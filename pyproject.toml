@@ -17,17 +17,18 @@ dependencies = [
   "pyyaml>=6.0.2",
   "sqlalchemy>=2.0.36",
   "alembic>=1.13.2",
+  "pyaxidraw>=3.9.6"
 ]
 
 [project.optional-dependencies]
 vpype = ["vpype>=1.14.0"]
-axidraw = ["pyaxidraw>=3.0.2"]
+# NOTE: EMS API is distributed as a zip; import name is `pyaxidraw`
+axidraw = ["axidraw @ https://cdn.evilmadscientist.com/dl/ad/public/AxiDraw_API.zip"]
 dev = ["pytest>=8.3.2", "pre-commit>=3.8.0", "ruff>=0.6.8", "black>=24.10.0"]
 
-[project.scripts]
-plotty = "plotty.cli:app"
-plottyd = "plotty.daemon:main"
+[dependency-groups]
+dev = ["pytest>=8.3.2", "pre-commit>=3.8.0", "ruff>=0.6.8", "black>=24.10.0"]
+vpype = ["vpype>=1.14.0"]
 
 [tool.uv]
-# optional but nice for consistency
-default-groups = ["dev"]
+default-groups = ["dev"]   # keep axidraw opt-in

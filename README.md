@@ -21,6 +21,49 @@ uv run pytest -q
 # try CLI
 uv run plotty --help
 
+## AxiDraw Integration
+
+If you have an AxiDraw plotter, install with the axidraw extra:
+
+```bash
+uv pip install -e ".[dev,vpype,axidraw]"
+```
+
+### AxiDraw CLI Commands
+
+```bash
+# Check AxiDraw status and list connected devices
+uv run plotty axidraw status
+
+# Plot a job with AxiDraw (with time estimation)
+uv run plotty axidraw plot <job_id>
+
+# Preview plot without moving the pen
+uv run plotty axidraw plot <job_id> --preview
+
+# Interactive XY control
+uv run plotty axidraw interactive
+
+# Test pen up/down movement
+uv run plotty axidraw pen-test
+```
+
+### AxiDraw Configuration
+
+Add AxiDraw device configuration to your config:
+
+```yaml
+devices:
+  axidraw:
+    port: /dev/ttyUSB0          # or COM3 on Windows
+    model: AxiDraw V3/A3        # AxiDraw V3/A3, AxiDraw V3/A2, etc.
+    pen_up_position: 50          # 0-100, higher = more up
+    pen_down_position: 30        # 0-100, lower = more down
+    pen_speed: 50                # 1-100, percentage of max speed
+    pen_lift_speed: 75           # 1-100, percentage of max speed
+    units: mm                   # mm, cm, or inches
+```
+
 ## Common dev tasks
 
 ```bash

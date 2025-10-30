@@ -15,8 +15,15 @@ url: str = "sqlite:///./plotty.db"
 echo: bool = False
 
 class DeviceCfg(BaseModel):
-preferred: str = "axidraw:auto"
-pause_ink_swatch: bool = True
+    preferred: str = "axidraw:auto"
+    pause_ink_swatch: bool = True
+    port: str | None = None
+    model: int = 1
+    pen_pos_up: int = 60
+    pen_pos_down: int = 40
+    speed_pendown: int = 25
+    speed_penup: int = 75
+    units: str = "inches"
 
 class VpypeCfg(BaseModel):
 preset: str = "multipen-fast"
