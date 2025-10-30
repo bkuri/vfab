@@ -17,6 +17,7 @@ from .config import load_config
 from .planner import plan_layers
 from .estimation import features, estimate_seconds
 from .hooks import create_hook_executor
+from .guards import create_guard_system
 
 
 class JobState(Enum):
@@ -83,6 +84,8 @@ class JobFSM:
         self.transitions: List[StateTransition] = []
         self.config = load_config()
         self.hook_executor = create_hook_executor(job_id, workspace)
+        self.guard_system = create_guard_system(self.config, workspace)
+        self._last_guard_checks: List[Any] = []
 
         # Initialize journal file for crash recovery
         self.journal_file = self.job_dir / "journal.jsonl"
@@ -119,7 +122,19 @@ class JobFSM:
 
     def can_transition_to(self, target_state: JobState) -> bool:
         """Check if transition to target state is valid."""
-        return target_state in self.VALID_TRANSITIONS.get(self.current_state, [])
+        # First check FSM state rules
+        if target_state not in self.VALID_TRANSITIONS.get(self.current_state, []):
+            return False
+
+        # Then check guards for target state
+        can_transition, guard_checks = self.guard_system.can_transition(
+            self.job_id, target_state.value, self.current_state.value
+        )
+
+        # Store guard results for logging
+        self._last_guard_checks = guard_checks
+
+        return can_transition
 
     def transition_to(
         self,
@@ -372,11 +387,33 @@ class JobFSM:
                 }
             )
 
+            # Write guard results to journal if available
+            if hasattr(self, "_last_guard_checks"):
+                self._write_journal(
+                    {
+                        "type": "guards_evaluated",
+                        "state": state.value,
+                        "checks": [
+                            check.to_dict() for check in self._last_guard_checks
+                        ],
+                    }
+                )
+
         except Exception as e:
             # Log hook execution errors but don't fail the transition
             self._write_journal(
                 {"type": "hooks_error", "state": state.value, "error": str(e)}
             )
+
+    def get_last_guard_results(self) -> List[Dict[str, Any]]:
+        """Get results from last guard evaluation.
+
+        Returns:
+            List of guard check results
+        """
+        if hasattr(self, "_last_guard_checks"):
+            return [check.to_dict() for check in self._last_guard_checks]
+        return []
 
 
 def create_fsm(job_id: str, workspace: Path) -> JobFSM:

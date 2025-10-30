@@ -4,6 +4,8 @@ from .config import load_config
 from .planner import plan_layers
 from .capture import start_ip, stop
 from .axidraw_integration import create_manager
+from .checklist import create_checklist
+from .fsm import create_fsm
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -153,6 +155,102 @@ def status(port: str = None, model: int = 1):
                 print(f"  {i}. {device}")
     else:
         print(f"✗ Could not list devices: {devices['error']}")
+
+
+@app.command()
+def checklist_show(job_id: str):
+    """Show checklist status for a job."""
+    cfg = load_config(None)
+    jdir = Path(cfg.workspace) / "jobs" / job_id
+    
+    if not jdir.exists():
+        raise typer.BadParameter(f"Job {job_id} not found")
+    
+    checklist = create_checklist(job_id, jdir)
+    progress = checklist.get_progress()
+    
+    print(f"Checklist for Job {job_id}")
+    print(f"Progress: {progress['required_completed']}/{progress['required_total']} required items ({progress['progress_percent']:.1f}%)")
+    print(f"Status: {'✓ Complete' if progress['is_complete'] else '✗ Incomplete'}")
+    print()
+    
+    for item in checklist.get_all_items():
+        status = "✓" if item.completed else "✗"
+        required = "(required)" if item.required else "(optional)"
+        print(f"  {status} {item.name} {required}")
+        print(f"    {item.description}")
+        if item.completed and item.notes:
+            print(f"    Notes: {item.notes}")
+        print()
+
+
+@app.command()
+def checklist_complete(job_id: str, item: str, notes: str = ""):
+    """Complete a checklist item."""
+    cfg = load_config(None)
+    jdir = Path(cfg.workspace) / "jobs" / job_id
+    
+    if not jdir.exists():
+        raise typer.BadParameter(f"Job {job_id} not found")
+    
+    checklist = create_checklist(job_id, jdir)
+    
+    if checklist.complete_item(item, notes):
+        print(f"✓ Completed checklist item: {item}")
+        progress = checklist.get_progress()
+        print(f"Progress: {progress['required_completed']}/{progress['required_total']} required items")
+    else:
+        print(f"✗ Checklist item not found: {item}")
+
+
+@app.command()
+def checklist_reset(job_id: str, item: str):
+    """Reset a checklist item to incomplete."""
+    cfg = load_config(None)
+    jdir = Path(cfg.workspace) / "jobs" / job_id
+    
+    if not jdir.exists():
+        raise typer.BadParameter(f"Job {job_id} not found")
+    
+    checklist = create_checklist(job_id, jdir)
+    
+    if checklist.uncomplete_item(item):
+        print(f"✓ Reset checklist item: {item}")
+    else:
+        print(f"✗ Checklist item not found: {item}")
+
+
+@app.command()
+def guards_check(job_id: str):
+    """Check guards for a job."""
+    cfg = load_config(None)
+    jdir = Path(cfg.workspace) / "jobs" / job_id
+    
+    if not jdir.exists():
+        raise typer.BadParameter(f"Job {job_id} not found")
+    
+    from .guards import create_guard_system
+    guard_system = create_guard_system(cfg, Path(cfg.workspace))
+    
+    # Check guards for ARMED state (most restrictive)
+    can_transition, guard_checks = guard_system.can_transition(job_id, "ARMED")
+    
+    print(f"Guard check for Job {job_id} (targeting ARMED state)")
+    print(f"Overall result: {'✓ PASS' if can_transition else '✗ FAIL'}")
+    print()
+    
+    for check in guard_checks:
+        status_icon = {
+            "pass": "✓",
+            "fail": "✗", 
+            "soft_fail": "⚠"
+        }.get(check.result.value, "?")
+        
+        print(f"{status_icon} {check.name}: {check.message}")
+        if check.details:
+            for key, value in check.details.items():
+                print(f"    {key}: {value}")
+        print()
 
 
 @app.command()
