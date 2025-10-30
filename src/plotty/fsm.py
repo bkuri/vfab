@@ -1,0 +1,384 @@
+"""
+Finite State Machine implementation for ploTTY job lifecycle.
+
+This module implements the core FSM that manages job states according to the PRD:
+NEW → QUEUED → ANALYZED → OPTIMIZED → READY → ARMED → PLOTTING → (PAUSED) → COMPLETED | ABORTED | FAILED
+"""
+
+from __future__ import annotations
+from enum import Enum
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Any, Callable
+from datetime import datetime
+import json
+from pathlib import Path
+
+from .config import load_config
+from .planner import plan_layers
+from .estimation import features, estimate_seconds
+from .hooks import create_hook_executor
+
+
+class JobState(Enum):
+    """Job states as defined in the PRD."""
+
+    NEW = "NEW"
+    QUEUED = "QUEUED"
+    ANALYZED = "ANALYZED"
+    OPTIMIZED = "OPTIMIZED"
+    READY = "READY"
+    ARMED = "ARMED"
+    PLOTTING = "PLOTTING"
+    PAUSED = "PAUSED"
+    COMPLETED = "COMPLETED"
+    ABORTED = "ABORTED"
+    FAILED = "FAILED"
+
+
+@dataclass
+class StateTransition:
+    """Represents a state transition with metadata."""
+
+    from_state: JobState
+    to_state: JobState
+    timestamp: datetime
+    reason: str
+    metadata: Dict[str, Any]
+
+
+class JobFSM:
+    """Finite State Machine for managing job lifecycle."""
+
+    # Valid state transitions as per PRD
+    VALID_TRANSITIONS = {
+        JobState.NEW: [JobState.QUEUED],
+        JobState.QUEUED: [JobState.ANALYZED, JobState.ABORTED],
+        JobState.ANALYZED: [JobState.OPTIMIZED, JobState.FAILED],
+        JobState.OPTIMIZED: [JobState.READY, JobState.FAILED],
+        JobState.READY: [JobState.ARMED, JobState.ABORTED],
+        JobState.ARMED: [JobState.PLOTTING, JobState.ABORTED],
+        JobState.PLOTTING: [
+            JobState.PAUSED,
+            JobState.COMPLETED,
+            JobState.ABORTED,
+            JobState.FAILED,
+        ],
+        JobState.PAUSED: [JobState.PLOTTING, JobState.ABORTED],
+        JobState.COMPLETED: [],  # Terminal state
+        JobState.ABORTED: [],  # Terminal state
+        JobState.FAILED: [],  # Terminal state
+    }
+
+    def __init__(self, job_id: str, workspace: Path):
+        """Initialize FSM for a job.
+
+        Args:
+            job_id: Unique job identifier
+            workspace: Path to workspace directory
+        """
+        self.job_id = job_id
+        self.workspace = workspace
+        self.job_dir = workspace / "jobs" / job_id
+        self.current_state = JobState.NEW
+        self.transitions: List[StateTransition] = []
+        self.config = load_config()
+        self.hook_executor = create_hook_executor(job_id, workspace)
+
+        # Initialize journal file for crash recovery
+        self.journal_file = self.job_dir / "journal.jsonl"
+        self._load_journal()
+
+    def _load_journal(self) -> None:
+        """Load existing journal for crash recovery."""
+        if self.journal_file.exists():
+            try:
+                with open(self.journal_file, "r") as f:
+                    for line in f:
+                        entry = json.loads(line.strip())
+                        if entry.get("type") == "state_change":
+                            self.current_state = JobState(entry["to_state"])
+            except Exception as e:
+                # If journal is corrupted, start fresh
+                self.current_state = JobState.NEW
+
+    def _write_journal(self, entry: Dict[str, Any]) -> None:
+        """Write entry to journal file."""
+        self.job_dir.mkdir(parents=True, exist_ok=True)
+        with open(self.journal_file, "a") as f:
+            f.write(
+                json.dumps(
+                    {
+                        **entry,
+                        "timestamp": datetime.utcnow().isoformat(),
+                        "job_id": self.job_id,
+                    }
+                )
+                + "\n"
+            )
+            f.flush()
+
+    def can_transition_to(self, target_state: JobState) -> bool:
+        """Check if transition to target state is valid."""
+        return target_state in self.VALID_TRANSITIONS.get(self.current_state, [])
+
+    def transition_to(
+        self,
+        target_state: JobState,
+        reason: str = "",
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> bool:
+        """Transition to target state if valid.
+
+        Args:
+            target_state: Target state to transition to
+            reason: Reason for transition
+            metadata: Additional metadata about transition
+
+        Returns:
+            True if transition succeeded, False otherwise
+        """
+        if not self.can_transition_to(target_state):
+            return False
+
+        transition = StateTransition(
+            from_state=self.current_state,
+            to_state=target_state,
+            timestamp=datetime.utcnow(),
+            reason=reason,
+            metadata=metadata or {},
+        )
+
+        self.transitions.append(transition)
+        self.current_state = target_state
+
+        # Write to journal for crash recovery
+        self._write_journal(
+            {
+                "type": "state_change",
+                "from_state": transition.from_state.value,
+                "to_state": transition.to_state.value,
+                "reason": reason,
+                "metadata": metadata or {},
+            }
+        )
+
+        # Update job file
+        self._update_job_file()
+
+        # Execute hooks for the new state
+        self._execute_hooks(target_state, reason, metadata or {})
+
+        return True
+
+    def _update_job_file(self) -> None:
+        """Update job.json file with current state."""
+        job_file = self.job_dir / "job.json"
+        if job_file.exists():
+            with open(job_file, "r") as f:
+                job_data = json.load(f)
+            job_data["state"] = self.current_state.value
+            job_data["updated_at"] = datetime.utcnow().isoformat()
+            with open(job_file, "w") as f:
+                json.dump(job_data, f, indent=2)
+
+    def get_state_history(self) -> List[Dict[str, Any]]:
+        """Get history of state transitions."""
+        return [
+            {
+                "from_state": t.from_state.value,
+                "to_state": t.to_state.value,
+                "timestamp": t.timestamp.isoformat(),
+                "reason": t.reason,
+                "metadata": t.metadata,
+            }
+            for t in self.transitions
+        ]
+
+    # State-specific methods implementing PRD user stories
+
+    def queue_job(self, src_path: str, name: str = "", paper: str = "A3") -> bool:
+        """Queue a new job (User Story 1)."""
+        if self.current_state != JobState.NEW:
+            return False
+
+        # Copy source file and create job metadata
+        import shutil
+
+        src_file = Path(src_path)
+        (self.job_dir / "src.svg").write_bytes(src_file.read_bytes())
+
+        job_data = {
+            "id": self.job_id,
+            "name": name or src_file.stem,
+            "paper": paper,
+            "state": JobState.QUEUED.value,
+            "created_at": datetime.utcnow().isoformat(),
+            "updated_at": datetime.utcnow().isoformat(),
+        }
+
+        with open(self.job_dir / "job.json", "w") as f:
+            json.dump(job_data, f, indent=2)
+
+        return self.transition_to(JobState.QUEUED, f"Job queued: {name}", {})
+
+    def analyze_job(self) -> bool:
+        """Analyze job geometry and features."""
+        if self.current_state != JobState.QUEUED:
+            return False
+
+        try:
+            src_svg = self.job_dir / "src.svg"
+            job_features = features(src_svg)
+
+            # Store analysis results
+            analysis = {
+                "features": job_features.__dict__,
+                "estimated_time": estimate_seconds(job_features, {}),
+            }
+
+            with open(self.job_dir / "analysis.json", "w") as f:
+                json.dump(analysis, f, indent=2)
+
+            return self.transition_to(JobState.ANALYZED, "Analysis completed", analysis)
+        except Exception as e:
+            return self.transition_to(
+                JobState.FAILED, f"Analysis failed: {str(e)}", {"error": str(e)}
+            )
+
+    def optimize_job(self, pen_map: Optional[Dict[str, str]] = None) -> bool:
+        """Optimize job via vpype (User Story 2)."""
+        if self.current_state != JobState.ANALYZED:
+            return False
+
+        try:
+            pen_map = pen_map or {"Layer 1": "0.3mm black"}
+            result = plan_layers(
+                self.job_dir / "src.svg",
+                self.config.vpype.preset,
+                self.config.vpype.presets_file,
+                pen_map,
+                self.job_dir,
+            )
+
+            with open(self.job_dir / "plan.json", "w") as f:
+                json.dump(result, f, indent=2)
+
+            return self.transition_to(
+                JobState.OPTIMIZED, "Optimization completed", result
+            )
+        except Exception as e:
+            return self.transition_to(
+                JobState.FAILED, f"Optimization failed: {str(e)}", {"error": str(e)}
+            )
+
+    def ready_job(self) -> bool:
+        """Mark job as ready after optimization."""
+        if self.current_state != JobState.OPTIMIZED:
+            return False
+
+        return self.transition_to(JobState.READY, "Job ready for plotting", {})
+
+    def arm_job(self) -> bool:
+        """Arm job for plotting (pre-flight checks)."""
+        if self.current_state != JobState.READY:
+            return False
+
+        # TODO: Implement checklist validation here
+        return self.transition_to(JobState.ARMED, "Job armed for plotting", {})
+
+    def start_plotting(self) -> bool:
+        """Start plotting job."""
+        if self.current_state != JobState.ARMED:
+            return False
+
+        return self.transition_to(JobState.PLOTTING, "Plotting started", {})
+
+    def pause_plotting(self) -> bool:
+        """Pause plotting."""
+        if self.current_state != JobState.PLOTTING:
+            return False
+
+        return self.transition_to(JobState.PAUSED, "Plotting paused", {})
+
+    def resume_plotting(self) -> bool:
+        """Resume plotting."""
+        if self.current_state != JobState.PAUSED:
+            return False
+
+        return self.transition_to(JobState.PLOTTING, "Plotting resumed", {})
+
+    def complete_job(self, metrics: Optional[Dict[str, Any]] = None) -> bool:
+        """Complete job successfully."""
+        if self.current_state not in [JobState.PLOTTING, JobState.PAUSED]:
+            return False
+
+        return self.transition_to(JobState.COMPLETED, "Job completed", metrics or {})
+
+    def abort_job(self, reason: str = "") -> bool:
+        """Abort job."""
+        if self.current_state in [
+            JobState.COMPLETED,
+            JobState.ABORTED,
+            JobState.FAILED,
+        ]:
+            return False
+
+        return self.transition_to(JobState.ABORTED, f"Job aborted: {reason}", {})
+
+    def fail_job(self, error: str) -> bool:
+        """Mark job as failed."""
+        if self.current_state in [
+            JobState.COMPLETED,
+            JobState.ABORTED,
+            JobState.FAILED,
+        ]:
+            return False
+
+        return self.transition_to(
+            JobState.FAILED, f"Job failed: {error}", {"error": error}
+        )
+
+    def _execute_hooks(
+        self, state: JobState, reason: str, metadata: Dict[str, Any]
+    ) -> None:
+        """Execute hooks for a state transition.
+
+        Args:
+            state: Target state
+            reason: Transition reason
+            metadata: Transition metadata
+        """
+        try:
+            # Get hooks for this state from config
+            state_hooks = getattr(self.config.hooks, state.value, [])
+
+            if not state_hooks:
+                return
+
+            # Get context for variable substitution
+            context = self.hook_executor.get_context(state.value, metadata)
+            context["reason"] = reason
+
+            # Execute hooks
+            results = self.hook_executor.execute_hooks(state_hooks, context)
+
+            # Write hook results to journal
+            self._write_journal(
+                {
+                    "type": "hooks_executed",
+                    "state": state.value,
+                    "reason": reason,
+                    "results": results,
+                }
+            )
+
+        except Exception as e:
+            # Log hook execution errors but don't fail the transition
+            self._write_journal(
+                {"type": "hooks_error", "state": state.value, "error": str(e)}
+            )
+
+
+def create_fsm(job_id: str, workspace: Path) -> JobFSM:
+    """Factory function to create FSM for a job."""
+    return JobFSM(job_id, workspace)

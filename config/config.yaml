@@ -1,5 +1,29 @@
 workspace: ./workspace
 database: { url: "sqlite:///./plotty.db", echo: false }
-camera: { mode: ip, url: "[http://127.0.0.1:8881/stream.mjpeg](http://127.0.0.1:8881/stream.mjpeg)", enabled: true, timelapse_fps: 1 }
+camera: { mode: ip, url: "http://127.0.0.1:8881/stream.mjpeg", enabled: true, timelapse_fps: 1 }
 device: { preferred: "axidraw:auto", pause_ink_swatch: true }
 vpype:  { preset: multipen-fast, presets_file: "config/vpype-presets.yaml" }
+
+hooks:
+  NEW:
+    - command: "notify-send 'ploTTY: Job {job_id} created'"
+  QUEUED:
+    - command: "echo 'Job {job_id} queued for processing'"
+  ANALYZED:
+    - command: "echo 'Analysis completed for {job_id}'"
+  OPTIMIZED:
+    - command: "echo 'Optimization completed for {job_id}'"
+  READY:
+    - command: "echo 'Job {job_id} ready for plotting'"
+  ARMED:
+    - command: "echo 'Job {job_id} armed - starting recording'"
+  PLOTTING:
+    - command: "echo 'Job {job_id} now plotting'"
+  PAUSED:
+    - command: "notify-send 'ploTTY: Job {job_id} paused'"
+  COMPLETED:
+    - command: "notify-send 'ploTTY: Job {job_id} completed successfully'"
+  ABORTED:
+    - command: "notify-send 'ploTTY: Job {job_id} aborted'"
+  FAILED:
+    - command: "notify-send 'ploTTY: Job {job_id} failed: {error}'"
