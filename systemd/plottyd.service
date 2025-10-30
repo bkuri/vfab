@@ -1,0 +1,13 @@
+[Unit]
+Description=ploTTY daemon
+After=network.target
+
+[Service]
+Type=simple
+Environment=PYTHONUNBUFFERED=1
+Environment=PLOTTY_CONFIG=/etc/plotty/config.yaml
+ExecStart=/usr/bin/plottyd --workspace /var/lib/plotty
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,9 @@
+presets:
+multipen-fast:
+pipe: |
+read {src}
+pagesize A3
+crop 0 0 297 420
+linemerge
+linesort
+write {dst}
