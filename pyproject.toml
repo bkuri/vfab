@@ -17,6 +17,7 @@ dependencies = [
   "pyyaml>=6.0.2",
   "sqlalchemy>=2.0.36",
   "alembic>=1.13.2",
+  "rich>=13.0.0",
 ]
 
 [project.optional-dependencies]

@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from .vpype_runner import run_vpype, load_preset
 from .estimation import features, estimate_seconds
+from .progress import layer_progress
 
 try:
     from .axidraw_integration import create_manager
@@ -65,61 +66,71 @@ def plan_layers(
     total_pre_time = 0
     total_post_time = 0
 
-    for i, layer in enumerate(layer_files):
-        layer_svg = out_dir / "layers" / f"layer_{i:02d}.svg"
-        if not layer_svg.exists():
-            continue
+    with layer_progress.process_layers(len(layer_files), "Processing") as update_layer:
+        for i, layer in enumerate(layer_files):
+            update_layer(i, f"Starting {layer.name}")
 
-        # Get features and estimates for this layer
-        preF = features(layer_svg)
-        pre_est = estimate_seconds(preF, {})
-        total_pre_time += pre_est
+            layer_svg = out_dir / "layers" / f"layer_{i:02d}.svg"
+            if not layer_svg.exists():
+                update_layer(i, f"Skipping {layer.name} (file not found)")
+                continue
 
-        # Apply vpype optimization to layer
-        optimized_layer = out_dir / "layers" / f"layer_{i:02d}_optimized.svg"
+            # Get features and estimates for this layer
+            update_layer(i, f"Analyzing {layer.name}")
+            preF = features(layer_svg)
+            pre_est = estimate_seconds(preF, {})
+            total_pre_time += pre_est
 
-        # Get paper dimensions for vpype
-        from .paper import PaperSize
+            # Apply vpype optimization to layer
+            optimized_layer = out_dir / "layers" / f"layer_{i:02d}_optimized.svg"
 
-        width_mm, height_mm = PaperSize.get_dimensions(paper_size) or (
-            210.0,
-            297.0,
-        )  # Default to A4
+            # Get paper dimensions for vpype
+            from .paper import PaperSize
 
-        pipe = load_preset(preset, presets_file).format(
-            src=str(layer_svg),
-            dst=str(optimized_layer),
-            pagesize=paper_size.lower(),
-            width_mm=width_mm,
-            height_mm=height_mm,
-        )
-        run_vpype(pipe, layer_svg, optimized_layer)
+            width_mm, height_mm = PaperSize.get_dimensions(paper_size) or (
+                210.0,
+                297.0,
+            )  # Default to A4
 
-        postF = features(optimized_layer)
-        post_est = estimate_seconds(postF, {})
-        total_post_time += post_est
+            update_layer(i, f"Optimizing {layer.name}")
+            pipe = load_preset(preset, presets_file).format(
+                src=str(layer_svg),
+                dst=str(optimized_layer),
+                pagesize=paper_size.lower(),
+                width_mm=width_mm,
+                height_mm=height_mm,
+            )
+            run_vpype(pipe, layer_svg, optimized_layer)
 
-        # Get pen info for this layer
-        pen_name = pen_map.get(
-            layer.name, list(pen_map.values())[0] if pen_map else "0.3mm black"
-        )
-        pen_info = next(
-            (p for p in (available_pens or []) if p["name"] == pen_name), {}
-        )
+            update_layer(i, f"Finalizing {layer.name}")
+            postF = features(optimized_layer)
+            post_est = estimate_seconds(postF, {})
+            total_post_time += post_est
 
-        processed_layers.append(
-            {
-                "name": layer.name,
-                "pen": pen_name,
-                "pen_info": pen_info,
-                "svg": str(optimized_layer),
-                "original_svg": str(layer_svg),
-                "order_index": layer.order_index,
-                "element_count": len(layer.elements),
-                "estimates": {"pre_s": round(pre_est, 1), "post_s": round(post_est, 1)},
-                "features": {"pre": preF.__dict__, "post": postF.__dict__},
-            }
-        )
+            # Get pen info for this layer
+            pen_name = pen_map.get(
+                layer.name, list(pen_map.values())[0] if pen_map else "0.3mm black"
+            )
+            pen_info = next(
+                (p for p in (available_pens or []) if p["name"] == pen_name), {}
+            )
+
+            processed_layers.append(
+                {
+                    "name": layer.name,
+                    "pen": pen_name,
+                    "pen_info": pen_info,
+                    "svg": str(optimized_layer),
+                    "original_svg": str(layer_svg),
+                    "order_index": layer.order_index,
+                    "element_count": len(layer.elements),
+                    "estimates": {
+                        "pre_s": round(pre_est, 1),
+                        "post_s": round(post_est, 1),
+                    },
+                    "features": {"pre": preF.__dict__, "post": postF.__dict__},
+                }
+            )
 
     # Create combined multi-pen SVG with AxiDraw layer control
     multipen_svg = out_dir / "multipen.svg"

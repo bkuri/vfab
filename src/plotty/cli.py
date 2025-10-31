@@ -3,10 +3,13 @@ import uuid
 import json
 import time
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 from .config import load_config
 from .planner import plan_layers
 from .capture import start_ip, stop
+
+# Import status commands
+from .cli_status import status_app
 
 try:
     from .axidraw_integration import create_manager, is_axidraw_available
@@ -25,6 +28,34 @@ except ImportError:
 
 app = typer.Typer(no_args_is_help=False, invoke_without_command=True)
 
+# Add status commands as a sub-group
+app.add_typer(status_app, name="status", help="Status and monitoring commands")
+
+
+def get_available_job_ids() -> List[str]:
+    """Get list of available job IDs for autocomplete."""
+    try:
+        cfg = load_config(None)
+        jobs_dir = Path(cfg.workspace) / "jobs"
+        job_ids = []
+
+        if jobs_dir.exists():
+            for job_dir in jobs_dir.iterdir():
+                if job_dir.is_dir():
+                    job_file = job_dir / "job.json"
+                    if job_file.exists():
+                        job_ids.append(job_dir.name)
+
+        return sorted(job_ids, reverse=True)  # Most recent first
+    except Exception:
+        return []
+
+
+def complete_job_id(ctx: typer.Context, args: List[str], incomplete: str) -> List[str]:
+    """Autocomplete function for job IDs."""
+    available_ids = get_available_job_ids()
+    return [job_id for job_id in available_ids if job_id.startswith(incomplete)]
+
 
 @app.callback()
 def main(ctx: typer.Context):
@@ -39,7 +70,8 @@ def main(ctx: typer.Context):
 @app.command()
 def add(src: str, name: str = "", paper: str = "A3"):
     cfg = load_config(None)
-    job_id = uuid.uuid4().hex[:12]
+    # Generate shorter 6-character job ID for better usability
+    job_id = uuid.uuid4().hex[:6]
     jdir = Path(cfg.workspace) / "jobs" / job_id
     jdir.mkdir(parents=True, exist_ok=True)
     (jdir / "src.svg").write_bytes(Path(src).read_bytes())
@@ -57,7 +89,13 @@ def add(src: str, name: str = "", paper: str = "A3"):
 
 
 @app.command()
-def plan(job_id: str, pen: str = "0.3mm black", interactive: bool = False):
+def plan(
+    job_id: str = typer.Argument(
+        ..., autocompletion=complete_job_id, help="Job ID to plan"
+    ),
+    pen: str = "0.3mm black",
+    interactive: bool = False,
+):
     """Plan a job with smart multi-pen detection."""
     cfg = load_config(None)
     jdir = Path(cfg.workspace) / "jobs" / job_id
@@ -65,7 +103,8 @@ def plan(job_id: str, pen: str = "0.3mm black", interactive: bool = False):
     # Load available pens from database
     available_pens = []
     try:
-        from .db import get_session, Pen
+        from .db import get_session
+        from .models import Pen
 
         with get_session() as session:
             pens = session.query(Pen).all()
@@ -135,7 +174,8 @@ def plan(job_id: str, pen: str = "0.3mm black", interactive: bool = False):
 
     print(f"📊 Planning completed for {res['layer_count']} layers")
     print(
-        f"⏱️  Time estimates: {res['estimates']['pre_s']}s → {res['estimates']['post_s']}s"
+        f"⏱️  Time estimates: {res['estimates']['pre_s']}s → "
+        f"{res['estimates']['post_s']}s"
     )
     if res["estimates"]["time_saved_percent"] > 0:
         print(f"💾 Time saved: {res['estimates']['time_saved_percent']}%")
@@ -144,7 +184,12 @@ def plan(job_id: str, pen: str = "0.3mm black", interactive: bool = False):
 
 
 @app.command()
-def record_test(job_id: str, seconds: int = 5):
+def record_test(
+    job_id: str = typer.Argument(
+        ..., autocompletion=complete_job_id, help="Job ID to record"
+    ),
+    seconds: int = 5,
+):
     cfg = load_config(None)
     jdir = Path(cfg.workspace) / "jobs" / job_id
     out = jdir / "sample.mp4"
@@ -170,7 +215,8 @@ def plot(
     """Plot a job using AxiDraw."""
     if not is_axidraw_available():
         raise typer.BadParameter(
-            "AxiDraw support not available. Install with: uv pip install -e '.[axidraw]'"
+            "AxiDraw support not available. Install with: "
+            "uv pip install -e '.[axidraw]'"
         )
     """Plot a job using AxiDraw with multi-pen support."""
     cfg = load_config(None)
@@ -222,7 +268,8 @@ def interactive(port: Optional[str] = None, model: int = 1, units: str = "inches
     """Enter interactive AxiDraw control mode."""
     if not is_axidraw_available():
         raise typer.BadParameter(
-            "AxiDraw support not available. Install with: uv pip install -e '.[axidraw]'"
+            "AxiDraw support not available. Install with: "
+            "uv pip install -e '.[axidraw]'"
         )
     manager = create_manager(port=port, model=model)
 
@@ -294,7 +341,8 @@ def pen_test(port: Optional[str] = None, model: int = 1, cycles: int = 3):
     """Test pen up/down movement."""
     if not is_axidraw_available():
         raise typer.BadParameter(
-            "AxiDraw support not available. Install with: uv pip install -e '.[axidraw]'"
+            "AxiDraw support not available. Install with: "
+            "uv pip install -e '.[axidraw]'"
         )
     manager = create_manager(port=port, model=model)
     print(f"Testing pen movement ({cycles} cycles)...")
@@ -318,27 +366,37 @@ def pen_test(port: Optional[str] = None, model: int = 1, cycles: int = 3):
 def pen_list():
     """List available pens from database."""
     try:
-        from .db import get_session, Pen
+        from .db import get_session
+        from .models import Pen
+        from rich.console import Console
+
+        console = Console()
+        default_pen = "0.3mm black"
 
         with get_session() as session:
             pens = session.query(Pen).all()
 
-        if not pens:
-            print("No pens found in database.")
-            print("Add pens with: pen-add <name> [options]")
-            return
+            if not pens:
+                print("No pens found in database.")
+                print("Add pens with: pen-add <name> [options]")
+                return
 
-        print("🖊️  Available pens:")
-        for pen in pens:
-            print(f"  {pen.id}: {pen.name}")
-            if pen.width_mm:
-                print(f"    Width: {pen.width_mm}mm")
-            if pen.speed_cap:
-                print(f"    Speed cap: {pen.speed_cap}")
-            if pen.pressure:
-                print(f"    Pressure: {pen.pressure}")
-            if pen.color_hex:
-                print(f"    Color: #{pen.color_hex}")
+            print("🖊️  Available pens:")
+            for pen in pens:
+                # Highlight default pen in green
+                if pen.name == default_pen:
+                    console.print(f"  {pen.id}: [green]{pen.name}[/green] (default)")
+                else:
+                    console.print(f"  {pen.id}: {pen.name}")
+
+                if pen.width_mm:
+                    print(f"    Width: {pen.width_mm}mm")
+                if pen.speed_cap:
+                    print(f"    Speed cap: {pen.speed_cap}")
+                if pen.pressure:
+                    print(f"    Pressure: {pen.pressure}")
+                if pen.color_hex:
+                    print(f"    Color: #{pen.color_hex}")
 
     except Exception as e:
         print(f"✗ Failed to load pens: {e}")
@@ -355,7 +413,8 @@ def pen_add(
 ):
     """Add a new pen to the database."""
     try:
-        from .db import get_session, Pen
+        from .db import get_session
+        from .models import Pen
 
         with get_session() as session:
             # Check if pen already exists
@@ -376,7 +435,10 @@ def pen_add(
             session.add(pen)
             session.commit()
 
-        print(f"✓ Added pen '{name}' (ID: {pen.id})")
+            # Get the ID before session closes
+            pen_id = pen.id
+
+        print(f"✓ Added pen '{name}' (ID: {pen_id})")
 
     except Exception as e:
         print(f"✗ Failed to add pen: {e}")
@@ -387,7 +449,8 @@ def pen_add(
 def pen_remove(name: str):
     """Remove a pen from database."""
     try:
-        from .db import get_session, Pen
+        from .db import get_session
+        from .models import Pen
 
         with get_session() as session:
             pen = session.query(Pen).filter(Pen.name == name).first()
@@ -406,7 +469,12 @@ def pen_remove(name: str):
 
 
 @app.command()
-def report(job_id: str, open_browser: bool = False):
+def report(
+    job_id: str = typer.Argument(
+        ..., autocompletion=complete_job_id, help="Job ID to generate report for"
+    ),
+    open_browser: bool = False,
+):
     """Generate and view job report."""
     cfg = load_config(None)
     jdir = Path(cfg.workspace) / "jobs" / job_id
@@ -451,26 +519,49 @@ def paper_list():
     try:
         from .paper import PaperSize
         from .db import get_session
+        from .config import load_config
+        from rich.console import Console
+
+        console = Console()
+        cfg = load_config(None)
+        default_paper = cfg.paper.default_size
 
         print("📄 Available Paper Sizes:")
         print("\nStandard Sizes:")
         for size in PaperSize:
             name, width_mm, height_mm = size.value
-            print(f"  {name:12} {width_mm:6.1f} × {height_mm:6.1f}mm")
+            # Highlight default paper in green
+            if name == default_paper:
+                console.print(
+                    f"  {name:12} {width_mm:6.1f} × {height_mm:6.1f}mm "
+                    "[green](default)[/green]"
+                )
+            else:
+                print(f"  {name:12} {width_mm:6.1f} × {height_mm:6.1f}mm")
 
         # Show custom papers from database
         try:
             with get_session() as session:
-                from .db import Paper
+                from .models import Paper
 
                 custom_papers = session.query(Paper).all()
                 if custom_papers:
                     print("\nCustom Papers:")
                     for paper in custom_papers:
-                        print(
-                            f"  {paper.name:12} {paper.width_mm:6.1f} × {paper.height_mm:6.1f}mm "
-                            f"(margin: {paper.margin_mm}mm, {paper.orientation})"
-                        )
+                        # Highlight default paper in green
+                        if paper.name == default_paper:
+                            console.print(
+                                f"  {paper.name:12} {paper.width_mm:6.1f} × "
+                                f"{paper.height_mm:6.1f}mm "
+                                f"(margin: {paper.margin_mm}mm, {paper.orientation}) "
+                                "[green](default)[/green]"
+                            )
+                        else:
+                            print(
+                                f"  {paper.name:12} {paper.width_mm:6.1f} × "
+                                f"{paper.height_mm:6.1f}mm "
+                                f"(margin: {paper.margin_mm}mm, {paper.orientation})"
+                            )
         except Exception:
             pass
 
@@ -488,27 +579,31 @@ def paper_add(
 ):
     """Add a custom paper size to database."""
     try:
-        from .paper import PaperManager, PaperConfig
         from .db import get_session
+        from .models import Paper
 
         if orientation not in ["portrait", "landscape"]:
             raise typer.BadParameter("Orientation must be 'portrait' or 'landscape'")
 
-        paper = PaperConfig.custom(
-            name=name,
-            width_mm=width_mm,
-            height_mm=height_mm,
-            margin_mm=margin_mm,
-            orientation=orientation,
-        )
-
         with get_session() as session:
-            manager = PaperManager(session)
-            if manager.add_custom_paper(paper):
-                print(f"✓ Added custom paper '{name}' ({width_mm}×{height_mm}mm)")
-            else:
+            # Check if paper already exists
+            existing = session.query(Paper).filter(Paper.name == name).first()
+            if existing:
                 print(f"✗ Paper '{name}' already exists")
                 raise typer.Exit(1)
+
+            # Add new paper
+            db_paper = Paper(
+                name=name,
+                width_mm=width_mm,
+                height_mm=height_mm,
+                margin_mm=margin_mm,
+                orientation=orientation,
+            )
+            session.add(db_paper)
+            session.commit()
+
+        print(f"✓ Added custom paper '{name}' ({width_mm}×{height_mm}mm)")
 
     except Exception as e:
         print(f"✗ Failed to add paper: {e}")
@@ -519,16 +614,19 @@ def paper_add(
 def paper_remove(name: str):
     """Remove a custom paper from database."""
     try:
-        from .paper import PaperManager
         from .db import get_session
+        from .models import Paper
 
         with get_session() as session:
-            manager = PaperManager(session)
-            if manager.remove_paper(name):
-                print(f"✓ Removed paper '{name}'")
-            else:
-                print(f"✗ Paper '{name}' not found or cannot be removed")
+            paper = session.query(Paper).filter(Paper.name == name).first()
+            if not paper:
+                print(f"✗ Paper '{name}' not found")
                 raise typer.Exit(1)
+
+            session.delete(paper)
+            session.commit()
+
+        print(f"✓ Removed paper '{name}'")
 
     except Exception as e:
         print(f"✗ Failed to remove paper: {e}")

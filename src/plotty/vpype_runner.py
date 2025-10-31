@@ -5,12 +5,17 @@ import subprocess
 import shlex
 import yaml
 
+from .progress import spinner_task
+
 
 def run_vpype(pipe: str, src: Path, dst: Path) -> None:
     cmd = pipe.replace("{src}", shlex.quote(str(src))).replace(
         "{dst}", shlex.quote(str(dst))
     )
-    subprocess.run(f"vpype -v {cmd}", shell=True, check=True)
+
+    # Show progress for vpype operations
+    with spinner_task(f"Optimizing {src.name}"):
+        subprocess.run(f"vpype -v {cmd}", shell=True, check=True)
 
 
 def stats_json(svg: Path) -> dict:

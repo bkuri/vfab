@@ -173,7 +173,7 @@ class PaperManager:
         """Get paper configuration by name from database."""
         try:
             with self.session_factory() as session:
-                from .db import Paper
+                from .models import Paper
 
                 paper = session.query(Paper).filter(Paper.name == name).first()
                 if paper:
@@ -199,7 +199,7 @@ class PaperManager:
         # Add custom papers from database
         try:
             with self.session_factory() as session:
-                from .db import Paper
+                from .models import Paper
 
                 db_papers = session.query(Paper).all()
                 for paper in db_papers:
@@ -222,7 +222,7 @@ class PaperManager:
         """Add custom paper to database."""
         try:
             with self.session_factory() as session:
-                from .db import Paper
+                from .models import Paper
 
                 # Check if paper already exists
                 existing = session.query(Paper).filter(Paper.name == paper.name).first()
@@ -247,7 +247,7 @@ class PaperManager:
         """Remove paper from database (only custom papers)."""
         try:
             with self.session_factory() as session:
-                from .db import Paper
+                from .models import Paper
 
                 paper = session.query(Paper).filter(Paper.name == name).first()
                 if paper:

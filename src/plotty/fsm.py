@@ -305,7 +305,8 @@ class JobFSM:
             # Load available pens from database if available
             available_pens = []
             try:
-                from .db import get_session, Pen
+                from .db import get_session
+                from .models import Pen
 
                 with get_session() as session:
                     pens = session.query(Pen).all()

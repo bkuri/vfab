@@ -282,6 +282,24 @@ Quick add:
 - [ ] Job queue management
 - [ ] Session management with FSM state display
 
+### 🚧 In Progress (v1 UX Enhancement)
+
+**Tier 1 Features (Week 1)**
+- [ ] Quick status commands (status, queue, job info)
+- [ ] Enhanced error messages with suggestions
+- [ ] Progress indicators for long operations
+
+**Tier 2 Features (Week 2)**
+- [ ] Job management shortcuts (cancel, retry, duplicate)
+- [ ] One-command setup wizard
+- [ ] Configuration validation and auto-fix
+
+**Tier 3 Features (Week 3-4)**
+- [ ] Quick plot presets (fast, safe, preview)
+- [ ] Usage statistics and analytics
+- [ ] Batch operations (plan-all, plot-all)
+- [ ] Enhanced help system with examples
+
 ### 📋 Deferred (v2)
 
 **Multi-Device Support**
@@ -293,6 +311,117 @@ Quick add:
 - [ ] USB/v4l2 camera integration
 - [ ] Custom ffmpeg filters
 - [ ] Hardware-accelerated encoding
+
+---
+
+## 15) v1 UX Enhancement Strategy
+
+### **15.1) Easy Wins for v1**
+
+Based on current codebase analysis (146K lines, 80% core functionality complete), the following high-impact, low-effort features are identified for v1:
+
+#### **Tier 1 (Must Have - Week 1)**
+1. **Quick Status Commands** - `plotty status`, `plotty queue`, `plotty job <id>`
+   - **Impact**: 10x UX improvement - no need to launch dashboard for quick checks
+   - **Effort**: 1-2 hours (reuse existing dashboard functions)
+
+2. **Better Error Messages** - User-friendly error handling with suggestions
+   - **Impact**: Dramatically better user experience, reduced support burden
+   - **Effort**: 2-3 hours (centralized error system)
+
+3. **Progress Indicators** - Progress bars for long operations (planning, optimization)
+   - **Impact**: User feedback during operations, perceived performance improvement
+   - **Effort**: 2-3 hours (tqdm integration)
+
+#### **Tier 2 (Should Have - Week 2)**
+4. **Job Management Shortcuts** - `plotty cancel <id>`, `plotty retry <id>`, `plotty duplicate <id>`
+   - **Impact**: Common workflow operations currently missing
+   - **Effort**: 2-3 hours (FSM state management)
+
+5. **One-Command Setup** - `plotty setup` interactive first-time configuration
+   - **Impact**: Removes friction for new users, improves onboarding
+   - **Effort**: 1-2 hours (wizard implementation)
+
+6. **Config Validation** - `plotty config-check`, `plotty config-fix`
+   - **Impact**: Prevents runtime errors from bad configuration
+   - **Effort**: 1-2 hours (validation rules)
+
+#### **Tier 3 (Nice to Have - Week 3-4)**
+7. **Quick Plot Presets** - `--fast`, `--safe`, `--preview` options
+   - **Impact**: Power user features for different scenarios
+   - **Effort**: 1 hour (preset configurations)
+
+8. **Quick Stats** - `plotty stats` usage analytics
+   - **Impact**: Helps users understand their usage patterns
+   - **Effort**: 1 hour (database queries)
+
+9. **Batch Operations** - `plotty plan-all`, `plotty plot-all`, `plotty clear-queue`
+   - **Impact**: Power user workflow automation
+   - **Effort**: 2-3 hours (loop operations)
+
+10. **Better Help System** - `plotty help <command>`, `plotty examples`
+   - **Impact**: Better feature discoverability
+   - **Effort**: 1 hour (help organization)
+
+### **15.2) Implementation Strategy**
+
+#### **Phase 1: Foundation (Week 1)**
+- **CLI Infrastructure**: Extend `src/plotty/cli.py` with new command groups
+- **Error Enhancement**: Create `src/plotty/utils.py` with centralized error handling
+- **Progress System**: Add `src/plotty/progress.py` for progress indicators
+- **Status Commands**: Reuse existing `dashboard.py` functions for CLI exposure
+
+#### **Phase 2: Core Features (Week 2)**
+- **Job Management**: Extend FSM with job manipulation commands
+- **Setup Wizard**: Interactive configuration with device detection
+- **Config Validation**: Add validation rules to `src/plotty/config.py`
+
+#### **Phase 3: Power Features (Week 3-4)**
+- **Plot Presets**: Add preset options to existing plot command
+- **Batch Operations**: Loop-based job processing
+- **Stats & Help**: Database analytics and help system improvements
+
+#### **New Files Structure**:
+```
+src/plotty/
+├── utils.py              # Error handling, progress bars
+├── cli_status.py        # Status/queue commands  
+├── cli_jobs.py          # Job management commands
+├── cli_setup.py        # Setup wizard
+└── progress.py          # Progress indicator utilities
+```
+
+### **15.3) Success Metrics**
+
+#### **User Experience Goals**
+- **Time to first plot**: < 5 minutes (including setup)
+- **Common operations**: < 10 seconds (status, queue, job info)
+- **Error recovery**: Clear guidance for 90% of errors
+
+#### **Technical Goals**
+- **Test coverage**: > 80% for new features
+- **CLI response time**: < 2 seconds for all commands
+- **Backward compatibility**: 100% (no breaking changes)
+
+#### **Feature Completeness**
+- **Tier 1 features**: 100% complete
+- **Tier 2 features**: 80% complete  
+- **Tier 3 features**: 50% complete
+
+### **15.4) Go/No-Go Criteria**
+
+#### **Go Conditions for v1 Release**
+- All Tier 1 features working and tested
+- Core tests passing (>80% coverage)
+- No breaking changes to existing workflows
+- Documentation updated with new commands
+- Performance regression < 20%
+
+#### **No-Go Conditions**
+- Breaking changes to existing workflows
+- Critical bugs in core functionality
+- Performance regression > 20%
+- Incomplete error handling for new features
 
 ---
 
