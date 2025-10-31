@@ -26,6 +26,7 @@ def plan_layers(
     out_dir: Path,
     available_pens: Optional[List[Dict]] = None,
     interactive: bool = False,
+    paper_size: str = "A4",
 ):
     """Plan layers for multi-pen plotting.
 
@@ -76,8 +77,21 @@ def plan_layers(
 
         # Apply vpype optimization to layer
         optimized_layer = out_dir / "layers" / f"layer_{i:02d}_optimized.svg"
+
+        # Get paper dimensions for vpype
+        from .paper import PaperSize
+
+        width_mm, height_mm = PaperSize.get_dimensions(paper_size) or (
+            210.0,
+            297.0,
+        )  # Default to A4
+
         pipe = load_preset(preset, presets_file).format(
-            src=str(layer_svg), dst=str(optimized_layer)
+            src=str(layer_svg),
+            dst=str(optimized_layer),
+            pagesize=paper_size.lower(),
+            width_mm=width_mm,
+            height_mm=height_mm,
         )
         run_vpype(pipe, layer_svg, optimized_layer)
 

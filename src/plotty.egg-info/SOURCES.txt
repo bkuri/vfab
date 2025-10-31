@@ -1,12 +1,14 @@
 README.md
 pyproject.toml
 src/plotty/__init__.py
+src/plotty/__main__.py
 src/plotty/axidraw_integration.py
 src/plotty/capture.py
 src/plotty/checklist.py
 src/plotty/cli.py
 src/plotty/config.py
 src/plotty/crash_recovery.py
+src/plotty/dashboard.py
 src/plotty/db.py
 src/plotty/estimation.py
 src/plotty/fsm.py

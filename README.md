@@ -93,6 +93,39 @@ ploTTY automatically detects layers in your SVG files and provides:
 - **🖊️ Interactive pen mapping** for multi-layer designs
 - **⚡ Automatic mode selection** (single-pen vs multi-pen)
 
+### vpype Optimization Presets
+
+ploTTY includes vpype presets for different optimization levels with **dynamic paper sizing**:
+
+```yaml
+# config/vpype-presets.yaml
+presets:
+  fast:
+    pipe: "read {src} pagesize {pagesize} crop 0 0 {width_mm:g}mm {height_mm:g}mm linemerge linesort write {dst}"
+  
+  hq:
+    pipe: "read {src} pagesize {pagesize} crop 0 0 {width_mm:g}mm {height_mm:g}mm linemerge linesort linesimplify write {dst}"
+```
+
+**Available presets:**
+- **`fast`**: Quick optimization (linemerge + linesort) - default
+- **`hq`**: High quality (adds linesimplify for segment reduction)
+
+**Dynamic paper sizing**: Presets automatically use the paper size from your config:
+```yaml
+# config/config.yaml
+vpype:
+  preset: fast                    # or hq
+  presets_file: "config/vpype-presets.yaml"
+
+paper:
+  default_size: A4               # A3, A4, Letter, etc.
+  default_margin_mm: 10.0
+  default_orientation: portrait
+```
+
+The `{pagesize}`, `{width_mm}`, and `{height_mm}` placeholders are automatically replaced with your configured paper size, so you don't need separate presets for different paper sizes!
+
 ### AxiDraw Configuration
 
 Add AxiDraw device configuration to your config:

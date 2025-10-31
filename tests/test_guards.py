@@ -25,7 +25,7 @@ workspace: ./workspace
 database: { url: "sqlite:///./plotty.db", echo: false }
 camera: { mode: ip, url: "http://127.0.0.1:8881/stream.mjpeg", enabled: true, timelapse_fps: 1 }
 device: { preferred: "axidraw:auto", pause_ink_swatch: true }
-vpype: { preset: multipen-fast, presets_file: "config/vpype-presets.yaml" }
+vpype: { preset: fast, presets_file: "config/vpype-presets.yaml" }
 hooks: {}
 """)
 

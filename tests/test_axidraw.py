@@ -8,7 +8,9 @@ try:
     from plotty.axidraw_integration import create_manager, is_axidraw_available
 except ImportError:
     create_manager = None
-    is_axidraw_available = lambda: False
+
+    def is_axidraw_available():
+        return False
 
 
 class TestAxiDrawManager:

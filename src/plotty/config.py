@@ -31,7 +31,7 @@ class DeviceCfg(BaseModel):
 
 
 class VpypeCfg(BaseModel):
-    preset: str = "multipen-fast"
+    preset: str = "fast"
     presets_file: str = str(Path("config/vpype-presets.yaml"))
 
 

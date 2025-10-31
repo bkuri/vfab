@@ -23,7 +23,17 @@ except ImportError:
     get_crash_recovery = None
     recover_all_jobs = None
 
-app = typer.Typer(no_args_is_help=True)
+app = typer.Typer(no_args_is_help=False, invoke_without_command=True)
+
+
+@app.callback()
+def main(ctx: typer.Context):
+    """ploTTY - FSM plotter manager with smart multipen detection."""
+    if ctx.invoked_subcommand is None:
+        # Show interactive dashboard
+        from .dashboard import show_dashboard
+
+        show_dashboard()
 
 
 @app.command()
@@ -104,6 +114,7 @@ def plan(job_id: str, pen: str = "0.3mm black", interactive: bool = False):
             jdir,
             available_pens,
             interactive,
+            cfg.paper.default_size,
         )
     else:
         # Use single pen workflow
@@ -118,6 +129,7 @@ def plan(job_id: str, pen: str = "0.3mm black", interactive: bool = False):
             jdir,
             available_pens,
             interactive,
+            cfg.paper.default_size,
         )
     (jdir / "plan.json").write_text(json.dumps(res, indent=2))
 
