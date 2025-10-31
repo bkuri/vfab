@@ -3,7 +3,7 @@
 import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
-from plotty.axidraw_integration import create_manager, AxiDrawManager
+from plotty.axidraw_integration import create_manager
 
 
 class TestAxiDrawManager:

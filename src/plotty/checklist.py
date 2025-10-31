@@ -77,9 +77,13 @@ class Checklist:
     # Default checklist items as per PRD
     DEFAULT_ITEMS = [
         ChecklistItem("paper_size_set", "Paper size/orientation selected", True),
+        ChecklistItem(
+            "paper_one_per_session", "One paper per session rule followed", True
+        ),
         ChecklistItem("paper_taped", "Paper taped down and square", True),
         ChecklistItem("origin_set", "Plot origin set", True),
         ChecklistItem("pen_loaded", "Pen loaded and ink test passed", True),
+        ChecklistItem("pen_one_per_layer", "One pen per layer rule followed", True),
         ChecklistItem("surface_clear", "Surface clear and adequate clearance", True),
         ChecklistItem("camera_ok", "Camera working (soft-fail allowed)", False),
         ChecklistItem("ink_swatch", "Ink swatch completed (optional)", False),

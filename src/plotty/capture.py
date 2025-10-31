@@ -1,5 +1,7 @@
 from __future__ import annotations
-import subprocess, signal, shlex
+import subprocess
+import signal
+import shlex
 
 
 def start_ip(url: str, out_path: str, timelapse_path: str | None = None):

@@ -13,9 +13,16 @@ from pathlib import Path
 import logging
 from enum import Enum
 
-from .config import load_config
-from .axidraw_integration import create_manager
-from .checklist import create_checklist
+
+try:
+    from .axidraw_integration import create_manager
+except ImportError:
+    create_manager = None
+
+try:
+    from .checklist import create_checklist
+except ImportError:
+    create_checklist = None
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +75,14 @@ class DeviceGuard:
         Returns:
             GuardCheck with result
         """
+        if create_manager is None:
+            return GuardCheck(
+                "device_idle",
+                GuardResult.SOFT_FAIL,
+                "AxiDraw integration not available - device check skipped",
+                {"warning": "axidraw_not_available"},
+            )
+
         try:
             # Create device manager
             manager = create_manager(
@@ -297,6 +312,14 @@ class ChecklistGuard:
         Returns:
             GuardCheck with result
         """
+        if create_checklist is None:
+            return GuardCheck(
+                "checklist_complete",
+                GuardResult.SOFT_FAIL,
+                "Checklist system not available - check skipped",
+                {"warning": "checklist_not_available"},
+            )
+
         try:
             job_dir = workspace / "jobs" / job_id
             checklist = create_checklist(job_id, job_dir)
@@ -334,64 +357,6 @@ class ChecklistGuard:
                 {"job_id": job_id, "error": str(e)},
             )
 
-        try:
-            import json
-
-            with open(checklist_file, "r") as f:
-                checklist = json.load(f)
-
-            # Check all required items are completed
-            required_items = [
-                "paper_size_set",
-                "paper_taped",
-                "origin_set",
-                "pen_loaded",
-                "surface_clear",
-            ]
-
-            incomplete_items = []
-            completed_items = []
-
-            for item in required_items:
-                if checklist.get(item, {}).get("completed", False):
-                    completed_items.append(item)
-                else:
-                    incomplete_items.append(item)
-
-            if incomplete_items:
-                return GuardCheck(
-                    "checklist_complete",
-                    GuardResult.FAIL,
-                    f"Checklist incomplete: {', '.join(incomplete_items)}",
-                    {
-                        "job_id": job_id,
-                        "completed": completed_items,
-                        "incomplete": incomplete_items,
-                        "total_required": len(required_items),
-                        "total_completed": len(completed_items),
-                    },
-                )
-
-            return GuardCheck(
-                "checklist_complete",
-                GuardResult.PASS,
-                f"Checklist complete ({len(completed_items)}/{len(required_items)} items)",
-                {
-                    "job_id": job_id,
-                    "completed": completed_items,
-                    "total_required": len(required_items),
-                    "total_completed": len(completed_items),
-                },
-            )
-
-        except Exception as e:
-            return GuardCheck(
-                "checklist_complete",
-                GuardResult.FAIL,
-                f"Checklist check failed: {str(e)}",
-                {"job_id": job_id, "error": str(e)},
-            )
-
 
 class GuardSystem:
     """System for evaluating FSM guards."""
@@ -408,6 +373,8 @@ class GuardSystem:
         self.device_guard = DeviceGuard(config)
         self.camera_guard = CameraGuard(config)
         self.checklist_guard = ChecklistGuard(config)
+        self.paper_session_guard = PaperSessionGuard(workspace)
+        self.pen_layer_guard = PenLayerGuard(workspace)
 
     def evaluate_guards(
         self, job_id: str, target_state: str, current_state: Optional[str] = None
@@ -432,6 +399,13 @@ class GuardSystem:
             # Checklist must be complete for armed state
             if target_state == "ARMED":
                 guards.append(self.checklist_guard.check(job_id, self.workspace))
+
+                # Paper session guard - one paper per session
+                if self.config.paper.require_one_per_session:
+                    guards.append(self.paper_session_guard.check(job_id))
+
+                # Pen layer guard - one pen per layer
+                guards.append(self.pen_layer_guard.check(job_id))
 
         # Camera health check (soft-fail allowed) for plotting states
         if target_state in ["ARMED", "PLOTTING"]:
@@ -460,6 +434,125 @@ class GuardSystem:
         can_transition = len(hard_failures) == 0
 
         return can_transition, guard_checks
+
+
+class PaperSessionGuard:
+    """Guard to enforce one paper per session rule."""
+
+    def __init__(self, workspace: Path):
+        self.workspace = workspace
+
+    def check(self, job_id: str) -> GuardCheck:
+        """Check if this is the first job in the session."""
+        try:
+            # Check for session marker file
+            session_file = self.workspace / ".paper_session"
+
+            if not session_file.exists():
+                # First job in session - create marker
+                session_file.write_text(job_id)
+                return GuardCheck(
+                    "paper_one_per_session",
+                    GuardResult.PASS,
+                    "First job in session - paper OK",
+                    {"session_job": job_id},
+                )
+            else:
+                # Check if this is the same job as session start
+                session_job = session_file.read_text().strip()
+                if session_job == job_id:
+                    return GuardCheck(
+                        "paper_one_per_session",
+                        GuardResult.PASS,
+                        "Same job as session start",
+                        {"session_job": job_id},
+                    )
+                else:
+                    return GuardCheck(
+                        "paper_one_per_session",
+                        GuardResult.FAIL,
+                        f"Paper already used for job {session_job}. Start new session or use fresh paper.",
+                        {"session_job": session_job, "current_job": job_id},
+                    )
+        except Exception as e:
+            return GuardCheck(
+                "paper_one_per_session",
+                GuardResult.FAIL,
+                f"Paper session check error: {str(e)}",
+                {"job_id": job_id, "error": str(e)},
+            )
+
+    def reset_session(self) -> bool:
+        """Reset the paper session marker."""
+        try:
+            session_file = self.workspace / ".paper_session"
+            if session_file.exists():
+                session_file.unlink()
+            return True
+        except Exception:
+            return False
+
+
+class PenLayerGuard:
+    """Guard to enforce one pen per layer rule."""
+
+    def __init__(self, workspace: Path):
+        self.workspace = workspace
+
+    def check(self, job_id: str) -> GuardCheck:
+        """Check if pen mapping follows one-pen-per-layer rule."""
+        try:
+            job_dir = self.workspace / "jobs" / job_id
+            plan_file = job_dir / "plan.json"
+
+            if not plan_file.exists():
+                return GuardCheck(
+                    "pen_one_per_layer",
+                    GuardResult.FAIL,
+                    "No plan file found - cannot validate pen mapping",
+                    {"job_id": job_id},
+                )
+
+            import json
+
+            plan_data = json.loads(plan_file.read_text())
+            pen_map = plan_data.get("pen_map", {})
+            layers = plan_data.get("layers", [])
+
+            # Validate each layer has exactly one pen assigned
+            violations = []
+            for layer in layers:
+                layer_name = layer.get("name", "")
+                assigned_pen = pen_map.get(layer_name)
+
+                if not assigned_pen:
+                    violations.append(f"Layer '{layer_name}' has no pen assigned")
+                elif isinstance(assigned_pen, list) and len(assigned_pen) > 1:
+                    violations.append(
+                        f"Layer '{layer_name}' has multiple pens assigned: {assigned_pen}"
+                    )
+
+            if violations:
+                return GuardCheck(
+                    "pen_one_per_layer",
+                    GuardResult.FAIL,
+                    f"Pen mapping violations: {'; '.join(violations)}",
+                    {"violations": violations, "pen_map": pen_map, "job_id": job_id},
+                )
+            else:
+                return GuardCheck(
+                    "pen_one_per_layer",
+                    GuardResult.PASS,
+                    f"Pen mapping valid: {len(pen_map)} layers with unique pens",
+                    {"pen_map": pen_map, "layer_count": len(layers), "job_id": job_id},
+                )
+        except Exception as e:
+            return GuardCheck(
+                "pen_one_per_layer",
+                GuardResult.FAIL,
+                f"Pen layer check error: {str(e)}",
+                {"job_id": job_id, "error": str(e)},
+            )
 
 
 def create_guard_system(config, workspace: Path) -> GuardSystem:

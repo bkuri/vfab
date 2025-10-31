@@ -8,7 +8,7 @@ NEW → QUEUED → ANALYZED → OPTIMIZED → READY → ARMED → PLOTTING → (
 from __future__ import annotations
 from enum import Enum
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any
 from datetime import datetime
 import json
 from pathlib import Path
@@ -16,8 +16,30 @@ from pathlib import Path
 from .config import load_config
 from .planner import plan_layers
 from .estimation import features, estimate_seconds
-from .hooks import create_hook_executor
-from .guards import create_guard_system
+
+# Import optional modules
+try:
+    from .hooks import create_hook_executor
+except ImportError:
+
+    def create_hook_executor(job_id, workspace):
+        return None
+
+
+try:
+    from .guards import create_guard_system
+except ImportError:
+
+    def create_guard_system(config, workspace):
+        return None
+
+
+try:
+    from .crash_recovery import get_crash_recovery
+except ImportError:
+
+    def get_crash_recovery(workspace):
+        return None
 
 
 class JobState(Enum):
@@ -91,6 +113,15 @@ class JobFSM:
         self.journal_file = self.job_dir / "journal.jsonl"
         self._load_journal()
 
+        # Register with crash recovery system
+        try:
+            crash_recovery = get_crash_recovery(workspace)
+            if crash_recovery is not None:
+                crash_recovery.register_fsm(self)
+        except Exception:
+            # Crash recovery not available, continue without it
+            pass
+
     def _load_journal(self) -> None:
         """Load existing journal for crash recovery."""
         if self.journal_file.exists():
@@ -100,7 +131,7 @@ class JobFSM:
                         entry = json.loads(line.strip())
                         if entry.get("type") == "state_change":
                             self.current_state = JobState(entry["to_state"])
-            except Exception as e:
+            except Exception:
                 # If journal is corrupted, start fresh
                 self.current_state = JobState.NEW
 
@@ -127,9 +158,13 @@ class JobFSM:
             return False
 
         # Then check guards for target state
-        can_transition, guard_checks = self.guard_system.can_transition(
-            self.job_id, target_state.value, self.current_state.value
-        )
+        if self.guard_system is not None:
+            can_transition, guard_checks = self.guard_system.can_transition(
+                self.job_id, target_state.value, self.current_state.value
+            )
+        else:
+            # No guard system available - allow transition
+            can_transition, guard_checks = True, []
 
         # Store guard results for logging
         self._last_guard_checks = guard_checks
@@ -217,7 +252,6 @@ class JobFSM:
             return False
 
         # Copy source file and create job metadata
-        import shutil
 
         src_file = Path(src_path)
         (self.job_dir / "src.svg").write_bytes(src_file.read_bytes())
@@ -260,26 +294,59 @@ class JobFSM:
                 JobState.FAILED, f"Analysis failed: {str(e)}", {"error": str(e)}
             )
 
-    def optimize_job(self, pen_map: Optional[Dict[str, str]] = None) -> bool:
-        """Optimize job via vpype (User Story 2)."""
+    def optimize_job(
+        self, pen_map: Optional[Dict[str, str]] = None, interactive: bool = False
+    ) -> bool:
+        """Optimize job via vpype with multi-pen support (User Story 2)."""
         if self.current_state != JobState.ANALYZED:
             return False
 
         try:
-            pen_map = pen_map or {"Layer 1": "0.3mm black"}
+            # Load available pens from database if available
+            available_pens = []
+            try:
+                from .db import get_session, Pen
+
+                with get_session() as session:
+                    pens = session.query(Pen).all()
+                    available_pens = [
+                        {
+                            "id": pen.id,
+                            "name": pen.name,
+                            "width_mm": pen.width_mm,
+                            "speed_cap": pen.speed_cap,
+                            "pressure": pen.pressure,
+                            "passes": pen.passes,
+                            "color_hex": pen.color_hex,
+                        }
+                        for pen in pens
+                    ]
+            except Exception:
+                # Database not available, continue without pen info
+                pass
+
+            # Use enhanced multi-pen planning
             result = plan_layers(
                 self.job_dir / "src.svg",
                 self.config.vpype.preset,
                 self.config.vpype.presets_file,
-                pen_map,
+                pen_map or {},
                 self.job_dir,
+                available_pens,
+                interactive,
             )
 
             with open(self.job_dir / "plan.json", "w") as f:
                 json.dump(result, f, indent=2)
 
+            # Store layer information for plotting
+            self.layers = result["layers"]
+            self.pen_map = result["pen_map"]
+
             return self.transition_to(
-                JobState.OPTIMIZED, "Optimization completed", result
+                JobState.OPTIMIZED,
+                f"Multi-pen optimization completed: {result['layer_count']} layers",
+                result,
             )
         except Exception as e:
             return self.transition_to(
@@ -371,11 +438,14 @@ class JobFSM:
                 return
 
             # Get context for variable substitution
-            context = self.hook_executor.get_context(state.value, metadata)
-            context["reason"] = reason
+            if self.hook_executor is not None:
+                context = self.hook_executor.get_context(state.value, metadata)
+                context["reason"] = reason
 
-            # Execute hooks
-            results = self.hook_executor.execute_hooks(state_hooks, context)
+                # Execute hooks
+                results = self.hook_executor.execute_hooks(state_hooks, context)
+            else:
+                results = []  # No hook executor available
 
             # Write hook results to journal
             self._write_journal(

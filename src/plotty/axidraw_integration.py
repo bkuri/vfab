@@ -8,8 +8,6 @@ following the official pyaxidraw API documentation.
 from __future__ import annotations
 from pathlib import Path
 from typing import Optional, Tuple, Dict, Any
-import json
-import time
 
 try:
     from pyaxidraw import axidraw

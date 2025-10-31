@@ -23,7 +23,7 @@ dependencies = [
 [project.optional-dependencies]
 vpype = ["vpype>=1.14.0"]
 # NOTE: EMS API is distributed as a zip; import name is `pyaxidraw`
-axidraw = ["axidraw @ https://cdn.evilmadscientist.com/dl/ad/public/AxiDraw_API.zip"]
+axidraw = ["pyaxidraw @ https://cdn.evilmadscientist.com/dl/ad/public/AxiDraw_API.zip"]
 dev = ["pytest>=8.3.2", "pre-commit>=3.8.0", "ruff>=0.6.8", "black>=24.10.0"]
 
 [dependency-groups]

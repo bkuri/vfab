@@ -1,7 +1,8 @@
 from __future__ import annotations
 from pydantic import BaseModel, Field
 from pathlib import Path
-import os, yaml
+import os
+import yaml
 
 
 class CameraCfg(BaseModel):
@@ -34,6 +35,14 @@ class VpypeCfg(BaseModel):
     presets_file: str = str(Path("config/vpype-presets.yaml"))
 
 
+class PaperCfg(BaseModel):
+    default_size: str = "A4"
+    default_margin_mm: float = 10.0
+    default_orientation: str = "portrait"
+    require_one_per_session: bool = True
+    track_usage: bool = True
+
+
 class HooksCfg(BaseModel):
     NEW: list[dict[str, str]] = Field(default_factory=list)
     QUEUED: list[dict[str, str]] = Field(default_factory=list)
@@ -54,6 +63,7 @@ class Settings(BaseModel):
     database: DatabaseCfg = Field(default_factory=DatabaseCfg)
     device: DeviceCfg = Field(default_factory=DeviceCfg)
     vpype: VpypeCfg = Field(default_factory=VpypeCfg)
+    paper: PaperCfg = Field(default_factory=PaperCfg)
     hooks: HooksCfg = Field(default_factory=HooksCfg)
 
 

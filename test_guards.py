@@ -8,7 +8,7 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from plotty.guards import create_guard_system, GuardResult
+from plotty.guards import create_guard_system
 from plotty.config import load_config
 from plotty.checklist import create_checklist
 

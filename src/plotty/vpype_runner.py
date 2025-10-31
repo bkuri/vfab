@@ -1,6 +1,9 @@
 from __future__ import annotations
 from pathlib import Path
-import subprocess, json, shlex, yaml
+import subprocess
+import json
+import shlex
+import yaml
 
 
 def run_vpype(pipe: str, src: Path, dst: Path) -> None:
