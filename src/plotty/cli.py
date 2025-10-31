@@ -7,7 +7,14 @@ from typing import Optional
 from .config import load_config
 from .planner import plan_layers
 from .capture import start_ip, stop
-from .axidraw_integration import create_manager
+
+try:
+    from .axidraw_integration import create_manager, is_axidraw_available
+except ImportError:
+    create_manager = None
+
+    def is_axidraw_available():
+        return False
 
 
 try:
@@ -41,7 +48,7 @@ def add(src: str, name: str = "", paper: str = "A3"):
 
 @app.command()
 def plan(job_id: str, pen: str = "0.3mm black", interactive: bool = False):
-    """Plan a job with multi-pen support."""
+    """Plan a job with smart multi-pen detection."""
     cfg = load_config(None)
     jdir = Path(cfg.workspace) / "jobs" / job_id
 
@@ -67,15 +74,51 @@ def plan(job_id: str, pen: str = "0.3mm black", interactive: bool = False):
     except Exception:
         pass
 
-    res = plan_layers(
-        jdir / "src.svg",
-        cfg.vpype.preset,
-        cfg.vpype.presets_file,
-        {"Layer 1": pen},
-        jdir,
-        available_pens,
-        interactive,
-    )
+    # Import multipen functions for layer detection
+    from .multipen import detect_svg_layers, display_layer_overview
+
+    # Detect layers and show overview
+    svg_path = jdir / "src.svg"
+    layers = detect_svg_layers(svg_path)
+
+    # Show layer overview
+    display_layer_overview(layers)
+
+    # Filter out hidden layers for processing
+    visible_layers = [layer for layer in layers if layer.visible]
+    hidden_count = len(layers) - len(visible_layers)
+
+    if hidden_count > 0:
+        print(
+            f"\n🚫 Skipping {hidden_count} hidden layer(s) as per AxiDraw layer control"
+        )
+
+    # Smart pen mapping: use multipen if multiple visible layers and pens available
+    if len(visible_layers) > 1 and available_pens and interactive:
+        # Use multipen workflow
+        res = plan_layers(
+            svg_path,
+            cfg.vpype.preset,
+            cfg.vpype.presets_file,
+            None,  # Will prompt for pen mapping
+            jdir,
+            available_pens,
+            interactive,
+        )
+    else:
+        # Use single pen workflow
+        pen_map = {"Layer 1": pen}  # Default fallback
+        if len(visible_layers) == 1:
+            pen_map = {visible_layers[0].name: pen}
+        res = plan_layers(
+            svg_path,
+            cfg.vpype.preset,
+            cfg.vpype.presets_file,
+            pen_map,
+            jdir,
+            available_pens,
+            interactive,
+        )
     (jdir / "plan.json").write_text(json.dumps(res, indent=2))
 
     print(f"📊 Planning completed for {res['layer_count']} layers")
@@ -112,6 +155,11 @@ def plot(
     multipen: bool = True,
     interactive: bool = True,
 ):
+    """Plot a job using AxiDraw."""
+    if not is_axidraw_available():
+        raise typer.BadParameter(
+            "AxiDraw support not available. Install with: uv pip install -e '.[axidraw]'"
+        )
     """Plot a job using AxiDraw with multi-pen support."""
     cfg = load_config(None)
     jdir = Path(cfg.workspace) / "jobs" / job_id
@@ -160,6 +208,10 @@ def plot(
 @app.command()
 def interactive(port: Optional[str] = None, model: int = 1, units: str = "inches"):
     """Enter interactive AxiDraw control mode."""
+    if not is_axidraw_available():
+        raise typer.BadParameter(
+            "AxiDraw support not available. Install with: uv pip install -e '.[axidraw]'"
+        )
     manager = create_manager(port=port, model=model)
 
     if not manager.connect():
@@ -228,6 +280,10 @@ def interactive(port: Optional[str] = None, model: int = 1, units: str = "inches
 @app.command()
 def pen_test(port: Optional[str] = None, model: int = 1, cycles: int = 3):
     """Test pen up/down movement."""
+    if not is_axidraw_available():
+        raise typer.BadParameter(
+            "AxiDraw support not available. Install with: uv pip install -e '.[axidraw]'"
+        )
     manager = create_manager(port=port, model=model)
     print(f"Testing pen movement ({cycles} cycles)...")
 

@@ -11,11 +11,13 @@ from typing import Optional, Tuple, Dict, Any
 
 try:
     from pyaxidraw import axidraw
-except ImportError as e:
-    raise ImportError(
-        "pyaxidraw not found. Install with: "
-        "python -m pip install https://cdn.evilmadscientist.com/dl/ad/public/AxiDraw_API.zip"
-    ) from e
+
+    _AXIDRAW_AVAILABLE = True
+    _IMPORT_ERROR = "pyaxidraw not found. Install with: uv pip install -e '.[axidraw]'"
+except ImportError:
+    axidraw = None
+    _AXIDRAW_AVAILABLE = False
+    _IMPORT_ERROR = "pyaxidraw not found. Install with: uv pip install -e '.[axidraw]'"
 
 
 class AxiDrawManager:
@@ -28,6 +30,9 @@ class AxiDrawManager:
             port: USB port or nickname for AxiDraw (auto-detect if None)
             model: AxiDraw model number (1=V2/V3/SE/A4, 2=V3/A3/SE/A3, etc.)
         """
+        if not _AXIDRAW_AVAILABLE:
+            raise ImportError(_IMPORT_ERROR)
+
         self.ad = axidraw.AxiDraw()
         self.port = port
         self.model = model
@@ -284,6 +289,24 @@ class AxiDrawManager:
             return {"success": False, "error": str(e)}
 
 
+def is_axidraw_available() -> bool:
+    """Check if pyaxidraw is available.
+
+    Returns:
+        True if pyaxidraw is installed and importable, False otherwise
+    """
+    return _AXIDRAW_AVAILABLE
+
+
+def get_axidraw_install_instructions() -> str:
+    """Get installation instructions for pyaxidraw.
+
+    Returns:
+        String with installation instructions
+    """
+    return _IMPORT_ERROR
+
+
 def create_manager(port: Optional[str] = None, model: int = 1) -> AxiDrawManager:
     """Factory function to create AxiDraw manager.
 
@@ -293,5 +316,8 @@ def create_manager(port: Optional[str] = None, model: int = 1) -> AxiDrawManager
 
     Returns:
         AxiDrawManager instance
+
+    Raises:
+        ImportError: If pyaxidraw is not available
     """
     return AxiDrawManager(port=port, model=model)

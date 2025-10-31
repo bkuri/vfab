@@ -2,7 +2,16 @@ from __future__ import annotations
 import time
 from pathlib import Path
 from typing import Dict, List, Optional, Callable
-from .axidraw_integration import create_manager
+
+try:
+    from .axidraw_integration import create_manager, is_axidraw_available
+except ImportError:
+    create_manager = None
+
+    def is_axidraw_available():
+        return False
+
+
 from .multipen import detect_svg_layers, parse_axidraw_layer_control
 
 
@@ -68,6 +77,10 @@ class MultiPenPlotter:
     def __init__(
         self, port: Optional[str] = None, model: int = 1, interactive: bool = True
     ):
+        if not is_axidraw_available():
+            raise ImportError(
+                "AxiDraw support not available. Install with: uv pip install -e '.[axidraw]'"
+            )
         self.manager = create_manager(port=port, model=model)
         self.prompt = PenSwapPrompt(interactive)
         self.interactive = interactive

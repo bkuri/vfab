@@ -21,10 +21,19 @@ class LayerControl(NamedTuple):
 class LayerInfo:
     """Represents a single layer in an SVG file."""
 
-    def __init__(self, name: str, elements: List[ET.Element], order_index: int):
+    def __init__(
+        self,
+        name: str,
+        elements: List[ET.Element],
+        order_index: int,
+        visible: bool = True,
+        color: Optional[str] = None,
+    ):
         self.name = name
         self.elements = elements
         self.order_index = order_index
+        self.visible = visible  # Layer visibility (Inkscape hidden layers)
+        self.color = color  # Layer color for visualization
         self.pen_id: Optional[int] = None
         self.stats: Dict = {}
 
@@ -33,6 +42,8 @@ class LayerInfo:
         return {
             "name": self.name,
             "order_index": self.order_index,
+            "visible": self.visible,
+            "color": self.color,
             "pen_id": self.pen_id,
             "element_count": len(self.elements),
             "stats": self.stats,
@@ -71,6 +82,35 @@ def detect_svg_layers(svg_path: Path) -> List[LayerInfo]:
             layer_name = group.get(
                 f"{{{namespaces['inkscape']}}}label", f"Layer {i + 1}"
             )
+
+            # Check Inkscape visibility
+            style = group.get("style", "")
+            visible = True
+            if "display:none" in style.replace(" ", ""):
+                visible = False
+
+            # Check Inkscape group style attribute for visibility
+            inkscape_visibility = group.get(
+                f"{{{namespaces['inkscape']}}}groupmode", "layer"
+            )
+            if inkscape_visibility == "hidden":
+                visible = False
+
+            # Extract layer color for visualization
+            color = None
+            # Try to get color from group style
+            if "stroke:" in style:
+                import re
+
+                stroke_match = re.search(r"stroke:([^;]+)", style)
+                if stroke_match:
+                    color = stroke_match.group(1).strip()
+
+            # Try to get color from inkscape:label color if available
+            label_color = group.get(f"{{{namespaces['inkscape']}}}label-color")
+            if label_color:
+                color = label_color
+
             elements = list(
                 group.findall(".//svg:path", namespaces)
                 + group.findall(".//svg:line", namespaces)
@@ -80,7 +120,7 @@ def detect_svg_layers(svg_path: Path) -> List[LayerInfo]:
                 + group.findall(".//svg:polygon", namespaces)
                 + group.findall(".//svg:polyline", namespaces)
             )
-            layers.append(LayerInfo(layer_name, elements, i))
+            layers.append(LayerInfo(layer_name, elements, i, visible, color))
 
     # Method 2: Look for groups with id attributes
     else:
@@ -88,8 +128,24 @@ def detect_svg_layers(svg_path: Path) -> List[LayerInfo]:
         if groups:
             for i, group in enumerate(groups):
                 layer_name = group.get("id", f"Layer {i + 1}")
+
+                # Check visibility for generic groups
+                style = group.get("style", "")
+                visible = True
+                if "display:none" in style.replace(" ", ""):
+                    visible = False
+
+                # Extract color for visualization
+                color = None
+                if "stroke:" in style:
+                    import re
+
+                    stroke_match = re.search(r"stroke:([^;]+)", style)
+                    if stroke_match:
+                        color = stroke_match.group(1).strip()
+
                 elements = list(group)
-                layers.append(LayerInfo(layer_name, elements, i))
+                layers.append(LayerInfo(layer_name, elements, i, visible, color))
 
         # Method 3: No groups found, treat all elements as one layer
         else:
@@ -104,7 +160,7 @@ def detect_svg_layers(svg_path: Path) -> List[LayerInfo]:
             )
 
             if all_elements:
-                layers.append(LayerInfo("Layer 1", all_elements, 0))
+                layers.append(LayerInfo("Layer 1", all_elements, 0, True, None))
 
     return layers
 
@@ -175,8 +231,44 @@ def create_pen_mapping_prompt(
     print("\n=== Multi-Pen Layer Mapping ===")
     print(f"Detected {len(layers)} layer(s):")
 
-    for i, layer in enumerate(layers):
-        print(f"  {i + 1}. {layer.name} ({len(layer.elements)} elements)")
+    # Count visible layers
+    visible_layers = [layer for layer in layers if layer.visible]
+    hidden_layers = [layer for layer in layers if not layer.visible]
+
+    if visible_layers:
+        print(f"\n📐 Visible layers ({len(visible_layers)}):")
+        for i, layer in enumerate(visible_layers):
+            color_indicator = ""
+            if layer.color:
+                # Simple color indicator using terminal colors
+                color_map = {
+                    "red": "🔴",
+                    "blue": "🔵",
+                    "green": "🟢",
+                    "yellow": "🟡",
+                    "black": "⚫",
+                    "white": "⚪",
+                    "purple": "🟣",
+                    "orange": "🟠",
+                    "cyan": "🔷",
+                }
+                color_lower = (
+                    layer.color.lower()
+                    .replace("#", "")
+                    .replace("rgb", "")
+                    .replace(" ", "")
+                )
+                color_indicator = color_map.get(color_lower, "🎨")
+
+            visibility_icon = "👁️" if layer.visible else "🚫"
+            print(
+                f"  {i + 1:2d}. {visibility_icon} {color_indicator} {layer.name} ({len(layer.elements)} elements)"
+            )
+
+    if hidden_layers:
+        print(f"\n🚫 Hidden layers ({len(hidden_layers)}) - will be skipped:")
+        for i, layer in enumerate(hidden_layers):
+            print(f"  {i + 1:2d}. 🚫 {layer.name} ({len(layer.elements)} elements)")
 
     print("\nAvailable pens:")
     for i, pen in enumerate(available_pens):
@@ -184,7 +276,8 @@ def create_pen_mapping_prompt(
 
     pen_map = {}
 
-    for layer in layers:
+    # Only map visible layers
+    for layer in visible_layers:
         print(f"\nLayer: {layer.name}")
         print("Select pen (enter number or pen name):")
 
@@ -306,6 +399,60 @@ def parse_axidraw_layer_control(layer_name: str) -> LayerControl:
         documentation_only=documentation_only,
         original_name=layer_name,
     )
+
+
+def display_layer_overview(layers: List[LayerInfo]) -> None:
+    """Display a color-coded overview of detected layers.
+
+    Args:
+        layers: List of LayerInfo objects
+    """
+    print("\n" + "=" * 60)
+    print("🎨 LAYER OVERVIEW")
+    print("=" * 60)
+
+    visible_layers = [layer for layer in layers if layer.visible]
+    hidden_layers = [layer for layer in layers if not layer.visible]
+
+    if visible_layers:
+        print(f"\n📐 Visible layers ({len(visible_layers)}):")
+        print("-" * 40)
+        for i, layer in enumerate(visible_layers):
+            color_indicator = ""
+            if layer.color:
+                # Simple color indicator using terminal colors
+                color_map = {
+                    "red": "🔴",
+                    "blue": "🔵",
+                    "green": "🟢",
+                    "yellow": "🟡",
+                    "black": "⚫",
+                    "white": "⚪",
+                    "purple": "🟣",
+                    "orange": "🟠",
+                    "cyan": "🔷",
+                }
+                color_lower = (
+                    layer.color.lower()
+                    .replace("#", "")
+                    .replace("rgb", "")
+                    .replace(" ", "")
+                )
+                color_indicator = color_map.get(color_lower, "🎨")
+
+            print(f"  {i + 1:2d}. {color_indicator} {layer.name}")
+            print(f"      Elements: {len(layer.elements)}")
+            if layer.color:
+                print(f"      Color: {layer.color}")
+
+    if hidden_layers:
+        print(f"\n🚫 Hidden layers ({len(hidden_layers)}) - will be skipped:")
+        print("-" * 40)
+        for i, layer in enumerate(hidden_layers):
+            print(f"  {i + 1:2d}. 🚫 {layer.name}")
+            print(f"      Elements: {len(layer.elements)}")
+
+    print("\n" + "=" * 60)
 
 
 def generate_layer_name(control: LayerControl, display_name: str) -> str:

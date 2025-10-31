@@ -3,7 +3,12 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from .vpype_runner import run_vpype, load_preset
 from .estimation import features, estimate_seconds
-from .axidraw_integration import create_manager
+
+try:
+    from .axidraw_integration import create_manager
+except ImportError:
+    create_manager = None
+
 from .multipen import (
     detect_svg_layers,
     extract_layers_to_files,
@@ -17,7 +22,7 @@ def plan_layers(
     src_svg: Path,
     preset: str,
     presets_file: str,
-    pen_map: dict[str, str],
+    pen_map: Optional[dict[str, str]],
     out_dir: Path,
     available_pens: Optional[List[Dict]] = None,
     interactive: bool = False,
@@ -116,9 +121,11 @@ def plan_layers(
             "pre_s": round(total_pre_time, 1),
             "post_s": round(total_post_time, 1),
             "time_saved_percent": round(
-                ((total_pre_time - total_post_time) / total_pre_time * 100)
-                if total_pre_time > 0
-                else 0,
+                (
+                    ((total_pre_time - total_post_time) / total_pre_time * 100)
+                    if total_pre_time > 0
+                    else 0
+                ),
                 1,
             ),
         },
@@ -159,6 +166,11 @@ def plan_axidraw_layers(
     Returns:
         Dictionary with AxiDraw-specific planning results
     """
+    if create_manager is None:
+        raise ImportError(
+            "AxiDraw support not available. Install with: uv pip install -e '.[axidraw]'"
+        )
+
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Use the enhanced multi-pen planning

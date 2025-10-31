@@ -3,12 +3,18 @@
 import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
-from plotty.axidraw_integration import create_manager
+
+try:
+    from plotty.axidraw_integration import create_manager, is_axidraw_available
+except ImportError:
+    create_manager = None
+    is_axidraw_available = lambda: False
 
 
 class TestAxiDrawManager:
     """Test AxiDraw manager functionality."""
 
+    @pytest.mark.skipif(not is_axidraw_available(), reason="pyaxidraw not available")
     def test_create_manager(self):
         """Test manager creation."""
         manager = create_manager()
@@ -21,6 +27,7 @@ class TestAxiDrawManager:
         assert manager_with_port.port == "/dev/ttyUSB0"
 
     @patch("plotty.axidraw_integration.axidraw")
+    @pytest.mark.skipif(not is_axidraw_available(), reason="pyaxidraw not available")
     def test_plot_file_success(self, mock_axidraw):
         """Test successful SVG plotting."""
         # Setup mock

@@ -3,7 +3,7 @@
 **One-liner:** Headless-first, checklist-driven, FSM-based pen-plotter manager that queues, optimizes (vpype), and plots SVGs (AxiDraw first), with per-session recording and multi-pen (per-layer) support.
 
 **Targets**
-- **Users:** artists/makers/studios with one or more plotters
+- **Users:** artists/makers/studios with one or more plotters (multi-device support planned for v2)
 - **OS:** Linux (Arch first-class), macOS OK, Windows best-effort
 - **Interfaces:** CLI + TUI + optional local JSON-RPC (no GUI deps)
 - **Container:** Podman Quadlet (systemd-managed)
@@ -17,8 +17,8 @@
 - Deterministic **FSM** for job lifecycle with crash-safe resume.
 - Queue → Analyze → Optimize(vpype) → Checklist → Arm → Plot → Report.
 - **Pre & post** optimization time estimates (geom model + optional `pyaxidraw.report_time`).
-- **Multi-pen**: one pen per SVG layer with gated swaps and per-layer metrics.
-- **AxiDraw** driver (pyaxidraw) with dry-run, pause/resume/abort, safe park.
+- **Multi-pen**: smart SVG layer detection with color-coded overview, hidden layer filtering, and one pen per layer with gated swaps and per-layer metrics.
+- **AxiDraw** driver (pyaxidraw) with graceful degradation, clear error messages, dry-run, pause/resume/abort, safe park.
 - **Recording:** v1 consumes **IP video** (`http/rtsp`, e.g. `localhost:8881`); later native **USB/v4l2** with custom ffmpeg filters.
 - **Headless** over SSH; systemd units + JSONL journal.
 - **Reports:** self-contained HTML per job (metrics, thumbnails, links to MP4).
@@ -30,7 +30,7 @@
 
 ## 2) User stories (acceptance, abbreviated)
 
-1. **Queue SVG** → auto-detect dims; choose paper; map layers→pens → state `QUEUED`.
+1. **Queue SVG** → auto-detect dims; choose paper; **smart layer detection with color-coded overview**; map layers→pens → state `QUEUED`.
 2. **Optimize** via vpype preset or custom pipe → see before/after stroke & length deltas.
 3. **Checklist gates** (paper taped, origin set, pen test, webcam OK) block Start until all green.
 4. **Plot** shows live ETA, current layer/pen; pause/resume/abort; prompt at layer boundaries.
@@ -42,7 +42,7 @@
 
 ## 3) Architecture
 
-CLI/TUI ──> Orchestrator (FSM) ──> Device Driver(s)
+CLI/TUI ──> Orchestrator (FSM) ──> Device Driver (v1: single device, v2: multi-device)
 │
 ├─> vpype Runner (subprocess)
 ├─> Estimator (geom + pyaxidraw)
@@ -175,8 +175,8 @@ Exec=plottyd --workspace /var/lib/plotty --rpc :8765
 
 ## 10) Multi-pen (per-layer)
 
-- Parse SVG layer names/order; require 1:1 mapping layer→pen before start.
-- At layer boundary: lift, park, prompt to swap pen (TUI/CLI + ntfy/MQTT), optional ink swatch.
+- Parse SVG layer names/order; auto-detect multi-pen requirements from SVG structure and AxiDraw layer control syntax.
+- At layer boundary: lift, park, prompt to swap pen (CLI + ntfy/MQTT; TUI v1.1), optional ink swatch.
 - Store per-layer metrics & estimates; show per-layer ETAs during run.
 
 ```sh
@@ -184,6 +184,19 @@ plotty job layers <job>
 plotty job map-pen <job> --layer "Hatch" --pen "0.4mm red"
 plotty job plan <job> --json
 ```
+
+## 10.1) Smart Multipen Detection (v1)
+
+- **Automatic Detection:** Parse SVG for multiple layers OR AxiDraw layer control syntax (`+S`, `+H`, `+D`, `!`, `%`)
+- **Hidden Layer Filtering:** Skip layers marked with `%` (documentation-only) in AxiDraw layer control syntax
+- **Fallback Logic:** Single-layer SVGs use single-pen mode; multi-layer or control-syntax SVGs use multipen mode
+- **No Manual Flags:** Remove requirement for explicit `--multipen` flag; auto-detect from job content
+- **Layer Control Support:** Full support for [AxiDraw Layer Control](https://wiki.evilmadscientist.com/AxiDraw_Layer_Control) syntax including:
+  - `+S<1-100>`: Set pen speed percentage
+  - `+H<0-100>`: Set pen height (up/down) percentage  
+  - `+D<1+>`: Set delay in milliseconds after layer
+  - `!`: Force pause after layer (pen swap)
+  - `%`: Documentation layer (skip plotting)
 
 ---
 
@@ -220,6 +233,70 @@ Reliability (idempotent resume, fsync journal), latency (pause/abort <500 ms), t
 - Container: slim + ffmpeg; optional USB/v4l devices via Quadlet.
 
 Quick add:
+
+---
+
+## 8) Implementation Status
+
+### ✅ Completed (v1)
+
+**Core FSM & Job Management**
+- [x] FSM-based job lifecycle with crash-safe resume
+- [x] Queue → Analyze → Optimize → Checklist → Plot → Report flow
+- [x] SQLite persistence with JSONL journal
+- [x] Workspace management with job directories
+
+**Smart Multipen Detection** 
+- [x] SVG layer detection with Inkscape compatibility
+- [x] Color-coded layer overview with element counts
+- [x] Hidden layer filtering (display:none, groupmode="hidden", % documentation)
+- [x] Interactive pen mapping with database integration
+- [x] Automatic single-pen vs multi-pen mode selection
+
+**AxiDraw Integration**
+- [x] Robust pyaxidraw import handling with graceful degradation
+- [x] Clear error messages and installation instructions
+- [x] Optional dependency management (axicli package metadata fix)
+- [x] Dry-run, pause/resume/abort, safe park functionality
+- [x] Time estimation with vpype optimization
+
+**CLI & Planning**
+- [x] Complete CLI interface with all required commands
+- [x] vpype integration for path optimization
+- [x] Pre/post optimization time estimates
+- [x] Paper and pen database management
+- [x] Checklist-driven safety gates
+
+**Recording & Reporting**
+- [x] IP camera integration (v1)
+- [x] Per-session MP4 recording with ffmpeg
+- [x] Self-contained HTML job reports
+- [x] Metrics, thumbnails, and video links
+
+### 🚧 In Progress
+
+**TUI (Terminal User Interface)**
+- [ ] Textual-based interactive interface
+- [ ] Real-time plotting progress visualization
+- [ ] Device health monitoring
+- [ ] Job queue management
+- [ ] Session management with FSM state display
+
+### 📋 Deferred (v2)
+
+**Multi-Device Support**
+- [ ] Multiple plotter management
+- [ ] Device pooling and load balancing
+- [ ] Cross-device job orchestration
+
+**Native Camera Support**
+- [ ] USB/v4l2 camera integration
+- [ ] Custom ffmpeg filters
+- [ ] Hardware-accelerated encoding
+
+---
+
+## 9) Development Workflow
 
 ```bash
 mkdir -p docs
