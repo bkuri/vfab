@@ -110,33 +110,131 @@ Header (ploTTY TUI)
 
 ---
 
-## 5) Backend Integration Requirements
+## 5) State Management Architecture
 
-### 5.1 Timer Integration
+### 5.1 Hybrid State Approach
+
+**Current CLI Architecture (Stateless):**
+```
+Command → Read Files → Process → Write Files → Exit
+```
+
+**TUI Architecture (Stateful):**
+```
+TUI Launch → Load State → Interactive Updates → Background Monitoring
+```
+
+**Hybrid Solution:**
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   CLI Commands   │───▶│   JSON Files     │◀───│  File Watchers  │
+│  (stateless)    │    │  (persistent)    │    │  (TUI daemon)  │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+                                ▲                        │
+                                │                        ▼
+                       ┌──────────────────┐    ┌─────────────────┐
+                       │  Status Commands │    │   TUI Interface │
+                       │  (read files)   │    │ (stateful)      │
+                       └──────────────────┘    └─────────────────┘
+```
+
+### 5.2 State Synchronization Strategy
+
+**File-Based State (Source of Truth):**
+- `job.json` - Current job states and FSM status
+- `plan.json` - Planning results and layer information
+- `results.json` - Plotting results and metrics
+- Database records - Pens, papers, device configurations
+
+**In-Memory State (TUI Cache):**
+- Real-time job status updates
+- Device connection monitoring
+- Progress tracking for active operations
+- UI component state
+
+**Synchronization Mechanisms:**
+- **File System Watchers:** Detect JSON file changes from CLI commands
+- **State Manager Service:** Coordinate between CLI and TUI instances
+- **Periodic Reconciliation:** Ensure consistency between file and memory state
+- **Event Broadcasting:** Push updates to connected TUI instances
+
+### 5.3 Multi-Instance Coordination
+
+**Challenge:** Multiple CLI/TUI instances accessing same state
+**Solution:** 
+- File-based locking for state updates
+- State manager coordination service
+- Atomic file operations with conflict detection
+- Graceful degradation when coordination unavailable
+
+### 5.4 Backward Compatibility Requirements
+
+**CLI Commands:** Continue working exactly as current implementation
+- No breaking changes to existing CLI interface
+- File-based state remains primary storage
+- Status commands continue reading files directly
+
+**TUI Integration:** Add state management layer without disrupting CLI
+- CLI commands optionally notify state manager of changes
+- TUI reads state from files + real-time watchers
+- Both interfaces can be used simultaneously
+
+### 5.5 State Manager Implementation
+
+```python
+# New: src/plotty/state_manager.py
+class StateManager:
+    def __init__(self):
+        self.in_memory_state = {}
+        self.file_watchers = {}
+        self.tui_clients = set()
+        self.lock = asyncio.Lock()
+    
+    async def sync_from_files(self):
+        """Load current state from JSON files"""
+        
+    async def notify_tui_clients(self, changes):
+        """Push updates to connected TUI instances"""
+        
+    async def handle_cli_update(self, job_id, new_state):
+        """Handle state changes from CLI commands"""
+        
+    async def start_file_watchers(self):
+        """Monitor file system for changes"""
+        
+    async def reconcile_state(self):
+        """Periodic consistency check"""
+```
+
+---
+
+## 8) Backend Integration Requirements
+
+### 8.1 Timer Integration
 - Connect TUI `SessionDisplay` to existing `plotting.py` timing functionality
 - Preserve existing timing data and metrics
 - Provide real-time updates during plotting
 
-### 5.2 Job Management
+### 8.2 Job Management
 - Use existing workspace job system (`workspace/jobs/`)
 - Connect to database job records
 - Support job selection and queuing
 - Display job metadata and planning results
 
-### 5.3 Device Integration
+### 8.3 Device Integration
 - Connect to existing `axidraw_integration.py` with graceful degradation
 - Use existing device manager and connection handling
 - Display real device status and health (with availability indicators)
 - Support device control through TUI (clear error messages when unavailable)
 - Integrate with smart multipen detection system
 
-### 5.4 Guard System Integration
+### 8.4 Guard System Integration
 - Display `PaperSessionGuard` status and session tracking
 - Show `PenLayerGuard` status and pen swap requirements
 - Visual guard status indicators
 - Support guard override options (display-only initially)
 
-### 5.5 FSM Integration
+### 8.5 FSM Integration
 - Display current FSM states for all active sessions
 - Show state transitions in real-time
 - Support state-based button visibility and actions
@@ -144,37 +242,55 @@ Header (ploTTY TUI)
 
 ---
 
-## 6) Implementation Phases
+## 7) Implementation Phases
+
+### Phase 0: State Management Foundation (Critical Path)
+1. **Create State Manager** (`src/plotty/state_manager.py`)
+   - File system monitoring for JSON changes
+   - In-memory state caching
+   - Event broadcasting to TUI instances
+   - Conflict resolution for multiple instances
+
+2. **Enhance CLI Integration** (Non-breaking)
+   - Add optional state manager notifications to CLI commands
+   - Maintain file-based state as source of truth
+   - Preserve existing CLI behavior
+
+3. **State Synchronization Layer**
+   - File watchers for real-time updates
+   - Periodic state reconciliation
+   - Multi-instance coordination
+   - Error handling and recovery
 
 ### Phase 1: Foundation (High Priority)
-1. **Add Textual dependency** to `pyproject.toml`
-2. **Create integrated TUI module** at `src/plotty/tui.py`
-3. **Add TUI CLI command** with `--tui` flag launch
-4. **Basic backend connections** to config and job systems
+4. **Add Textual dependency** to `pyproject.toml`
+5. **Create integrated TUI module** at `src/plotty/tui.py`
+6. **Add TUI CLI command** with `--tui` flag launch
+7. **Basic backend connections** to config and job systems
 
 ### Phase 2: Core Integration (Medium Priority)
-5. **Timer integration** with existing `plotting.py` timing
-6. **Job management** connection to workspace and database
-7. **Device control** integration with axidraw manager
-8. **FSM state** display and management
+8. **Timer integration** with existing `plotting.py` timing
+9. **Job management** connection to workspace and database
+10. **Device control** integration with axidraw manager
+11. **FSM state** display and management
 
 ### Phase 3: Enhancement (Low Priority)
-9. **Guard system** display and integration
-10. **Device health** monitoring and real-time updates
-11. **Advanced features** (layer progress, pen swap visualization)
-12. **Testing** and validation of integrated systems
+12. **Guard system** display and integration
+13. **Device health** monitoring and real-time updates
+14. **Advanced features** (layer progress, pen swap visualization)
+15. **Testing** and validation of integrated systems
 
 ---
 
-## 7) Technical Specifications
+## 9) Technical Specifications
 
-### 7.1 Dependencies
+### 9.1 Dependencies
 ```toml
 [project.optional-dependencies]
 tui = ["textual>=0.44.0"]
 ```
 
-### 7.2 CLI Integration
+### 9.2 CLI Integration
 ```python
 @app.command()
 def tui():
@@ -184,7 +300,7 @@ def tui():
     app.run()
 ```
 
-### 7.3 Key Integration Points
+### 9.3 Key Integration Points
 ```python
 # Backend connections in src/plotty/tui.py
 from .plotting import MultiPenPlotter
@@ -197,7 +313,73 @@ from .db import get_session
 
 ---
 
-## 8) Design Decisions
+## 10) Migration Strategy
+
+### 10.1 Gradual Transition Approach
+
+**Phase 0: Foundation (No Breaking Changes)**
+- Add state management system alongside existing CLI
+- CLI continues working exactly as before
+- File-based state remains source of truth
+
+**Phase 1: Hybrid Operation**
+- CLI and TUI can run simultaneously
+- State manager coordinates between interfaces
+- Users can gradually transition to TUI
+
+**Phase 2: Enhanced Integration**
+- Rich TUI real-time features
+- Advanced state synchronization
+- Performance optimizations
+
+### 10.2 Risk Mitigation
+
+**State Consistency Risks:**
+- File corruption during concurrent access
+- State drift between file and memory
+- Lost updates during system crashes
+
+**Mitigation Strategies:**
+- Atomic file operations with backup/restore
+- Periodic state reconciliation
+- Conflict detection and resolution
+- Graceful degradation to file-only mode
+
+**Performance Risks:**
+- File system overhead from monitoring
+- Memory usage from state caching
+- UI lag from real-time updates
+
+**Mitigation Strategies:**
+- Efficient debouncing of file changes
+- Selective state caching (active jobs only)
+- Optimized UI update cycles
+- Background processing for non-critical updates
+
+### 10.3 Success Criteria for State Management
+
+**Functional Requirements:**
+- [ ] CLI commands continue working without modification
+- [ ] TUI provides real-time updates for active operations
+- [ ] State remains consistent across CLI/TUI boundary
+- [ ] Multiple instances can coordinate without conflicts
+- [ ] System gracefully handles state manager failures
+
+**Performance Requirements:**
+- [ ] File monitoring overhead < 1% CPU usage
+- [ ] State synchronization latency < 100ms
+- [ ] UI refresh rate ≥ 10Hz for smooth updates
+- [ ] Memory usage for state caching < 50MB
+
+**Reliability Requirements:**
+- [ ] No data loss during concurrent access
+- [ ] Automatic recovery from state corruption
+- [ ] Graceful degradation when state manager unavailable
+- [ ] Zero impact on existing CLI functionality
+
+---
+
+## 11) Design Decisions
 
 ### 8.1 TUI Mode Approach
 **Decision:** CLI-first with optional `--tui` flag
