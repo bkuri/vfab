@@ -18,7 +18,9 @@ src/plotty/multipen.py
 src/plotty/paper.py
 src/plotty/planner.py
 src/plotty/plotting.py
+src/plotty/progress.py
 src/plotty/reporting.py
+src/plotty/utils.py
 src/plotty/vpype_runner.py
 src/plotty.egg-info/PKG-INFO
 src/plotty.egg-info/SOURCES.txt
@@ -33,4 +35,7 @@ src/textual/plotty_tui_integrated.py
 src/textual/plotty_tui_standalone.py
 src/textual/plotty_tui_tabbed.py
 tests/test_axidraw.py
+tests/test_fsm.py
+tests/test_guards.py
+tests/test_hooks.py
 tests/test_smoke.py

@@ -9,6 +9,7 @@ Requires-Dist: pydantic>=2.9
 Requires-Dist: pyyaml>=6.0.2
 Requires-Dist: sqlalchemy>=2.0.36
 Requires-Dist: alembic>=1.13.2
+Requires-Dist: rich>=13.0.0
 Provides-Extra: vpype
 Requires-Dist: vpype>=1.14.0; extra == "vpype"
 Provides-Extra: axidraw
@@ -113,6 +114,39 @@ ploTTY automatically detects layers in your SVG files and provides:
 - **🚫 Hidden layer filtering** (skips Inkscape hidden layers and `%` documentation layers)  
 - **🖊️ Interactive pen mapping** for multi-layer designs
 - **⚡ Automatic mode selection** (single-pen vs multi-pen)
+
+### vpype Optimization Presets
+
+ploTTY includes vpype presets for different optimization levels with **dynamic paper sizing**:
+
+```yaml
+# config/vpype-presets.yaml
+presets:
+  fast:
+    pipe: "read {src} pagesize {pagesize} crop 0 0 {width_mm:g}mm {height_mm:g}mm linemerge linesort write {dst}"
+  
+  hq:
+    pipe: "read {src} pagesize {pagesize} crop 0 0 {width_mm:g}mm {height_mm:g}mm linemerge linesort linesimplify write {dst}"
+```
+
+**Available presets:**
+- **`fast`**: Quick optimization (linemerge + linesort) - default
+- **`hq`**: High quality (adds linesimplify for segment reduction)
+
+**Dynamic paper sizing**: Presets automatically use the paper size from your config:
+```yaml
+# config/config.yaml
+vpype:
+  preset: fast                    # or hq
+  presets_file: "config/vpype-presets.yaml"
+
+paper:
+  default_size: A4               # A3, A4, Letter, etc.
+  default_margin_mm: 10.0
+  default_orientation: portrait
+```
+
+The `{pagesize}`, `{width_mm}`, and `{height_mm}` placeholders are automatically replaced with your configured paper size, so you don't need separate presets for different paper sizes!
 
 ### AxiDraw Configuration
 

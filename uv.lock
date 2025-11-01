@@ -733,6 +733,7 @@ dependencies = [
     { name = "alembic" },
     { name = "pydantic" },
     { name = "pyyaml" },
+    { name = "rich" },
     { name = "sqlalchemy" },
     { name = "typer" },
 ]
@@ -771,6 +772,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.9" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.2" },
     { name = "pyyaml", specifier = ">=6.0.2" },
+    { name = "rich", specifier = ">=13.0.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6.8" },
     { name = "sqlalchemy", specifier = ">=2.0.36" },
     { name = "typer", specifier = ">=0.12.3" },
