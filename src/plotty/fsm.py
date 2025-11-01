@@ -9,7 +9,7 @@ from __future__ import annotations
 from enum import Enum
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 from pathlib import Path
 
@@ -143,7 +143,7 @@ class JobFSM:
                 json.dumps(
                     {
                         **entry,
-                        "timestamp": datetime.utcnow().isoformat(),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                         "job_id": self.job_id,
                     }
                 )
@@ -193,7 +193,7 @@ class JobFSM:
         transition = StateTransition(
             from_state=self.current_state,
             to_state=target_state,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             reason=reason,
             metadata=metadata or {},
         )
@@ -227,7 +227,7 @@ class JobFSM:
             with open(job_file, "r") as f:
                 job_data = json.load(f)
             job_data["state"] = self.current_state.value
-            job_data["updated_at"] = datetime.utcnow().isoformat()
+            job_data["updated_at"] = datetime.now(timezone.utc).isoformat()
             with open(job_file, "w") as f:
                 json.dump(job_data, f, indent=2)
 
@@ -261,8 +261,8 @@ class JobFSM:
             "name": name or src_file.stem,
             "paper": paper,
             "state": JobState.QUEUED.value,
-            "created_at": datetime.utcnow().isoformat(),
-            "updated_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
         }
 
         with open(self.job_dir / "job.json", "w") as f:

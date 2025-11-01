@@ -11,7 +11,7 @@ import signal
 import atexit
 from typing import Dict, Any, List, Optional
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 
 from .fsm import JobFSM, JobState, StateTransition
@@ -81,7 +81,7 @@ class CrashRecovery:
                 {
                     "type": "emergency_shutdown",
                     "state": fsm.current_state.value,
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                     "reason": "signal_received",
                 }
             )
@@ -183,7 +183,7 @@ class CrashRecovery:
                 recovery_transition = StateTransition(
                     from_state=last_state,
                     to_state=last_state,
-                    timestamp=datetime.utcnow(),
+                    timestamp=datetime.now(timezone.utc),
                     reason="Crash recovery",
                     metadata={"emergency_shutdown": True},
                 )
@@ -196,7 +196,7 @@ class CrashRecovery:
                         "from_state": last_state.value,
                         "to_state": last_state.value,
                         "reason": "Crash recovery after emergency shutdown",
-                        "timestamp": datetime.utcnow().isoformat(),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                     }
                 )
 

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Callable
 
 try:
-    from .axidraw_integration import create_manager, is_axidraw_available
+    from .drivers import create_manager, is_axidraw_available
 except ImportError:
     create_manager = None
 

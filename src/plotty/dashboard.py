@@ -42,7 +42,7 @@ def get_system_status() -> Dict:
         # Simple check - try to import module
         import importlib.util
 
-        spec = importlib.util.find_spec("plotty.axidraw_integration")
+        spec = importlib.util.find_spec("plotty.drivers.axidraw")
         status["axidraw"]["available"] = spec is not None
     except Exception:
         pass

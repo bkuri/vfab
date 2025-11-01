@@ -79,7 +79,7 @@ def show_system_status(
             try:
                 import importlib.util
 
-                spec = importlib.util.find_spec("plotty.axidraw_integration")
+                spec = importlib.util.find_spec("plotty.drivers.axidraw")
                 axidraw_status = "✅ Available" if spec else "❌ Not installed"
             except Exception:
                 axidraw_status = "❌ Error checking"

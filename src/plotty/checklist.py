@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 from typing import Dict, Any, List, Optional
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 
 logger = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ class ChecklistItem:
     def complete(self, notes: str = "") -> None:
         """Mark item as completed."""
         self.completed = True
-        self.completed_at = datetime.utcnow()
+        self.completed_at = datetime.now(timezone.utc)
         self.notes = notes
 
     def uncomplete(self) -> None:
@@ -136,7 +136,7 @@ class Checklist:
 
         data = {
             "job_id": self.job_id,
-            "updated_at": datetime.utcnow().isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
             "items": [item.to_dict() for item in self.items.values()],
         }
 

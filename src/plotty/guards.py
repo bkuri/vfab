@@ -15,7 +15,7 @@ from enum import Enum
 
 
 try:
-    from .axidraw_integration import create_manager
+    from .drivers import create_manager
 except ImportError:
     create_manager = None
 
