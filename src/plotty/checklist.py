@@ -40,9 +40,9 @@ class ChecklistItem:
             "description": self.description,
             "required": self.required,
             "completed": self.completed,
-            "completed_at": self.completed_at.isoformat()
-            if self.completed_at
-            else None,
+            "completed_at": (
+                self.completed_at.isoformat() if self.completed_at else None
+            ),
             "notes": self.notes,
         }
 
@@ -246,9 +246,11 @@ class Checklist:
             "total_items": len(all_items),
             "total_completed": len(completed_all),
             "is_complete": self.is_complete(),
-            "progress_percent": (len(completed_required) / len(required_items)) * 100
-            if required_items
-            else 100,
+            "progress_percent": (
+                (len(completed_required) / len(required_items)) * 100
+                if required_items
+                else 100
+            ),
         }
 
     def to_dict(self) -> Dict[str, Any]:

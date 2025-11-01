@@ -285,9 +285,11 @@ def get_paper_presets() -> Dict[str, Dict]:
         presets[name.lower()] = {
             "width_mm": width_mm,
             "height_mm": height_mm,
-            "vpype_pagesize": name.upper()
-            if name.upper() in ["A0", "A1", "A2", "A3", "A4", "A5", "A6"]
-            else "Letter",
+            "vpype_pagesize": (
+                name.upper()
+                if name.upper() in ["A0", "A1", "A2", "A3", "A4", "A5", "A6"]
+                else "Letter"
+            ),
             "description": f"Standard {name} paper ({width_mm}x{height_mm}mm)",
         }
 

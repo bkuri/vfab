@@ -316,10 +316,12 @@ class CrashRecovery:
                 "last_transition": last_transition,
                 "job_info": job_info,
                 "journal_entries": len(entries),
-                "recoverable": current_state
-                not in [JobState.COMPLETED, JobState.ABORTED, JobState.FAILED]
-                if current_state
-                else False,
+                "recoverable": (
+                    current_state
+                    not in [JobState.COMPLETED, JobState.ABORTED, JobState.FAILED]
+                    if current_state
+                    else False
+                ),
             }
 
         except Exception as e:

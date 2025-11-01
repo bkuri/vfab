@@ -19,7 +19,8 @@ def test_hooks_integration():
 
         # Create test config with hooks
         config_file = workspace / "config.yaml"
-        config_file.write_text("""
+        config_file.write_text(
+            """
 workspace: ./workspace
 database: { url: "sqlite:///./plotty.db", echo: false }
 camera: { mode: ip, url: "http://127.0.0.1:8881/stream.mjpeg", enabled: true, timelapse_fps: 1 }
@@ -33,7 +34,8 @@ hooks:
     - command: "echo 'Job {job_id} queued'"
   COMPLETED:
     - command: "echo 'Job {job_id} completed'"
-""")
+"""
+        )
 
         # Set config env var
         import os
