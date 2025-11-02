@@ -7,11 +7,7 @@ This package contains the main CLI interface split into logical command groups.
 from __future__ import annotations
 
 import typer
-from pathlib import Path
-from typing import List
 
-from ..config import load_config
-from .core import get_available_job_ids
 from .plot_commands import plot_app
 from .job_commands import job_app
 from .config_commands import config_app

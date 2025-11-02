@@ -5,10 +5,8 @@ Job management commands for ploTTY CLI.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 import typer
 
-from ..config import load_config
 from ..utils import error_handler, validate_file_exists
 from .core import get_available_job_ids
 
@@ -27,8 +25,6 @@ def complete_job_id(incomplete: str):
 def add(src: str, name: str = "", paper: str = "A3"):
     """Add a new job to workspace."""
     try:
-        cfg = load_config(None)
-
         # Validate source file exists
         src_path = Path(src)
         validate_file_exists(src_path, "Source SVG file")

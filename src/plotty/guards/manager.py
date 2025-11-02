@@ -5,7 +5,7 @@ Guard system manager for coordinating multiple guards.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List
 import logging
 
 from .base import GuardCheck, GuardResult
@@ -21,18 +21,12 @@ class GuardSystem:
     def __init__(self, config, workspace: Path):
         self.config = config
         self.workspace = workspace
-        self.device_guard = DeviceGuard(config)
-        self.camera_guard = CameraGuard(config)
-        self.checklist_guard = ChecklistGuard(config)
-        self.paper_session_guard = PaperSessionGuard(config)
-        self.pen_layer_guard = PenLayerGuard(config)
-
         self.guards = {
-            "device_idle": self.device_guard,
-            "camera_health": self.camera_guard,
-            "checklist_complete": self.checklist_guard,
-            "paper_session_valid": self.paper_session_guard,
-            "pen_layer_compatible": self.pen_layer_guard,
+            "device_idle": DeviceGuard(config),
+            "camera_health": CameraGuard(config),
+            "checklist_complete": ChecklistGuard(config),
+            "paper_session_valid": PaperSessionGuard(config),
+            "pen_layer_compatible": PenLayerGuard(config),
         }
 
     def check_all(self, job_id: str) -> List[GuardCheck]:
@@ -101,11 +95,13 @@ class GuardSystem:
         # Determine which guards to check based on target state
         if target_state in ["ARMED", "PLOTTING"]:
             # Device must be idle for armed/plotting states
-            guards.append(self.device_guard.check(job_id))
+            guards.append(self.guards["device_idle"].check(job_id))
 
             # Checklist must be complete for armed state
             if target_state == "ARMED":
-                guards.append(self.checklist_guard.check(job_id, self.workspace))
+                guards.append(
+                    self.guards["checklist_complete"].check(job_id, self.workspace)
+                )
 
                 # Paper session guard - one paper per session
                 if (
@@ -113,14 +109,14 @@ class GuardSystem:
                     and hasattr(self.config.paper, "require_one_per_session")
                     and self.config.paper.require_one_per_session
                 ):
-                    guards.append(self.paper_session_guard.check(job_id))
+                    guards.append(self.guards["paper_session_valid"].check(job_id))
 
                 # Pen layer guard - one pen per layer
-                guards.append(self.pen_layer_guard.check(job_id))
+                guards.append(self.guards["pen_layer_compatible"].check(job_id))
 
         # Camera health check (soft-fail allowed) for plotting states
         if target_state == "PLOTTING":
-            guards.append(self.camera_guard.check(job_id))
+            guards.append(self.guards["camera_health"].check(job_id))
 
         return guards
 
