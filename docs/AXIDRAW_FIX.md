@@ -167,4 +167,4 @@ The pyaxidraw import issue is **permanently resolved**. ploTTY now:
 - **Maintains full functionality** for non-AxiDraw workflows
 - **Passes all quality checks** (linting, formatting, tests)
 
-Users can now install plootty confidently and get helpful error messages when they need AxiDraw support.
+Users can now install ploTTY confidently and get helpful error messages when they need AxiDraw support.
