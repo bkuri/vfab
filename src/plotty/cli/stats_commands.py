@@ -7,11 +7,10 @@ from __future__ import annotations
 from pathlib import Path
 import json
 import typer
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from ..config import load_config
 from ..utils import error_handler
-from ..progress import show_status
 
 try:
     from rich.console import Console
@@ -250,7 +249,7 @@ def jobs(
                 console.print(f"  {paper}: {count}")
 
             # Timing stats
-            console.print(f"\nTiming Statistics:")
+            console.print("\nTiming Statistics:")
             console.print(f"  Total jobs: {stats.get('total_jobs', 0)}")
             console.print(f"  Completed: {stats.get('completed_jobs', 0)}")
             console.print(f"  Failed: {stats.get('failed_jobs', 0)}")

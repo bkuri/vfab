@@ -13,7 +13,7 @@ from .job_commands import job_app
 from .config_commands import config_app
 from .recovery_commands import recovery_app
 from .stats_commands import stats_app
-from .batch_commands import batch_app
+from .batch import batch_app
 
 # Import status commands from parent module
 from ..cli_status import status_app

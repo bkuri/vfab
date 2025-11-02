@@ -107,6 +107,73 @@ def plot(
         if not optimized_svg.exists():
             raise typer.BadParameter(f"No SVG file found for job {job_id}")
 
+        # Show time estimation before plotting
+        if console:
+            show_status("Calculating time estimation...", "info")
+
+            # Use AxiDraw preview mode for accurate time estimation
+            from ..plotting import MultiPenPlotter
+
+            preview_plotter = MultiPenPlotter(port=port, model=model, interactive=False)
+
+            # Apply preset settings to preview if provided
+            if preset_obj:
+                preset_settings = preset_obj.to_vpype_args()
+                device_config = {
+                    "speed_pendown": int(preset_settings.get("speed", 25)),
+                    "speed_penup": int(preset_settings.get("speed", 75)),
+                    "pen_pos_up": int(preset_settings.get("pen_height", 60)),
+                    "pen_pos_down": int(preset_settings.get("pen_height", 40)),
+                }
+                for key, value in device_config.items():
+                    if hasattr(preview_plotter.manager, key):
+                        setattr(preview_plotter.manager, key, value)
+
+            # Run preview to get time estimate
+            preview_result = preview_plotter.manager.plot_file(
+                optimized_svg, preview_only=True
+            )
+
+            if preview_result.get("success"):
+                est_time = preview_result.get("time_estimate", 0)
+                est_distance = preview_result.get("distance_pendown", 0)
+
+                console.print(f"\n⏱️  Estimated time: {est_time / 60:.1f} minutes")
+                console.print(f"📏 Estimated distance: {est_distance:.1f}mm")
+
+                if preset_obj:
+                    speed_factor = preset_obj.speed / 100.0
+                    console.print(f"⚡ Speed factor: {speed_factor:.1f}x")
+            else:
+                console.print("⚠️  Could not estimate time", style="yellow")
+        cfg = load_config(None)
+        job_dir = Path(cfg.workspace) / "jobs" / job_id
+
+        if not job_dir.exists():
+            raise typer.BadParameter(f"Job {job_id} not found")
+
+        job_file = job_dir / "job.json"
+        if not job_file.exists():
+            raise typer.BadParameter(f"Job metadata not found for {job_id}")
+
+        job_data = json.loads(job_file.read_text())
+
+        # Check if job is planned
+        if job_data.get("state") not in ["OPTIMIZED", "READY"]:
+            show_status(
+                f"Job {job_id} must be planned first. Run: plotty job plan {job_id}",
+                "warning",
+            )
+            return
+
+        # Find the optimized SVG file
+        optimized_svg = job_dir / "multipen.svg"
+        if not optimized_svg.exists():
+            optimized_svg = job_dir / "src.svg"
+
+        if not optimized_svg.exists():
+            raise typer.BadParameter(f"No SVG file found for job {job_id}")
+
         # Use the MultiPenPlotter for actual plotting
         from ..plotting import MultiPenPlotter
 
