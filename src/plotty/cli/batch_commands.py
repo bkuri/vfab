@@ -137,6 +137,7 @@ def plan_all(
 ):
     """Plan multiple jobs with pen optimization (implicit dry-run without --apply)."""
     try:
+        cfg = load_config(None)
         jobs = get_jobs_by_state(state)
 
         if not jobs:
@@ -330,9 +331,105 @@ def plan_all(
                         show_status("Planning cancelled by user", "info")
                     return
 
-            # TODO: Implement traditional batch planning
+            # Implement traditional batch planning
+            from ..planner import plan_layers
+            from ..db import get_session
+            from ..models import Pen
+            from datetime import datetime
+
+            # Get available pens from database
+            with get_session() as session:
+                pens = session.query(Pen).all()
+                available_pens = [
+                    {
+                        "id": p.id,
+                        "name": p.name,
+                        "width_mm": p.width_mm,
+                        "speed_cap": p.speed_cap,
+                        "pressure": p.pressure,
+                        "passes": p.passes,
+                    }
+                    for p in pens
+                ]
+
+            # Plan each job individually
+            successful_plans = []
+            failed_plans = []
+
+            for job in jobs:
+                job_id = job["id"]
+                try:
+                    job_dir = job["path"]
+                    src_svg = job_dir / "src.svg"
+
+                    if not src_svg.exists():
+                        failed_plans.append(
+                            {"id": job_id, "error": "Source SVG not found"}
+                        )
+                        continue
+
+                    # Create default pen mapping (all layers use default pen)
+                    from ..multipen import detect_svg_layers
+
+                    layers = detect_svg_layers(src_svg)
+                    pen_map = {layer.name: "0.3mm black" for layer in layers}
+
+                    # Plan the job
+                    plan_result = plan_layers(
+                        src_svg=src_svg,
+                        preset="fast",  # Use fast preset for planning
+                        presets_file=cfg.vpype.presets_file,
+                        pen_map=pen_map,
+                        out_dir=job_dir,
+                        available_pens=available_pens,
+                        interactive=False,
+                        paper_size=job["data"].get("paper", "A4"),
+                    )
+
+                    # Save planning results
+                    plan_file = job_dir / "plan.json"
+                    plan_file.write_text(json.dumps(plan_result, indent=2, default=str))
+
+                    # Update job state to OPTIMIZED
+                    job_data = job["data"]
+                    job_data["state"] = "OPTIMIZED"
+                    job_data["planned_at"] = datetime.now().isoformat()
+                    job_data["plan_result"] = plan_result
+
+                    job_file = job_dir / "job.json"
+                    job_file.write_text(json.dumps(job_data, indent=2))
+
+                    successful_plans.append(job_id)
+
+                except Exception as e:
+                    failed_plans.append({"id": job_id, "error": str(e)})
+
+            # Report results
             if not quiet:
-                show_status("Traditional batch planning not yet implemented", "warning")
+                if successful_plans:
+                    show_status(
+                        f"Successfully planned {len(successful_plans)} jobs", "success"
+                    )
+                    if verbose:
+                        for job_id in successful_plans:
+                            print(f"  ✓ {job_id}")
+
+                if failed_plans:
+                    show_status(f"Failed to plan {len(failed_plans)} jobs", "error")
+                    if verbose:
+                        for failure in failed_plans:
+                            print(f"  ✗ {failure['id']}: {failure['error']}")
+
+            if json_output:
+                result_data = {
+                    "mode": "traditional",
+                    "results": {
+                        "successful": successful_plans,
+                        "failed": failed_plans,
+                        "total_processed": len(successful_plans) + len(failed_plans),
+                    },
+                }
+                print(json.dumps(result_data, indent=2, default=str))
 
     except Exception as e:
         error_handler.handle(e)
