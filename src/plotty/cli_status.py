@@ -8,6 +8,7 @@ to launch the full dashboard.
 
 from __future__ import annotations
 
+import logging
 import json
 from pathlib import Path
 from typing import Optional, List
@@ -18,6 +19,8 @@ from rich.table import Table
 
 from .config import load_config
 from .utils import error_handler
+
+logger = logging.getLogger(__name__)
 
 # Create console for rich output
 console = Console()
@@ -116,8 +119,10 @@ def show_status_overview(
                                         == "CONFIGURED"
                                     ):
                                         ready_count += 1
-                                except Exception:
-                                    pass
+                                except Exception as e:
+                                    logger.debug(
+                                        f"Failed to read job file {job_file}: {e}"
+                                    )
 
                 print(f"| Queue | {queue_count} jobs ({ready_count} ready) |")
                 print()
@@ -160,7 +165,8 @@ def show_status_overview(
                                 "layer_count": layer_count,
                             }
                         )
-                    except Exception:
+                    except Exception as e:
+                        logger.debug(f"Failed to load job {job_dir.name}: {e}")
                         continue
 
                 # Sort by state priority

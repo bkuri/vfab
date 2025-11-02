@@ -1,7 +1,10 @@
 from __future__ import annotations
+import logging
 import subprocess
 import signal
 import shlex
+
+logger = logging.getLogger(__name__)
 
 
 def start_ip(url: str, out_path: str, timelapse_path: str | None = None):
@@ -30,8 +33,9 @@ def stop(procs: tuple[subprocess.Popen, subprocess.Popen | None]):
             try:
                 p.send_signal(signal.SIGINT)
                 p.wait(timeout=10)
-            except Exception:
+            except Exception as e:
+                logger.debug(f"Failed to gracefully stop ffmpeg: {e}")
                 try:
                     p.kill()
-                except Exception:
-                    pass
+                except Exception as e2:
+                    logger.debug(f"Failed to kill ffmpeg: {e2}")

@@ -5,6 +5,7 @@ Provides interactive menu system for common ploTTY operations.
 
 from __future__ import annotations
 
+import logging
 import os
 import json
 import subprocess
@@ -12,6 +13,8 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from .config import load_config
+
+logger = logging.getLogger(__name__)
 
 
 def clear_screen():
@@ -39,13 +42,12 @@ def get_system_status() -> Dict:
 
     # Check AxiDraw availability
     try:
-        # Simple check - try to import module
         import importlib.util
 
         spec = importlib.util.find_spec("plotty.drivers.axidraw")
         status["axidraw"]["available"] = spec is not None
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(f"Failed to check AxiDraw availability: {e}")
 
     # Load config for workspace and camera
     try:
@@ -53,8 +55,8 @@ def get_system_status() -> Dict:
         status["workspace"] = cfg.workspace
         status["camera"]["enabled"] = cfg.camera.mode != "disabled"
         status["camera"]["url"] = getattr(cfg.camera, "url", None)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(f"Failed to load config: {e}")
 
     # Count jobs in queue
     try:
@@ -75,10 +77,10 @@ def get_system_status() -> Dict:
                                     status["ready_jobs"] += 1
                                 else:
                                     status["default_jobs"] += 1
-                        except Exception:
-                            pass
-    except Exception:
-        pass
+                        except Exception as e:
+                            logger.debug(f"Failed to process job {job_dir.name}: {e}")
+    except Exception as e:
+        logger.debug(f"Failed to count jobs in workspace: {e}")
 
     return status
 
@@ -148,11 +150,12 @@ def get_job_queue() -> List[Dict]:
                         "time_estimate": time_estimate,
                     }
                 )
-            except Exception:
+            except Exception as e:
+                logger.debug(f"Failed to load job {job_dir.name}: {e}")
                 continue
 
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(f"Failed to load jobs list: {e}")
 
     # Sort by creation time (simple ID sort for now)
     jobs.sort(key=lambda x: x["id"])

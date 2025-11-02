@@ -11,11 +11,14 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timezone
 import json
+import logging
 from pathlib import Path
 
 from .config import load_config
 from .planner import plan_layers
 from .estimation import features, estimate_seconds
+
+logger = logging.getLogger(__name__)
 
 # Import optional modules
 try:
@@ -39,6 +42,14 @@ try:
 except ImportError:
 
     def get_crash_recovery(workspace):
+        return None
+
+
+try:
+    from .checklist import create_checklist
+except ImportError:
+
+    def create_checklist(job_id, job_dir):
         return None
 
 
@@ -366,7 +377,33 @@ class JobFSM:
         if self.current_state != JobState.READY:
             return False
 
-        # TODO: Implement checklist validation here
+        # Validate checklist before arming
+        if create_checklist is not None:
+            try:
+                checklist = create_checklist(self.job_id, self.job_dir)
+                if checklist is not None:
+                    progress = checklist.get_progress()
+
+                    # Check if all required items are completed
+                    if progress["required_completed"] < progress["required_total"]:
+                        missing = (
+                            progress["required_total"] - progress["required_completed"]
+                        )
+                        return self.transition_to(
+                            JobState.READY,
+                            f"Cannot arm job: {missing} required checklist items incomplete",
+                            {},
+                        )
+
+                    logger.info(
+                        f"Checklist validation passed: {progress['required_completed']}/{progress['required_total']} required items complete"
+                    )
+            except Exception as e:
+                logger.warning(
+                    f"Failed to validate checklist for job {self.job_id}: {e}"
+                )
+                # Continue with arming but log the issue
+
         return self.transition_to(JobState.ARMED, "Job armed for plotting", {})
 
     def start_plotting(self) -> bool:
