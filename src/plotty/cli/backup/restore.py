@@ -104,5 +104,6 @@ def backup(
         console.print("[green]✓ Backup restored successfully![/green]")
 
     except Exception as e:
-        console.print(f"[red]Error restoring backup: {e}[/red]")
-        raise typer.Exit(1)
+        from ...utils import error_handler
+
+        error_handler.handle(e)

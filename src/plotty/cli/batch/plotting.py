@@ -519,67 +519,80 @@ def plot_all(
                             f"\nStarting traditional batch plotting ({len(jobs)} jobs)"
                         )
 
-                for job in jobs:
-                    job_id = job["id"]
-                    job_dir = job["path"]
+                # Add progress tracking for batch plotting
+                from ...progress import progress_task
 
-                    try:
-                        # Find optimized SVG file
-                        optimized_svg = job_dir / "multipen.svg"
-                        if not optimized_svg.exists():
-                            optimized_svg = job_dir / "src.svg"
+                with progress_task(
+                    f"Batch plotting {len(jobs)} jobs", total=len(jobs)
+                ) as update_progress:
+                    for idx, job in enumerate(jobs):
+                        job_id = job["id"]
+                        job_dir = job["path"]
 
-                        if not optimized_svg.exists():
-                            failed_plots.append(
-                                {
-                                    "job_id": job_id,
-                                    "error": f"No SVG file found for job '{job_id}' (tried: multipen.svg, src.svg)",
-                                }
-                            )
-                            continue
+                        try:
+                            # Find optimized SVG file
+                            optimized_svg = job_dir / "multipen.svg"
+                            if not optimized_svg.exists():
+                                optimized_svg = job_dir / "src.svg"
 
-                        if not quiet:
-                            if verbose:
-                                show_status(f"Plotting {job_id}", "info")
-                            elif console:
-                                console.print(f"  • {job_id}")
-
-                        # Plot the job
-                        result = plotter.plot_with_axidraw_layers(optimized_svg)
-
-                        if result["success"]:
-                            successful_plots.append(
-                                {
-                                    "job_id": job_id,
-                                    "time": result.get("time_elapsed", 0),
-                                    "distance": result.get("distance_pendown", 0),
-                                }
-                            )
-                            total_time += result.get("time_elapsed", 0)
-                            total_distance += result.get("distance_pendown", 0)
-
-                            if verbose:
-                                show_status(
-                                    f"  ✓ {job_id} ({result.get('time_elapsed', 0):.1f}s)",
-                                    "success",
+                            if not optimized_svg.exists():
+                                failed_plots.append(
+                                    {
+                                        "job_id": job_id,
+                                        "error": f"No SVG file found for job '{job_id}' (tried: multipen.svg, src.svg)",
+                                    }
                                 )
-                        else:
+                                update_progress(1)
+                                continue
+
+                            if not quiet:
+                                if verbose:
+                                    show_status(f"Plotting {job_id}", "info")
+                                elif console:
+                                    console.print(f"  • {job_id}")
+
+                            # Plot the job
+                            result = plotter.plot_with_axidraw_layers(optimized_svg)
+
+                            if result["success"]:
+                                successful_plots.append(
+                                    {
+                                        "job_id": job_id,
+                                        "time": result.get("time_elapsed", 0),
+                                        "distance": result.get("distance_pendown", 0),
+                                    }
+                                )
+                                total_time += result.get("time_elapsed", 0)
+                                total_distance += result.get("distance_pendown", 0)
+
+                                if verbose:
+                                    show_status(
+                                        f"  ✓ {job_id} ({result.get('time_elapsed', 0):.1f}s)",
+                                        "success",
+                                    )
+                            else:
+                                failed_plots.append(
+                                    {
+                                        "job_id": job_id,
+                                        "error": result.get("error", "Unknown error"),
+                                    }
+                                )
+                                if verbose:
+                                    show_status(
+                                        f"  ✗ {job_id}: {result.get('error', 'Unknown error')}",
+                                        "error",
+                                    )
+
+                            # Update progress for this job
+                            update_progress(1)
+
+                        except Exception as job_error:
                             failed_plots.append(
-                                {
-                                    "job_id": job_id,
-                                    "error": result.get("error", "Unknown error"),
-                                }
+                                {"job_id": job_id, "error": str(job_error)}
                             )
                             if verbose:
-                                show_status(
-                                    f"  ✗ {job_id}: {result.get('error', 'Unknown error')}",
-                                    "error",
-                                )
-
-                    except Exception as job_error:
-                        failed_plots.append({"job_id": job_id, "error": str(job_error)})
-                        if verbose:
-                            show_status(f"  ✗ {job_id}: {job_error}", "error")
+                                show_status(f"  ✗ {job_id}: {job_error}", "error")
+                            update_progress(1)
 
             # Report results
             if not quiet:

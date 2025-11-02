@@ -17,8 +17,8 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from .config import load_config
-from .utils import error_handler
+from ...config import load_config
+from ...utils import error_handler
 
 logger = logging.getLogger(__name__)
 
@@ -484,14 +484,67 @@ def show_quick_status():
                         except Exception:
                             pass
 
+        # Queue summary with additional context
         if queue_count > 0:
             console.print(f"Queue: {queue_count} jobs ({ready_count} ready)")
+
+            # Add next ready job info if available
+            if ready_count > 0:
+                for job_dir in jobs_dir.iterdir():
+                    if job_dir.is_dir():
+                        job_file = job_dir / "job.json"
+                        if job_file.exists():
+                            try:
+                                job_data = json.loads(job_file.read_text())
+                                if (
+                                    job_data.get("state") == "QUEUED"
+                                    and job_data.get("config_status") == "CONFIGURED"
+                                ):
+                                    job_name = job_data.get("name", "Unknown")
+                                    job_id = job_dir.name[:8]
+                                    est_time = job_data.get("estimates", {}).get(
+                                        "post_s", 0
+                                    )
+                                    time_str = format_time(est_time)
+                                    console.print(
+                                        f"Next: {job_name} ({job_id}) - {time_str}"
+                                    )
+                                    break
+                            except Exception:
+                                pass
         else:
             console.print("Queue: Empty")
 
         # Workspace
         workspace_short = Path(cfg.workspace).name
         console.print(f"Workspace: {workspace_short}")
+
+        # Add recent activity summary
+        try:
+            recent_completed = 0
+            total_time = 0
+            for job_dir in jobs_dir.iterdir():
+                if job_dir.is_dir():
+                    job_file = job_dir / "job.json"
+                    if job_file.exists():
+                        try:
+                            job_data = json.loads(job_file.read_text())
+                            if job_data.get("state") == "COMPLETED":
+                                recent_completed += 1
+                                # Get actual time if available, otherwise estimated
+                                actual_time = job_data.get("actual_time", 0)
+                                if actual_time > 0:
+                                    total_time += actual_time
+                        except Exception:
+                            pass
+
+            if recent_completed > 0:
+                avg_time = total_time / recent_completed if recent_completed > 0 else 0
+                console.print(
+                    f"Completed: {recent_completed} jobs (avg: {format_time(avg_time)})"
+                )
+        except Exception:
+            pass
 
     except Exception as e:
         error_handler.handle(e)
@@ -656,14 +709,18 @@ def show_job_details(
         job_dir = Path(cfg.workspace) / "jobs" / job_id
 
         if not job_dir.exists():
-            console.print(f"[red]Job {job_id} not found[/red]")
-            return
+            from ...utils import create_job_error
+
+            raise create_job_error(f"Job {job_id} not found", job_id=job_id)
 
         # Load job data
         job_file = job_dir / "job.json"
         if not job_file.exists():
-            console.print(f"[red]Job data not found for {job_id}[/red]")
-            return
+            from ...utils import create_job_error
+
+            raise create_job_error(
+                f"Job metadata not found for {job_id}", job_id=job_id
+            )
 
         job_data = json.loads(job_file.read_text())
 

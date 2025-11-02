@@ -18,8 +18,8 @@ from .batch import batch_app
 from .logging import logging_app
 from .backup import backup_app
 
-# Import status commands from parent module
-from ..cli_status import status_app
+# Import status commands
+from .status import status_app
 
 # Create main app
 app = typer.Typer(no_args_is_help=False, invoke_without_command=True)

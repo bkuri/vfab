@@ -38,7 +38,7 @@ except ImportError:
 
 
 try:
-    from .crash_recovery import get_crash_recovery
+    from .recovery import get_crash_recovery
 except ImportError:
 
     def get_crash_recovery(workspace):

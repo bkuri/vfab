@@ -22,7 +22,7 @@ def session_reset() -> None:
         from ...db import get_session
         from ...models import Job, Layer
         from ...progress import show_boxed_progress
-        from ...exit_codes import ExitCode
+        from ...codes import ExitCode
         from sqlalchemy import text
 
         if console:
@@ -93,7 +93,7 @@ def session_reset() -> None:
         raise
     except Exception as e:
         from ...utils import error_handler
-        from ...exit_codes import ExitCode
+        from ...codes import ExitCode
 
         error_handler.handle(e)
         raise typer.Exit(ExitCode.ERROR)

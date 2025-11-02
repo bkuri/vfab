@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional
 from pathlib import Path
 
-from .vpype_runner import stats_json
+from .vpype import stats_json
 from .presets import get_preset
 
 

@@ -11,7 +11,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from ...logging_config import get_logger, logging_manager
+from ...logging import get_logger, logging_manager
 
 console = Console()
 
@@ -108,6 +108,12 @@ def cleanup_logs(
         console.print(f"[green]✓ Deleted {deleted_count} log files[/green]")
 
     except Exception as e:
-        logger.error(f"Failed to cleanup logs: {e}")
-        console.print(f"[red]Error: {e}[/red]")
-        raise typer.Exit(1)
+        from ...utils import error_handler
+
+        # Try to log if logger is available, but don't let logging errors cause issues
+        try:
+            logger = get_logger("cli")
+            logger.error(f"Failed to cleanup logs: {e}")
+        except Exception:
+            pass
+        error_handler.handle(e)

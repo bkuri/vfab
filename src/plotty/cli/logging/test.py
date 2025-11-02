@@ -10,7 +10,7 @@ import typer
 from rich.console import Console
 
 from ...config import load_config
-from ...logging_config import (
+from ...logging import (
     LogLevel,
     LogOutput,
     get_logger,
@@ -68,5 +68,6 @@ def test_logging(
             console.print(f"[blue]Check log file: {config.logging.log_file}[/blue]")
 
     except Exception as e:
-        console.print(f"[red]Error: {e}[/red]")
-        raise typer.Exit(1)
+        from ...utils import error_handler
+
+        error_handler.handle(e)

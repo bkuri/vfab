@@ -11,7 +11,7 @@ import typer
 from rich.console import Console
 
 from ...config import load_config
-from ...logging_config import (
+from ...logging import (
     LogLevel,
     LogFormat,
     LogOutput,
@@ -90,6 +90,12 @@ def configure_logging(
         console.print(f"[blue]Configuration saved to: {config_file}[/blue]")
 
     except Exception as e:
-        logger.error(f"Failed to configure logging: {e}")
-        console.print(f"[red]Error: {e}[/red]")
-        raise typer.Exit(1)
+        from ...utils import error_handler
+
+        # Try to log if logger is available, but don't let logging errors cause issues
+        try:
+            logger = get_logger("cli")
+            logger.error(f"Failed to configure logging: {e}")
+        except Exception:
+            pass
+        error_handler.handle(e)

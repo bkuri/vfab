@@ -5,7 +5,7 @@ Pen configuration management commands.
 from __future__ import annotations
 
 import typer
-from ...exit_codes import ExitCode
+from ...codes import ExitCode
 from ...utils import error_handler
 from ...progress import show_status
 

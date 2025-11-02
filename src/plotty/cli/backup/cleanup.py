@@ -125,5 +125,6 @@ def backups(
         )
 
     except Exception as e:
-        console.print(f"[red]Error during cleanup: {e}[/red]")
-        raise typer.Exit(1)
+        from ...utils import error_handler
+
+        error_handler.handle(e)

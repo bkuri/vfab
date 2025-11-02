@@ -25,7 +25,7 @@ def setup() -> None:
     try:
         from ...config import load_config
         from ...progress import show_status, show_boxed_progress
-        from ...exit_codes import ExitCode
+        from ...codes import ExitCode
 
         if console and Panel:
             console.print(Panel.fit("🎨 ploTTY Setup Wizard", style="bold blue"))
@@ -140,7 +140,7 @@ def setup() -> None:
 
     except Exception as e:
         from ...utils import error_handler
-        from ...exit_codes import ExitCode
+        from ...codes import ExitCode
 
         error_handler.handle(e)
         raise typer.Exit(ExitCode.ERROR)
@@ -150,7 +150,7 @@ def check_config() -> None:
     """Validate ploTTY configuration and report issues."""
     try:
         from ...config import load_config
-        from ...exit_codes import ExitCode
+        from ...codes import ExitCode
 
         if console:
             console.print("🔍 Configuration Validation", style="bold blue")
@@ -255,7 +255,7 @@ def check_config() -> None:
         raise
     except Exception as e:
         from ...utils import error_handler
-        from ...exit_codes import ExitCode
+        from ...codes import ExitCode
 
         error_handler.handle(e)
         raise typer.Exit(ExitCode.ERROR)

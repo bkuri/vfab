@@ -66,10 +66,13 @@ def backup(
 
         console.print(f"[green]Creating {backup_type.value} backup...[/green]")
 
-        # Create backup
-        backup_path = manager.create_backup(
-            backup_type=backup_type, name=name, description=description
-        )
+        # Create backup with progress tracking
+        from ...progress import spinner_task
+
+        with spinner_task(f"Creating {backup_type.value} backup"):
+            backup_path = manager.create_backup(
+                backup_type=backup_type, name=name, description=description
+            )
 
         console.print("[green]✓ Backup created successfully![/green]")
         console.print(f"[blue]Location: {backup_path}[/blue]")
@@ -80,5 +83,6 @@ def backup(
         console.print(f"[cyan]Size: {size_mb:.2f} MB[/cyan]")
 
     except Exception as e:
-        console.print(f"[red]Error creating backup: {e}[/red]")
-        raise typer.Exit(1)
+        from ...utils import error_handler
+
+        error_handler.handle(e)

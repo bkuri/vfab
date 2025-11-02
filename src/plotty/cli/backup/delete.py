@@ -62,5 +62,6 @@ def backup(
         console.print("[green]✓ Backup deleted successfully![/green]")
 
     except Exception as e:
-        console.print(f"[red]Error deleting backup: {e}[/red]")
-        raise typer.Exit(1)
+        from ...utils import error_handler
+
+        error_handler.handle(e)

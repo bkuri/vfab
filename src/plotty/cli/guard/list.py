@@ -8,7 +8,7 @@ from __future__ import annotations
 import typer
 
 from ...utils import error_handler
-from ...exit_codes import ExitCode
+from ...codes import ExitCode
 
 try:
     from rich.console import Console

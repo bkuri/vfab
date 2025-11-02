@@ -14,7 +14,7 @@ from rich.panel import Panel
 from rich.text import Text
 
 from ...config import load_config
-from ...logging_config import (
+from ...logging import (
     LogOutput,
     get_logger,
     logging_manager,
@@ -92,6 +92,12 @@ def logging_status(
             console.print("[yellow]No log files found[/yellow]")
 
     except Exception as e:
-        logger.error(f"Failed to show logging status: {e}")
-        console.print(f"[red]Error: {e}[/red]")
-        raise typer.Exit(1)
+        from ...utils import error_handler
+
+        # Try to log if logger is available, but don't let logging errors cause issues
+        try:
+            logger = get_logger("cli")
+            logger.error(f"Failed to show logging status: {e}")
+        except Exception:
+            pass
+        error_handler.handle(e)

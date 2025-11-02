@@ -1,7 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
 from typing import Dict, List, Optional
-from .vpype_runner import run_vpype, load_preset
+from .vpype import run_vpype, load_preset
 from .estimation import features, estimate_seconds
 from .progress import layer_progress
 

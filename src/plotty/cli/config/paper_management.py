@@ -104,7 +104,7 @@ def paper_add(
     try:
         from ...db import get_session
         from ...models import Paper
-        from ...exit_codes import ExitCode
+        from ...codes import ExitCode
 
         # Validate inputs
         if width_mm <= 0:
@@ -147,7 +147,7 @@ def paper_add(
         raise
     except Exception as e:
         from ...utils import error_handler
-        from ...exit_codes import ExitCode
+        from ...codes import ExitCode
 
         error_handler.handle(e)
         raise typer.Exit(ExitCode.ERROR)
@@ -158,7 +158,7 @@ def paper_remove(name: str) -> None:
     try:
         from ...db import get_session
         from ...models import Paper
-        from ...exit_codes import ExitCode
+        from ...codes import ExitCode
         from ...utils import show_status
 
         with get_session() as session:
@@ -213,7 +213,7 @@ def paper_remove(name: str) -> None:
         raise
     except Exception as e:
         from ...utils import error_handler
-        from ...exit_codes import ExitCode
+        from ...codes import ExitCode
 
         error_handler.handle(e)
         raise typer.Exit(ExitCode.ERROR)

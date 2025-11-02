@@ -12,7 +12,7 @@ import typer
 from rich.console import Console
 
 from ...config import load_config
-from ...logging_config import (
+from ...logging import (
     LogLevel,
     LogFormat,
     get_logger,
@@ -98,9 +98,15 @@ def view_logs(
                     console.print("[yellow]No matching log entries found[/yellow]")
 
     except Exception as e:
-        logger.error(f"Failed to view logs: {e}")
-        console.print(f"[red]Error: {e}[/red]")
-        raise typer.Exit(1)
+        from ...utils import error_handler
+
+        # Try to log if logger is available, but don't let logging errors cause issues
+        try:
+            logger = get_logger("cli")
+            logger.error(f"Failed to view logs: {e}")
+        except Exception:
+            pass
+        error_handler.handle(e)
 
 
 def _should_show_line(

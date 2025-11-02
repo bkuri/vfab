@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 from .config import load_config
-from .logging_config import get_logger
+from .logging import get_logger
 
 
 class BackupType(str, Enum):
