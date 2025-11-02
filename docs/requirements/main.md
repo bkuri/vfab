@@ -49,7 +49,7 @@ CLI/TUI ──> Orchestrator (FSM) ──> Device Driver (v1: single device, v2:
 ├─> Capture (ffmpeg: IP v1; v4l2 later)
 └─> Persistence (SQLite + workspace FS + JSONL journal)
 
-**FSM states:** `NEW → QUEUED → ANALYZED → OPTIMIZED → READY → ARMED → PLOTTING → (PAUSED) → COMPLETED | ABORTED | FAILED`  
+**FSM states:** `NEW → QUEUED → ANALYZED → OPTIMIZED → READY → ARMED → PLOTTING → (PAUSED) → COMPLETED | ABORTED | FAILED`
 **Guards:** device idle; checklist complete; camera health (soft-fail allowed).
 **Hooks:** Per-state configurable actions (commands, scripts, webhooks) with variable substitution.
 
@@ -80,9 +80,9 @@ logs/{fsm.log,device.log}
 
 ## 5) Estimation (pre/post)
 
-**Features:** `L_down`, `L_travel`, `N_lifts`, `N_corners`  
-**Model:** `T ≈ a*L_down + b*L_travel + c*N_lifts + d*N_corners` (coeffs per device+pen; auto-calibrated after each job).  
-**Pre-opt:** approximate travel via nearest-neighbor; **Post-opt:** exact from optimized paths.  
+**Features:** `L_down`, `L_travel`, `N_lifts`, `N_corners`
+**Model:** `T ≈ a*L_down + b*L_travel + c*N_lifts + d*N_corners` (coeffs per device+pen; auto-calibrated after each job).
+**Pre-opt:** approximate travel via nearest-neighbor; **Post-opt:** exact from optimized paths.
 Optional **`pyaxidraw.report_time`** (post-opt); store method + error band.
 Persist `pre`, `post`, and `actual` in `jobs.metrics_json` and per-layer `layers.stats_json`.
 
@@ -193,7 +193,7 @@ plotty job plan <job> --json
 - **No Manual Flags:** Remove requirement for explicit `--multipen` flag; auto-detect from job content
 - **Layer Control Support:** Full support for [AxiDraw Layer Control](https://wiki.evilmadscientist.com/AxiDraw_Layer_Control) syntax including:
   - `+S<1-100>`: Set pen speed percentage
-  - `+H<0-100>`: Set pen height (up/down) percentage  
+  - `+H<0-100>`: Set pen height (up/down) percentage
   - `+D<1+>`: Set delay in milliseconds after layer
   - `!`: Force pause after layer (pen swap)
   - `%`: Documentation layer (skip plotting)
@@ -246,7 +246,7 @@ Quick add:
 - [x] SQLite persistence with JSONL journal
 - [x] Workspace management with job directories
 
-**Smart Multipen Detection** 
+**Smart Multipen Detection**
 - [x] SVG layer detection with Inkscape compatibility
 - [x] Color-coded layer overview with element counts
 - [x] Hidden layer filtering (display:none, groupmode="hidden", % documentation)
@@ -273,15 +273,6 @@ Quick add:
 - [x] Self-contained HTML job reports
 - [x] Metrics, thumbnails, and video links
 
-### 🚧 In Progress
-
-**TUI (Terminal User Interface)**
-- [ ] Textual-based interactive interface
-- [ ] Real-time plotting progress visualization
-- [ ] Device health monitoring
-- [ ] Job queue management
-- [ ] Session management with FSM state display
-
 ### 🚧 In Progress (v1 UX Enhancement)
 
 **Tier 1 Features (Week 1)**
@@ -301,6 +292,13 @@ Quick add:
 - [ ] Enhanced help system with examples
 
 ### 📋 Deferred (v2)
+
+**TUI (Terminal User Interface)**
+- [ ] Textual-based interactive interface
+- [ ] Real-time plotting progress visualization
+- [ ] Device health monitoring
+- [ ] Job queue management
+- [ ] Session management with FSM state display
 
 **Multi-Device Support**
 - [ ] Multiple plotter management
@@ -385,7 +383,7 @@ Based on current codebase analysis (146K lines, 80% core functionality complete)
 ```
 src/plotty/
 ├── utils.py              # Error handling, progress bars
-├── cli_status.py        # Status/queue commands  
+├── cli_status.py        # Status/queue commands
 ├── cli_jobs.py          # Job management commands
 ├── cli_setup.py        # Setup wizard
 └── progress.py          # Progress indicator utilities
@@ -405,7 +403,7 @@ src/plotty/
 
 #### **Feature Completeness**
 - **Tier 1 features**: 100% complete
-- **Tier 2 features**: 80% complete  
+- **Tier 2 features**: 80% complete
 - **Tier 3 features**: 50% complete
 
 ### **15.4) Go/No-Go Criteria**

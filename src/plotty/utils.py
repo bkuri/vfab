@@ -7,6 +7,7 @@ and utility functions used across the ploTTY application.
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 from typing import Optional
@@ -42,10 +43,42 @@ class PlottyError(Exception):
     def __str__(self) -> str:
         result = f"[red]Error:[/red] {self.message}"
         if self.suggestion:
-            result += f"\n[yellow]Suggestion:[/yellow] {self.suggestion}"
+            result += f"\n[yellow]💡 Suggestion:[/yellow] {self.suggestion}"
         if self.technical:
             result += f"\n[dim]Technical details:[/dim] {self.technical}"
         return result
+
+
+class JobError(PlottyError):
+    """Job-related errors with specific suggestions."""
+
+    def __init__(self, message: str, job_id: Optional[str] = None, **kwargs):
+        self.job_id = job_id
+        super().__init__(message, category="job", **kwargs)
+
+
+class DeviceError(PlottyError):
+    """Device/plotter-related errors with hardware-specific suggestions."""
+
+    def __init__(self, message: str, device_type: str = "AxiDraw", **kwargs):
+        self.device_type = device_type
+        super().__init__(message, category="device", **kwargs)
+
+
+class ConfigError(PlottyError):
+    """Configuration-related errors with setup suggestions."""
+
+    def __init__(self, message: str, config_file: Optional[str] = None, **kwargs):
+        self.config_file = config_file
+        super().__init__(message, category="config", **kwargs)
+
+
+class ValidationError(PlottyError):
+    """Input validation errors with format suggestions."""
+
+    def __init__(self, message: str, expected_format: Optional[str] = None, **kwargs):
+        self.expected_format = expected_format
+        super().__init__(message, category="validation", **kwargs)
 
 
 class ErrorHandler:
@@ -70,18 +103,46 @@ class ErrorHandler:
         if isinstance(error, PlottyError):
             self.console.print(str(error))
         elif isinstance(error, typer.BadParameter):
-            self.console.print(f"[red]Invalid parameter:[/red] {error}")
+            self._handle_bad_parameter(error)
         elif isinstance(error, FileNotFoundError):
             self._handle_file_not_found(error)
         elif isinstance(error, PermissionError):
             self._handle_permission_error(error)
         elif isinstance(error, (ConnectionError, OSError)):
             self._handle_connection_error(error)
+        elif isinstance(error, ImportError):
+            self._handle_import_error(error)
+        elif isinstance(error, json.JSONDecodeError):
+            self._handle_json_error(error)
+        elif isinstance(error, ValueError):
+            self._handle_value_error(error)
         else:
             self._handle_generic_error(error)
 
         if exit_on_error:
             sys.exit(1)
+
+    def _handle_bad_parameter(self, error: typer.BadParameter) -> None:
+        """Handle invalid CLI parameters with helpful suggestions."""
+        message = f"Invalid parameter: {error}"
+
+        # Common parameter suggestions
+        if "job" in str(error).lower():
+            suggestion = "Use 'plotty status queue' to see available job IDs"
+        elif "paper" in str(error).lower():
+            suggestion = "Use 'plotty paper-list' to see available paper sizes"
+        elif "pen" in str(error).lower():
+            suggestion = "Use 'plotty pen-list' to see available pens"
+        else:
+            suggestion = "Check the command help with '--help' for valid options"
+
+        plotty_error = PlottyError(
+            message=message,
+            suggestion=suggestion,
+            technical=str(error),
+            category="parameter",
+        )
+        self.console.print(str(plotty_error))
 
     def _handle_file_not_found(self, error: FileNotFoundError) -> None:
         """Handle file not found errors with helpful suggestions."""
@@ -126,6 +187,76 @@ class ErrorHandler:
         )
         self.console.print(str(plotty_error))
 
+    def _handle_import_error(self, error: ImportError) -> None:
+        """Handle import errors with installation suggestions."""
+        module_name = (
+            str(error).split("'")[1] if "'" in str(error) else "unknown module"
+        )
+
+        if "axidraw" in module_name.lower():
+            message = "AxiDraw support not available"
+            suggestion = "Install with: uv pip install -e '.[axidraw]'"
+        elif "vpype" in module_name.lower():
+            message = "vpype not available"
+            suggestion = "Install with: uv pip install -e '.[vpype]'"
+        else:
+            message = f"Missing dependency: {module_name}"
+            suggestion = "Install with: uv pip install -e '.[dev,vpype,axidraw]'"
+
+        plotty_error = PlottyError(
+            message=message,
+            suggestion=suggestion,
+            technical=str(error),
+            category="dependency",
+        )
+        self.console.print(str(plotty_error))
+
+    def _handle_json_error(self, error: json.JSONDecodeError) -> None:
+        """Handle JSON parsing errors with file-specific suggestions."""
+        message = "Invalid JSON format in file"
+        suggestion = "Check file syntax and ensure valid JSON structure"
+
+        if hasattr(error, "doc") and error.doc:
+            # Try to extract filename from the document
+            first_line = error.doc.split("\n")[0] if error.doc else ""
+            if "config" in first_line.lower():
+                suggestion = (
+                    "Validate your configuration file with 'plotty config-check'"
+                )
+
+        plotty_error = PlottyError(
+            message=message,
+            suggestion=suggestion,
+            technical=f"Line {error.lineno}, Column {error.colno}: {error.msg}",
+            category="format",
+        )
+        self.console.print(str(plotty_error))
+
+    def _handle_value_error(self, error: ValueError) -> None:
+        """Handle value errors with format suggestions."""
+        message = f"Invalid value: {str(error)}"
+
+        # Common value error suggestions
+        error_str = str(error).lower()
+        if "paper" in error_str:
+            suggestion = "Use 'plotty paper-list' to see available paper sizes"
+        elif "pen" in error_str:
+            suggestion = "Use 'plotty pen-list' to see available pens"
+        elif "orientation" in error_str:
+            suggestion = "Valid orientations: 'portrait' or 'landscape'"
+        elif "positive" in error_str:
+            suggestion = "Values must be positive numbers"
+        else:
+            suggestion = "Check the input format and try again"
+
+        plotty_error = PlottyError(
+            message=message,
+            suggestion=suggestion,
+            technical=str(error),
+            category="validation",
+        )
+        self.console.print(str(plotty_error))
+
     def _handle_generic_error(self, error: Exception) -> None:
         """Handle generic errors with debugging information."""
         message = f"Unexpected error: {type(error).__name__}"
@@ -158,7 +289,7 @@ def create_error(
     category: str = "general",
 ) -> PlottyError:
     """
-    Create a PlottyError with the given parameters.
+    Create a PlottyError with given parameters.
 
     This is a convenience function for creating consistent error messages
     across the application.
@@ -174,6 +305,59 @@ def create_error(
     """
     return PlottyError(
         message=message, suggestion=suggestion, technical=technical, category=category
+    )
+
+
+def create_job_error(
+    message: str, job_id: Optional[str] = None, suggestion: Optional[str] = None
+) -> JobError:
+    """Create a JobError with job-specific context."""
+    if not suggestion:
+        if job_id:
+            suggestion = f"Use 'plotty status job {job_id}' to check job status"
+        else:
+            suggestion = "Use 'plotty status queue' to see available jobs"
+
+    return JobError(message=message, job_id=job_id, suggestion=suggestion)
+
+
+def create_device_error(
+    message: str, device_type: str = "AxiDraw", suggestion: Optional[str] = None
+) -> DeviceError:
+    """Create a DeviceError with hardware-specific context."""
+    if not suggestion:
+        if device_type == "AxiDraw":
+            suggestion = "Check AxiDraw connection and install with: uv pip install -e '.[axidraw]'"
+        else:
+            suggestion = "Check device connections and configuration"
+
+    return DeviceError(message=message, device_type=device_type, suggestion=suggestion)
+
+
+def create_config_error(
+    message: str, config_file: Optional[str] = None, suggestion: Optional[str] = None
+) -> ConfigError:
+    """Create a ConfigError with configuration-specific context."""
+    if not suggestion:
+        suggestion = "Run 'plotty setup' to create a valid configuration"
+
+    return ConfigError(message=message, config_file=config_file, suggestion=suggestion)
+
+
+def create_validation_error(
+    message: str,
+    expected_format: Optional[str] = None,
+    suggestion: Optional[str] = None,
+) -> ValidationError:
+    """Create a ValidationError with format-specific context."""
+    if not suggestion:
+        if expected_format:
+            suggestion = f"Expected format: {expected_format}"
+        else:
+            suggestion = "Check the input format and try again"
+
+    return ValidationError(
+        message=message, expected_format=expected_format, suggestion=suggestion
     )
 
 

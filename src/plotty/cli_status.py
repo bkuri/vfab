@@ -54,72 +54,416 @@ def complete_job_id(ctx: typer.Context, args: List[str], incomplete: str) -> Lis
 
 
 @status_app.callback()
-def show_system_status(
+def show_status_overview(
     ctx: typer.Context,
-    limit: int = typer.Option(
-        10, "--limit", "-l", help="Maximum number of jobs to show"
-    ),
-    state: Optional[str] = typer.Option(
-        None, "--state", "-s", help="Filter by job state"
+    markdown: bool = typer.Option(
+        False, "--markdown", "-m", help="Export status as markdown"
     ),
 ):
-    """Show overall system status or run subcommands."""
+    """Show complete status overview or run subcommands."""
     if ctx.invoked_subcommand is None:
-        # Show system status when no subcommand is provided
+        # Show complete status overview when no subcommand is provided
         try:
             # Load configuration
             cfg = load_config(None)
 
-            # Create status table
-            table = Table(title="🎨 ploTTY System Status", show_header=False)
-            table.add_column("Component", style="cyan")
-            table.add_column("Status", style="white")
+            if markdown:
+                # Markdown output for piping to files
+                print("# ploTTY Status Report")
+                print()
 
-            # Check AxiDraw availability
-            try:
-                import importlib.util
+                # System status
+                print("## System Status")
+                print("| Component | Status |")
+                print("|-----------|--------|")
 
-                spec = importlib.util.find_spec("plotty.drivers.axidraw")
-                axidraw_status = "✅ Available" if spec else "❌ Not installed"
-            except Exception:
-                axidraw_status = "❌ Error checking"
+                # Check AxiDraw availability
+                try:
+                    import importlib.util
 
-            table.add_row("AxiDraw", axidraw_status)
+                    spec = importlib.util.find_spec("plotty.drivers.axidraw")
+                    axidraw_status = "✅ Available" if spec else "❌ Not installed"
+                except Exception:
+                    axidraw_status = "❌ Error checking"
+                print(f"| AxiDraw | {axidraw_status} |")
 
-            # Camera status
-            camera_status = (
-                "✅ Enabled" if cfg.camera.mode != "disabled" else "❌ Disabled"
-            )
-            table.add_row("Camera", camera_status)
+                # Camera status
+                camera_status = (
+                    "✅ Enabled" if cfg.camera.mode != "disabled" else "❌ Disabled"
+                )
+                print(f"| Camera | {camera_status} |")
+                print(f"| Workspace | {cfg.workspace} |")
 
-            # Workspace
-            table.add_row("Workspace", str(cfg.workspace))
+                # Count jobs
+                jobs_dir = Path(cfg.workspace) / "jobs"
+                queue_count = 0
+                ready_count = 0
+                state_counts = {}
 
-            # Count jobs
-            jobs_dir = Path(cfg.workspace) / "jobs"
-            queue_count = 0
-            ready_count = 0
-
-            if jobs_dir.exists():
-                for job_dir in jobs_dir.iterdir():
-                    if job_dir.is_dir():
-                        job_file = job_dir / "job.json"
-                        if job_file.exists():
-                            try:
-                                job_data = json.loads(job_file.read_text())
-                                queue_count += 1
-                                if job_data.get("state") == "QUEUED":
-                                    if job_data.get("config_status") == "CONFIGURED":
+                if jobs_dir.exists():
+                    for job_dir in jobs_dir.iterdir():
+                        if job_dir.is_dir():
+                            job_file = job_dir / "job.json"
+                            if job_file.exists():
+                                try:
+                                    job_data = json.loads(job_file.read_text())
+                                    queue_count += 1
+                                    state = job_data.get("state", "UNKNOWN")
+                                    state_counts[state] = state_counts.get(state, 0) + 1
+                                    if (
+                                        state == "QUEUED"
+                                        and job_data.get("config_status")
+                                        == "CONFIGURED"
+                                    ):
                                         ready_count += 1
-                            except Exception:
-                                pass
+                                except Exception:
+                                    pass
 
-            table.add_row("Queue", f"{queue_count} jobs ({ready_count} ready)")
+                print(f"| Queue | {queue_count} jobs ({ready_count} ready) |")
+                print()
 
-            console.print(table)
+                # Job queue
+                print("## Job Queue")
+                print("| ID | Name | State | Config | Paper | Layers | Est. Time |")
+                print("|----|------|-------|--------|-------|--------|-----------|")
+
+                # Collect and sort jobs
+                jobs = []
+                for job_dir in jobs_dir.iterdir():
+                    if not job_dir.is_dir():
+                        continue
+                    job_file = job_dir / "job.json"
+                    if not job_file.exists():
+                        continue
+                    try:
+                        job_data = json.loads(job_file.read_text())
+
+                        # Get plan info
+                        plan_file = job_dir / "plan.json"
+                        time_estimate = None
+                        layer_count = None
+                        if plan_file.exists():
+                            plan_data = json.loads(plan_file.read_text())
+                            time_estimate = plan_data.get("estimates", {}).get("post_s")
+                            layer_count = len(plan_data.get("layers", []))
+
+                        jobs.append(
+                            {
+                                "id": job_data.get("id", job_dir.name),
+                                "name": job_data.get("name", "Unknown"),
+                                "state": job_data.get("state", "UNKNOWN"),
+                                "config_status": job_data.get(
+                                    "config_status", "DEFAULTS"
+                                ),
+                                "paper": job_data.get("paper", "Unknown"),
+                                "time_estimate": time_estimate,
+                                "layer_count": layer_count,
+                            }
+                        )
+                    except Exception:
+                        continue
+
+                # Sort by state priority
+                state_priority = {
+                    "PLOTTING": 0,
+                    "ARMED": 1,
+                    "READY": 2,
+                    "OPTIMIZED": 3,
+                    "ANALYZED": 4,
+                    "QUEUED": 5,
+                    "NEW": 6,
+                    "PAUSED": 7,
+                    "COMPLETED": 8,
+                    "ABORTED": 9,
+                    "FAILED": 10,
+                }
+                jobs.sort(key=lambda j: state_priority.get(j["state"], 99))
+
+                # Print jobs
+                for job in jobs[:20]:  # Limit to 20 for markdown
+                    time_str = (
+                        f"{job['time_estimate']:.1f}s"
+                        if job["time_estimate"]
+                        else "Unknown"
+                    )
+                    if job["time_estimate"] and job["time_estimate"] > 60:
+                        time_str = f"{job['time_estimate'] / 60:.1f}m"
+
+                    print(
+                        f"| {job['id']} | {job['name'][:20]} | {job['state']} | {job['config_status']} | {job['paper']} | {job['layer_count'] or 'Unknown'} | {time_str} |"
+                    )
+
+                if len(jobs) > 20:
+                    print("| ... | ... | ... | ... | ... | ... | ... |")
+                    print(f"| | | | | | **{len(jobs) - 20} more jobs** | |")
+
+                print()
+
+                # State summary
+                if state_counts:
+                    print("## Jobs by State")
+                    for state, count in sorted(state_counts.items()):
+                        print(f"- {state}: {count}")
+
+            else:
+                # Rich console output
+                # System status table
+                system_table = Table(title="🎨 ploTTY System Status", show_header=False)
+                system_table.add_column("Component", style="cyan")
+                system_table.add_column("Status", style="white")
+
+                # Check AxiDraw availability
+                try:
+                    import importlib.util
+
+                    spec = importlib.util.find_spec("plotty.drivers.axidraw")
+                    axidraw_status = "✅ Available" if spec else "❌ Not installed"
+                except Exception:
+                    axidraw_status = "❌ Error checking"
+
+                system_table.add_row("AxiDraw", axidraw_status)
+
+                # Camera status
+                camera_status = (
+                    "✅ Enabled" if cfg.camera.mode != "disabled" else "❌ Disabled"
+                )
+                system_table.add_row("Camera", camera_status)
+
+                # Workspace
+                system_table.add_row("Workspace", str(cfg.workspace))
+
+                # Count jobs
+                jobs_dir = Path(cfg.workspace) / "jobs"
+                queue_count = 0
+                ready_count = 0
+
+                if jobs_dir.exists():
+                    for job_dir in jobs_dir.iterdir():
+                        if job_dir.is_dir():
+                            job_file = job_dir / "job.json"
+                            if job_file.exists():
+                                try:
+                                    job_data = json.loads(job_file.read_text())
+                                    queue_count += 1
+                                    if job_data.get("state") == "QUEUED":
+                                        if (
+                                            job_data.get("config_status")
+                                            == "CONFIGURED"
+                                        ):
+                                            ready_count += 1
+                                except Exception:
+                                    pass
+
+                system_table.add_row(
+                    "Queue", f"{queue_count} jobs ({ready_count} ready)"
+                )
+
+                console.print(system_table)
+
+                # Job queue table
+                jobs = []
+                if jobs_dir.exists():
+                    for job_dir in jobs_dir.iterdir():
+                        if not job_dir.is_dir():
+                            continue
+                        job_file = job_dir / "job.json"
+                        if not job_file.exists():
+                            continue
+                        try:
+                            job_data = json.loads(job_file.read_text())
+
+                            # Get plan info
+                            plan_file = job_dir / "plan.json"
+                            time_estimate = None
+                            layer_count = None
+                            if plan_file.exists():
+                                plan_data = json.loads(plan_file.read_text())
+                                time_estimate = plan_data.get("estimates", {}).get(
+                                    "post_s"
+                                )
+                                layer_count = len(plan_data.get("layers", []))
+
+                            jobs.append(
+                                {
+                                    "id": job_data.get("id", job_dir.name),
+                                    "name": job_data.get("name", "Unknown"),
+                                    "state": job_data.get("state", "UNKNOWN"),
+                                    "config_status": job_data.get(
+                                        "config_status", "DEFAULTS"
+                                    ),
+                                    "paper": job_data.get("paper", "Unknown"),
+                                    "time_estimate": time_estimate,
+                                    "layer_count": layer_count,
+                                }
+                            )
+                        except Exception:
+                            continue
+
+                if jobs:
+                    # Sort by state priority
+                    state_priority = {
+                        "PLOTTING": 0,
+                        "ARMED": 1,
+                        "READY": 2,
+                        "OPTIMIZED": 3,
+                        "ANALYZED": 4,
+                        "QUEUED": 5,
+                        "NEW": 6,
+                        "PAUSED": 7,
+                        "COMPLETED": 8,
+                        "ABORTED": 9,
+                        "FAILED": 10,
+                    }
+                    jobs.sort(key=lambda j: state_priority.get(j["state"], 99))
+
+                    queue_table = Table(title=f"Job Queue ({len(jobs)} jobs)")
+                    queue_table.add_column("ID", style="cyan")
+                    queue_table.add_column("Name", style="white")
+                    queue_table.add_column("State", style="white")
+                    queue_table.add_column("Config", style="white")
+                    queue_table.add_column("Paper", style="white")
+                    queue_table.add_column("Layers", style="white", justify="right")
+                    queue_table.add_column("Est. Time", style="white", justify="right")
+
+                    for job in jobs[:15]:  # Show first 15 jobs
+                        time_str = "Unknown"
+                        if job["time_estimate"]:
+                            if job["time_estimate"] < 60:
+                                time_str = f"{job['time_estimate']:.1f}s"
+                            else:
+                                time_str = f"{job['time_estimate'] / 60:.1f}m"
+
+                        queue_table.add_row(
+                            job["id"],
+                            job["name"][:20],
+                            job["state"],
+                            job["config_status"],
+                            job["paper"],
+                            str(job["layer_count"])
+                            if job["layer_count"]
+                            else "Unknown",
+                            time_str,
+                        )
+
+                    console.print(queue_table)
+
+                    if len(jobs) > 15:
+                        console.print(f"... and {len(jobs) - 15} more jobs")
 
         except Exception as e:
             error_handler.handle(e)
+
+
+@status_app.command("system")
+def show_system_status():
+    """Show overall system status."""
+    try:
+        # Load configuration
+        cfg = load_config(None)
+
+        # Create status table
+        table = Table(title="🎨 ploTTY System Status", show_header=False)
+        table.add_column("Component", style="cyan")
+        table.add_column("Status", style="white")
+
+        # Check AxiDraw availability
+        try:
+            import importlib.util
+
+            spec = importlib.util.find_spec("plotty.drivers.axidraw")
+            axidraw_status = "✅ Available" if spec else "❌ Not installed"
+        except Exception:
+            axidraw_status = "❌ Error checking"
+
+        table.add_row("AxiDraw", axidraw_status)
+
+        # Camera status
+        camera_status = "✅ Enabled" if cfg.camera.mode != "disabled" else "❌ Disabled"
+        table.add_row("Camera", camera_status)
+
+        # Workspace
+        table.add_row("Workspace", str(cfg.workspace))
+
+        # Count jobs
+        jobs_dir = Path(cfg.workspace) / "jobs"
+        queue_count = 0
+        ready_count = 0
+
+        if jobs_dir.exists():
+            for job_dir in jobs_dir.iterdir():
+                if job_dir.is_dir():
+                    job_file = job_dir / "job.json"
+                    if job_file.exists():
+                        try:
+                            job_data = json.loads(job_file.read_text())
+                            queue_count += 1
+                            if job_data.get("state") == "QUEUED":
+                                if job_data.get("config_status") == "CONFIGURED":
+                                    ready_count += 1
+                        except Exception:
+                            pass
+
+        table.add_row("Queue", f"{queue_count} jobs ({ready_count} ready)")
+
+        console.print(table)
+
+    except Exception as e:
+        error_handler.handle(e)
+
+
+@status_app.command("tldr")
+def show_quick_status():
+    """Show quick overview of system and queue (too long; didn't read)."""
+    try:
+        # Load configuration
+        cfg = load_config(None)
+
+        # Quick status line
+        console.print("🎨 ploTTY Quick Status")
+        console.print("=" * 30)
+
+        # System indicators
+        try:
+            import importlib.util
+
+            spec = importlib.util.find_spec("plotty.drivers.axidraw")
+            axi_status = "✅" if spec else "❌"
+        except Exception:
+            axi_status = "❌"
+
+        cam_status = "✅" if cfg.camera.mode != "disabled" else "❌"
+        console.print(f"AxiDraw: {axi_status}  Camera: {cam_status}")
+
+        # Queue summary
+        jobs_dir = Path(cfg.workspace) / "jobs"
+        queue_count = 0
+        ready_count = 0
+
+        if jobs_dir.exists():
+            for job_dir in jobs_dir.iterdir():
+                if job_dir.is_dir():
+                    job_file = job_dir / "job.json"
+                    if job_file.exists():
+                        try:
+                            job_data = json.loads(job_file.read_text())
+                            queue_count += 1
+                            if job_data.get("state") == "QUEUED":
+                                if job_data.get("config_status") == "CONFIGURED":
+                                    ready_count += 1
+                        except Exception:
+                            pass
+
+        if queue_count > 0:
+            console.print(f"Queue: {queue_count} jobs ({ready_count} ready)")
+        else:
+            console.print("Queue: Empty")
+
+        # Workspace
+        workspace_short = Path(cfg.workspace).name
+        console.print(f"Workspace: {workspace_short}")
+
+    except Exception as e:
+        error_handler.handle(e)
 
 
 def format_time(seconds: Optional[float]) -> str:
@@ -243,7 +587,7 @@ def show_job_queue(
         jobs = jobs[:limit]
 
         # Create table
-        table = Table(title=f"Job Queue (showing {len(jobs)} of {len(jobs)})")
+        table = Table(title=f"Job Queue (showing {len(jobs)})")
         table.add_column("ID", style="cyan")
         table.add_column("Name", style="white")
         table.add_column("State", style="white")

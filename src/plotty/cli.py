@@ -7,8 +7,12 @@ from typing import Optional, List
 from .config import load_config
 from .planner import plan_layers
 from .capture import start_ip, stop
-from .utils import error_handler, validate_file_exists
-from .progress import progress, layer_progress
+from .utils import (
+    error_handler,
+    validate_file_exists,
+    create_job_error,
+)
+from .progress import progress, layer_progress, boxed_progress_task
 
 # Import status commands
 from .cli_status import status_app
@@ -121,7 +125,7 @@ def plan(
 
         # Validate job directory exists
         if not jdir.exists():
-            raise typer.BadParameter(f"Job {job_id} not found")
+            raise create_job_error(f"Job {job_id} not found", job_id=job_id)
 
         # Validate source SVG exists
         svg_path = jdir / "src.svg"
@@ -171,7 +175,7 @@ def plan(
             )
 
         # Plan layers with progress tracking
-        with progress.spinner("Planning layers..."):
+        with boxed_progress_task("Planning layers", 100):
             # Smart pen mapping: use multipen if multiple visible layers and pens available
             if len(visible_layers) > 1 and available_pens and interactive:
                 # Use multipen workflow

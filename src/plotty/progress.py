@@ -19,6 +19,8 @@ from rich.progress import (
     TextColumn,
     TimeElapsedColumn,
 )
+from rich.panel import Panel
+from rich.text import Text
 
 
 class PlottyProgress:
@@ -34,10 +36,11 @@ class PlottyProgress:
         self._progress = Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
-            BarColumn(),
+            BarColumn(bar_width=40, style="blue"),
             TaskProgressColumn(),
             TimeElapsedColumn(),
             console=self.console,
+            transient=True,  # Clear progress when complete
         )
 
     @contextmanager
@@ -104,6 +107,39 @@ class PlottyProgress:
 
         color = style_map.get(style, "white")
         self.console.print(f"[{color}]{message}[/{color}]")
+
+    def show_boxed_progress(
+        self, description: str, progress_percent: float, total_time: str = ""
+    ) -> None:
+        """
+        Show a boxed progress indicator with visual consistency.
+
+        Args:
+            description: Progress description
+            progress_percent: Progress percentage (0-100)
+            total_time: Optional elapsed time display
+        """
+        # Create progress bar
+        bar_width = 50
+        filled = int(bar_width * progress_percent / 100)
+        bar = "█" * filled + " " * (bar_width - filled)
+
+        # Create progress text
+        progress_text = f"{bar} {progress_percent:.0f}%"
+        if total_time:
+            progress_text += f" ({total_time})"
+
+        # Create boxed panel
+        panel_content = Text(progress_text, style="white")
+        panel = Panel(
+            panel_content,
+            title=description,
+            title_align="left",
+            border_style="blue",
+            padding=(0, 1),
+        )
+
+        self.console.print(panel)
 
 
 class LayerProgress:
@@ -261,3 +297,80 @@ def show_status(message: str, style: str = "info") -> None:
         style: Message style
     """
     progress.show_status(message, style)
+
+
+def show_boxed_progress(
+    description: str, current: int, total: int, elapsed_time: str = ""
+) -> None:
+    """
+    Show a boxed progress indicator with visual consistency.
+
+    Args:
+        description: Progress description
+        current: Current progress value
+        total: Total value
+        elapsed_time: Optional elapsed time string
+    """
+    progress_percent = (current / total * 100) if total > 0 else 0
+
+    # Create progress bar using box-drawing characters
+    bar_width = 50
+    filled = int(bar_width * progress_percent / 100)
+    bar = "█" * filled + " " * (bar_width - filled)
+
+    # Create progress text
+    progress_text = f"{bar} {progress_percent:.0f}%"
+    if elapsed_time:
+        progress_text += f" ({elapsed_time})"
+
+    # Create boxed panel using Rich Panel
+    from rich.panel import Panel
+    from rich.text import Text
+
+    panel_content = Text(progress_text, style="white")
+    panel = Panel(
+        panel_content,
+        title=description,
+        title_align="left",
+        border_style="blue",
+        padding=(0, 1),
+        width=80,  # Fixed width for consistency
+    )
+
+    console = Console()
+    console.print(panel)
+
+
+@contextmanager
+def boxed_progress_task(
+    description: str, total: int
+) -> Generator[Callable[[int], None], None, None]:
+    """
+    Context manager for boxed progress with visual consistency.
+
+    Args:
+        description: Task description
+        total: Total number of steps
+
+    Yields:
+        Update function that takes current progress
+    """
+    import time
+
+    start_time = time.time()
+
+    def update(current: int) -> None:
+        """Update the boxed progress display."""
+        elapsed = time.time() - start_time
+        elapsed_str = f"{elapsed:.0f}s" if elapsed < 60 else f"{elapsed / 60:.1f}m"
+
+        # Clear previous line and show new progress
+        show_boxed_progress(description, current, total, elapsed_str)
+
+    try:
+        yield update
+    finally:
+        # Show final completion
+        show_boxed_progress(
+            description, total, total, f"{time.time() - start_time:.1f}s"
+        )
