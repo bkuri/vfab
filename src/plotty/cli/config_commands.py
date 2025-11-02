@@ -10,6 +10,7 @@ from pathlib import Path
 from ..config import load_config
 from ..utils import error_handler
 from ..progress import show_status, show_boxed_progress
+from ..exit_codes import exit_success, exit_error, exit_warning, ExitCode
 
 try:
     from rich.console import Console
@@ -318,9 +319,13 @@ def check_config():
                     for warning in warnings:
                         print(f"  • {warning}")
 
-        # Exit with error code if there are issues
+        # Exit with appropriate code based on results
         if issues:
-            raise typer.Exit(1)
+            raise typer.Exit(ExitCode.ERROR)
+        elif warnings:
+            raise typer.Exit(ExitCode.WARNING)
+        else:
+            raise typer.Exit(ExitCode.SUCCESS)
 
     except Exception as e:
         if not isinstance(e, typer.Exit):

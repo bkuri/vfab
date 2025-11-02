@@ -62,6 +62,7 @@ def show_status_overview(
     markdown: bool = typer.Option(
         False, "--markdown", "-m", help="Export status as markdown"
     ),
+    json_output: bool = typer.Option(False, "--json", help="Export status as JSON"),
 ):
     """Show complete status overview or run subcommands."""
     if ctx.invoked_subcommand is None:
@@ -69,6 +70,23 @@ def show_status_overview(
         try:
             # Load configuration
             cfg = load_config(None)
+
+            if json_output:
+                # JSON output for LLM parsing
+                status_data = {
+                    "system": {
+                        "axidraw_available": axidraw_status == "✅ Available",
+                        "camera_enabled": cfg.camera.mode != "disabled",
+                        "workspace": cfg.workspace,
+                    },
+                    "queue": {
+                        "total_jobs": queue_count,
+                        "ready_jobs": ready_count,
+                    },
+                    "jobs": jobs,  # Will be populated below
+                }
+                print(json.dumps(status_data, indent=2, default=str))
+                return
 
             if markdown:
                 # Markdown output for piping to files

@@ -107,7 +107,9 @@ def record_test(
 
 
 @job_app.command("list")
-def list_jobs():
+def list_jobs(
+    json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
+):
     """List all jobs in workspace."""
     try:
         cfg = load_config(None)
@@ -152,7 +154,10 @@ def list_jobs():
                 continue
 
         if not jobs:
-            show_status("No jobs found", "info")
+            if json_output:
+                print("[]")
+            else:
+                show_status("No jobs found", "info")
             return
 
         # Sort by state priority
@@ -170,6 +175,11 @@ def list_jobs():
             "FAILED": 10,
         }
         jobs.sort(key=lambda j: state_priority.get(j["state"], 99))
+
+        if json_output:
+            # JSON output for LLM parsing
+            print(json.dumps(jobs, indent=2, default=str))
+            return
 
         if console and Table:
             # Rich table output
