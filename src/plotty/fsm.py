@@ -1,7 +1,7 @@
 """
 Finite State Machine implementation for ploTTY job lifecycle.
 
-This module implements the core FSM that manages job states according to the PRD:
+This module implements core FSM that manages job states according to the PRD:
 NEW → QUEUED → ANALYZED → OPTIMIZED → READY → ARMED → PLOTTING → (PAUSED) → COMPLETED | ABORTED | FAILED
 """
 
@@ -54,7 +54,7 @@ except ImportError:
 
 
 class JobState(Enum):
-    """Job states as defined in the PRD."""
+    """Job states as defined in PRD."""
 
     NEW = "NEW"
     QUEUED = "QUEUED"
@@ -226,7 +226,7 @@ class JobFSM:
         # Update job file
         self._update_job_file()
 
-        # Execute hooks for the new state
+        # Execute hooks for new state
         self._execute_hooks(target_state, reason, metadata or {})
 
         return True
@@ -263,7 +263,6 @@ class JobFSM:
             return False
 
         # Copy source file and create job metadata
-
         src_file = Path(src_path)
         (self.job_dir / "src.svg").write_bytes(src_file.read_bytes())
 
@@ -347,7 +346,6 @@ class JobFSM:
                 available_pens,
                 interactive,
             )
-
             with open(self.job_dir / "plan.json", "w") as f:
                 json.dump(result, f, indent=2)
 
@@ -402,7 +400,7 @@ class JobFSM:
                 logger.warning(
                     f"Failed to validate checklist for job {self.job_id}: {e}"
                 )
-                # Continue with arming but log the issue
+                # Continue with arming but log issue
 
         return self.transition_to(JobState.ARMED, "Job armed for plotting", {})
 
@@ -508,7 +506,7 @@ class JobFSM:
                 )
 
         except Exception as e:
-            # Log hook execution errors but don't fail the transition
+            # Log hook execution errors but don't fail transition
             self._write_journal(
                 {"type": "hooks_error", "state": state.value, "error": str(e)}
             )
