@@ -71,6 +71,42 @@ def show_status_overview(
             # Load configuration
             cfg = load_config(None)
 
+            # Check AxiDraw availability first (needed for both JSON and markdown)
+            try:
+                import importlib.util
+
+                spec = importlib.util.find_spec("plotty.drivers.axidraw")
+                axidraw_status = "✅ Available" if spec else "❌ Not installed"
+            except Exception:
+                axidraw_status = "❌ Error checking"
+
+            # Count jobs (needed for both JSON and markdown)
+            jobs_dir = Path(cfg.workspace) / "jobs"
+            queue_count = 0
+            ready_count = 0
+            jobs = []
+
+            if jobs_dir.exists():
+                for job_dir in jobs_dir.iterdir():
+                    if job_dir.is_dir():
+                        job_file = job_dir / "job.json"
+                        if job_file.exists():
+                            try:
+                                job_data = json.loads(job_file.read_text())
+                                jobs.append(
+                                    {
+                                        "id": job_dir.name,
+                                        "state": job_data.get("state", "UNKNOWN"),
+                                        "created_at": job_data.get("created_at"),
+                                        "plot_file": job_data.get("plot_file"),
+                                    }
+                                )
+                                queue_count += 1
+                                if job_data.get("state") == "READY":
+                                    ready_count += 1
+                            except Exception:
+                                pass
+
             if json_output:
                 # JSON output for LLM parsing
                 status_data = {
@@ -83,7 +119,7 @@ def show_status_overview(
                         "total_jobs": queue_count,
                         "ready_jobs": ready_count,
                     },
-                    "jobs": jobs,  # Will be populated below
+                    "jobs": jobs,
                 }
                 print(json.dumps(status_data, indent=2, default=str))
                 return
@@ -98,14 +134,6 @@ def show_status_overview(
                 print("| Component | Status |")
                 print("|-----------|--------|")
 
-                # Check AxiDraw availability
-                try:
-                    import importlib.util
-
-                    spec = importlib.util.find_spec("plotty.drivers.axidraw")
-                    axidraw_status = "✅ Available" if spec else "❌ Not installed"
-                except Exception:
-                    axidraw_status = "❌ Error checking"
                 print(f"| AxiDraw | {axidraw_status} |")
 
                 # Camera status
@@ -115,32 +143,11 @@ def show_status_overview(
                 print(f"| Camera | {camera_status} |")
                 print(f"| Workspace | {cfg.workspace} |")
 
-                # Count jobs
-                jobs_dir = Path(cfg.workspace) / "jobs"
-                queue_count = 0
-                ready_count = 0
+                # Job states (already counted above)
                 state_counts = {}
-
-                if jobs_dir.exists():
-                    for job_dir in jobs_dir.iterdir():
-                        if job_dir.is_dir():
-                            job_file = job_dir / "job.json"
-                            if job_file.exists():
-                                try:
-                                    job_data = json.loads(job_file.read_text())
-                                    queue_count += 1
-                                    state = job_data.get("state", "UNKNOWN")
-                                    state_counts[state] = state_counts.get(state, 0) + 1
-                                    if (
-                                        state == "QUEUED"
-                                        and job_data.get("config_status")
-                                        == "CONFIGURED"
-                                    ):
-                                        ready_count += 1
-                                except Exception as e:
-                                    logger.debug(
-                                        f"Failed to read job file {job_file}: {e}"
-                                    )
+                for job in jobs:
+                    state = job.get("state", "UNKNOWN")
+                    state_counts[state] = state_counts.get(state, 0) + 1
 
                 print(f"| Queue | {queue_count} jobs ({ready_count} ready) |")
                 print()

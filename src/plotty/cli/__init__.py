@@ -8,12 +8,15 @@ from __future__ import annotations
 
 import typer
 
-from .plot_commands import plot_app
-from .job_commands import job_app
-from .config_commands import config_app
-from .recovery_commands import recovery_app
-from .stats_commands import stats_app
+from .plot import plot_app
+from .job import job_app
+from .config import config_app
+from .recovery import recovery_app
+from .guard import guard_app
+from .stats import stats_app
 from .batch import batch_app
+from .logging import logging_app
+from .backup import backup_app
 
 # Import status commands from parent module
 from ..cli_status import status_app
@@ -27,8 +30,11 @@ app.add_typer(plot_app, name="plot", help="Plotting commands")
 app.add_typer(job_app, name="job", help="Job management commands")
 app.add_typer(config_app, name="config", help="Configuration commands")
 app.add_typer(recovery_app, name="recovery", help="Crash recovery commands")
+app.add_typer(guard_app, name="guard", help="System guard commands")
 app.add_typer(stats_app, name="stats", help="Statistics and analytics commands")
 app.add_typer(batch_app, name="batch", help="Batch operations commands")
+app.add_typer(logging_app, name="logging", help="Logging system commands")
+app.add_typer(backup_app, name="backup", help="Backup and restore commands")
 
 
 @app.callback()

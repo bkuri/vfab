@@ -6,7 +6,7 @@
 
 ## 1. Critical Path (Core Functionality)
 
-### 1.1 Plotting Execution (`src/plotty/cli/batch_commands.py`)
+### 1.1 Plotting Execution (`src/plotty/cli/batch/`)
 
 **Priority: HIGH | Complexity: MEDIUM**
 
@@ -35,7 +35,7 @@
   - Safe job removal with cleanup
   - Support for dry-run preview mode
 
-### 1.2 Job Management (`src/plotty/cli/job_commands.py`)
+### 1.2 Job Management (`src/plotty/cli/job/`)
 
 **Priority: HIGH | Complexity: LOW**
 
@@ -49,7 +49,7 @@
   - Store test results and metrics
   - Support test result comparison
 
-### 1.3 Plot Commands (`src/plotty/cli/plot_commands.py`)
+### 1.3 Plot Commands (`src/plotty/cli/plot/`)
 
 **Priority: HIGH | Complexity: LOW**
 
@@ -72,7 +72,7 @@
 
 ## 2. Management Features (Nice-to-have)
 
-### 2.1 Configuration Management (`src/plotty/cli/config_commands.py`)
+### 2.1 Configuration Management (`src/plotty/cli/config/`)
 
 **Priority: MEDIUM | Complexity: MEDIUM**
 
@@ -96,7 +96,7 @@
   - Preserve critical settings during reset
   - Support selective reset options
 
-### 2.2 Recovery System (`src/plotty/cli/recovery_commands.py`)
+### 2.2 Recovery System (`src/plotty/cli/recovery/`)
 
 **Priority: LOW | Complexity: HIGH**
 

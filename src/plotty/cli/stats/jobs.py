@@ -1,16 +1,15 @@
 """
-Statistics commands for ploTTY CLI.
+Job statistics for ploTTY CLI.
 """
 
 from __future__ import annotations
 
-from pathlib import Path
 import json
-import typer
+from pathlib import Path
 from datetime import datetime
 
-from ..config import load_config
-from ..utils import error_handler
+from ...config import load_config
+from ...utils import error_handler
 
 try:
     from rich.console import Console
@@ -20,8 +19,14 @@ except ImportError:
     console = None
 
 
-# Create stats command group
-stats_app = typer.Typer(help="Statistics and analytics commands")
+def format_time(seconds):
+    """Format seconds into human readable time."""
+    if seconds < 60:
+        return f"{seconds:.1f}s"
+    elif seconds < 3600:
+        return f"{seconds / 60:.1f}m"
+    else:
+        return f"{seconds / 3600:.1f}h"
 
 
 def get_job_stats():
@@ -123,108 +128,7 @@ def get_job_stats():
         return {}
 
 
-def format_time(seconds):
-    """Format seconds into human readable time."""
-    if seconds < 60:
-        return f"{seconds:.1f}s"
-    elif seconds < 3600:
-        return f"{seconds / 60:.1f}m"
-    else:
-        return f"{seconds / 3600:.1f}h"
-
-
-@stats_app.command()
-def tldr(
-    json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
-):
-    """Quick stats overview (too long; didn't read)."""
-    try:
-        stats = get_job_stats()
-
-        if json_output:
-            # JSON output for LLM parsing
-            json_stats = {
-                "total_jobs": stats.get("total_jobs", 0),
-                "completed_jobs": stats.get("completed_jobs", 0),
-                "queued_jobs": stats.get("by_state", {}).get("QUEUED", 0),
-                "failed_jobs": stats.get("failed_jobs", 0),
-                "success_rate": stats.get("success_rate", 0),
-                "avg_time_seconds": stats.get("avg_time", 0),
-                "estimated_queue_time_seconds": stats.get("by_state", {}).get(
-                    "QUEUED", 0
-                )
-                * stats.get("avg_time", 0),
-                "device_available": True,  # Simplified check
-            }
-            print(json.dumps(json_stats, indent=2))
-            return
-
-        if console:
-            console.print("📊 ploTTY Quick Stats")
-            console.print("=" * 30)
-        else:
-            print("📊 ploTTY Quick Stats")
-            print("=" * 30)
-
-        # Job counts
-        total = stats.get("total_jobs", 0)
-        completed = stats.get("completed_jobs", 0)
-        queued = stats.get("by_state", {}).get("QUEUED", 0)
-        failed = stats.get("failed_jobs", 0)
-
-        if console:
-            console.print(
-                f"Jobs: {total} total | {completed} completed | {queued} queued | {failed} failed"
-            )
-        else:
-            print(
-                f"Jobs: {total} total | {completed} completed | {queued} queued | {failed} failed"
-            )
-
-        # Success rate and timing
-        success_rate = stats.get("success_rate", 0)
-        avg_time = stats.get("avg_time", 0)
-
-        if console:
-            console.print(
-                f"Success: {success_rate:.0f}% | Avg time: {format_time(avg_time)}"
-            )
-        else:
-            print(f"Success: {success_rate:.0f}% | Avg time: {format_time(avg_time)}")
-
-        # Queue estimate
-        if queued > 0 and avg_time > 0:
-            queue_time = queued * avg_time
-            if console:
-                console.print(f"Est. queue: {format_time(queue_time)}")
-            else:
-                print(f"Est. queue: {format_time(queue_time)}")
-
-        # Device status (simplified)
-        try:
-            import importlib.util
-
-            spec = importlib.util.find_spec("plotty.drivers.axidraw")
-            device_status = "✅ Ready" if spec else "❌ Not available"
-
-            if console:
-                console.print(f"Device: {device_status}")
-            else:
-                print(f"Device: {device_status}")
-        except Exception:
-            if console:
-                console.print("Device: ❓ Unknown")
-            else:
-                print("Device: ❓ Unknown")
-
-    except Exception as e:
-        error_handler.handle(e)
-
-
-@stats_app.command()
-def jobs(
-    json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
-):
+def show_job_stats(json_output: bool = False):
     """Detailed job statistics."""
     try:
         stats = get_job_stats()
@@ -264,47 +168,6 @@ def jobs(
             for key, value in stats.items():
                 if key not in ["by_state", "by_paper"]:
                     print(f"  {key}: {value}")
-
-    except Exception as e:
-        error_handler.handle(e)
-
-
-@stats_app.command()
-def time():
-    """Time usage analytics."""
-    try:
-        stats = get_job_stats()
-
-        if console:
-            console.print("⏱️  Time Analytics")
-            console.print("=" * 30)
-
-            total_time = stats.get("total_time", 0)
-            avg_time = stats.get("avg_time", 0)
-            completed = stats.get("completed_jobs", 0)
-
-            console.print(f"Total plotting time: {format_time(total_time)}")
-            console.print(f"Average job time: {format_time(avg_time)}")
-            console.print(f"Completed jobs: {completed}")
-
-            if completed > 0:
-                console.print(
-                    f"Time per completed job: {format_time(total_time / completed)}"
-                )
-
-            # Job age analysis
-            oldest = stats.get("oldest_job")
-            newest = stats.get("newest_job")
-
-            if oldest and newest:
-                age_span = newest - oldest
-                console.print(f"Job age span: {age_span.days} days")
-
-        else:
-            print("⏱️  Time Analytics")
-            print("=" * 30)
-            print(f"Total time: {format_time(stats.get('total_time', 0))}")
-            print(f"Average time: {format_time(stats.get('avg_time', 0))}")
 
     except Exception as e:
         error_handler.handle(e)

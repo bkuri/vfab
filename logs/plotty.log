@@ -1,0 +1,6 @@
+15:51:04 - INFO - Test 1: System startup completed
+15:51:04 - INFO - Test 2: Device connected successfully
+15:51:14 - INFO - Creating config backup
+15:51:14 - ERROR - Failed to create backup: Backup verification failed: Backup missing manifest.json
+15:51:30 - INFO - Creating config backup
+15:51:30 - ERROR - Failed to create backup: Backup verification failed: Backup missing manifest.json

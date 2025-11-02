@@ -57,6 +57,24 @@ class HooksCfg(BaseModel):
     FAILED: list[dict[str, str]] = Field(default_factory=list)
 
 
+class LoggingSettings(BaseModel):
+    enabled: bool = True
+    level: str = "INFO"
+    format: str = "rich"
+    output: str = "both"
+    log_file: str = "logs/plotty.log"
+    max_file_size: int = 10485760  # 10MB
+    backup_count: int = 5
+    console_show_timestamp: bool = False
+    console_show_level: bool = True
+    console_rich_tracebacks: bool = True
+    include_job_id: bool = True
+    include_device_info: bool = True
+    include_session_id: bool = True
+    buffer_size: int = 1024
+    flush_interval: int = 5
+
+
 class Settings(BaseModel):
     workspace: str = str(Path("./workspace").absolute())
     camera: CameraCfg = Field(default_factory=CameraCfg)
@@ -65,6 +83,7 @@ class Settings(BaseModel):
     vpype: VpypeCfg = Field(default_factory=VpypeCfg)
     paper: PaperCfg = Field(default_factory=PaperCfg)
     hooks: HooksCfg = Field(default_factory=HooksCfg)
+    logging: LoggingSettings = Field(default_factory=LoggingSettings)
 
 
 def load_config(path: str | None = None) -> Settings:
