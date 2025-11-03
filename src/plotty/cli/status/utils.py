@@ -213,7 +213,28 @@ def get_axidraw_status(cfg) -> str:
 
         if result["count"] > 0:
             accessible = "accessible" if result["accessible"] else "connected"
-            return f"✅ {accessible.capitalize()} ({result['count']} device{'s' if result['count'] > 1 else ''})"
+            base_status = f"✅ {accessible.capitalize()} ({result['count']} device{'s' if result['count'] > 1 else ''})"
+
+            # Add device details if available
+            if "devices" in result and result["devices"]:
+                device_types = []
+                for device in result["devices"]:
+                    device_id = device.get("id", "unknown")
+                    if "fd92" in device_id:
+                        device_types.append("AxiDraw")
+                    elif "fc73" in device_id:
+                        device_types.append("AxiDraw v3")
+                    else:
+                        device_types.append("Microchip")
+
+                if device_types:
+                    unique_types = list(set(device_types))
+                    if len(unique_types) == 1:
+                        base_status += f" ({unique_types[0]})"
+                    else:
+                        base_status += f" ({', '.join(unique_types[:2])}{'...' if len(unique_types) > 2 else ''})"
+
+            return base_status
         elif result["installed"]:
             return "❌ Not connected"
         else:

@@ -38,8 +38,8 @@ class DeviceDetector:
         result = {
             "count": 0,
             "installed": self._check_pyaxidraw_installed(),
-            "device_id": "04d8:fd92",
-            "device_name": "Microchip EiBotBoard (AxiDraw)",
+            "device_id": "04d8:xxxx",
+            "device_name": "Microchip/AxiDraw compatible device",
             "accessible": False,
         }
 
@@ -47,9 +47,13 @@ class DeviceDetector:
         usb_count = self._detect_axidraw_usb()
         result["count"] = usb_count
 
-        # Test accessibility if devices found
+        # Get detailed device information if devices found
         if usb_count > 0:
+            device_details = self._get_device_details()
+            result["devices"] = device_details
             result["accessible"] = self._test_axidraw_access()
+        else:
+            result["devices"] = []
 
         return result
 
@@ -121,12 +125,33 @@ class DeviceDetector:
 
     def _detect_axidraw_usb(self) -> int:
         """Detect AxiDraw devices via USB."""
-        cmd = "lsusb | grep '04d8:fd92' | wc -l"
+        # Detect all Microchip devices (vendor ID 04d8) which includes various AxiDraw models
+        cmd = "lsusb | grep '04d8:' | wc -l"
         try:
             count = int(self._run_command(cmd))
             return count
         except ValueError:
             return 0
+
+    def _get_device_details(self) -> List[Dict[str, str]]:
+        """Get detailed information about detected Microchip devices."""
+        cmd = "lsusb | grep '04d8:'"
+        try:
+            output = self._run_command(cmd)
+            devices = []
+
+            for line in output.split("\n"):
+                if line.strip():
+                    # Parse lsusb output format: Bus XXX Device XXX: ID XXXX:XXXX Description
+                    parts = line.split("ID ")
+                    if len(parts) >= 2:
+                        device_id = parts[1].split(" ")[0]
+                        description = " ".join(parts[1].split(" ")[1:])
+                        devices.append({"id": device_id, "description": description})
+
+            return devices
+        except Exception:
+            return []
 
     def _test_axidraw_access(self) -> bool:
         """Test if AxiDraw devices are accessible."""
