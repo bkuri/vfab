@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from logging.config import fileConfig
 
 from sqlalchemy import (
     MetaData,
@@ -24,8 +23,9 @@ config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+# Skip logging configuration to avoid missing formatters section
+# if config.config_file_name is not None:
+#     fileConfig(config.config_file_name)
 
 metadata = MetaData()
 
@@ -127,8 +127,9 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    section = config.get_section(config.config_ini_section) or {}
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section),
+        section,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )

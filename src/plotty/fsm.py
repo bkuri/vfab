@@ -49,7 +49,15 @@ try:
     from .checklist import create_checklist
 except ImportError:
 
-    def create_checklist(job_id, job_dir):
+    def create_checklist(config, workspace):
+        return None
+
+
+try:
+    from .stats import get_statistics_service
+except ImportError:
+
+    def get_statistics_service():
         return None
 
 
@@ -228,6 +236,9 @@ class JobFSM:
 
         # Execute hooks for new state
         self._execute_hooks(target_state, reason, metadata or {})
+
+        # Record statistics for state transition
+        self._record_statistics(target_state, reason, metadata or {})
 
         return True
 
@@ -510,6 +521,67 @@ class JobFSM:
             self._write_journal(
                 {"type": "hooks_error", "state": state.value, "error": str(e)}
             )
+
+    def _record_statistics(
+        self, state: JobState, reason: str, metadata: Dict[str, Any]
+    ) -> None:
+        """Record statistics for state transition.
+
+        Args:
+            state: Target state
+            reason: Transition reason
+            metadata: Transition metadata
+        """
+        try:
+            stats_service = get_statistics_service()
+            if stats_service is None:
+                return
+
+            # Map states to event types
+            event_mapping = {
+                JobState.NEW: "created",
+                JobState.QUEUED: "queued",
+                JobState.ANALYZED: "analyzed",
+                JobState.OPTIMIZED: "optimized",
+                JobState.READY: "ready",
+                JobState.ARMED: "armed",
+                JobState.PLOTTING: "started",
+                JobState.PAUSED: "paused",
+                JobState.COMPLETED: "finished",
+                JobState.ABORTED: "aborted",
+                JobState.FAILED: "failed",
+            }
+
+            event_type = event_mapping.get(state, state.value)
+
+            # Extract metrics from metadata if available
+            duration_seconds = metadata.get("duration_seconds")
+            pen_changes = metadata.get("pen_changes", 0)
+            distance_plotted_mm = metadata.get("distance_plotted_mm", 0.0)
+            distance_travel_mm = metadata.get("distance_travel_mm", 0.0)
+            pen_down_time_seconds = metadata.get("pen_down_time_seconds", 0.0)
+            pen_up_time_seconds = metadata.get("pen_up_time_seconds", 0.0)
+            layers_completed = metadata.get("layers_completed", 0)
+            total_layers = metadata.get("total_layers", 0)
+
+            # Record the event
+            stats_service.record_job_event(
+                job_id=self.job_id,
+                event_type=event_type,
+                duration_seconds=duration_seconds,
+                pen_changes=pen_changes,
+                distance_plotted_mm=distance_plotted_mm,
+                distance_travel_mm=distance_travel_mm,
+                pen_down_time_seconds=pen_down_time_seconds,
+                pen_up_time_seconds=pen_up_time_seconds,
+                layers_completed=layers_completed,
+                total_layers=total_layers,
+                metadata=metadata,
+            )
+
+        except Exception as e:
+            # Log statistics errors but don't fail transition
+            logger.warning(f"Failed to record statistics for job {self.job_id}: {e}")
 
     def get_last_guard_results(self) -> List[Dict[str, Any]]:
         """Get results from last guard evaluation.
