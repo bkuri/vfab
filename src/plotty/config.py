@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 from pathlib import Path
 import os
 import yaml
+import platformdirs
 
 
 class CameraCfg(BaseModel):
@@ -14,7 +15,7 @@ class CameraCfg(BaseModel):
 
 
 class DatabaseCfg(BaseModel):
-    url: str = "sqlite:///./plotty.db"
+    url: str = f"sqlite:///{Path(platformdirs.user_data_dir('plotty')) / 'plotty.db'}"
     echo: bool = False
 
 
@@ -62,7 +63,9 @@ class LoggingSettings(BaseModel):
     level: str = "INFO"
     format: str = "rich"
     output: str = "both"
-    log_file: str = "logs/plotty.log"
+    log_file: str = str(
+        Path(platformdirs.user_data_dir("plotty")) / "logs" / "plotty.log"
+    )
     max_file_size: int = 10485760  # 10MB
     backup_count: int = 5
     console_show_timestamp: bool = False
@@ -76,7 +79,7 @@ class LoggingSettings(BaseModel):
 
 
 class Settings(BaseModel):
-    workspace: str = str(Path("./workspace").absolute())
+    workspace: str = str(Path(platformdirs.user_data_dir("plotty")) / "workspace")
     camera: CameraCfg = Field(default_factory=CameraCfg)
     database: DatabaseCfg = Field(default_factory=DatabaseCfg)
     device: DeviceCfg = Field(default_factory=DeviceCfg)
@@ -89,4 +92,21 @@ class Settings(BaseModel):
 def load_config(path: str | None = None) -> Settings:
     p = Path(path or os.environ.get("PLOTTY_CONFIG", "config/config.yaml"))
     data = yaml.safe_load(p.read_text()) if p.exists() else {}
+
+    # Resolve relative paths to user data directory
+    if data:
+        # Convert workspace path
+        if "workspace" in data and data["workspace"].startswith("./"):
+            data["workspace"] = str(
+                Path(platformdirs.user_data_dir("plotty")) / data["workspace"][2:]
+            )
+
+        # Convert database URL
+        if "database" in data and "url" in data["database"]:
+            db_url = data["database"]["url"]
+            if db_url.startswith("sqlite:///./"):
+                db_path = db_url[12:]  # Remove 'sqlite:///./'
+                full_db_path = Path(platformdirs.user_data_dir("plotty")) / db_path
+                data["database"]["url"] = f"sqlite:///{full_db_path}"
+
     return Settings(**(data or {}))

@@ -123,8 +123,10 @@ dmypy.json
 .pyre/
 
 # ploTTY specific
+# User data directories (created in ~/.local/share/plotty/)
 workspace/
 logs/
+backups/
 _temp/
 *.db
 *.sqlite
@@ -134,7 +136,6 @@ _temp/
 *.html
 bandit-report.json
 coverage.xml
-backups/
 .ruff_cache/
 .pytest_cache/
 .mypy_cache/
