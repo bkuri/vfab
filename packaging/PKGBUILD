@@ -7,7 +7,7 @@ arch=('any')
 url="https://github.com/bkuri/plotty"
 license=('MIT')
 depends=(
-  'python>=3.13'
+  'python>=3.11'
   'python-typer'
   'python-pydantic'
   'python-yaml'

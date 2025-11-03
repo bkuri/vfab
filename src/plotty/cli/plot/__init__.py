@@ -15,7 +15,7 @@ from .presets import list_plot_presets
 from .pen_test import test_pen_operation
 
 # Create plot command group
-plot_app = typer.Typer(help="Plotting commands")
+plot_app = typer.Typer(no_args_is_help=True, help="Plotting commands")
 
 # Register commands
 plot_app.command("plot")(plot_job)

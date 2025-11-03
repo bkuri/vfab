@@ -15,7 +15,7 @@ from .operations import recover_job, recover_all_jobs_cmd, cleanup_journal
 from ..core import get_available_job_ids
 
 # Create recovery command group
-recovery_app = typer.Typer(help="Crash recovery commands")
+recovery_app = typer.Typer(no_args_is_help=True, help="Crash recovery commands")
 
 
 def complete_job_id(incomplete: str):

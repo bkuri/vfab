@@ -29,7 +29,7 @@ except metadata.PackageNotFoundError:
     __version__ = "1.2.0"
 
 # Create main app
-app = typer.Typer(no_args_is_help=False, invoke_without_command=True)
+app = typer.Typer(no_args_is_help=True, invoke_without_command=True)
 
 # Add sub-apps
 app.add_typer(status_app, name="status", help="Status and monitoring commands")
@@ -46,6 +46,7 @@ app.add_typer(backup_app, name="backup", help="Backup and restore commands")
 
 @app.callback()
 def main_callback(
+    ctx: typer.Context,
     version: bool = typer.Option(
         False, "--version", "-v", help="Show version and exit"
     ),
@@ -54,6 +55,10 @@ def main_callback(
     if version:
         typer.echo(f"ploTTY v{__version__}")
         raise typer.Exit()
+
+    # Show help if no subcommand was provided
+    if ctx.invoked_subcommand is None:
+        typer.echo(ctx.get_help())
 
 
 def main():

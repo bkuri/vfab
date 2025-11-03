@@ -12,7 +12,7 @@ from .session_management import session_reset
 from .setup_wizard import setup, check_config
 
 # Create config command group
-config_app = typer.Typer(help="Configuration commands")
+config_app = typer.Typer(no_args_is_help=True, help="Configuration commands")
 
 # Register pen management commands
 config_app.command("pen-list")(pen_list)

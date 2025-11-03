@@ -11,7 +11,7 @@ from .plotting import plot_all
 from .queue import clear_queue
 
 # Create batch command group
-batch_app = typer.Typer(help="Batch operations commands")
+batch_app = typer.Typer(no_args_is_help=True, help="Batch operations commands")
 
 # Register commands
 batch_app.command()(plan_all)

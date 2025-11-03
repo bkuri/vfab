@@ -11,7 +11,7 @@ from .check import check_guards
 from .validate import validate_transition
 
 # Create guard command group
-guard_app = typer.Typer(help="System guard commands")
+guard_app = typer.Typer(no_args_is_help=True, help="System guard commands")
 
 # Register commands
 guard_app.command("list")(list_guards)
