@@ -33,6 +33,9 @@ vpype = ["vpype>=1.14.0"]
 axidraw = ["axicli @ https://cdn.evilmadscientist.com/dl/ad/public/AxiDraw_API.zip"]
 dev = ["pytest>=8.3.2", "pre-commit>=3.8.0", "ruff>=0.6.8", "black>=24.10.0"]
 
+[project.scripts]
+plotty = "plotty.cli:main"
+
 [dependency-groups]
 dev = ["pytest>=8.3.2", "pre-commit>=3.8.0", "ruff>=0.6.8", "black>=24.10.0"]
 vpype = ["vpype>=1.14.0"]

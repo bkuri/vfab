@@ -56,5 +56,10 @@ def main_callback(
         raise typer.Exit()
 
 
-if __name__ == "__main__":
+def main():
+    """Main entry point for plotty CLI."""
     app()
+
+
+if __name__ == "__main__":
+    main()
