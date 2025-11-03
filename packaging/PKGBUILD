@@ -23,7 +23,7 @@ depends=(
   'python-pillow'
   'python-matplotlib'
   'python-pandas'
-  'pipx'
+  'python-pipx'
 )
 makedepends=(
   'python-build'
