@@ -141,13 +141,6 @@ jobs:
           path: dist/
           
       - name: Publish to PyPI
-        if: secrets.PYPI_API_TOKEN != ''
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
-          
-      - name: Skip PyPI Publishing
-        if: secrets.PYPI_API_TOKEN == ''
-        run: |
-          echo "PyPI API token not configured - skipping publishing"
-          echo "To enable PyPI publishing, add PYPI_API_TOKEN secret to repository"
