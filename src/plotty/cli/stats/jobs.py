@@ -1,173 +1,135 @@
 """
-Job statistics for ploTTY CLI.
+Job statistics commands for ploTTY.
+
+This module provides commands for viewing job-related statistics
+including completion rates, time estimates, and job history.
 """
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-from datetime import datetime
-
-from ...config import load_config
+from ...stats import StatisticsService
 from ...utils import error_handler
-
-try:
-    from rich.console import Console
-
-    console = Console()
-except ImportError:
-    console = None
+from ..status.output import get_output_manager
 
 
-def format_time(seconds):
-    """Format seconds into human readable time."""
-    if seconds < 60:
-        return f"{seconds:.1f}s"
-    elif seconds < 3600:
-        return f"{seconds / 60:.1f}m"
-    else:
-        return f"{seconds / 3600:.1f}h"
-
-
-def get_job_stats():
-    """Get comprehensive job statistics."""
+def show_job_stats(
+    limit: int = 10,
+    json_output: bool = False,
+    csv_output: bool = False,
+):
+    """Show job-related statistics."""
     try:
-        cfg = load_config(None)
-        jobs_dir = Path(cfg.workspace) / "jobs"
+        output = get_output_manager()
+        stats_service = StatisticsService()
+        job_stats = stats_service.get_job_summary_stats()
 
-        stats = {
-            "total_jobs": 0,
-            "by_state": {},
-            "by_paper": {},
-            "completed_jobs": 0,
-            "failed_jobs": 0,
-            "total_time": 0,
-            "avg_time": 0,
-            "oldest_job": None,
-            "newest_job": None,
-        }
-
-        if not jobs_dir.exists():
-            return stats
-
-        job_times = []
-
-        for job_dir in jobs_dir.iterdir():
-            if not job_dir.is_dir():
-                continue
-
-            job_file = job_dir / "job.json"
-            if not job_file.exists():
-                continue
-
-            try:
-                job_data = json.loads(job_file.read_text())
-                stats["total_jobs"] += 1
-
-                # Count by state
-                state = job_data.get("state", "UNKNOWN")
-                stats["by_state"][state] = stats["by_state"].get(state, 0) + 1
-
-                # Count by paper
-                paper = job_data.get("paper", "Unknown")
-                stats["by_paper"][paper] = stats["by_paper"].get(paper, 0) + 1
-
-                # Track completed/failed
-                if state == "COMPLETED":
-                    stats["completed_jobs"] += 1
-                elif state == "FAILED":
-                    stats["failed_jobs"] += 1
-
-                # Get time estimates
-                plan_file = job_dir / "plan.json"
-                if plan_file.exists():
-                    plan_data = json.loads(plan_file.read_text())
-                    time_est = plan_data.get("estimates", {}).get("post_s")
-                    if time_est:
-                        job_times.append(time_est)
-                        stats["total_time"] += time_est
-
-                # Track job ages
-                created_at = job_data.get("created_at")
-                if created_at:
-                    try:
-                        # Handle different timestamp formats
-                        if isinstance(created_at, str):
-                            job_time = datetime.fromisoformat(
-                                created_at.replace("Z", "+00:00")
-                            )
-                        else:
-                            job_time = created_at
-
-                        if not stats["oldest_job"] or job_time < stats["oldest_job"]:
-                            stats["oldest_job"] = job_time
-                        if not stats["newest_job"] or job_time > stats["newest_job"]:
-                            stats["newest_job"] = job_time
-                    except Exception:
-                        pass
-
-            except Exception:
-                continue
-
-        # Calculate averages
-        if job_times:
-            stats["avg_time"] = sum(job_times) / len(job_times)
-
-        # Calculate success rate
-        if stats["total_jobs"] > 0:
-            stats["success_rate"] = (
-                stats["completed_jobs"] / stats["total_jobs"]
-            ) * 100
+        # Add limit handling for recent jobs if needed
+        if "by_state" in job_stats:
+            # Convert to a format suitable for display
+            job_stats_display = {
+                "summary": {
+                    "total_jobs": job_stats.get("total_jobs", 0),
+                    "completed_jobs": job_stats.get("completed_jobs", 0),
+                    "failed_jobs": job_stats.get("failed_jobs", 0),
+                    "success_rate": f"{job_stats.get('success_rate', 0):.1f}%",
+                    "avg_time": f"{job_stats.get('avg_time', 0):.1f}s",
+                    "total_time": f"{job_stats.get('total_time', 0):.1f}s",
+                },
+                "by_state": job_stats.get("by_state", {}),
+                "by_paper": job_stats.get("by_paper", {}),
+            }
         else:
-            stats["success_rate"] = 0
+            job_stats_display = job_stats
 
-        return stats
+        # Prepare data for different formats
+        json_data = job_stats
 
-    except Exception as e:
-        error_handler.handle(e)
-        return {}
+        # Build CSV data
+        csv_data = [["ploTTY Job Statistics"], []]
 
+        if "summary" in job_stats_display:
+            csv_data.extend(
+                [
+                    ["Summary"],
+                    ["Metric", "Value"],
+                ]
+            )
+            for key, value in job_stats_display["summary"].items():
+                csv_data.append([key, str(value)])
+            csv_data.append([])
 
-def show_job_stats(json_output: bool = False):
-    """Detailed job statistics."""
-    try:
-        stats = get_job_stats()
+        if "by_state" in job_stats_display:
+            csv_data.extend(
+                [
+                    ["Jobs by State"],
+                    ["State", "Count"],
+                ]
+            )
+            for state, count in job_stats_display["by_state"].items():
+                csv_data.append([state, str(count)])
+            csv_data.append([])
 
-        if json_output:
-            # JSON output for LLM parsing
-            print(json.dumps(stats, indent=2, default=str))
-            return
+        if "by_paper" in job_stats_display:
+            csv_data.extend(
+                [
+                    ["Jobs by Paper"],
+                    ["Paper", "Count"],
+                ]
+            )
+            for paper, count in job_stats_display["by_paper"].items():
+                csv_data.append([paper, str(count)])
 
-        if console:
-            console.print("📈 Job Statistics")
-            console.print("=" * 30)
+        # Build markdown content
+        sections = []
 
-            # Job states
-            console.print("\nJobs by State:")
-            for state, count in stats.get("by_state", {}).items():
-                console.print(f"  {state}: {count}")
+        if "summary" in job_stats_display:
+            rows = [
+                f"| {key} | {value} |"
+                for key, value in job_stats_display["summary"].items()
+            ]
+            sections.append(
+                f"""## Summary
+| Metric | Value |
+|--------|-------|
+{chr(10).join(rows)}"""
+            )
 
-            # Paper types
-            console.print("\nJobs by Paper:")
-            for paper, count in stats.get("by_paper", {}).items():
-                console.print(f"  {paper}: {count}")
+        if "by_state" in job_stats_display:
+            rows = [
+                f"| {state} | {count} |"
+                for state, count in job_stats_display["by_state"].items()
+            ]
+            sections.append(
+                f"""## Jobs by State
+| State | Count |
+|-------|-------|
+{chr(10).join(rows)}"""
+            )
 
-            # Timing stats
-            console.print("\nTiming Statistics:")
-            console.print(f"  Total jobs: {stats.get('total_jobs', 0)}")
-            console.print(f"  Completed: {stats.get('completed_jobs', 0)}")
-            console.print(f"  Failed: {stats.get('failed_jobs', 0)}")
-            console.print(f"  Success rate: {stats.get('success_rate', 0):.1f}%")
-            console.print(f"  Average time: {format_time(stats.get('avg_time', 0))}")
-            console.print(f"  Total time: {format_time(stats.get('total_time', 0))}")
+        if "by_paper" in job_stats_display:
+            rows = [
+                f"| {paper} | {count} |"
+                for paper, count in job_stats_display["by_paper"].items()
+            ]
+            sections.append(
+                f"""## Jobs by Paper
+| Paper | Count |
+|-------|-------|
+{chr(10).join(rows)}"""
+            )
 
-        else:
-            print("📈 Job Statistics")
-            print("=" * 30)
+        markdown_content = f"""# ploTTY Job Statistics
 
-            for key, value in stats.items():
-                if key not in ["by_state", "by_paper"]:
-                    print(f"  {key}: {value}")
+{chr(10).join(sections)}"""
+
+        # Output using the manager
+        output.print_markdown(
+            content=markdown_content,
+            json_data=json_data,
+            csv_data=csv_data,
+            json_output=json_output,
+            csv_output=csv_output,
+        )
 
     except Exception as e:
         error_handler.handle(e)
