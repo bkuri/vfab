@@ -1,6 +1,6 @@
 # Maintainer: Bernardo Kuri <github@bkuri.com>
 pkgname=plotty
-pkgver=1.0.2
+pkgver=1.0.3
 pkgrel=1
 pkgdesc="ploTTY: FSM plotter manager (headless-first) with vpype + per-session recording"
 arch=('any')
@@ -19,6 +19,11 @@ depends=(
   'python-click'
   'python-platformdirs'
   'python-defusedxml'
+  'vpype'
+  'ffmpeg'
+  'python-pillow'
+  'python-matplotlib'
+  'python-pandas'
 )
 makedepends=(
   'python-build'
@@ -41,7 +46,7 @@ checkdepends=(
 provides=('plotty')
 conflicts=('plotty')
 source=("$pkgname-$pkgver.tar.gz::https://github.com/bkuri/plotty/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('19ca6c49e1149b41ac82fe3529a45709ea5ed3e11d8dcacc421fa1170f639ebc')
+sha256sums=('0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5')
 
 build() {
   cd "$pkgname-$pkgver"
@@ -104,7 +109,7 @@ post_install() {
   echo "  plotty plot drawing            # Plot the job"
   echo ""
   echo "For AxiDraw support:"
-  echo "  pip install pyaxidraw"
+  echo "  plotty install-axidraw          # Install pyaxidraw dependency"
   echo "  plotty plot drawing --device axidraw"
   echo ""
   echo "For statistics:"
