@@ -7,7 +7,6 @@ on:
     branches: [ master, main ]
   release:
     types: [ published ]
-  workflow_dispatch:
 
 jobs:
   test:
@@ -152,4 +151,3 @@ jobs:
         run: |
           echo "PyPI API token not configured - skipping publishing"
           echo "To enable PyPI publishing, add PYPI_API_TOKEN secret to repository"
-          echo "See RELEASE_STATUS.md for setup instructions"
