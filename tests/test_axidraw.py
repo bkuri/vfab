@@ -4,19 +4,40 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
+# Import create_manager if available
 try:
-    from plotty.drivers import create_manager, is_axidraw_available
+    from plotty.drivers import create_manager
 except ImportError:
     create_manager = None
 
-    def is_axidraw_available():
+
+def is_axidraw_available():
+    """Check if pyaxidraw is available."""
+    try:
+        import pyaxidraw  # noqa: F401
+
+        return True
+    except ImportError:
         return False
+
+
+def get_create_manager():
+    """Get create_manager function if available."""
+    try:
+        from plotty.drivers import create_manager
+
+        return create_manager
+    except ImportError:
+        return None
 
 
 class TestAxiDrawManager:
     """Test AxiDraw manager functionality."""
 
-    @pytest.mark.skipif(not is_axidraw_available(), reason="pyaxidraw not available")
+    @pytest.mark.skipif(
+        not is_axidraw_available() or create_manager is None,
+        reason="pyaxidraw not available",
+    )
     def test_create_manager(self):
         """Test manager creation."""
         manager = create_manager()
@@ -29,7 +50,10 @@ class TestAxiDrawManager:
         assert manager_with_port.port == "/dev/ttyUSB0"
 
     @patch("plotty.drivers.axidraw.axidraw")
-    @pytest.mark.skipif(not is_axidraw_available(), reason="pyaxidraw not available")
+    @pytest.mark.skipif(
+        not is_axidraw_available() or create_manager is None,
+        reason="pyaxidraw not available",
+    )
     def test_plot_file_success(self, mock_axidraw):
         """Test successful SVG plotting."""
         # Setup mock
@@ -59,6 +83,7 @@ class TestAxiDrawManager:
         assert mock_ad.options.speed_pendown == 30
 
     @patch("plotty.drivers.axidraw.axidraw")
+    @pytest.mark.skipif(create_manager is None, reason="create_manager not available")
     def test_plot_file_preview(self, mock_axidraw):
         """Test preview mode plotting."""
         mock_ad = Mock()
@@ -75,6 +100,7 @@ class TestAxiDrawManager:
         mock_ad.options.preview = True
 
     @patch("plotty.drivers.axidraw.axidraw")
+    @pytest.mark.skipif(create_manager is None, reason="create_manager not available")
     def test_plot_file_failure(self, mock_axidraw):
         """Test plot failure handling."""
         mock_ad = Mock()
@@ -92,6 +118,7 @@ class TestAxiDrawManager:
         assert result["error"] == "Connection failed"
 
     @patch("plotty.drivers.axidraw.axidraw")
+    @pytest.mark.skipif(create_manager is None, reason="create_manager not available")
     def test_interactive_operations(self, mock_axidraw):
         """Test interactive mode operations."""
         mock_ad = Mock()
@@ -137,6 +164,7 @@ class TestAxiDrawManager:
         mock_ad.pendown.assert_called_once()
         mock_ad.disconnect.assert_called_once()
 
+    @pytest.mark.skipif(create_manager is None, reason="create_manager not available")
     def test_interactive_not_connected(self):
         """Test operations when not connected."""
         manager = create_manager()
@@ -151,6 +179,7 @@ class TestAxiDrawManager:
             manager.pen_up()
 
     @patch("plotty.drivers.axidraw.axidraw")
+    @pytest.mark.skipif(create_manager is None, reason="create_manager not available")
     def test_pen_operations(self, mock_axidraw):
         """Test pen up/down operations."""
         mock_ad = Mock()
@@ -173,6 +202,7 @@ class TestAxiDrawManager:
         mock_ad.plot_run.assert_called()
 
     @patch("plotty.drivers.axidraw.axidraw")
+    @pytest.mark.skipif(create_manager is None, reason="create_manager not available")
     def test_sysinfo(self, mock_axidraw):
         """Test system information retrieval."""
         mock_ad = Mock()
@@ -193,6 +223,7 @@ class TestAxiDrawManager:
         mock_ad.plot_run.assert_called_once()
 
     @patch("plotty.drivers.axidraw.axidraw")
+    @pytest.mark.skipif(create_manager is None, reason="create_manager not available")
     def test_list_devices(self, mock_axidraw):
         """Test device listing."""
         mock_ad = Mock()
@@ -212,6 +243,7 @@ class TestAxiDrawManager:
         mock_ad.options.manual_cmd = "list_names"
         mock_ad.plot_run.assert_called_once()
 
+    @pytest.mark.skipif(create_manager is None, reason="create_manager not available")
     def test_set_units(self):
         """Test unit setting."""
         manager = create_manager()
@@ -231,6 +263,7 @@ class TestAxiDrawManager:
             manager.set_units("invalid")
 
     @patch("plotty.drivers.axidraw._AXIDRAW_AVAILABLE", False)
+    @pytest.mark.skipif(create_manager is None, reason="create_manager not available")
     def test_import_error_handling(self):
         """Test ImportError when pyaxidraw not available."""
         with pytest.raises(ImportError, match="pyaxidraw not found"):
@@ -250,10 +283,11 @@ class TestAxiDrawIntegration:
 
         # Test that create_manager can be called with the expected parameters
         try:
-            manager = create_manager(port="/dev/ttyUSB0", model=2)
-            # If pyaxidraw is available, verify the manager was created correctly
-            assert manager.port == "/dev/ttyUSB0"
-            assert manager.model == 2
+            if create_manager:
+                manager = create_manager(port="/dev/ttyUSB0", model=2)
+                # If pyaxidraw is available, verify the manager was created correctly
+                assert manager.port == "/dev/ttyUSB0"
+                assert manager.model == 2
         except ImportError:
             # If pyaxidraw is not available, that's expected in test environment
             pass
