@@ -10,6 +10,7 @@ name = "plotty"
 version = "1.0.0"
 description = "ploTTY: FSM plotter manager (headless-first) with vpype + per-session recording"
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.11"
 dependencies = [
     "typer>=0.12.3",

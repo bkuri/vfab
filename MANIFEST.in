@@ -1,0 +1,12 @@
+include LICENSE
+include README.md
+include CHANGELOG.md
+include RELEASE_NOTES.md
+include *.yaml
+include *.yml
+recursive-include src/plotty *.py
+recursive-include completions *
+recursive-include packaging *
+recursive-include docs *
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
