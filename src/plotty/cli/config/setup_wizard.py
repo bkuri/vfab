@@ -101,7 +101,7 @@ def setup() -> None:
                     "warning",
                 )
 
-        except Exception as e:
+        except Exception:
             show_status("⚠ Could not check AxiDraw availability", "warning")
 
         try:
