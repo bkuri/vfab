@@ -5,9 +5,9 @@ After=network.target
 [Service]
 Type=simple
 Environment=PYTHONUNBUFFERED=1
-Environment=PLOTTY_CONFIG=/etc/plotty/config.yaml
-ExecStart=/usr/bin/plottyd --workspace /var/lib/plotty
+Environment=PLOTTY_CONFIG=%h/.config/plotty/config.yaml
+ExecStart=/usr/bin/plottyd
 Restart=on-failure
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target

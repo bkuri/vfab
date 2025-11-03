@@ -4,11 +4,10 @@ Description=ploTTY daemon (container)
 [Container]
 Image=ghcr.io/yourorg/plotty:latest
 Network=host
-Volume=%h/plotty/workspace:/var/lib/plotty:Z
+Volume=%h/.local/share/plotty:/var/lib/plotty:Z
 Volume=%h/.config/plotty:/etc/plotty:Z
-Volume=%h/plotty/log:/var/log/plotty:Z
 Environment=PLOTTY_CONFIG=/etc/plotty/config.yaml
-Exec=plottyd --workspace /var/lib/plotty
+Exec=plottyd
 
 [Install]
 WantedBy=default.target

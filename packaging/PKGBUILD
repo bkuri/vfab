@@ -17,6 +17,7 @@ depends=(
   'python-jinja2>=3.1.0'
   'python-psutil>=5.9.0'
   'python-click>=8.0.0'
+  'python-platformdirs>=4.0.0'
 )
 makedepends=(
   'python-build'
@@ -82,6 +83,9 @@ package() {
 post_install() {
   echo "ploTTY v$pkgver has been installed successfully!"
   echo ""
+  echo "User data will be stored in: ~/.local/share/plotty/"
+  echo "Configuration: ~/.config/plotty/config.yaml"
+  echo ""
   echo "Quick start:"
   echo "  plotty setup                    # Run setup wizard"
   echo "  plotty job add drawing.svg      # Add a job"
@@ -93,8 +97,8 @@ post_install() {
   echo "  plotty plot drawing --device axidraw"
   echo ""
   echo "For statistics:"
-  echo "  uv run alembic upgrade head    # Initialize database"
   echo "  plotty stats summary           # View statistics"
+  echo "  (Database automatically initialized on first run)"
   echo ""
   echo "Documentation: /usr/share/doc/$pkgname/"
 }
@@ -106,5 +110,5 @@ post_upgrade() {
 
 pre_remove() {
   echo "Removing ploTTY..."
-  echo "Your workspace directory (~/plotty-workspace) will not be removed."
+  echo "Your user data directory (~/.local/share/plotty/) will not be removed."
 }
