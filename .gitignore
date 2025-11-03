@@ -135,6 +135,12 @@ _temp/
 *.html
 bandit-report.json
 coverage.xml
+backups/
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+.dmypy.json
 !config/config.yaml
 !config/vpype-presets.yaml
 !tests/fixtures/test_design.svg
