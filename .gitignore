@@ -125,7 +125,6 @@ dmypy.json
 # ploTTY specific
 workspace/
 logs/
-output/
 _temp/
 *.db
 *.sqlite
