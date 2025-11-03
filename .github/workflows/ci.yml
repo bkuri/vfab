@@ -37,6 +37,8 @@ jobs:
           uv pip install -e ".[dev,vpype]"
           # Install pytest-cov separately for coverage
           uv pip install pytest-cov
+          # Install AxiDraw support for testing
+          bash scripts/install_pyaxidraw.sh
           
       - name: Run database migrations
         run: |
