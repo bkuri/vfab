@@ -7,7 +7,7 @@ arch=('any')
 url="https://github.com/bkuri/plotty"
 license=('MIT')
 depends=(
-  'python>=3.11'
+  'python>=3.13'
   'python-typer'
   'python-pydantic'
   'python-yaml'
@@ -19,11 +19,11 @@ depends=(
   'python-click'
   'python-platformdirs'
   'python-defusedxml'
-  'vpype'
   'ffmpeg'
   'python-pillow'
   'python-matplotlib'
   'python-pandas'
+  'pipx'
 )
 makedepends=(
   'python-build'
@@ -33,7 +33,6 @@ makedepends=(
 )
 optdepends=(
   'python-pyaxidraw: AxiDraw plotter support (install from PyPI)'
-  'vpype: SVG optimization and processing (install from PyPI)'
   'ffmpeg: Camera recording and timelapse generation'
   'python-pillow: Image processing for reports'
   'python-matplotlib: Plot generation for statistics'
@@ -108,9 +107,9 @@ post_install() {
   echo "  plotty job plan drawing        # Plan the job"
   echo "  plotty plot drawing            # Plot the job"
   echo ""
-  echo "For AxiDraw support:"
-  echo "  plotty install-axidraw          # Install pyaxidraw dependency"
-  echo "  plotty plot drawing --device axidraw"
+  echo "Optional dependencies:"
+  echo "  plotty install-axidraw          # Install pyaxidraw for AxiDraw support"
+  echo "  pipx install \"vpype[all]\"       # Install vpype for SVG processing"
   echo ""
   echo "For statistics:"
   echo "  plotty stats summary           # View statistics"
