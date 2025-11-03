@@ -68,12 +68,11 @@ test_installation() {
     # Test import
     if uv run python -c "
 try:
-    from plotty.axidraw_integration import is_axidraw_available, get_axidraw_install_instructions
+    from plotty.drivers import is_axidraw_available
     if is_axidraw_available():
         print('✅ AxiDraw integration available')
     else:
         print('❌ AxiDraw integration not available')
-        print(f'Instructions: {get_axidraw_install_instructions()}')
         exit(1)
 except ImportError as e:
     print(f'❌ Import error: {e}')
