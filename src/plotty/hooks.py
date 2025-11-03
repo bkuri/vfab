@@ -66,7 +66,7 @@ class HookExecutor:
             substituted_cmd = self._substitute_variables(command, context)
             result = subprocess.run(
                 substituted_cmd,
-                shell=True,
+                shell=True,  # nosec B602 - needed for user-configured hook commands with variable substitution
                 capture_output=True,
                 text=True,
                 timeout=30,  # 30 second timeout

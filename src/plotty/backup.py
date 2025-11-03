@@ -7,6 +7,7 @@ and application state with compression, scheduling, and integrity verification.
 
 from __future__ import annotations
 
+import os
 import shutil
 import tarfile
 import tempfile
@@ -440,7 +441,24 @@ class BackupManager:
         mode = self._get_tar_mode_full("r")
 
         with tarfile.open(backup_path, mode) as tar:  # type: ignore
-            tar.extractall(temp_path)
+            # Safe extraction - check for path traversal attempts
+            def is_within_directory(directory, target):
+                abs_directory = os.path.abspath(directory)
+                abs_target = os.path.abspath(target)
+                prefix = os.path.commonprefix([abs_directory, abs_target])
+                return prefix == abs_directory
+
+            def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+                for member in tar.getmembers():
+                    member_path = os.path.join(path, member.name)
+                    if not is_within_directory(path, member_path):
+                        raise Exception("Attempted path traversal in tar file")
+
+                tar.extractall(
+                    path, members, numeric_owner=numeric_owner
+                )  # nosec B202 - safe extraction validated above
+
+            safe_extract(tar, str(temp_path))
 
     def _restore_config(self, temp_path: Path) -> None:
         """Restore configuration files."""

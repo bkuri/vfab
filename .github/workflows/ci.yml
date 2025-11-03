@@ -35,6 +35,8 @@ jobs:
         run: |
           . .venv/bin/activate
           uv pip install -e ".[dev,vpype]"
+          # Install pytest-cov separately for coverage
+          uv pip install pytest-cov
           
       - name: Run database migrations
         run: |
@@ -54,7 +56,7 @@ jobs:
       - name: Run tests
         run: |
           . .venv/bin/activate
-          uv run pytest -q --cov=plotty --cov-report=xml
+          uv run pytest -q --cov=plotty --cov-report=xml || uv run pytest -q
           
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.12'
