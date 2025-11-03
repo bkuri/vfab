@@ -65,45 +65,77 @@ def setup() -> None:
             show_status(f"✗ Failed to create workspace: {e}", "error")
             raise typer.Exit(ExitCode.ERROR)
 
-        # Device detection
+        # Device detection using new DeviceDetector
         show_boxed_progress("Detecting devices", 2, 3)
         axidraw_available = False
-        try:
-            import importlib.util
+        camera_available = False
 
-            spec = importlib.util.find_spec("plotty.drivers.axidraw")
-            axidraw_available = spec is not None
+        try:
+            from ...detection import DeviceDetector
+
+            # Use device config for remote detection if available
+            remote_host = (
+                getattr(cfg.device, "remote_detection_host", None) if cfg else None
+            )
+            timeout = getattr(cfg.device, "detection_timeout", 5) if cfg else 5
+
+            detector = DeviceDetector(remote_host=remote_host, timeout=timeout)
+
+            # Detect AxiDraw
+            axidraw_result = detector.detect_axidraw_devices()
+            axidraw_available = axidraw_result["count"] > 0
 
             if axidraw_available:
-                show_status("✓ AxiDraw driver available", "success")
+                accessible = (
+                    "accessible" if axidraw_result["accessible"] else "connected"
+                )
+                show_status(
+                    f"✓ AxiDraw {accessible} ({axidraw_result['count']} device{'s' if axidraw_result['count'] > 1 else ''})",
+                    "success",
+                )
+            elif axidraw_result["installed"]:
+                show_status("⚠ AxiDraw installed but no devices connected", "warning")
             else:
                 show_status(
-                    "⚠ AxiDraw driver not found (install with: pip install pyaxidraw)",
+                    "⚠ AxiDraw not installed (install with: pip install pyaxidraw)",
                     "warning",
                 )
-        except Exception:
+
+        except Exception as e:
             show_status("⚠ Could not check AxiDraw availability", "warning")
 
-        # Camera test
-        show_boxed_progress("Testing camera", 3, 3)
-        camera_available = False
         try:
-            # Simple camera detection
-            cv2 = __import__("cv2")
-            cap = cv2.VideoCapture(0)
-            if cap.isOpened():
-                camera_available = True
-                cap.release()
-                show_status("✓ Camera detected", "success")
+            from ...detection import DeviceDetector
+
+            # Detect Camera (reuse detector if available)
+            if "detector" not in locals():
+                remote_host = (
+                    getattr(cfg.device, "remote_detection_host", None) if cfg else None
+                )
+                timeout = getattr(cfg.device, "detection_timeout", 5) if cfg else 5
+                detector = DeviceDetector(remote_host=remote_host, timeout=timeout)
+
+            camera_result = detector.detect_camera_devices()
+            camera_available = camera_result["count"] > 0
+
+            if camera_available:
+                if camera_result["accessible"]:
+                    show_status(
+                        f"✓ Camera connected ({camera_result['count']} device{'s' if camera_result['count'] > 1 else ''})",
+                        "success",
+                    )
+                elif camera_result["motion_running"]:
+                    show_status(
+                        "⚠ Camera connected but blocked (motion service running)",
+                        "warning",
+                    )
+                else:
+                    show_status("⚠ Camera connected but inaccessible", "warning")
             else:
-                show_status("⚠ No camera detected", "warning")
-        except ImportError:
-            show_status(
-                "⚠ OpenCV not available (install with: pip install opencv-python)",
-                "warning",
-            )
+                show_status("⚠ No camera devices found", "warning")
+
         except Exception:
-            show_status("⚠ Camera test failed", "warning")
+            show_status("⚠ Camera detection failed", "warning")
 
         # Configuration summary
         if console:
@@ -178,17 +210,36 @@ def check_config() -> None:
         except Exception as e:
             issues.append(f"Failed to load configuration: {e}")
 
-        # Check device drivers
+        # Check device drivers using DeviceDetector
         try:
-            import importlib.util
+            from ...detection import DeviceDetector
 
-            spec = importlib.util.find_spec("plotty.drivers.axidraw")
-            if not spec:
-                warnings.append(
-                    "AxiDraw driver not available (install: pip install pyaxidraw)"
-                )
+            remote_host = (
+                getattr(cfg.device, "remote_detection_host", None) if cfg else None
+            )
+            timeout = getattr(cfg.device, "detection_timeout", 5) if cfg else 5
+
+            detector = DeviceDetector(remote_host=remote_host, timeout=timeout)
+
+            # Check AxiDraw
+            axidraw_result = detector.detect_axidraw_devices()
+            if axidraw_result["count"] == 0:
+                if axidraw_result["installed"]:
+                    warnings.append("AxiDraw installed but no devices connected")
+                else:
+                    warnings.append(
+                        "AxiDraw not available (install: pip install pyaxidraw)"
+                    )
+
+            # Check Camera
+            camera_result = detector.detect_camera_devices()
+            if camera_result["count"] == 0:
+                warnings.append("No camera devices found")
+            elif not camera_result["accessible"] and camera_result["motion_running"]:
+                warnings.append("Camera connected but blocked by motion service")
+
         except Exception:
-            warnings.append("Could not check AxiDraw driver availability")
+            warnings.append("Could not check device availability")
 
         # Check database
         try:
@@ -200,18 +251,6 @@ def check_config() -> None:
                 session.execute(text("SELECT 1"))
         except Exception as e:
             issues.append(f"Database connection failed: {e}")
-
-        # Check camera
-        try:
-            cv2 = __import__("cv2")
-            cap = cv2.VideoCapture(0)
-            if not cap.isOpened():
-                warnings.append("No camera detected")
-            cap.release()
-        except ImportError:
-            warnings.append("OpenCV not available (install: pip install opencv-python)")
-        except Exception:
-            warnings.append("Camera test failed")
 
         # Report results
         total_issues = len(issues) + len(warnings)

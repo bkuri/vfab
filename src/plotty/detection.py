@@ -130,18 +130,8 @@ class DeviceDetector:
 
     def _test_axidraw_access(self) -> bool:
         """Test if AxiDraw devices are accessible."""
-        # Try to import and initialize pyaxidraw
-        cmd = """
-python3 -c "
-try:
-    from pyaxidraw import axidraw
-    ad = axidraw.AxiDraw()
-    ad.interactive()
-    print('OK')
-except Exception as e:
-    print(f'ERROR: {e}')
-" 2>/dev/null
-"""
+        # Try to import and initialize pyaxidraw with simpler command for SSH compatibility
+        cmd = "python3 -c 'from pyaxidraw import axidraw; ad = axidraw.AxiDraw(); ad.interactive(); print(\"OK\")' 2>/dev/null"
         result = self._run_command(cmd)
         return result == "OK"
 

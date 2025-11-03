@@ -206,7 +206,8 @@ def get_axidraw_status(cfg) -> str:
         from ...detection import DeviceDetector
 
         detector = DeviceDetector(
-            remote_host=getattr(cfg.device, "remote_detection_host", None)
+            remote_host=getattr(cfg.device, "remote_detection_host", None),
+            timeout=getattr(cfg.device, "detection_timeout", 5),
         )
         result = detector.detect_axidraw_devices()
 
@@ -230,7 +231,8 @@ def get_camera_status(cfg) -> str:
             return "❌ Disabled"
 
         detector = DeviceDetector(
-            remote_host=getattr(cfg.device, "remote_detection_host", None)
+            remote_host=getattr(cfg.device, "remote_detection_host", None),
+            timeout=getattr(cfg.device, "detection_timeout", 5),
         )
         result = detector.detect_camera_devices()
 
