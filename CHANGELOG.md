@@ -5,6 +5,34 @@ All notable changes to ploTTY will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2025-11-03
+
+### 🏠 Architecture: Proper User Data Directory Structure
+
+### ✨ Added
+- **Platformdirs Integration**: Cross-platform user data directory support
+- **Data Migration**: Automatic migration from old relative paths to user directories
+- **XDG Compliance**: Proper Linux/Unix directory standards compliance
+
+### 🔄 Changed
+- **User Data Location**: Moved from `./workspace/` to `~/.local/share/plotty/workspace/`
+- **Database Location**: Moved from `./plotty.db` to `~/.local/share/plotty/plotty.db`
+- **Log Location**: Moved from `./logs/` to `~/.local/share/plotty/logs/`
+- **Backup Location**: Moved from `./backups/` to `~/.local/share/plotty/backups/`
+
+### 🛠️ Improved
+- **Installation Support**: Can now be properly installed system-wide
+- **Repository Organization**: Clean separation of code vs user data
+- **Packaging Updates**: PKGBUILD and container files updated for new structure
+- **CI/CD Pipeline**: Fixed security issues and improved test coverage
+
+### 📝 Migration Notes
+- Existing users will be automatically migrated on first run
+- Old data in `./workspace/` and `./plotty.db` will be moved to user directories
+- No manual intervention required for most users
+
+---
+
 ## [1.2.0] - 2025-11-03
 
 ### 🎉 Major Release: Statistics System & CSV Export

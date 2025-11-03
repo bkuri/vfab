@@ -109,4 +109,39 @@ def load_config(path: str | None = None) -> Settings:
                 full_db_path = Path(platformdirs.user_data_dir("plotty")) / db_path
                 data["database"]["url"] = f"sqlite:///{full_db_path}"
 
-    return Settings(**(data or {}))
+    settings = Settings(**(data or {}))
+
+    # Handle data migration from old locations
+    _migrate_from_old_locations()
+
+    return settings
+
+
+def _migrate_from_old_locations() -> None:
+    """Migrate data from old relative paths to new user data directory."""
+    import shutil
+
+    user_data_dir = Path(platformdirs.user_data_dir("plotty"))
+    user_data_dir.mkdir(parents=True, exist_ok=True)
+
+    # Migrate old workspace if it exists
+    old_workspace = Path("./workspace")
+    new_workspace = user_data_dir / "workspace"
+
+    if old_workspace.exists() and not new_workspace.exists():
+        try:
+            shutil.move(str(old_workspace), str(new_workspace))
+            print(f"Migrated workspace from {old_workspace} to {new_workspace}")
+        except Exception as e:
+            print(f"Warning: Failed to migrate workspace: {e}")
+
+    # Migrate old database if it exists
+    old_db = Path("./plotty.db")
+    new_db = user_data_dir / "plotty.db"
+
+    if old_db.exists() and not new_db.exists():
+        try:
+            shutil.move(str(old_db), str(new_db))
+            print(f"Migrated database from {old_db} to {new_db}")
+        except Exception as e:
+            print(f"Warning: Failed to migrate database: {e}")
