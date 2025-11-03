@@ -9,15 +9,7 @@ import typer
 
 from ...utils import error_handler
 from ...codes import ExitCode
-
-try:
-    from rich.console import Console
-    from rich.table import Table
-
-    console = Console()
-except ImportError:
-    console = None
-    Table = None
+from ..status.output import get_output_manager
 
 
 def list_guards(
@@ -54,14 +46,29 @@ def list_guards(
             writer.writerow(headers)
             writer.writerows(rows)
         else:
-            # Markdown output (default)
-            typer.echo("# 🛡️ Available System Guards")
-            typer.echo()
-            typer.echo("| " + " | ".join(headers) + " |")
-            typer.echo("| " + " | ".join(["---"] * len(headers)) + " |")
+            # Rich table output (default)
+            output = get_output_manager()
 
-            for row in rows:
-                typer.echo("| " + " | ".join(row) + " |")
+            # Build markdown content
+            markdown_content = output.print_table_markdown(
+                title="🛡️ Available System Guards", headers=headers, rows=rows
+            )
+
+            # Prepare JSON data
+            json_data = {
+                "guards": [
+                    {"name": name, "description": desc, "type": guard_type}
+                    for name, desc, guard_type in guards_info
+                ]
+            }
+
+            # Output using the manager
+            output.print_markdown(
+                content=markdown_content,
+                json_data=json_data,
+                json_output=json_output,
+                csv_output=csv_output,
+            )
 
     except Exception as e:
         error_handler.handle(e)

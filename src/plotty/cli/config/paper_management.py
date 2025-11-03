@@ -6,6 +6,8 @@ from __future__ import annotations
 
 import typer
 
+from ..status.output import get_output_manager
+
 try:
     from rich.console import Console
     from rich.prompt import Confirm
@@ -63,22 +65,24 @@ def paper_list(
                     ]
                 )
 
+            # Prepare JSON data
+            papers_data = []
+            for i, paper in enumerate(papers):
+                papers_data.append(
+                    {
+                        "id": getattr(paper, "id", 0),
+                        "name": getattr(paper, "name", "Unknown"),
+                        "width_mm": getattr(paper, "width_mm", 0),
+                        "height_mm": getattr(paper, "height_mm", 0),
+                        "margin_mm": getattr(paper, "margin_mm", 0),
+                        "orientation": getattr(paper, "orientation", "Unknown"),
+                    }
+                )
+
             # Output in requested format
             if json_output:
                 import json
 
-                papers_data = []
-                for i, paper in enumerate(papers):
-                    papers_data.append(
-                        {
-                            "id": getattr(paper, "id", 0),
-                            "name": getattr(paper, "name", "Unknown"),
-                            "width_mm": getattr(paper, "width_mm", 0),
-                            "height_mm": getattr(paper, "height_mm", 0),
-                            "margin_mm": getattr(paper, "margin_mm", 0),
-                            "orientation": getattr(paper, "orientation", "Unknown"),
-                        }
-                    )
                 typer.echo(json.dumps(papers_data, indent=2, default=str))
             elif csv_output:
                 import csv
@@ -88,14 +92,23 @@ def paper_list(
                 writer.writerow(headers)
                 writer.writerows(rows)
             else:
-                # Markdown output (default)
-                typer.echo("# 📄 Available Paper Configurations")
-                typer.echo()
-                typer.echo("| " + " | ".join(headers) + " |")
-                typer.echo("| " + " | ".join(["---"] * len(headers)) + " |")
+                # Rich table output (default)
+                output = get_output_manager()
 
-                for row in rows:
-                    typer.echo("| " + " | ".join(row) + " |")
+                # Build markdown content
+                markdown_content = output.print_table_markdown(
+                    title="📄 Available Paper Configurations",
+                    headers=headers,
+                    rows=rows,
+                )
+
+                # Output using the manager
+                output.print_markdown(
+                    content=markdown_content,
+                    json_data={"papers": papers_data},
+                    json_output=json_output,
+                    csv_output=csv_output,
+                )
 
     except Exception as e:
         from ...utils import error_handler

@@ -11,15 +11,7 @@ import json
 from ...config import load_config
 from ...utils import error_handler
 from ...progress import show_status
-
-try:
-    from rich.console import Console
-    from rich.table import Table
-
-    console = Console()
-except ImportError:
-    console = None
-    Table = None
+from ..status.output import get_output_manager
 
 list_app = typer.Typer(help="List jobs")
 
@@ -27,6 +19,7 @@ list_app = typer.Typer(help="List jobs")
 @list_app.command("jobs")
 def jobs(
     json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
+    csv_output: bool = typer.Option(False, "--csv", help="Output in CSV format"),
 ):
     """List all jobs in workspace."""
     try:
@@ -99,12 +92,11 @@ def jobs(
             print(json.dumps(jobs, indent=2, default=str))
             return
 
-        # Markdown output (default)
-        typer.echo(f"# Jobs ({len(jobs)} total)")
-        typer.echo()
-        typer.echo("| ID | Name | State | Paper | Layers | Est. Time |")
-        typer.echo("|----|------|-------|--------|--------|-----------|")
+        # Rich table output (default)
+        output = get_output_manager()
 
+        # Prepare rows with formatted time
+        formatted_rows = []
         for job in jobs:
             time_str = "Unknown"
             if job["time_estimate"]:
@@ -113,10 +105,31 @@ def jobs(
                 else:
                     time_str = f"{job['time_estimate'] / 60:.1f}m"
 
-            typer.echo(
-                f"| {job['id']} | {job['name'][:20]} | {job['state']} | {job['paper']} | "
-                f"{job['layer_count'] if job['layer_count'] else 'Unknown'} | {time_str} |"
+            formatted_rows.append(
+                [
+                    job["id"],
+                    job["name"][:20],
+                    job["state"],
+                    job["paper"],
+                    str(job["layer_count"]) if job["layer_count"] else "Unknown",
+                    time_str,
+                ]
             )
+
+        headers = ["ID", "Name", "State", "Paper", "Layers", "Est. Time"]
+
+        # Build markdown content
+        markdown_content = output.print_table_markdown(
+            title=f"Jobs ({len(jobs)} total)", headers=headers, rows=formatted_rows
+        )
+
+        # Output using the manager
+        output.print_markdown(
+            content=markdown_content,
+            json_data={"jobs": jobs},
+            json_output=json_output,
+            csv_output=csv_output,
+        )
 
     except Exception as e:
         error_handler.handle(e)

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import typer
 from ...utils import error_handler
+from ..status.output import get_output_manager
 
 try:
     from rich.console import Console
@@ -46,21 +47,23 @@ def list_plot_presets(
                 ]
             )
 
+        # Prepare JSON data
+        presets_data = []
+        for preset in all_presets.values():
+            presets_data.append(
+                {
+                    "name": preset.name,
+                    "description": preset.description,
+                    "speed": preset.speed,
+                    "pen_pressure": preset.pen_pressure,
+                    "passes": preset.passes,
+                }
+            )
+
         # Output in requested format
         if json_output:
             import json
 
-            presets_data = []
-            for preset in all_presets.values():
-                presets_data.append(
-                    {
-                        "name": preset.name,
-                        "description": preset.description,
-                        "speed": preset.speed,
-                        "pen_pressure": preset.pen_pressure,
-                        "passes": preset.passes,
-                    }
-                )
             typer.echo(json.dumps(presets_data, indent=2))
         elif csv_output:
             import csv
@@ -70,14 +73,21 @@ def list_plot_presets(
             writer.writerow(headers)
             writer.writerows(rows)
         else:
-            # Markdown output (default)
-            typer.echo("# Available Plot Presets")
-            typer.echo()
-            typer.echo("| " + " | ".join(headers) + " |")
-            typer.echo("| " + " | ".join(["---"] * len(headers)) + " |")
+            # Rich table output (default)
+            output = get_output_manager()
 
-            for row in rows:
-                typer.echo("| " + " | ".join(row) + " |")
+            # Build markdown content
+            markdown_content = output.print_table_markdown(
+                title="Available Plot Presets", headers=headers, rows=rows
+            )
+
+            # Output using the manager
+            output.print_markdown(
+                content=markdown_content,
+                json_data={"presets": presets_data},
+                json_output=json_output,
+                csv_output=csv_output,
+            )
 
     except Exception as e:
         error_handler.handle(e)

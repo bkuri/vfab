@@ -99,20 +99,34 @@ class OutputFormatter:
             self._render_markdown()
             return
 
+        # Create console that handles redirection properly
+        if not RICH_AVAILABLE:
+            self._render_markdown()
+            return
+
+        from rich.console import Console as RichConsole
+
+        is_redirected = not sys.stdout.isatty()
+        render_console = (
+            RichConsole(force_terminal=False, legacy_windows=False)
+            if is_redirected
+            else console
+        )
+
         if self.title and Panel and Text:
             title_panel = Panel(
                 Text(self.title, style="bold white"),
                 border_style="blue",
                 padding=(0, 1),
             )
-            console.print(title_panel)
-            console.print()
+            render_console.print(title_panel)
+            render_console.print()
 
         for section in self.sections:
             if section["type"] == "text":
-                console.print(f"## {section['title']}")
-                console.print(section["content"])
-                console.print()
+                render_console.print(f"## {section['title']}")
+                render_console.print(section["content"])
+                render_console.print()
 
             elif section["type"] == "table" and Table:
                 table_data = section["content"]
@@ -124,8 +138,8 @@ class OutputFormatter:
                 for row in table_data["rows"]:
                     table.add_row(*row)
 
-                console.print(table)
-                console.print()
+                render_console.print(table)
+                render_console.print()
 
             elif section["type"] == "key_value" and Table:
                 kv_table = Table(title=section["title"], show_header=False)
@@ -135,8 +149,8 @@ class OutputFormatter:
                 for key, value in section["content"].items():
                     kv_table.add_row(key, value)
 
-                console.print(kv_table)
-                console.print()
+                render_console.print(kv_table)
+                render_console.print()
 
     def _render_markdown(self) -> None:
         """Render as markdown."""

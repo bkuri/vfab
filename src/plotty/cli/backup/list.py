@@ -10,6 +10,7 @@ from typing import Optional
 import typer
 
 from ...backup import BackupConfig, BackupManager
+from ..status.output import get_output_manager
 
 list_app = typer.Typer(name="list", help="List available backups", no_args_is_help=True)
 
@@ -74,15 +75,23 @@ def backups(
             writer.writerow(headers)
             writer.writerows(rows)
         else:
-            # Markdown output (default)
-            typer.echo(f"# Backup Listing ({len(backups)} backups)")
-            typer.echo()
-            typer.echo("## Available Backups")
-            typer.echo("| " + " | ".join(headers) + " |")
-            typer.echo("| " + " | ".join(["---"] * len(headers)) + " |")
+            # Rich table output (default)
+            output = get_output_manager()
 
-            for row in rows:
-                typer.echo("| " + " | ".join(row) + " |")
+            # Build markdown content
+            markdown_content = output.print_table_markdown(
+                title=f"Backup Listing ({len(backups)} backups)",
+                headers=headers,
+                rows=rows,
+            )
+
+            # Output using the manager
+            output.print_markdown(
+                content=markdown_content,
+                json_data={"backups": backups},
+                json_output=json_output,
+                csv_output=csv_output,
+            )
 
     except Exception as e:
         from ...utils import error_handler
