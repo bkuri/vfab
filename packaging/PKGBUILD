@@ -1,6 +1,6 @@
 # Maintainer: Bernardo Kuri <github@bkuri.com>
 pkgname=plotty
-pkgver=1.2.0
+pkgver=1.0.0
 pkgrel=1
 pkgdesc="ploTTY: FSM plotter manager (headless-first) with vpype + per-session recording"
 arch=('any')
