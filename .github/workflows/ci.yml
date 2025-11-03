@@ -1,12 +1,138 @@
-name: ci
-on: [push, pull_request]
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main ]
+  release:
+    types: [ published ]
+
 jobs:
   test:
+    name: Test Suite
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v3
-      - run: uv python install 3.12
-      - run: uv venv && . .venv/bin/activate && uv pip install -e ".[dev,vpype]"
-      - run: uv run alembic upgrade head
-      - run: uv run pytest -q
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+        
+      - name: Create virtual environment
+        run: uv venv
+        
+      - name: Install dependencies
+        run: |
+          . .venv/bin/activate
+          uv pip install -e ".[dev,vpype]"
+          
+      - name: Run database migrations
+        run: |
+          . .venv/bin/activate
+          uv run alembic upgrade head
+          
+      - name: Run linting
+        run: |
+          . .venv/bin/activate
+          uvx ruff check .
+          
+      - name: Run formatting check
+        run: |
+          . .venv/bin/activate
+          uvx black --check .
+          
+      - name: Run tests
+        run: |
+          . .venv/bin/activate
+          uv run pytest -q --cov=plotty --cov-report=xml
+          
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.12'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+
+  build:
+    name: Build Package
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
+        
+      - name: Build package
+        run: |
+          uv python install 3.12
+          uv build --wheel
+          
+      - name: Check package
+        run: |
+          uv python install 3.12
+          uv pip install dist/*.whl
+          
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Run Bandit security scan
+        run: |
+          pip install bandit[toml]
+          bandit -r src/ -f json -o bandit-report.json || true
+          bandit -r src/
+          
+      - name: Upload security scan results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-scan
+          path: bandit-report.json
+
+  publish:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    needs: [test, build]
+    if: github.event_name == 'release' && github.event.action == 'published'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
+        
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}

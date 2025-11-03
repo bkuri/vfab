@@ -1,0 +1,110 @@
+# Maintainer: Bernardo Kuri <github@bkuri.com>
+pkgname=plotty
+pkgver=1.2.0
+pkgrel=1
+pkgdesc="ploTTY: FSM plotter manager (headless-first) with vpype + per-session recording"
+arch=('any')
+url="https://github.com/bkuri/plotty"
+license=('MIT')
+depends=(
+  'python>=3.11'
+  'python-typer>=0.12.3'
+  'python-pydantic>=2.9'
+  'python-pyyaml>=6.0.2'
+  'python-sqlalchemy>=2.0.36'
+  'python-alembic>=1.13.2'
+  'python-rich>=13.0.0'
+  'python-jinja2>=3.1.0'
+  'python-psutil>=5.9.0'
+  'python-click>=8.0.0'
+)
+makedepends=(
+  'python-build'
+  'python-installer'
+  'python-wheel'
+  'python-setuptools'
+)
+optdepends=(
+  'python-pyaxidraw: AxiDraw plotter support'
+  'vpype: SVG optimization and processing'
+  'ffmpeg: Camera recording and timelapse generation'
+  'python-pillow: Image processing for reports'
+  'python-matplotlib: Plot generation for statistics'
+  'python-pandas: Data analysis for statistics'
+)
+checkdepends=(
+  'python-pytest'
+  'python-pytest-cov'
+)
+provides=('plotty')
+conflicts=('plotty')
+source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "$pkgname-$pkgver"
+  python -m build --wheel --no-isolation
+}
+
+check() {
+  cd "$pkgname-$pkgver"
+  local python_version=$(python -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
+  
+  # Install test dependencies
+  pip install pytest pytest-cov
+  
+  # Run tests
+  PYTHONPATH="$PWD/src" pytest tests/ -v
+}
+
+package() {
+  cd "$pkgname-$pkgver"
+  python -m installer --destdir="$pkgdir" dist/*.whl
+  
+  # Install documentation
+  install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+  install -Dm644 CHANGELOG.md "$pkgdir/usr/share/doc/$pkgname/CHANGELOG.md"
+  install -Dm644 docs/requirements/v1.md "$pkgdir/usr/share/doc/$pkgname/REQUIREMENTS.md"
+  
+  # Install license
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  
+  # Install systemd service files
+  install -Dm644 systemd/plottyd.service "$pkgdir/usr/lib/systemd/user/plottyd.service"
+  install -Dm644 packaging/quadlet/plottyd.container "$pkgdir/usr/share/containers/systemd/plottyd.container"
+  
+  # Install shell completions
+  install -Dm644 completions/bash/plotty "$pkgdir/usr/share/bash-completion/completions/plotty"
+  install -Dm644 completions/zsh/_plotty "$pkgdir/usr/share/zsh/site-functions/_plotty"
+  install -Dm644 completions/fish/plotty.fish "$pkgdir/usr/share/fish/vendor_completions.d/plotty.fish"
+}
+
+post_install() {
+  echo "ploTTY v$pkgver has been installed successfully!"
+  echo ""
+  echo "Quick start:"
+  echo "  plotty setup                    # Run setup wizard"
+  echo "  plotty job add drawing.svg      # Add a job"
+  echo "  plotty job plan drawing        # Plan the job"
+  echo "  plotty plot drawing            # Plot the job"
+  echo ""
+  echo "For AxiDraw support:"
+  echo "  pip install pyaxidraw"
+  echo "  plotty plot drawing --device axidraw"
+  echo ""
+  echo "For statistics:"
+  echo "  uv run alembic upgrade head    # Initialize database"
+  echo "  plotty stats summary           # View statistics"
+  echo ""
+  echo "Documentation: /usr/share/doc/$pkgname/"
+}
+
+post_upgrade() {
+  echo "ploTTY has been upgraded to v$pkgver"
+  echo "Run 'uv run alembic upgrade head' to update the database schema"
+}
+
+pre_remove() {
+  echo "Removing ploTTY..."
+  echo "Your workspace directory (~/plotty-workspace) will not be removed."
+}

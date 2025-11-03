@@ -7,6 +7,7 @@ This package contains the main CLI interface split into logical command groups.
 from __future__ import annotations
 
 import typer
+from importlib import metadata
 
 from .plot import plot_app
 from .job import job_app
@@ -20,6 +21,12 @@ from .backup import backup_app
 
 # Import status commands
 from .status import status_app
+
+# Get version
+try:
+    __version__ = metadata.version("plotty")
+except metadata.PackageNotFoundError:
+    __version__ = "1.2.0"
 
 # Create main app
 app = typer.Typer(no_args_is_help=False, invoke_without_command=True)
@@ -38,9 +45,15 @@ app.add_typer(backup_app, name="backup", help="Backup and restore commands")
 
 
 @app.callback()
-def main_callback():
+def main_callback(
+    version: bool = typer.Option(
+        False, "--version", "-v", help="Show version and exit"
+    ),
+):
     """ploTTY - Plotter management system."""
-    pass
+    if version:
+        typer.echo(f"ploTTY v{__version__}")
+        raise typer.Exit()
 
 
 if __name__ == "__main__":
