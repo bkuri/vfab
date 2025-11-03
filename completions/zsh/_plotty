@@ -1,0 +1,26 @@
+#compdef plotty
+# Zsh completion for ploTTY
+_plotty() {
+    local -a commands
+    commands=(
+        'job:Manage plotting jobs'
+        'plot:Plot jobs interactively'
+        'batch:Batch process multiple jobs'
+        'stats:View statistics and analytics'
+        'backup:Backup and restore data'
+        'recovery:Crash recovery operations'
+        'guard:System validation and checks'
+        'config:Configuration management'
+        'logging:Log management'
+        'status:System status information'
+        '--help:Show help'
+        '--version:Show version'
+    )
+    
+    if (( CURRENT == 2 )); then
+        _describe 'command' commands
+    else
+        _files
+    fi
+}
+_plotty

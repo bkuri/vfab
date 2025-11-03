@@ -18,6 +18,7 @@ depends=(
   'python-psutil>=5.9.0'
   'python-click>=8.0.0'
   'python-platformdirs>=4.0.0'
+  'python-defusedxml>=0.7.1'
 )
 makedepends=(
   'python-build'
@@ -39,8 +40,8 @@ checkdepends=(
 )
 provides=('plotty')
 conflicts=('plotty')
-source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
-sha256sums=('SKIP')
+source=("$pkgname-$pkgver.tar.gz::https://github.com/bkuri/plotty/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5')
 
 build() {
   cd "$pkgname-$pkgver"

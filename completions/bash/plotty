@@ -1,0 +1,13 @@
+# Bash completion for ploTTY
+_plotty_completion() {
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    
+    if [[ ${cur} == * ]] ; then
+        COMPREPLY=( $(compgen -W "job plot batch stats backup recovery guard config logging status --help --version" -- ${cur}) 
+        return 0
+    fi
+}
+complete -F _plotty_completion plotty
