@@ -133,9 +133,10 @@ _temp/
 *.jsonl
 *.mp4
 *.html
+bandit-report.json
+coverage.xml
 !config/config.yaml
 !config/vpype-presets.yaml
-!test_design.svg
-!systemd/
+!tests/fixtures/test_design.svg
 !packaging/
 !alembic.ini

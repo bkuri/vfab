@@ -70,7 +70,7 @@ package() {
   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
   
   # Install systemd service files
-  install -Dm644 systemd/plottyd.service "$pkgdir/usr/lib/systemd/user/plottyd.service"
+  install -Dm644 packaging/systemd/plottyd.service "$pkgdir/usr/lib/systemd/user/plottyd.service"
   install -Dm644 packaging/quadlet/plottyd.container "$pkgdir/usr/share/containers/systemd/plottyd.container"
   
   # Install shell completions
