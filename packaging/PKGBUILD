@@ -8,17 +8,17 @@ url="https://github.com/bkuri/plotty"
 license=('MIT')
 depends=(
   'python>=3.11'
-  'python-typer>=0.12.3'
-  'python-pydantic>=2.9'
-  'python-pyyaml>=6.0.2'
-  'python-sqlalchemy>=2.0.36'
-  'python-alembic>=1.13.2'
-  'python-rich>=13.0.0'
-  'python-jinja2>=3.1.0'
-  'python-psutil>=5.9.0'
-  'python-click>=8.0.0'
-  'python-platformdirs>=4.0.0'
-  'python-defusedxml>=0.7.1'
+  'python-typer'
+  'python-pydantic'
+  'python-yaml'
+  'python-sqlalchemy'
+  'python-alembic'
+  'python-rich'
+  'python-jinja'
+  'python-psutil'
+  'python-click'
+  'python-platformdirs'
+  'python-defusedxml'
 )
 makedepends=(
   'python-build'
@@ -27,8 +27,8 @@ makedepends=(
   'python-setuptools'
 )
 optdepends=(
-  'python-pyaxidraw: AxiDraw plotter support'
-  'vpype: SVG optimization and processing'
+  'python-pyaxidraw: AxiDraw plotter support (install from PyPI)'
+  'vpype: SVG optimization and processing (install from PyPI)'
   'ffmpeg: Camera recording and timelapse generation'
   'python-pillow: Image processing for reports'
   'python-matplotlib: Plot generation for statistics'
