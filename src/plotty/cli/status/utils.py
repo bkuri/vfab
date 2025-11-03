@@ -200,20 +200,51 @@ def format_state(state: str) -> str:
     return f"[{color}]{state}[/{color}]"
 
 
-def get_axidraw_status() -> str:
-    """Check AxiDraw availability."""
+def get_axidraw_status(cfg) -> str:
+    """Check actual AxiDraw hardware status."""
     try:
-        import importlib.util
+        from ...detection import DeviceDetector
 
-        spec = importlib.util.find_spec("plotty.drivers.axidraw")
-        return "✅ Available" if spec else "❌ Not installed"
+        detector = DeviceDetector(
+            remote_host=getattr(cfg.device, "remote_detection_host", None)
+        )
+        result = detector.detect_axidraw_devices()
+
+        if result["count"] > 0:
+            accessible = "accessible" if result["accessible"] else "connected"
+            return f"✅ {accessible.capitalize()} ({result['count']} device{'s' if result['count'] > 1 else ''})"
+        elif result["installed"]:
+            return "❌ Not connected"
+        else:
+            return "❌ Not installed"
     except Exception:
         return "❌ Error checking"
 
 
 def get_camera_status(cfg) -> str:
-    """Get camera status string."""
-    return "✅ Enabled" if cfg.camera.mode != "disabled" else "❌ Disabled"
+    """Check actual camera hardware status."""
+    try:
+        from ...detection import DeviceDetector
+
+        if cfg.camera.mode == "disabled":
+            return "❌ Disabled"
+
+        detector = DeviceDetector(
+            remote_host=getattr(cfg.device, "remote_detection_host", None)
+        )
+        result = detector.detect_camera_devices()
+
+        if result["count"] > 0:
+            if result["accessible"]:
+                return f"✅ Connected ({result['count']} device{'s' if result['count'] > 1 else ''})"
+            elif result["motion_running"]:
+                return "⚠️ Connected but blocked (motion running)"
+            else:
+                return "⚠️ Connected but inaccessible"
+        else:
+            return "❌ No devices found"
+    except Exception:
+        return "❌ Error checking"
 
 
 def count_jobs_by_state(jobs: List[Dict[str, Any]]) -> Dict[str, int]:

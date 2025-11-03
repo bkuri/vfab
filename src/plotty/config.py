@@ -12,6 +12,8 @@ class CameraCfg(BaseModel):
     device: str | None = None
     enabled: bool = True
     timelapse_fps: int = 1
+    test_access: bool = True
+    motion_service: str = "motion"
 
 
 class DatabaseCfg(BaseModel):
@@ -29,6 +31,8 @@ class DeviceCfg(BaseModel):
     speed_pendown: int = 25
     speed_penup: int = 75
     units: str = "inches"
+    remote_detection_host: str | None = None
+    detection_timeout: int = 5
 
 
 class VpypeCfg(BaseModel):

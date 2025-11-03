@@ -34,7 +34,7 @@ def show_system_status(
         cfg = load_config(None)
 
         # Check AxiDraw availability
-        axidraw_status = get_axidraw_status()
+        axidraw_status = get_axidraw_status(cfg)
         camera_status = get_camera_status(cfg)
 
         # Count jobs
@@ -120,9 +120,10 @@ def show_quick_status(
         cfg = load_config(None)
 
         # Check AxiDraw availability
-        axidraw_status = get_axidraw_status()
-        axi_available = "Available" in axidraw_status
-        cam_enabled = cfg.camera.mode != "disabled"
+        axidraw_status = get_axidraw_status(cfg)
+        camera_status = get_camera_status(cfg)
+        axi_available = "Connected" in axidraw_status or "Accessible" in axidraw_status
+        cam_available = "Connected" in camera_status or "Enabled" in camera_status
 
         # Queue summary
         jobs_dir = Path(cfg.workspace) / "jobs"
@@ -145,7 +146,7 @@ def show_quick_status(
         json_data = {
             "system": {
                 "axidraw_available": axi_available,
-                "camera_enabled": cam_enabled,
+                "camera_enabled": cam_available,
                 "workspace": cfg.workspace,
             },
             "queue": queue_summary,
@@ -164,7 +165,7 @@ def show_quick_status(
                 "section": "System",
                 "category": "Camera",
                 "item": "",
-                "value": "✅" if cam_enabled else "❌",
+                "value": "✅" if cam_available else "❌",
             },
             {
                 "section": "System",
@@ -237,7 +238,7 @@ def show_quick_status(
 
         markdown_content = f"""## System
 - AxiDraw: {"✅" if axi_available else "❌"}
-- Camera: {"✅" if cam_enabled else "❌"}
+- Camera: {"✅" if cam_available else "❌"}
 - Workspace: {Path(cfg.workspace).name}
 
 ## Queue
@@ -272,7 +273,7 @@ def show_status_overview(
         cfg = load_config(None)
 
         # Check AxiDraw availability first (needed for both JSON and markdown)
-        axidraw_status = get_axidraw_status()
+        axidraw_status = get_axidraw_status(cfg)
         camera_status = get_camera_status(cfg)
 
         # Count jobs (needed for both JSON and markdown)
