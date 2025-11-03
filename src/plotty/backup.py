@@ -457,7 +457,9 @@ class BackupManager:
                     if not is_within_directory(path, member_path):
                         raise Exception("Attempted path traversal in tar file")
 
-                tar.extractall(path, members, numeric_owner=numeric_owner)  # nosec B202 - safe extraction validated above
+                tar.extractall(
+                    path, members, numeric_owner=numeric_owner
+                )  # nosec B202 - safe extraction validated above
 
             safe_extract(tar, str(temp_path))
 
