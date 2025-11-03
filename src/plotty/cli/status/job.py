@@ -53,41 +53,89 @@ def show_job_details(
             "estimates": estimates,
         }
 
-        # Build CSV data
-        csv_data = [["Job Details"]]
-        csv_data.extend(
-            [
-                ["Property", "Value"],
-                ["ID", job_data.get("id", "Unknown")],
-                ["Name", job_data.get("name", "Unknown")],
-                ["State", job_data.get("state", "UNKNOWN")],
-                ["Config Status", job_data.get("config_status", "DEFAULTS")],
-                ["Paper", job_data.get("paper", "Unknown")],
-            ]
-        )
+        # Build hierarchical CSV data for job info
+        hierarchical_csv_data = [
+            {
+                "section": "Job Details",
+                "category": "ID",
+                "item": "",
+                "value": job_data.get("id", "Unknown"),
+            },
+            {
+                "section": "Job Details",
+                "category": "Name",
+                "item": "",
+                "value": job_data.get("name", "Unknown"),
+            },
+            {
+                "section": "Job Details",
+                "category": "State",
+                "item": "",
+                "value": job_data.get("state", "UNKNOWN"),
+            },
+            {
+                "section": "Job Details",
+                "category": "Config Status",
+                "item": "",
+                "value": job_data.get("config_status", "DEFAULTS"),
+            },
+            {
+                "section": "Job Details",
+                "category": "Paper",
+                "item": "",
+                "value": job_data.get("paper", "Unknown"),
+            },
+        ]
 
         if "created_at" in job_data:
-            csv_data.append(["Created", job_data["created_at"]])
+            hierarchical_csv_data.append(
+                {
+                    "section": "Job Details",
+                    "category": "Created",
+                    "item": "",
+                    "value": job_data["created_at"],
+                }
+            )
         if "updated_at" in job_data:
-            csv_data.append(["Updated", job_data["updated_at"]])
+            hierarchical_csv_data.append(
+                {
+                    "section": "Job Details",
+                    "category": "Updated",
+                    "item": "",
+                    "value": job_data["updated_at"],
+                }
+            )
+
+        # Build tabular CSV data for layers
+        tabular_csv_data = None
 
         if plan_data:
-            csv_data.extend(
+            hierarchical_csv_data.extend(
                 [
-                    [],
-                    ["Plan Information"],
-                    ["Layers", str(len(layers))],
+                    {
+                        "section": "Plan Information",
+                        "category": "Layers",
+                        "item": "",
+                        "value": str(len(layers)),
+                    },
                 ]
             )
 
             if estimates:
-                csv_data.extend(
+                hierarchical_csv_data.extend(
                     [
-                        ["Pre-optimization time", format_time(estimates.get("pre_s"))],
-                        [
-                            "Post-optimization time",
-                            format_time(estimates.get("post_s")),
-                        ],
+                        {
+                            "section": "Plan Information",
+                            "category": "Pre-optimization time",
+                            "item": "",
+                            "value": format_time(estimates.get("pre_s")),
+                        },
+                        {
+                            "section": "Plan Information",
+                            "category": "Post-optimization time",
+                            "item": "",
+                            "value": format_time(estimates.get("post_s")),
+                        },
                     ]
                 )
 
@@ -95,38 +143,57 @@ def show_job_details(
                     improvement = (
                         (estimates["pre_s"] - estimates["post_s"]) / estimates["pre_s"]
                     ) * 100
-                    csv_data.append(["Time improvement", f"{improvement:.1f}%"])
-
-            total_segments = sum(layer.get("segments", 0) for layer in layers)
-            csv_data.append(["Total segments", f"{total_segments:,}"])
-
-            if layers:
-                csv_data.extend(
-                    [
-                        [],
-                        ["Layer Details"],
-                        ["Layer", "Color", "Segments", "Time"],
-                    ]
-                )
-
-                for i, layer in enumerate(layers, 1):
-                    csv_data.append(
-                        [
-                            str(i),
-                            layer.get("color", "Unknown"),
-                            str(layer.get("segments", 0)),
-                            format_time(layer.get("time_s")),
-                        ]
+                    hierarchical_csv_data.append(
+                        {
+                            "section": "Plan Information",
+                            "category": "Time improvement",
+                            "item": "",
+                            "value": f"{improvement:.1f}%",
+                        }
                     )
 
+            total_segments = sum(layer.get("segments", 0) for layer in layers)
+            hierarchical_csv_data.append(
+                {
+                    "section": "Plan Information",
+                    "category": "Total segments",
+                    "item": "",
+                    "value": f"{total_segments:,}",
+                }
+            )
+
+            if layers:
+                layer_headers = ["Layer", "Color", "Segments", "Time"]
+                layer_rows = []
+
+                for i, layer in enumerate(layers, 1):
+                    layer_rows.append(
+                        {
+                            "Layer": str(i),
+                            "Color": layer.get("color", "Unknown"),
+                            "Segments": str(layer.get("segments", 0)),
+                            "Time": format_time(layer.get("time_s")),
+                        }
+                    )
+
+                tabular_csv_data = {
+                    "headers": layer_headers,
+                    "rows": layer_rows,
+                }
+
         if job_data.get("state") == "FAILED" and "error" in job_data:
-            csv_data.extend(
+            hierarchical_csv_data.extend(
                 [
-                    [],
-                    ["Error Information"],
-                    ["Error", job_data["error"]],
+                    {
+                        "section": "Error Information",
+                        "category": "Error",
+                        "item": "",
+                        "value": job_data["error"],
+                    },
                 ]
             )
+
+            # All CSV data is now built in hierarchical_csv_data and tabular_csv_data above
 
         # Build markdown content
         job_info_rows = [
@@ -214,7 +281,8 @@ def show_job_details(
         output.print_markdown(
             content=markdown_content,
             json_data=json_data,
-            csv_data=csv_data,
+            hierarchical_csv_data=hierarchical_csv_data,
+            tabular_csv_data=tabular_csv_data,
             json_output=json_output,
             csv_output=csv_output,
         )

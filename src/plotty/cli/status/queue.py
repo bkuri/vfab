@@ -61,23 +61,29 @@ def show_job_queue(
             }
         }
 
-        csv_data = [["Job Queue"]]
-        csv_data.append(
-            ["ID", "Name", "State", "Config", "Paper", "Layers", "Est. Time"]
-        )
+        # Build tabular CSV data
+        headers = ["ID", "Name", "State", "Config", "Paper", "Layers", "Est. Time"]
+        rows = []
 
         for job in jobs:
-            csv_data.append(
-                [
-                    job["id"],
-                    job["name"][:30],
-                    job["state"],
-                    job["config_status"],
-                    job["paper"],
-                    str(job["layer_count"]) if job["layer_count"] else "Unknown",
-                    format_time(job["time_estimate"]),
-                ]
+            rows.append(
+                {
+                    "ID": job["id"],
+                    "Name": job["name"][:30],
+                    "State": job["state"],
+                    "Config": job["config_status"],
+                    "Paper": job["paper"],
+                    "Layers": (
+                        str(job["layer_count"]) if job["layer_count"] else "Unknown"
+                    ),
+                    "Est. Time": format_time(job["time_estimate"]),
+                }
             )
+
+        tabular_csv_data = {
+            "headers": headers,
+            "rows": rows,
+        }
 
         # Build markdown content
         state_filter = ""
@@ -108,7 +114,7 @@ Showing **{len(jobs)}** jobs (limited to {limit})
         output.print_markdown(
             content=markdown_content,
             json_data=json_data,
-            csv_data=csv_data,
+            tabular_csv_data=tabular_csv_data,
             json_output=json_output,
             csv_output=csv_output,
         )

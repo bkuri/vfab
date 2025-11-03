@@ -16,6 +16,7 @@ from ...planner import plan_layers
 from ...db import get_session
 from ...models import Pen
 from ...multipen import detect_svg_layers
+from ..status.output import get_output_manager
 from .utils import get_jobs_by_state, group_layers_by_pen, calculate_pen_optimization
 
 try:
@@ -45,6 +46,7 @@ def plan_all(
     json_output: bool = typer.Option(
         False, "--json", help="Output in JSON format (useful for scripting/automation)"
     ),
+    csv_output: bool = typer.Option(False, "--csv", help="Output in CSV format"),
     quiet: bool = typer.Option(
         False, "--quiet", help="Minimal output (show only essential information)"
     ),
@@ -122,6 +124,62 @@ def plan_all(
                         ],
                     }
                 print(json.dumps(plan_data, indent=2, default=str))
+            elif csv_output:
+                # CSV output for planning data
+                output = get_output_manager()
+
+                # Build hierarchical CSV data for optimization summary
+                hierarchical_csv_data = [
+                    {
+                        "section": "Optimization",
+                        "category": "Traditional Swaps",
+                        "item": "",
+                        "value": str(optimization["traditional_swaps"]),
+                    },
+                    {
+                        "section": "Optimization",
+                        "category": "Optimized Swaps",
+                        "item": "",
+                        "value": str(optimization["optimized_swaps"]),
+                    },
+                    {
+                        "section": "Optimization",
+                        "category": "Reduction",
+                        "item": "",
+                        "value": f"{optimization['reduction_percentage']:.0f}%",
+                    },
+                    {
+                        "section": "Summary",
+                        "category": "Total Jobs",
+                        "item": "",
+                        "value": str(len(jobs)),
+                    },
+                    {
+                        "section": "Summary",
+                        "category": "Pen Groups",
+                        "item": "",
+                        "value": str(len(pen_groups)),
+                    },
+                ]
+
+                # Build tabular CSV data for pen groups
+                tabular_csv_data = {
+                    "headers": ["Pen", "Jobs", "Layers", "Est. Time"],
+                    "rows": [
+                        {
+                            "Pen": pen_name,
+                            "Jobs": str(len(set(item["job"]["id"] for item in layers))),
+                            "Layers": str(len(layers)),
+                            "Est. Time": "Unknown",  # TODO: Calculate time estimates
+                        }
+                        for pen_name, layers in pen_groups.items()
+                    ],
+                }
+
+                output.print_hierarchical_csv(data=hierarchical_csv_data)
+                output.print_tabular_csv(
+                    data=tabular_csv_data["rows"], headers=tabular_csv_data["headers"]
+                )
             elif not quiet:
                 # Display optimization preview
                 if console:
@@ -337,6 +395,49 @@ def plan_all(
                         "processing_details": "traditional mode processes jobs individually",
                     }
                 print(json.dumps(plan_data, indent=2, default=str))
+            elif csv_output:
+                # CSV output for traditional planning
+                output = get_output_manager()
+
+                # Build hierarchical CSV data for summary
+                hierarchical_csv_data = [
+                    {
+                        "section": "Planning",
+                        "category": "Mode",
+                        "item": "",
+                        "value": "Traditional",
+                    },
+                    {
+                        "section": "Planning",
+                        "category": "Total Jobs",
+                        "item": "",
+                        "value": str(len(jobs)),
+                    },
+                    {
+                        "section": "Planning",
+                        "category": "Dry Run",
+                        "item": "",
+                        "value": str(not apply),
+                    },
+                ]
+
+                # Build tabular CSV data for jobs
+                tabular_csv_data = {
+                    "headers": ["ID", "Name", "State"],
+                    "rows": [
+                        {
+                            "ID": job["id"],
+                            "Name": job["name"],
+                            "State": job["data"]["state"],
+                        }
+                        for job in jobs
+                    ],
+                }
+
+                output.print_hierarchical_csv(data=hierarchical_csv_data)
+                output.print_tabular_csv(
+                    data=tabular_csv_data["rows"], headers=tabular_csv_data["headers"]
+                )
             elif not quiet:
                 if console:
                     console.print(f"📋 Traditional Planning Preview ({len(jobs)} jobs)")

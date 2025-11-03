@@ -44,40 +44,41 @@ def show_job_stats(
         # Prepare data for different formats
         json_data = job_stats
 
-        # Build CSV data
-        csv_data = [["ploTTY Job Statistics"], []]
+        # Build hierarchical CSV data
+        hierarchical_csv_data = []
 
         if "summary" in job_stats_display:
-            csv_data.extend(
-                [
-                    ["Summary"],
-                    ["Metric", "Value"],
-                ]
-            )
             for key, value in job_stats_display["summary"].items():
-                csv_data.append([key, str(value)])
-            csv_data.append([])
+                hierarchical_csv_data.append(
+                    {
+                        "section": "Summary",
+                        "category": key,
+                        "item": "",
+                        "value": str(value),
+                    }
+                )
 
         if "by_state" in job_stats_display:
-            csv_data.extend(
-                [
-                    ["Jobs by State"],
-                    ["State", "Count"],
-                ]
-            )
             for state, count in job_stats_display["by_state"].items():
-                csv_data.append([state, str(count)])
-            csv_data.append([])
+                hierarchical_csv_data.append(
+                    {
+                        "section": "Jobs by State",
+                        "category": state,
+                        "item": "",
+                        "value": str(count),
+                    }
+                )
 
         if "by_paper" in job_stats_display:
-            csv_data.extend(
-                [
-                    ["Jobs by Paper"],
-                    ["Paper", "Count"],
-                ]
-            )
             for paper, count in job_stats_display["by_paper"].items():
-                csv_data.append([paper, str(count)])
+                hierarchical_csv_data.append(
+                    {
+                        "section": "Jobs by Paper",
+                        "category": paper,
+                        "item": "",
+                        "value": str(count),
+                    }
+                )
 
         # Build markdown content
         sections = []
@@ -126,7 +127,7 @@ def show_job_stats(
         output.print_markdown(
             content=markdown_content,
             json_data=json_data,
-            csv_data=csv_data,
+            hierarchical_csv_data=hierarchical_csv_data,
             json_output=json_output,
             csv_output=csv_output,
         )

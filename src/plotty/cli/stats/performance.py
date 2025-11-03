@@ -26,65 +26,131 @@ def show_performance_stats(
         # Prepare data for different formats
         json_data = performance_stats
 
-        # Build CSV data
-        csv_data = [[f"ploTTY Performance Metrics ({days} days)"], []]
+        # Build hierarchical CSV data for performance metrics
+        hierarchical_csv_data = []
 
-        if "summary" in performance_stats:
-            csv_data.extend(
-                [
-                    ["Summary"],
-                    ["Metric", "Value"],
-                ]
-            )
-            for key, value in performance_stats["summary"].items():
-                csv_data.append([key, str(value)])
-            csv_data.append([])
+        # Add main performance metrics
+        hierarchical_csv_data.extend(
+            [
+                {
+                    "section": "Performance",
+                    "category": "Time",
+                    "item": "Total Plotting Time",
+                    "value": f"{performance_stats.get('total_plotting_time', 0.0):.1f}s",
+                },
+                {
+                    "section": "Performance",
+                    "category": "Time",
+                    "item": "Average Job Time",
+                    "value": f"{performance_stats.get('average_job_time', 0.0):.1f}s",
+                },
+                {
+                    "section": "Performance",
+                    "category": "Jobs",
+                    "item": "Completed Jobs",
+                    "value": str(performance_stats.get("completed_jobs", 0)),
+                },
+            ]
+        )
 
-        if "daily_metrics" in performance_stats:
-            csv_data.extend(
-                [
-                    ["Daily Metrics"],
-                    ["Date", "Jobs", "Avg Time", "Total Time"],
-                ]
+        # Add job age information if available
+        if performance_stats.get("oldest_job"):
+            hierarchical_csv_data.append(
+                {
+                    "section": "Performance",
+                    "category": "Age",
+                    "item": "Oldest Job",
+                    "value": performance_stats["oldest_job"].strftime("%Y-%m-%d %H:%M"),
+                }
             )
-            for metric in performance_stats["daily_metrics"]:
-                csv_data.append(
-                    [
-                        metric.get("date", ""),
-                        str(metric.get("job_count", "")),
-                        str(metric.get("avg_time_seconds", "")),
-                        str(metric.get("total_time_seconds", "")),
-                    ]
+
+        if performance_stats.get("newest_job"):
+            hierarchical_csv_data.append(
+                {
+                    "section": "Performance",
+                    "category": "Age",
+                    "item": "Newest Job",
+                    "value": performance_stats["newest_job"].strftime("%Y-%m-%d %H:%M"),
+                }
+            )
+
+        # Build tabular CSV data for recent metrics
+        tabular_csv_data = None
+
+        if (
+            "recent_metrics" in performance_stats
+            and performance_stats["recent_metrics"]
+        ):
+            headers = ["Type", "Value", "Unit", "Timestamp"]
+            rows = []
+
+            for metric in performance_stats["recent_metrics"]:
+                rows.append(
+                    {
+                        "Type": metric.get("type", ""),
+                        "Value": str(metric.get("value", "")),
+                        "Unit": metric.get("unit", ""),
+                        "Timestamp": (
+                            metric.get("timestamp", "").strftime("%Y-%m-%d %H:%M:%S")
+                            if metric.get("timestamp")
+                            else ""
+                        ),
+                    }
                 )
+
+            tabular_csv_data = {
+                "headers": headers,
+                "rows": rows,
+            }
 
         # Build markdown content
         sections = []
 
-        if "summary" in performance_stats:
-            rows = [
-                f"| {key} | {value} |"
-                for key, value in performance_stats["summary"].items()
-            ]
-            sections.append(
-                f"""## Summary
-| Metric | Value |
-|--------|-------|
-{chr(10).join(rows)}"""
+        # Performance summary section
+        perf_rows = [
+            f"| Total Plotting Time | {performance_stats.get('total_plotting_time', 0.0):.1f}s |",
+            f"| Average Job Time | {performance_stats.get('average_job_time', 0.0):.1f}s |",
+            f"| Completed Jobs | {performance_stats.get('completed_jobs', 0)} |",
+        ]
+
+        if performance_stats.get("oldest_job"):
+            perf_rows.append(
+                f"| Oldest Job | {performance_stats['oldest_job'].strftime('%Y-%m-%d %H:%M')} |"
             )
 
-        if "daily_metrics" in performance_stats:
-            rows = []
-            for metric in performance_stats["daily_metrics"]:
-                rows.append(
-                    f"| {metric.get('date', '')} | {metric.get('job_count', '')} | "
-                    f"{metric.get('avg_time_seconds', '')} | "
-                    f"{metric.get('total_time_seconds', '')} |"
+        if performance_stats.get("newest_job"):
+            perf_rows.append(
+                f"| Newest Job | {performance_stats['newest_job'].strftime('%Y-%m-%d %H:%M')} |"
+            )
+
+        sections.append(
+            f"""## Performance Summary
+| Metric | Value |
+|--------|-------|
+{chr(10).join(perf_rows)}"""
+        )
+
+        # Recent metrics section
+        if (
+            "recent_metrics" in performance_stats
+            and performance_stats["recent_metrics"]
+        ):
+            metric_rows = []
+            for metric in performance_stats["recent_metrics"]:
+                timestamp = (
+                    metric.get("timestamp", "").strftime("%Y-%m-%d %H:%M:%S")
+                    if metric.get("timestamp")
+                    else ""
+                )
+                metric_rows.append(
+                    f"| {metric.get('type', '')} | {metric.get('value', '')} | "
+                    f"{metric.get('unit', '')} | {timestamp} |"
                 )
             sections.append(
-                f"""## Daily Metrics
-| Date | Jobs | Avg Time | Total Time |
-|------|------|----------|------------|
-{chr(10).join(rows)}"""
+                f"""## Recent Metrics
+| Type | Value | Unit | Timestamp |
+|------|-------|------|-----------|
+{chr(10).join(metric_rows)}"""
             )
 
         markdown_content = f"""# ploTTY Performance Metrics ({days} days)
@@ -95,7 +161,8 @@ def show_performance_stats(
         output.print_markdown(
             content=markdown_content,
             json_data=json_data,
-            csv_data=csv_data,
+            hierarchical_csv_data=hierarchical_csv_data,
+            tabular_csv_data=tabular_csv_data,
             json_output=json_output,
             csv_output=csv_output,
         )

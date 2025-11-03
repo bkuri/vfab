@@ -25,16 +25,29 @@ def show_stats_summary(
         # Prepare data for different formats
         json_data = summary
 
-        # Build CSV data
-        csv_data = [["ploTTY Statistics Summary"], [], ["Metric", "Value"]]
+        # Build hierarchical CSV data
+        hierarchical_csv_data = []
 
         for key, value in summary.items():
             if isinstance(value, dict):
-                csv_data.append([key, ""])
                 for sub_key, sub_value in value.items():
-                    csv_data.append([f"  {sub_key}", str(sub_value)])
+                    hierarchical_csv_data.append(
+                        {
+                            "section": key.title(),
+                            "category": sub_key,
+                            "item": "",
+                            "value": str(sub_value),
+                        }
+                    )
             else:
-                csv_data.append([key, str(value)])
+                hierarchical_csv_data.append(
+                    {
+                        "section": key.title(),
+                        "category": "",
+                        "item": "",
+                        "value": str(value),
+                    }
+                )
 
         # Build markdown content
         sections = []
@@ -65,7 +78,7 @@ def show_stats_summary(
         output.print_markdown(
             content=markdown_content,
             json_data=json_data,
-            csv_data=csv_data,
+            hierarchical_csv_data=hierarchical_csv_data,
             json_output=json_output,
             csv_output=csv_output,
         )
