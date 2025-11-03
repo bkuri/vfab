@@ -3,7 +3,8 @@ AxiDraw-specific functionality for multi-pen plotting.
 """
 
 from __future__ import annotations
-import xml.etree.ElementTree as ET
+from defusedxml import ElementTree as ET
+from xml.etree.ElementTree import Element, SubElement
 from pathlib import Path
 from typing import List, Dict
 import re
@@ -134,11 +135,14 @@ def create_multipen_svg(
     tree = ET.parse(original_svg_path)
     root = tree.getroot()
 
+    if root is None:
+        raise ValueError(f"Could not parse SVG file: {original_svg_path}")
+
     # Create pen lookup
     pen_by_name = {pen["name"]: pen for pen in available_pens}
 
     # Copy SVG attributes
-    new_root = ET.Element(
+    new_root = Element(
         "svg",
         {
             "width": root.get("width", "100mm"),
@@ -177,7 +181,7 @@ def create_multipen_svg(
         layer_name = generate_layer_name(control, f"{layer.name} ({pen_name})")
 
         # Create layer group
-        layer_group = ET.SubElement(
+        layer_group = SubElement(
             new_root,
             "g",
             {
@@ -192,5 +196,7 @@ def create_multipen_svg(
             layer_group.append(element)
 
     # Save the multi-pen SVG
-    tree = ET.ElementTree(new_root)
+    from xml.etree.ElementTree import ElementTree
+
+    tree = ElementTree(new_root)
     tree.write(output_path, encoding="unicode", xml_declaration=True)

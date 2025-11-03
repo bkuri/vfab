@@ -3,7 +3,8 @@ SVG layer detection and extraction functionality.
 """
 
 from __future__ import annotations
-import xml.etree.ElementTree as ET
+from defusedxml import ElementTree as ET
+from xml.etree.ElementTree import Element, ElementTree
 from pathlib import Path
 from typing import List
 import re
@@ -26,6 +27,9 @@ def detect_svg_layers(svg_path: Path) -> List[LayerInfo]:
     # Parse SVG
     tree = ET.parse(svg_path)
     root = tree.getroot()
+
+    if root is None:
+        raise ValueError(f"Could not parse SVG file: {svg_path}")
 
     # Handle XML namespaces
     namespaces = {
@@ -138,6 +142,9 @@ def extract_layers_to_files(svg_path: Path, output_dir: Path) -> List[LayerInfo]
     tree = ET.parse(svg_path)
     root = tree.getroot()
 
+    if root is None:
+        raise ValueError(f"Could not parse SVG file: {svg_path}")
+
     # Get dimensions and viewBox from original
     width = root.get("width", "100mm")
     height = root.get("height", "100mm")
@@ -148,7 +155,7 @@ def extract_layers_to_files(svg_path: Path, output_dir: Path) -> List[LayerInfo]
 
     for layer in layers:
         # Create new SVG for this layer
-        layer_root = ET.Element(
+        layer_root = Element(
             "svg",
             {
                 "width": width,
@@ -164,7 +171,7 @@ def extract_layers_to_files(svg_path: Path, output_dir: Path) -> List[LayerInfo]
 
         # Save layer file
         layer_file = output_dir / f"layer_{layer.order_index:02d}.svg"
-        layer_tree = ET.ElementTree(layer_root)
+        layer_tree = ElementTree(layer_root)
         layer_tree.write(layer_file, encoding="unicode", xml_declaration=True)
 
         # Store file path in layer info
