@@ -217,3 +217,4 @@ uv run plotty interactive --help
 - **📊 Time Estimation**: Accurate plotting time estimates with vpype optimization
 - **🎥 Session Recording**: IP camera integration for plot documentation
 - **🖊️ Pen Database**: Manage multiple pens with width and speed settings
+# CI/CD Debug
