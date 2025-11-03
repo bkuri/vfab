@@ -1,6 +1,6 @@
 # Maintainer: Bernardo Kuri <github@bkuri.com>
 pkgname=plotty
-pkgver=1.0.1
+pkgver=1.0.2
 pkgrel=1
 pkgdesc="ploTTY: FSM plotter manager (headless-first) with vpype + per-session recording"
 arch=('any')
@@ -60,7 +60,7 @@ try:
     print('✓ ploTTY imports successfully')
     from plotty.config import load_config
     print('✓ Config module loads')
-    from plotty.fsm import PlotterFSM
+    from plotty.fsm import JobFSM
     print('✓ FSM module loads')
     print('✓ All basic imports working')
 except Exception as e:
