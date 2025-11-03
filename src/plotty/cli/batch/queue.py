@@ -156,12 +156,15 @@ def clear_queue(
 
         # Show preview or apply clearing
         if not quiet:
-            if console and Table:
-                table = Table(title=f"Jobs to Clear ({len(jobs_to_clear)} total)")
-                table.add_column("Job ID", style="cyan")
-                table.add_column("Name", style="white")
-                table.add_column("State", style="white")
-                table.add_column("Reason", style="yellow")
+            if json_output:
+                # JSON output handled below
+                pass
+            else:
+                # Markdown output (default)
+                typer.echo(f"# Jobs to Clear ({len(jobs_to_clear)} total)")
+                typer.echo()
+                typer.echo("| Job ID | Name | State | Reason |")
+                typer.echo("|--------|------|-------|--------|")
 
                 for job_info in jobs_to_clear:
                     job_path = job_info["path"]
@@ -169,22 +172,15 @@ def clear_queue(
 
                     if job_file.exists():
                         job_data = json.loads(job_file.read_text())
-                        table.add_row(
-                            job_info["id"],
-                            job_data.get("name", "Unknown"),
-                            job_data.get("state", "UNKNOWN"),
-                            job_info["reason"],
-                        )
+                        name = job_data.get("name", "Unknown")
+                        state = job_data.get("state", "UNKNOWN")
                     else:
-                        table.add_row(
-                            job_info["id"], "Unknown", "NO_FILE", job_info["reason"]
-                        )
+                        name = "Unknown"
+                        state = "NO_FILE"
 
-                console.print(table)
-            else:
-                print(f"Jobs to Clear ({len(jobs_to_clear)} total):")
-                for job_info in jobs_to_clear:
-                    print(f"  {job_info['id']}: {job_info['reason']}")
+                    typer.echo(
+                        f"| {job_info['id']} | {name[:20]} | {state} | {job_info['reason']} |"
+                    )
 
         if apply:
             # Ask for confirmation unless --no-confirm is specified

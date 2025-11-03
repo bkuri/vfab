@@ -18,7 +18,10 @@ except ImportError:
     Table = None
 
 
-def paper_list() -> None:
+def paper_list(
+    json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
+    csv_output: bool = typer.Option(False, "--csv", help="Output in CSV format"),
+) -> None:
     """List available paper configurations."""
     try:
         from ...db import get_session
@@ -29,61 +32,70 @@ def paper_list() -> None:
             papers = session.query(Paper).order_by(Paper.name).all()
 
             if not papers:
-                if console:
-                    console.print(
-                        "No papers configured. Use 'plotty config paper-add' to add one."
-                    )
+                if json_output:
+                    typer.echo("[]")
+                elif csv_output:
+                    typer.echo("ID,Name,Width,Height,Margin,Orientation")
                 else:
-                    print(
+                    typer.echo(
                         "No papers configured. Use 'plotty config paper-add' to add one."
                     )
                 return
 
-            if console:
-                console.print("📄 Available Paper Configurations")
-                console.print("=" * 40)
+            # Prepare data
+            headers = ["ID", "Name", "Width", "Height", "Margin", "Orientation"]
+            rows = []
 
-                table = Table()
-                table.add_column("ID", style="cyan", justify="right")
-                table.add_column("Name", style="white")
-                table.add_column("Width", style="white", justify="right")
-                table.add_column("Height", style="white", justify="right")
-                table.add_column("Margin", style="white", justify="right")
-                table.add_column("Orientation", style="white")
+            for paper in papers:
+                width = getattr(paper, "width_mm", 0)
+                height = getattr(paper, "height_mm", 0)
+                margin = getattr(paper, "margin_mm", 0)
+                orientation = getattr(paper, "orientation", "Unknown")
 
-                for paper in papers:
-                    width = getattr(paper, "width_mm", 0)
-                    height = getattr(paper, "height_mm", 0)
-                    margin = getattr(paper, "margin_mm", 0)
-                    orientation = getattr(paper, "orientation", "Unknown")
-
-                    table.add_row(
+                rows.append(
+                    [
                         str(getattr(paper, "id", 0)),
                         getattr(paper, "name", "Unknown"),
                         f"{width:.1f}mm",
                         f"{height:.1f}mm",
                         f"{margin:.1f}mm",
                         orientation,
-                    )
-
-                console.print(table)
-            else:
-                print("Available Paper Configurations:")
-                print("=" * 40)
-                print(
-                    f"{'ID':<4} {'Name':<15} {'Width':<8} {'Height':<8} {'Margin':<8} {'Orientation':<12}"
+                    ]
                 )
-                print("-" * 40)
 
-                for paper in papers:
-                    width = getattr(paper, "width_mm", 0)
-                    height = getattr(paper, "height_mm", 0)
-                    margin = getattr(paper, "margin_mm", 0)
-                    orientation = getattr(paper, "orientation", "Unknown")
+            # Output in requested format
+            if json_output:
+                import json
 
-                    print(
-                        f"{getattr(paper, 'id', 0):<4} {getattr(paper, 'name', 'Unknown'):<15} {width:>7.1f}mm {height:>7.1f}mm {margin:>7.1f}mm {orientation:<12}"
+                papers_data = []
+                for i, paper in enumerate(papers):
+                    papers_data.append(
+                        {
+                            "id": getattr(paper, "id", 0),
+                            "name": getattr(paper, "name", "Unknown"),
+                            "width_mm": getattr(paper, "width_mm", 0),
+                            "height_mm": getattr(paper, "height_mm", 0),
+                            "margin_mm": getattr(paper, "margin_mm", 0),
+                            "orientation": getattr(paper, "orientation", "Unknown"),
+                        }
                     )
+                typer.echo(json.dumps(papers_data, indent=2, default=str))
+            elif csv_output:
+                import csv
+                import sys
+
+                writer = csv.writer(sys.stdout)
+                writer.writerow(headers)
+                writer.writerows(rows)
+            else:
+                # Markdown output (default)
+                typer.echo("# 📄 Available Paper Configurations")
+                typer.echo()
+                typer.echo("| " + " | ".join(headers) + " |")
+                typer.echo("| " + " | ".join(["---"] * len(headers)) + " |")
+
+                for row in rows:
+                    typer.echo("| " + " | ".join(row) + " |")
 
     except Exception as e:
         from ...utils import error_handler
@@ -159,7 +171,7 @@ def paper_remove(name: str) -> None:
         from ...db import get_session
         from ...models import Paper
         from ...codes import ExitCode
-        from ...utils import show_status
+        from ...progress import show_status
 
         with get_session() as session:
             # Find the paper

@@ -99,42 +99,24 @@ def jobs(
             print(json.dumps(jobs, indent=2, default=str))
             return
 
-        if console and Table:
-            # Rich table output
-            table = Table(title=f"Jobs ({len(jobs)} total)")
-            table.add_column("ID", style="cyan")
-            table.add_column("Name", style="white")
-            table.add_column("State", style="white")
-            table.add_column("Paper", style="white")
-            table.add_column("Layers", style="white", justify="right")
-            table.add_column("Est. Time", style="white", justify="right")
+        # Markdown output (default)
+        typer.echo(f"# Jobs ({len(jobs)} total)")
+        typer.echo()
+        typer.echo("| ID | Name | State | Paper | Layers | Est. Time |")
+        typer.echo("|----|------|-------|--------|--------|-----------|")
 
-            for job in jobs:
-                time_str = "Unknown"
-                if job["time_estimate"]:
-                    if job["time_estimate"] < 60:
-                        time_str = f"{job['time_estimate']:.1f}s"
-                    else:
-                        time_str = f"{job['time_estimate'] / 60:.1f}m"
+        for job in jobs:
+            time_str = "Unknown"
+            if job["time_estimate"]:
+                if job["time_estimate"] < 60:
+                    time_str = f"{job['time_estimate']:.1f}s"
+                else:
+                    time_str = f"{job['time_estimate'] / 60:.1f}m"
 
-                table.add_row(
-                    job["id"],
-                    job["name"][:20],
-                    job["state"],
-                    job["paper"],
-                    str(job["layer_count"]) if job["layer_count"] else "Unknown",
-                    time_str,
-                )
-
-            console.print(table)
-        else:
-            # Fallback plain text output
-            print(f"Jobs ({len(jobs)} total):")
-            for job in jobs:
-                time_str = (
-                    f" {job['time_estimate']:.1f}s" if job["time_estimate"] else ""
-                )
-                print(f"  {job['id']}: {job['name']} ({job['state']}){time_str}")
+            typer.echo(
+                f"| {job['id']} | {job['name'][:20]} | {job['state']} | {job['paper']} | "
+                f"{job['layer_count'] if job['layer_count'] else 'Unknown'} | {time_str} |"
+            )
 
     except Exception as e:
         error_handler.handle(e)

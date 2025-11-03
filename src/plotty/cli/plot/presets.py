@@ -4,6 +4,7 @@ List plot presets command for ploTTY CLI.
 
 from __future__ import annotations
 
+import typer
 from ...utils import error_handler
 
 try:
@@ -16,7 +17,10 @@ except ImportError:
     Table = None
 
 
-def list_plot_presets():
+def list_plot_presets(
+    json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
+    csv_output: bool = typer.Option(False, "--csv", help="Output in CSV format"),
+) -> None:
     """List available plot presets."""
     try:
         import sys
@@ -27,31 +31,53 @@ def list_plot_presets():
 
         all_presets = list_presets()
 
-        if console and Table:
-            table = Table(title="Available Plot Presets")
-            table.add_column("Name", style="cyan")
-            table.add_column("Description", style="white")
-            table.add_column("Speed", style="white", justify="right")
-            table.add_column("Pressure", style="white", justify="right")
-            table.add_column("Passes", style="white", justify="right")
+        # Prepare data
+        headers = ["Name", "Description", "Speed", "Pressure", "Passes"]
+        rows = []
 
-            for preset in all_presets.values():
-                table.add_row(
+        for preset in all_presets.values():
+            rows.append(
+                [
                     preset.name,
                     preset.description,
                     f"{preset.speed:.0f}%",
-                    f"{preset.pen_pressure}",
-                    f"{preset.passes}",
-                )
+                    str(preset.pen_pressure),
+                    str(preset.passes),
+                ]
+            )
 
-            console.print(table)
-        else:
-            print("Available Plot Presets:")
+        # Output in requested format
+        if json_output:
+            import json
+
+            presets_data = []
             for preset in all_presets.values():
-                print(f"  {preset.name}: {preset.description}")
-                print(
-                    f"    Speed: {preset.speed:.0f}%, Pressure: {preset.pen_pressure}, Passes: {preset.passes}"
+                presets_data.append(
+                    {
+                        "name": preset.name,
+                        "description": preset.description,
+                        "speed": preset.speed,
+                        "pen_pressure": preset.pen_pressure,
+                        "passes": preset.passes,
+                    }
                 )
+            typer.echo(json.dumps(presets_data, indent=2))
+        elif csv_output:
+            import csv
+            import sys
+
+            writer = csv.writer(sys.stdout)
+            writer.writerow(headers)
+            writer.writerows(rows)
+        else:
+            # Markdown output (default)
+            typer.echo("# Available Plot Presets")
+            typer.echo()
+            typer.echo("| " + " | ".join(headers) + " |")
+            typer.echo("| " + " | ".join(["---"] * len(headers)) + " |")
+
+            for row in rows:
+                typer.echo("| " + " | ".join(row) + " |")
 
     except Exception as e:
         error_handler.handle(e)

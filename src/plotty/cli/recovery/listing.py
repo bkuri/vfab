@@ -22,7 +22,10 @@ except ImportError:
     Table = None
 
 
-def list_recoverable() -> None:
+def list_recoverable(
+    json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
+    csv_output: bool = typer.Option(False, "--csv", help="Output in CSV format"),
+) -> None:
     """List available recovery entries."""
     try:
         cfg = load_config(None)
@@ -38,51 +41,77 @@ def list_recoverable() -> None:
                 print("No jobs need recovery")
             return
 
-        if console:
-            console.print("🔄 Recoverable Jobs", style="bold blue")
-            console.print("=" * 40)
+        # Prepare data
+        headers = ["Job ID", "Current State", "Emergency Shutdown", "Recoverable"]
+        rows = []
 
-            table = Table()
-            table.add_column("Job ID", style="cyan")
-            table.add_column("Current State", style="white")
-            table.add_column("Emergency Shutdown", style="yellow")
-            table.add_column("Recoverable", style="green")
-
-            for job_id in recoverable_jobs:
-                status = recovery.get_job_status(job_id)
-                if "error" not in status:
-                    table.add_row(
+        for job_id in recoverable_jobs:
+            status = recovery.get_job_status(job_id)
+            if "error" not in status:
+                rows.append(
+                    [
                         job_id,
                         status.get("current_state", "Unknown"),
                         "Yes" if status.get("emergency_shutdown") else "No",
                         "Yes" if status.get("recoverable") else "No",
-                    )
+                    ]
+                )
 
-            console.print(table)
-        else:
-            print("Recoverable Jobs:")
-            print("=" * 40)
-            print(f"{'Job ID':<20} {'State':<15} {'Emergency':<10} {'Recoverable':<12}")
-            print("-" * 40)
+        # Output in requested format
+        if json_output:
+            import json
 
+            jobs_data = []
             for job_id in recoverable_jobs:
                 status = recovery.get_job_status(job_id)
                 if "error" not in status:
-                    print(
-                        f"{job_id:<20} {status.get('current_state', 'Unknown'):<15} {'Yes' if status.get('emergency_shutdown') else 'No':<10} {'Yes' if status.get('recoverable') else 'No':<12}"
+                    jobs_data.append(
+                        {
+                            "job_id": job_id,
+                            "current_state": status.get("current_state", "Unknown"),
+                            "emergency_shutdown": status.get(
+                                "emergency_shutdown", False
+                            ),
+                            "recoverable": status.get("recoverable", False),
+                        }
                     )
+            output_data = {
+                "recoverable_jobs": jobs_data,
+                "total_count": len(recoverable_jobs),
+            }
+            typer.echo(json.dumps(output_data, indent=2, default=str))
+        elif csv_output:
+            import csv
+            import sys
 
-        if console:
-            console.print(f"\nFound {len(recoverable_jobs)} recoverable job(s)")
+            writer = csv.writer(sys.stdout)
+            writer.writerow(headers)
+            writer.writerows(rows)
+            writer.writerow([])
+            writer.writerow(["Total", str(len(recoverable_jobs))])
         else:
-            print(f"\nFound {len(recoverable_jobs)} recoverable job(s)")
+            # Markdown output (default)
+            typer.echo("# 🔄 Recoverable Jobs")
+            typer.echo()
+            typer.echo("| " + " | ".join(headers) + " |")
+            typer.echo("| " + " | ".join(["---"] * len(headers)) + " |")
+
+            for row in rows:
+                typer.echo("| " + " | ".join(row) + " |")
+
+            typer.echo()
+            typer.echo(f"Found {len(recoverable_jobs)} recoverable job(s)")
 
     except Exception as e:
         error_handler.handle(e)
         raise typer.Exit(ExitCode.ERROR)
 
 
-def job_status(job_id: str) -> None:
+def job_status(
+    job_id: str,
+    json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
+    csv_output: bool = typer.Option(False, "--csv", help="Output in CSV format"),
+) -> None:
     """Check recovery status for a job."""
     try:
         cfg = load_config(None)
@@ -98,45 +127,72 @@ def job_status(job_id: str) -> None:
                 print(f"Error: {status_info['error']}")
             raise typer.Exit(ExitCode.NOT_FOUND)
 
-        if console:
-            console.print(f"📊 Recovery Status for Job '{job_id}'", style="bold blue")
-            console.print("=" * 50)
+        # Output in requested format
+        if json_output:
+            import json
 
-            console.print(
-                f"Current State: {status_info.get('current_state', 'Unknown')}"
-            )
-            console.print(
-                f"Emergency Shutdown: {'Yes' if status_info.get('emergency_shutdown') else 'No'}"
-            )
-            console.print(
-                f"Recoverable: {'Yes' if status_info.get('recoverable') else 'No'}"
-            )
-            console.print(f"Journal Entries: {status_info.get('journal_entries', 0)}")
+            typer.echo(json.dumps(status_info, indent=2, default=str))
+        elif csv_output:
+            import csv
+            import sys
 
+            writer = csv.writer(sys.stdout)
+
+            # Status information
+            writer.writerow(["Status Information"])
+            writer.writerow(["Property", "Value"])
+            writer.writerow(
+                ["Current State", status_info.get("current_state", "Unknown")]
+            )
+            writer.writerow(
+                [
+                    "Emergency Shutdown",
+                    "Yes" if status_info.get("emergency_shutdown") else "No",
+                ]
+            )
+            writer.writerow(
+                ["Recoverable", "Yes" if status_info.get("recoverable") else "No"]
+            )
+            writer.writerow(
+                ["Journal Entries", str(status_info.get("journal_entries", 0))]
+            )
+            writer.writerow([])
+
+            # Last transition
             if status_info.get("last_transition"):
+                writer.writerow(["Last Transition"])
+                writer.writerow(["Property", "Value"])
                 transition = status_info["last_transition"]
-                console.print("\nLast Transition:")
-                console.print(f"  From: {transition.get('from_state', 'Unknown')}")
-                console.print(f"  To: {transition.get('to_state', 'Unknown')}")
-                console.print(f"  Reason: {transition.get('reason', 'Unknown')}")
-                console.print(f"  Time: {transition.get('timestamp', 'Unknown')}")
+                writer.writerow(["From", transition.get("from_state", "Unknown")])
+                writer.writerow(["To", transition.get("to_state", "Unknown")])
+                writer.writerow(["Time", transition.get("timestamp", "Unknown")])
         else:
-            print(f"Recovery Status for Job '{job_id}'")
-            print("=" * 50)
-            print(f"Current State: {status_info.get('current_state', 'Unknown')}")
-            print(
-                f"Emergency Shutdown: {'Yes' if status_info.get('emergency_shutdown') else 'No'}"
+            # Markdown output (default)
+            typer.echo(f"# 📊 Recovery Status for Job '{job_id}'")
+            typer.echo()
+            typer.echo("## Status Information")
+            typer.echo("| Property | Value |")
+            typer.echo("|----------|-------|")
+            typer.echo(
+                f"| Current State | {status_info.get('current_state', 'Unknown')} |"
             )
-            print(f"Recoverable: {'Yes' if status_info.get('recoverable') else 'No'}")
-            print(f"Journal Entries: {status_info.get('journal_entries', 0)}")
+            typer.echo(
+                f"| Emergency Shutdown | {'Yes' if status_info.get('emergency_shutdown') else 'No'} |"
+            )
+            typer.echo(
+                f"| Recoverable | {'Yes' if status_info.get('recoverable') else 'No'} |"
+            )
+            typer.echo(f"| Journal Entries | {status_info.get('journal_entries', 0)} |")
 
             if status_info.get("last_transition"):
                 transition = status_info["last_transition"]
-                print("\nLast Transition:")
-                print(f"  From: {transition.get('from_state', 'Unknown')}")
-                print(f"  To: {transition.get('to_state', 'Unknown')}")
-                print(f"  Reason: {transition.get('reason', 'Unknown')}")
-                print(f"  Time: {transition.get('timestamp', 'Unknown')}")
+                typer.echo()
+                typer.echo("## Last Transition")
+                typer.echo("| Property | Value |")
+                typer.echo("|----------|-------|")
+                typer.echo(f"| From | {transition.get('from_state', 'Unknown')} |")
+                typer.echo(f"| To | {transition.get('to_state', 'Unknown')} |")
+                typer.echo(f"| Time | {transition.get('timestamp', 'Unknown')} |")
 
     except typer.Exit:
         raise

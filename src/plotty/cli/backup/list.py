@@ -8,12 +8,8 @@ from pathlib import Path
 from typing import Optional
 
 import typer
-from rich.console import Console
-from rich.table import Table
 
 from ...backup import BackupConfig, BackupManager
-
-console = Console()
 
 list_app = typer.Typer(name="list", help="List available backups", no_args_is_help=True)
 
@@ -23,6 +19,8 @@ def backups(
     backup_dir: Optional[str] = typer.Option(
         None, "--backup-dir", "-b", help="Backup directory path"
     ),
+    json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
+    csv_output: bool = typer.Option(False, "--csv", help="Output in CSV format"),
 ) -> None:
     """List all available backups."""
     try:
@@ -36,34 +34,55 @@ def backups(
         backups = manager.list_backups()
 
         if not backups:
-            console.print("[yellow]No backups found[/yellow]")
+            if json_output:
+                typer.echo("[]")
+            else:
+                typer.echo("# Backup Listing")
+                typer.echo()
+                typer.echo("No backups found")
             return
 
-        console.print(f"[green]Found {len(backups)} backups:[/green]\n")
-
-        # Create table
-        table = Table()
-        table.add_column("Name", style="cyan")
-        table.add_column("Type", style="green")
-        table.add_column("Created", style="yellow")
-        table.add_column("Size", style="blue")
-        table.add_column("Compression", style="magenta")
-        table.add_column("Files", style="white")
+        # Prepare data
+        headers = ["Name", "Type", "Created", "Size", "Compression", "Files"]
+        rows = []
 
         for backup in backups:
             created_str = backup["created_at"].strftime("%Y-%m-%d %H:%M:%S")
             size_str = f"{backup['size'] / (1024 * 1024):.1f}MB"
 
-            table.add_row(
-                backup["file"],
-                backup["type"],
-                created_str,
-                size_str,
-                backup["compression"],
-                str(backup["total_files"]),
+            rows.append(
+                [
+                    backup["file"],
+                    backup["type"],
+                    created_str,
+                    size_str,
+                    backup["compression"],
+                    str(backup["total_files"]),
+                ]
             )
 
-        console.print(table)
+        # Output in requested format
+        if json_output:
+            import json
+
+            typer.echo(json.dumps(backups, indent=2, default=str))
+        elif csv_output:
+            import csv
+            import sys
+
+            writer = csv.writer(sys.stdout)
+            writer.writerow(headers)
+            writer.writerows(rows)
+        else:
+            # Markdown output (default)
+            typer.echo(f"# Backup Listing ({len(backups)} backups)")
+            typer.echo()
+            typer.echo("## Available Backups")
+            typer.echo("| " + " | ".join(headers) + " |")
+            typer.echo("| " + " | ".join(["---"] * len(headers)) + " |")
+
+            for row in rows:
+                typer.echo("| " + " | ".join(row) + " |")
 
     except Exception as e:
         from ...utils import error_handler

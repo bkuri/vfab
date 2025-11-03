@@ -69,9 +69,7 @@ def validate_transition(
                     check_style = (
                         "green"
                         if check.result.value == "pass"
-                        else "red"
-                        if check.result.value == "fail"
-                        else "yellow"
+                        else "red" if check.result.value == "fail" else "yellow"
                     )
                     table.add_row(
                         check.name,

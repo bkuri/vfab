@@ -9,9 +9,6 @@ from typing import Optional
 
 import typer
 from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from rich.text import Text
 
 from ...config import load_config
 from ...logging import (
@@ -28,6 +25,8 @@ def logging_status(
     config_path: Optional[str] = typer.Option(
         None, "--config", "-c", help="Configuration file path"
     ),
+    json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
+    csv_output: bool = typer.Option(False, "--csv", help="Output in CSV format"),
 ) -> None:
     """Show current logging configuration and status."""
     try:
@@ -35,61 +34,116 @@ def logging_status(
         logging_config = config_from_settings(config)
         logger = get_logger("cli")
 
-        # Create status panel
-        status_text = Text()
-        status_text.append("Logging System Status\n", style="bold blue")
-        status_text.append(
-            f"Enabled: {logging_config.enabled}\n",
-            style="green" if logging_config.enabled else "red",
-        )
-        status_text.append(f"Level: {logging_config.level.value}\n", style="yellow")
-        status_text.append(f"Format: {logging_config.format.value}\n", style="cyan")
-        status_text.append(f"Output: {logging_config.output.value}\n", style="cyan")
+        # Prepare configuration data
+        config_data = {
+            "enabled": logging_config.enabled,
+            "level": logging_config.level.value,
+            "format": logging_config.format.value,
+            "output": logging_config.output.value,
+        }
 
         if logging_config.output in [LogOutput.FILE, LogOutput.BOTH]:
-            status_text.append(f"Log File: {logging_config.log_file}\n", style="blue")
-            status_text.append(
-                f"Max Size: {logging_config.max_file_size // (1024 * 1024)}MB\n",
-                style="blue",
+            config_data.update(
+                {
+                    "log_file": logging_config.log_file,
+                    "max_file_size_mb": logging_config.max_file_size // (1024 * 1024),
+                    "backup_count": logging_config.backup_count,
+                }
             )
-            status_text.append(
-                f"Backup Count: {logging_config.backup_count}\n", style="blue"
-            )
-
-        console.print(
-            Panel(status_text, title="📊 Logging Status", border_style="blue")
-        )
 
         # Show log files
         log_files = logging_manager.list_log_files()
-        if log_files:
-            console.print("\n[bold]Log Files:[/bold]")
+        log_files_data = []
 
-            table = Table()
-            table.add_column("File", style="cyan")
-            table.add_column("Size", style="green")
-            table.add_column("Modified", style="yellow")
+        for log_file in sorted(log_files):
+            try:
+                stat = log_file.stat()
+                size = stat.st_size
+                size_str = (
+                    f"{size / 1024:.1f}KB"
+                    if size < 1024 * 1024
+                    else f"{size / (1024 * 1024):.1f}MB"
+                )
+                modified = datetime.fromtimestamp(stat.st_mtime).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
+                log_files_data.append(
+                    {
+                        "file": log_file.name,
+                        "size": size_str,
+                        "modified": modified,
+                    }
+                )
+            except Exception:
+                log_files_data.append(
+                    {
+                        "file": log_file.name,
+                        "size": "Unknown",
+                        "modified": "Unknown",
+                    }
+                )
 
-            for log_file in sorted(log_files):
-                try:
-                    stat = log_file.stat()
-                    size = stat.st_size
-                    size_str = (
-                        f"{size / 1024:.1f}KB"
-                        if size < 1024 * 1024
-                        else f"{size / (1024 * 1024):.1f}MB"
-                    )
-                    modified = datetime.fromtimestamp(stat.st_mtime).strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    )
+        # Output in requested format
+        if json_output:
+            import json
 
-                    table.add_row(str(log_file), size_str, modified)
-                except OSError:
-                    table.add_row(str(log_file), "Unknown", "Unknown")
+            output_data = {
+                "configuration": config_data,
+                "log_files": log_files_data,
+            }
+            typer.echo(json.dumps(output_data, indent=2, default=str))
+        elif csv_output:
+            import csv
+            import sys
 
-            console.print(table)
+            writer = csv.writer(sys.stdout)
+
+            # Configuration section
+            writer.writerow(["Configuration"])
+            writer.writerow(["Setting", "Value"])
+            for key, value in config_data.items():
+                writer.writerow([key, value])
+            writer.writerow([])
+
+            # Log files section
+            writer.writerow(["Log Files"])
+            writer.writerow(["File", "Size", "Modified"])
+            for log_file in log_files_data:
+                writer.writerow(
+                    [log_file["file"], log_file["size"], log_file["modified"]]
+                )
         else:
-            console.print("[yellow]No log files found[/yellow]")
+            # Markdown output (default)
+            typer.echo("# Logging System Status")
+            typer.echo()
+            typer.echo("## Configuration")
+            typer.echo("| Setting | Value |")
+            typer.echo("|---------|-------|")
+
+            enabled_status = "✅ Enabled" if logging_config.enabled else "❌ Disabled"
+            typer.echo(f"| Enabled | {enabled_status} |")
+            typer.echo(f"| Level | {logging_config.level.value} |")
+            typer.echo(f"| Format | {logging_config.format.value} |")
+            typer.echo(f"| Output | {logging_config.output.value} |")
+
+            if logging_config.output in [LogOutput.FILE, LogOutput.BOTH]:
+                typer.echo(f"| Log File | {logging_config.log_file} |")
+                typer.echo(
+                    f"| Max Size | {logging_config.max_file_size // (1024 * 1024)}MB |"
+                )
+                typer.echo(f"| Backup Count | {logging_config.backup_count} |")
+
+            typer.echo()
+
+            if log_files_data:
+                typer.echo("## Log Files")
+                typer.echo("| File | Size | Modified |")
+                typer.echo("|------|------|----------|")
+
+                for log_file in log_files_data:
+                    typer.echo(
+                        f"| {log_file['file']} | {log_file['size']} | {log_file['modified']} |"
+                    )
 
     except Exception as e:
         from ...utils import error_handler

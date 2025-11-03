@@ -91,9 +91,7 @@ def check_guards(
                     result_style = (
                         "green"
                         if result.result.value == "pass"
-                        else "red"
-                        if result.result.value == "fail"
-                        else "yellow"
+                        else "red" if result.result.value == "fail" else "yellow"
                     )
                     table.add_row(
                         result.name,
