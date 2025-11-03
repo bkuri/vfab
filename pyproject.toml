@@ -37,3 +37,7 @@ vpype = ["vpype>=1.14.0"]
 
 [tool.uv]
 default-groups = ["dev"]   # keep axidraw opt-in
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+skips = ["B110", "B112"]
