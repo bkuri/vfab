@@ -195,20 +195,6 @@ class SystemStatistics(Base):
     metadata_json = Column(JSON)
 
 
-class DeviceTest(Base):
-    """Device test model for managing test configurations."""
-
-    __tablename__ = "device_tests"
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String, unique=True, nullable=False)
-    test_type = Column(String, nullable=False)  # servo, camera, timing
-    description = Column(String)
-    config_json = Column(JSON)
-    created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-
-
 class PerformanceMetrics(Base):
     """Performance metrics model."""
 

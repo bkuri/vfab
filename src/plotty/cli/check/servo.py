@@ -5,7 +5,6 @@ Servo test command for ploTTY CLI.
 from __future__ import annotations
 
 
-
 def servo_test() -> None:
     """Test servo motor operation."""
     try:

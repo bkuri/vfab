@@ -5,7 +5,6 @@ Camera test command for ploTTY CLI.
 from __future__ import annotations
 
 
-
 def camera_test() -> None:
     """Test camera connectivity and capture."""
     try:

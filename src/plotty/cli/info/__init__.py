@@ -10,7 +10,6 @@ from __future__ import annotations
 import typer
 
 from .system import show_status_overview, show_system_status, show_quick_status
-from .queue import show_job_queue
 from .job import show_job_details
 from .session import session_reset, session_info
 from .utils import complete_job_id
@@ -51,24 +50,6 @@ def status_tldr(
     show_quick_status(json_output=json_output, csv_output=csv_output)
 
 
-@status_app.command("queue")
-def status_queue(
-    limit: int = typer.Option(
-        10, "--limit", "-l", help="Maximum number of jobs to show"
-    ),
-    state: str = typer.Option(None, "--state", "-s", help="Filter by job state"),
-    json_output: bool = typer.Option(False, "--json", help="Export status as JSON"),
-    csv_output: bool = typer.Option(False, "--csv", help="Export status as CSV"),
-):
-    """Show jobs in queue."""
-    show_job_queue(
-        limit=limit,
-        state=state,
-        json_output=json_output,
-        csv_output=csv_output,
-    )
-
-
 @status_app.command("job")
 def status_job(
     job_id: str = typer.Argument(
@@ -82,9 +63,13 @@ def status_job(
 
 
 @status_app.command("reset")
-def status_reset():
+def status_reset(
+    apply: bool = typer.Option(
+        False, "--apply", help="Apply session reset (dry-run by default)"
+    ),
+):
     """Reset the current session (clear all jobs and layers)."""
-    session_reset()
+    session_reset(apply=apply)
 
 
 @status_app.command("session")

@@ -5,6 +5,7 @@ Session management commands for ploTTY.
 from __future__ import annotations
 
 import typer
+from ..common import confirm_destructive_operation, create_apply_option
 
 try:
     from rich.console import Console
@@ -16,7 +17,9 @@ except ImportError:
     Confirm = None
 
 
-def session_reset() -> None:
+def session_reset(
+    apply: bool = create_apply_option("Apply session reset (dry-run by default)"),
+) -> None:
     """Reset the current session."""
     try:
         from ...db import get_session
@@ -31,28 +34,24 @@ def session_reset() -> None:
             print("🔄 Session Reset")
             print("=" * 20)
 
-        # Confirm reset
-        if console and Confirm:
-            if not Confirm.ask("⚠️  This will reset all jobs and layers. Continue?"):
-                from ...progress import show_status
-
-                show_status("Operation cancelled", "info")
-                return
-        else:
-            response = (
-                input("⚠️  This will reset all jobs and layers. Continue? [y/N]: ")
-                .strip()
-                .lower()
-            )
-            if response not in ["y", "yes"]:
-                print("Operation cancelled")
-                return
-
+        # Get current session info for preview
         with get_session() as session:
-            # Count current jobs and layers
             job_count = session.query(Job).count()
             layer_count = session.query(Layer).count()
 
+        # Confirm using common library
+        if not confirm_destructive_operation(
+            operation_name="reset",
+            item_description=f"session ({job_count} jobs, {layer_count} layers)",
+            apply_flag=apply,
+            console_instance=console,
+        ):
+            from ...progress import show_status
+
+            show_status("Operation cancelled", "info")
+            return
+
+        with get_session() as session:
             if console:
                 console.print(f"Found {job_count} jobs and {layer_count} layers")
             else:

@@ -13,12 +13,15 @@ from pathlib import Path
 add_app = typer.Typer(no_args_is_help=True, help="Add new resources")
 
 
-def add_job(
+def add_single_job(
     src: str,
     name: str = typer.Option("", "--name", "-n", help="Job name"),
     paper: str = typer.Option("A3", "--paper", "-p", help="Paper size"),
+    pristine: bool = typer.Option(
+        False, "--pristine", help="Skip optimization (add in pristine state)"
+    ),
 ) -> None:
-    """Add a new job to workspace."""
+    """Add a single job to workspace."""
     try:
         from ...config import load_config
         from ...utils import error_handler, validate_file_exists
@@ -50,6 +53,11 @@ def add_job(
             "state": "QUEUED",
             "config_status": "DEFAULTS",
             "created_at": str(Path.cwd()),
+            "optimization": {
+                "level": "none" if pristine else "full",
+                "applied_at": None if pristine else str(Path.cwd()),
+                "version": "1.0",
+            },
         }
 
         (jdir / "job.json").write_text(json.dumps(job_data, indent=2))
@@ -181,64 +189,110 @@ def add_paper(
         raise typer.Exit(ExitCode.ERROR)
 
 
+def add_jobs(
+    pattern: str = typer.Argument(
+        ..., help="File pattern for multiple jobs (e.g., *.svg)"
+    ),
+    pristine: bool = typer.Option(
+        False, "--pristine", help="Skip optimization (add in pristine state)"
+    ),
+) -> None:
+    """Add multiple jobs using file pattern."""
+    try:
+        from ...config import load_config
+        from ...utils import error_handler
+        from ...progress import show_status
+        from pathlib import Path
+        import glob
+
+        cfg = load_config(None)
+
+        # Find files matching pattern
+        files = glob.glob(pattern)
+
+        if not files:
+            show_status(f"No files found matching pattern: {pattern}", "warning")
+            return
+
+        show_status(f"Found {len(files)} files matching pattern", "info")
+
+        # Process each file using single job flow
+        added_jobs = []
+        for file_path in files:
+            try:
+                # Use the same logic as add_single_job but without the function call overhead
+                src_path = Path(file_path)
+
+                # Generate 6-character job ID
+                import uuid
+
+                job_id = uuid.uuid4().hex[:6]
+                jdir = Path(cfg.workspace) / "jobs" / job_id
+
+                # Create job directory
+                jdir.mkdir(parents=True, exist_ok=True)
+
+                # Copy source file
+                (jdir / "src.svg").write_bytes(src_path.read_bytes())
+
+                # Create job metadata
+                import json
+
+                job_data = {
+                    "id": job_id,
+                    "name": src_path.stem,
+                    "paper": "A3",  # Default paper
+                    "state": "QUEUED",
+                    "config_status": "DEFAULTS",
+                    "created_at": str(Path.cwd()),
+                    "optimization": {
+                        "level": "none" if pristine else "full",
+                        "applied_at": None if pristine else str(Path.cwd()),
+                        "version": "1.0",
+                    },
+                }
+
+                (jdir / "job.json").write_text(json.dumps(job_data, indent=2))
+
+                # Run optimization if not pristine
+                if not pristine:
+                    from ...planner import plan_layers
+
+                    # Plan the job using plan_layers function
+                    plan_layers(
+                        src_svg=jdir / "src.svg",
+                        preset=cfg.vpype.preset,
+                        presets_file=cfg.vpype.presets_file,
+                        pen_map=None,  # Will use default pen mapping
+                        out_dir=jdir,
+                        interactive=False,
+                        paper_size="A4",
+                    )
+                    job_data["optimization"]["level"] = "full"
+                    job_data["optimization"]["applied_at"] = str(Path.cwd())
+                    (jdir / "job.json").write_text(json.dumps(job_data, indent=2))
+
+                added_jobs.append(job_id)
+                show_status(f"✓ Added job {job_id}: {src_path.name}", "success")
+
+            except Exception as e:
+                show_status(f"Failed to add {file_path}: {e}", "error")
+
+        show_status(f"Successfully added {len(added_jobs)} jobs", "success")
+        if added_jobs:
+            print("Added job IDs:", ", ".join(added_jobs))
+
+    except Exception as e:
+        from ...utils import error_handler
+
+        error_handler.handle(e)
+
+
 # Register commands
-add_app.command("job", help="Add a new job")(add_job)
+add_app.command("job", help="Add a new job")(add_single_job)
+add_app.command("jobs", help="Add multiple jobs using pattern")(add_jobs)
 add_app.command("pen", help="Add a new pen configuration")(add_pen)
 add_app.command("paper", help="Add a new paper configuration")(add_paper)
 
-
-def add_test(
-    name: str,
-    test_type: str = typer.Option(
-        ..., "--type", "-t", help="Type of test (servo/camera/timing)"
-    ),
-    description: str = typer.Option("", "--description", "-d", help="Test description"),
-) -> None:
-    """Add a new device test."""
-    try:
-        from ...db import get_session
-        from ...models import DeviceTest
-        from ...codes import ExitCode
-
-        # Validate test type
-        valid_types = ["servo", "camera", "timing"]
-        if test_type not in valid_types:
-            raise typer.BadParameter(
-                f"Test type must be one of: {', '.join(valid_types)}"
-            )
-
-        with get_session() as session:
-            # Check if test already exists
-            existing_test = (
-                session.query(DeviceTest).filter(DeviceTest.name == name).first()
-            )
-            if existing_test:
-                typer.echo(f"Error: Test '{name}' already exists", err=True)
-                raise typer.Exit(ExitCode.ALREADY_EXISTS)
-
-            # Create new test
-            new_test = DeviceTest(
-                name=name,
-                test_type=test_type,
-                description=description or f"{test_type.title()} test: {name}",
-            )
-
-            session.add(new_test)
-            session.commit()
-
-            typer.echo(f"✅ Added test '{name}' ({test_type}) successfully")
-
-    except typer.BadParameter:
-        raise
-    except Exception as e:
-        from ...utils import error_handler
-        from ...codes import ExitCode
-
-        error_handler.handle(e)
-        raise typer.Exit(ExitCode.ERROR)
-
-
-# Register test command
-add_app.command("test", help="Add a new device test")(add_test)
 
 __all__ = ["add_app"]

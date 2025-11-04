@@ -5,6 +5,7 @@ List jobs command for ploTTY CLI.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Optional
 import typer
 import json
 
@@ -15,6 +16,15 @@ from ..info.output import get_output_manager
 
 
 def jobs(
+    state: Optional[str] = typer.Option(
+        None,
+        "--state",
+        "-s",
+        help="Filter by job state (NEW, QUEUED, OPTIMIZED, READY, PLOTTING, COMPLETED, FAILED, etc.)",
+    ),
+    failed: bool = typer.Option(False, "--failed", help="Show only failed jobs"),
+    resumed: bool = typer.Option(False, "--resumed", help="Show only resumed jobs"),
+    finished: bool = typer.Option(False, "--finished", help="Show only finished jobs"),
     json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
     csv_output: bool = typer.Option(False, "--csv", help="Output in CSV format"),
 ):
@@ -68,6 +78,20 @@ def jobs(
                 show_status("No jobs found", "info")
             return
 
+        # Apply filters
+        if state:
+            # Filter by specific state
+            state_upper = state.upper()
+            jobs = [j for j in jobs if j["state"] == state_upper]
+        elif failed:
+            jobs = [j for j in jobs if j["state"] == "FAILED"]
+        elif resumed:
+            jobs = [
+                j for j in jobs if j["state"] in ["PLOTTING", "ARMED", "READY"]
+            ]  # Jobs that were resumed
+        elif finished:
+            jobs = [j for j in jobs if j["state"] in ["COMPLETED", "ABORTED"]]
+
         # Sort by state priority
         state_priority = {
             "PLOTTING": 0,
@@ -115,9 +139,27 @@ def jobs(
 
         headers = ["ID", "Name", "State", "Paper", "Layers", "Est. Time"]
 
+        # Build title based on filters
+        title_parts = []
+        if state:
+            title_parts.append(f"{state.upper()} Jobs")
+        elif failed:
+            title_parts.append("Failed")
+        elif resumed:
+            title_parts.append("Resumed")
+        elif finished:
+            title_parts.append("Finished")
+        else:
+            title_parts.append("All")
+
+        if state:
+            title = f"{state.upper()} Jobs ({len(jobs)} total)"
+        else:
+            title = f"{title_parts[0]} Jobs ({len(jobs)} total)"
+
         # Build markdown content
         markdown_content = output.print_table_markdown(
-            title=f"Jobs ({len(jobs)} total)", headers=headers, rows=formatted_rows
+            title=title, headers=headers, rows=formatted_rows
         )
 
         # Output using the manager

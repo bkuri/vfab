@@ -12,7 +12,9 @@ import typer
 from ..utils import error_handler
 from ..progress import show_status
 from ..config import load_config
+from ..planner import plan_layers
 from .core import get_available_job_ids
+from .common import create_apply_option
 
 try:
     from rich.console import Console
@@ -185,9 +187,9 @@ def plan_command(
 ):
     """Plan a job for plotting."""
     try:
-        from ..planner import JobPlanner
         from ..config import load_config
         from pathlib import Path
+        import json
 
         cfg = load_config(None)
         job_dir = Path(cfg.workspace) / "jobs" / job_id
@@ -195,8 +197,34 @@ def plan_command(
         if not job_dir.exists():
             raise typer.BadParameter(f"Job {job_id} not found")
 
-        planner = JobPlanner(cfg)
-        planner.plan_job(job_id, pen, interactive)
+        # Find source SVG file
+        src_svg = job_dir / "src.svg"
+        if not src_svg.exists():
+            raise typer.BadParameter(f"Source SVG not found for job {job_id}")
+
+        # Plan the job using plan_layers function
+        result = plan_layers(
+            src_svg=src_svg,
+            preset=cfg.vpype.preset,
+            presets_file=cfg.vpype.presets_file,
+            pen_map=None,  # Will use default pen mapping
+            out_dir=job_dir,
+            interactive=interactive,
+            paper_size="A4",
+        )
+
+        # Update job metadata
+        job_file = job_dir / "job.json"
+        if job_file.exists():
+            job_data = json.loads(job_file.read_text())
+            job_data["state"] = "OPTIMIZED"
+            job_data["planning"] = {
+                "layer_count": result["layer_count"],
+                "pen_map": result["pen_map"],
+                "estimates": result["estimates"],
+                "planned_at": str(Path.cwd()),
+            }
+            job_file.write_text(json.dumps(job_data, indent=2))
 
         show_status(f"Job {job_id} planned successfully", "success")
 
@@ -204,4 +232,186 @@ def plan_command(
         error_handler.handle(e)
 
 
-__all__ = ["start_command", "plan_command"]
+def optimize_command(
+    job_ids: Optional[str] = typer.Argument(
+        None, help="Comma-separated job IDs to optimize"
+    ),
+    apply: bool = create_apply_option(
+        "Actually perform optimization (preview by default)"
+    ),
+) -> None:
+    """Optimize jobs with preview by default."""
+    try:
+        from ..config import load_config
+        from ..utils import error_handler
+        from ..progress import show_status
+        from ..planner import plan_layers
+        from pathlib import Path
+        import json
+
+        cfg = load_config(None)
+        jobs_dir = Path(cfg.workspace) / "jobs"
+
+        # Get target jobs
+        if job_ids:
+            target_ids = [job_id.strip() for job_id in job_ids.split(",")]
+        else:
+            # Get all pristine jobs
+            target_ids = []
+            if jobs_dir.exists():
+                for job_dir in jobs_dir.iterdir():
+                    if job_dir.is_dir():
+                        job_file = job_dir / "job.json"
+                        if job_file.exists():
+                            try:
+                                job_data = json.loads(job_file.read_text())
+                                if (
+                                    job_data.get("optimization", {}).get("level")
+                                    == "none"
+                                ):
+                                    target_ids.append(job_dir.name)
+                            except Exception:
+                                continue
+
+        if not target_ids:
+            show_status("No jobs found to optimize", "info")
+            return
+
+        # Show preview table
+        jobs_data = []
+        for job_id in target_ids:
+            job_dir = jobs_dir / job_id
+            job_file = job_dir / "job.json"
+            if job_file.exists():
+                try:
+                    job_data = json.loads(job_file.read_text())
+                    src_file = job_dir / "src.svg"
+                    current_size = src_file.stat().st_size if src_file.exists() else 0
+
+                    jobs_data.append(
+                        {
+                            "id": job_id,
+                            "name": job_data.get("name", "Unknown"),
+                            "current_size": current_size,
+                            "status": job_data.get("optimization", {}).get(
+                                "level", "none"
+                            ),
+                        }
+                    )
+                except Exception:
+                    jobs_data.append(
+                        {
+                            "id": job_id,
+                            "name": "Unknown",
+                            "current_size": 0,
+                            "status": "error",
+                        }
+                    )
+
+        # Display preview table
+        if console:
+            console.print("🔧 Job Optimization Summary")
+            console.print()
+
+            from rich.table import Table
+
+            table = Table()
+            table.add_column("Job ID", style="cyan")
+            table.add_column("Name", style="white")
+            table.add_column("Current Size", style="yellow")
+            table.add_column("Status", style="green")
+
+            for job in jobs_data:
+                size_str = (
+                    f"{job['current_size'] / 1024:.1f}KB"
+                    if job["current_size"] > 0
+                    else "Unknown"
+                )
+                status_style = "red" if job["status"] == "none" else "green"
+                status_text = "Pristine" if job["status"] == "none" else "Optimized"
+
+                table.add_row(
+                    job["id"],
+                    job["name"],
+                    size_str,
+                    f"[{status_style}]{status_text}[/{status_style}]",
+                )
+
+            console.print(table)
+            console.print()
+            console.print(
+                f"💡 Use --apply to optimize {len(jobs_data)} jobs", style="yellow"
+            )
+        else:
+            print("Job Optimization Summary")
+            print("=" * 25)
+            for job in jobs_data:
+                size_str = (
+                    f"{job['current_size'] / 1024:.1f}KB"
+                    if job["current_size"] > 0
+                    else "Unknown"
+                )
+                status_text = "Pristine" if job["status"] == "none" else "Optimized"
+                print(f"{job['id']}: {job['name']} ({size_str}) - {status_text}")
+            print(f"\nUse --apply to optimize {len(jobs_data)} jobs")
+
+        if not apply:
+            return
+
+        # Perform optimization
+        show_status(f"Optimizing {len(jobs_data)} jobs...", "info")
+        optimized_count = 0
+        failed_count = 0
+
+        for job_id in target_ids:
+            try:
+                # Find source SVG file
+                src_svg = jobs_dir / job_id / "src.svg"
+                if not src_svg.exists():
+                    raise FileNotFoundError(f"Source SVG not found for job {job_id}")
+
+                # Plan the job using plan_layers function
+                plan_layers(
+                    src_svg=src_svg,
+                    preset=cfg.vpype.preset,
+                    presets_file=cfg.vpype.presets_file,
+                    pen_map=None,  # Will use default pen mapping
+                    out_dir=jobs_dir / job_id,
+                    interactive=False,
+                    paper_size="A4",
+                )
+
+                # Update optimization metadata
+                job_file = jobs_dir / job_id / "job.json"
+                if job_file.exists():
+                    job_data = json.loads(job_file.read_text())
+                    job_data["optimization"] = {
+                        "level": "full",
+                        "applied_at": str(Path.cwd()),
+                        "version": "1.0",
+                    }
+                    job_file.write_text(json.dumps(job_data, indent=2))
+
+                optimized_count += 1
+                if console:
+                    console.print(f"  ✓ Optimized {job_id}", style="green")
+                else:
+                    print(f"  Optimized {job_id}")
+
+            except Exception as e:
+                failed_count += 1
+                if console:
+                    console.print(f"  ❌ Failed to optimize {job_id}: {e}", style="red")
+                else:
+                    print(f"  Failed to optimize {job_id}: {e}")
+
+        show_status(
+            f"Optimized {optimized_count} jobs, {failed_count} failed",
+            "success" if failed_count == 0 else "warning",
+        )
+
+    except Exception as e:
+        error_handler.handle(e)
+
+
+__all__ = ["start_command", "plan_command", "optimize_command"]

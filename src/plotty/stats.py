@@ -7,7 +7,7 @@ for jobs, layers, and system performance metrics.
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -72,7 +72,7 @@ class StatisticsService:
                 job_id=job_id,
                 collection_level=collection_level,
                 event_type=event_type,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 duration_seconds=duration_seconds,
                 pen_changes=pen_changes,
                 distance_plotted_mm=distance_plotted_mm,
@@ -129,7 +129,7 @@ class StatisticsService:
                 job_id=job_id,
                 layer_id=layer_id,
                 pen_id=pen_id,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 duration_seconds=duration_seconds,
                 distance_plotted_mm=distance_plotted_mm,
                 distance_travel_mm=distance_travel_mm,
@@ -168,7 +168,7 @@ class StatisticsService:
         with self.session_context as session:
             metric = PerformanceMetrics(
                 job_id=job_id,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 metric_type=metric_type,
                 metric_value=metric_value,
                 unit=unit,
@@ -361,7 +361,7 @@ class StatisticsService:
         if not summary:
             summary = SystemStatistics(
                 stat_type="daily_summary",
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 total_jobs=0,
                 completed_jobs=0,
                 failed_jobs=0,

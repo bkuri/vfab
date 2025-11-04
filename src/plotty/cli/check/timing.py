@@ -5,7 +5,6 @@ Timing test command for ploTTY CLI.
 from __future__ import annotations
 
 
-
 def timing_test() -> None:
     """Test device timing and synchronization."""
     try:
