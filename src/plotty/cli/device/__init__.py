@@ -12,7 +12,7 @@ import typer
 device_app = typer.Typer(no_args_is_help=True, help="Device management commands")
 
 
-def ready(
+def check(
     component: str = typer.Argument(
         "all", help="Component to check (plotter/camera/all)"
     ),
@@ -53,7 +53,7 @@ def ready(
         error_handler.handle(e)
 
 
-# Register ready command
-device_app.command("ready", help="Check device readiness")(ready)
+# Register check command
+device_app.command("check", help="Check device readiness")(check)
 
 __all__ = ["device_app"]

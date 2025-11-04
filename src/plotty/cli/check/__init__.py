@@ -14,14 +14,10 @@ from pathlib import Path
 from .servo import servo_test
 from .camera import camera_test
 from .timing import timing_test
-from .device import device_check_app
 from .job import check_job
 
 # Create check command group
 check_app = typer.Typer(no_args_is_help=True, help="System and device checking")
-
-# Add device subcommand group
-check_app.add_typer(device_check_app, name="plotter", help="Plotter checking commands")
 
 # Register test commands
 check_app.command("servo", help="Test servo motor operation")(servo_test)
