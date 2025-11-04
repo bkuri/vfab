@@ -5,6 +5,7 @@ List jobs command for ploTTY CLI.
 from __future__ import annotations
 
 from pathlib import Path
+import sys
 import typer
 import json
 

@@ -34,9 +34,10 @@ def add(src: str, name: str = "", paper: str = "A3"):
 @job_app.command("list")
 def list(
     json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
+    csv_output: bool = typer.Option(False, "--csv", help="Output in CSV format"),
 ):
     """List all jobs in workspace."""
-    return list_jobs_func(json_output)
+    return list_jobs_func(json_output, csv_output)
 
 
 @job_app.command()
