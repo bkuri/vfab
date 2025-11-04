@@ -11,12 +11,9 @@ import json
 from ...config import load_config
 from ...utils import error_handler
 from ...progress import show_status
-from ..status.output import get_output_manager
-
-list_app = typer.Typer(help="List jobs")
+from ..info.output import get_output_manager
 
 
-@list_app.command("jobs")
 def jobs(
     json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
     csv_output: bool = typer.Option(False, "--csv", help="Output in CSV format"),
@@ -133,3 +130,6 @@ def jobs(
 
     except Exception as e:
         error_handler.handle(e)
+
+
+__all__ = ["jobs"]

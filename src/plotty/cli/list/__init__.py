@@ -8,8 +8,8 @@ import typer
 
 from .pen_management import pen_list
 from .paper_management import paper_list
-from .session_management import session_reset
 from .presets import list_plot_presets
+from .jobs import jobs
 from ..guard.list import list_guards
 
 # Create list command group
@@ -24,8 +24,8 @@ list_app.command("papers")(paper_list)
 # Register presets command
 list_app.command("presets")(list_plot_presets)
 
-# Register session management commands
-list_app.command("session")(session_reset)
+# Register jobs command
+list_app.command("jobs")(jobs)
 
 # Register guard listing
 list_app.command("guards")(list_guards)

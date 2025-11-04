@@ -10,7 +10,7 @@ from typing import Optional
 import typer
 
 from ...backup import BackupConfig, BackupManager
-from ..status.output import get_output_manager
+from ..info.output import get_output_manager
 
 list_app = typer.Typer(name="list", help="List available backups", no_args_is_help=True)
 

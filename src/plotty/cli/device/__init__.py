@@ -8,19 +8,8 @@ from __future__ import annotations
 
 import typer
 
-from .test import test_app
-from .interactive import interactive_session
-
 # Create device command group
 device_app = typer.Typer(no_args_is_help=True, help="Device management commands")
-
-# Add test subcommand group
-device_app.add_typer(test_app, name="test", help="Device testing commands")
-
-# Register other commands
-device_app.command("interactive", help="Start interactive plotting session")(
-    interactive_session
-)
 
 
 def ready(

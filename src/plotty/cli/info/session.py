@@ -1,5 +1,5 @@
 """
-Session management commands.
+Session management commands for ploTTY.
 """
 
 from __future__ import annotations
@@ -97,3 +97,54 @@ def session_reset() -> None:
 
         error_handler.handle(e)
         raise typer.Exit(ExitCode.ERROR)
+
+
+def session_info() -> None:
+    """Show current session information."""
+    try:
+        from ...db import get_session
+        from ...models import Job, Layer
+
+        if console:
+            console.print("📊 Session Information", style="bold blue")
+        else:
+            print("📊 Session Information")
+            print("=" * 25)
+
+        with get_session() as session:
+            # Count jobs and layers
+            job_count = session.query(Job).count()
+            layer_count = session.query(Layer).count()
+
+            # Count jobs by state
+            pending_jobs = session.query(Job).filter(Job.state == "pending").count()
+            running_jobs = session.query(Job).filter(Job.state == "running").count()
+            completed_jobs = session.query(Job).filter(Job.state == "completed").count()
+            failed_jobs = session.query(Job).filter(Job.state == "failed").count()
+
+            if console:
+                console.print(f"Total Jobs: {job_count}")
+                console.print(f"Total Layers: {layer_count}")
+                console.print("")
+                console.print("Jobs by State:")
+                console.print(f"  Pending: {pending_jobs}")
+                console.print(f"  Running: {running_jobs}")
+                console.print(f"  Completed: {completed_jobs}")
+                console.print(f"  Failed: {failed_jobs}")
+            else:
+                print(f"Total Jobs: {job_count}")
+                print(f"Total Layers: {layer_count}")
+                print("")
+                print("Jobs by State:")
+                print(f"  Pending: {pending_jobs}")
+                print(f"  Running: {running_jobs}")
+                print(f"  Completed: {completed_jobs}")
+                print(f"  Failed: {failed_jobs}")
+
+    except Exception as e:
+        from ...utils import error_handler
+
+        error_handler.handle(e)
+
+
+__all__ = ["session_reset", "session_info"]

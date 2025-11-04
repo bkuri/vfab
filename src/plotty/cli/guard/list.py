@@ -9,7 +9,7 @@ import typer
 
 from ...utils import error_handler
 from ...codes import ExitCode
-from ..status.output import get_output_manager
+from ..info.output import get_output_manager
 
 
 def list_guards(

@@ -16,7 +16,7 @@ from ...planner import plan_layers
 from ...db import get_session
 from ...models import Pen
 from ...multipen import detect_svg_layers
-from ..status.output import get_output_manager
+from ..info.output import get_output_manager
 from .utils import get_jobs_by_state, group_layers_by_pen, calculate_pen_optimization
 
 try:

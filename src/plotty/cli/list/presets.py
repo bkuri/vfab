@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import typer
 from ...utils import error_handler
-from ..status.output import get_output_manager
+from ..info.output import get_output_manager
 
 try:
     from rich.console import Console

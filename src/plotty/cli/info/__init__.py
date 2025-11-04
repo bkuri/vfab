@@ -12,6 +12,7 @@ import typer
 from .system import show_status_overview, show_system_status, show_quick_status
 from .queue import show_job_queue
 from .job import show_job_details
+from .session import session_reset, session_info
 from .utils import complete_job_id
 
 # Create status command group
@@ -78,6 +79,18 @@ def status_job(
 ):
     """Show detailed information about a specific job."""
     show_job_details(job_id, json_output=json_output, csv_output=csv_output)
+
+
+@status_app.command("reset")
+def status_reset():
+    """Reset the current session (clear all jobs and layers)."""
+    session_reset()
+
+
+@status_app.command("session")
+def status_session():
+    """Show current session information."""
+    session_info()
 
 
 __all__ = ["status_app"]

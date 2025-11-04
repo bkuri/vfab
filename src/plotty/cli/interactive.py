@@ -9,9 +9,9 @@ import json
 from pathlib import Path
 import typer
 
-from ...utils import error_handler
-from ...config import load_config
-from ..core import get_available_job_ids
+from ..utils import error_handler
+from ..config import load_config
+from .core import get_available_job_ids
 
 try:
     from rich.console import Console
@@ -23,14 +23,14 @@ except ImportError:
     Table = None
 
 
-def interactive_session(
+def interactive_command(
     port: Optional[str] = typer.Option(None, "--port", help="Device port"),
     model: int = typer.Option(1, "--model", help="Device model"),
     units: str = typer.Option("inches", "--units", help="Coordinate units"),
 ):
     """Start interactive plotting session."""
     try:
-        from ...plotting import MultiPenPlotter
+        from ..plotting import MultiPenPlotter
 
         # Initialize plotter
         plotter = MultiPenPlotter(port=port, model=model, interactive=True)
@@ -207,7 +207,7 @@ def interactive_session(
                     import os
 
                     sys.path.insert(
-                        0, os.path.join(os.path.dirname(__file__), "..", "..", "..")
+                        0, os.path.join(os.path.dirname(__file__), "..", "..")
                     )
                     from plotty.presets import list_presets
 
@@ -286,3 +286,6 @@ def interactive_session(
 
     except Exception as e:
         error_handler.handle(e)
+
+
+__all__ = ["interactive_command"]

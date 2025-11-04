@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from ...stats import StatisticsService
 from ...utils import error_handler
-from ..status.output import get_output_manager
+from ..info.output import get_output_manager
 
 
 def show_stats_summary(

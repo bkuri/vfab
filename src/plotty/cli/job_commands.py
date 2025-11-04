@@ -1,5 +1,5 @@
 """
-Start job command for ploTTY CLI.
+Main level job commands for ploTTY CLI.
 """
 
 from __future__ import annotations
@@ -9,10 +9,10 @@ import json
 from pathlib import Path
 import typer
 
-from ...utils import error_handler
-from ...progress import show_status
-from ...config import load_config
-from ..core import get_available_job_ids
+from ..utils import error_handler
+from ..progress import show_status
+from ..config import load_config
+from .core import get_available_job_ids
 
 try:
     from rich.console import Console
@@ -29,7 +29,7 @@ def complete_job_id(incomplete: str):
     ]
 
 
-def start_job(
+def start_command(
     job_id: str = typer.Argument(
         ..., autocompletion=complete_job_id, help="Job ID to start"
     ),
@@ -45,7 +45,7 @@ def start_job(
         import sys
         import os
 
-        sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
         from plotty.presets import get_preset, preset_names
 
         # Validate preset if provided
@@ -88,7 +88,7 @@ def start_job(
         # Check if job is planned
         if job_data.get("state") not in ["OPTIMIZED", "READY"]:
             show_status(
-                f"Job {job_id} must be planned first. Run: plotty job plan {job_id}",
+                f"Job {job_id} must be planned first. Run: plotty plan {job_id}",
                 "warning",
             )
             return
@@ -106,7 +106,7 @@ def start_job(
             show_status("Calculating time estimation...", "info")
 
             # Use AxiDraw preview mode for accurate time estimation
-            from ...plotting import MultiPenPlotter
+            from ..plotting import MultiPenPlotter
 
             preview_plotter = MultiPenPlotter(port=port, model=model, interactive=False)
 
@@ -142,7 +142,7 @@ def start_job(
                 console.print("⚠️  Could not estimate time", style="yellow")
 
         # Use MultiPenPlotter for actual plotting
-        from ...plotting import MultiPenPlotter
+        from ..plotting import MultiPenPlotter
 
         # Create plotter
         plotter = MultiPenPlotter(port=port, model=model)
@@ -176,3 +176,72 @@ def start_job(
             )
     except Exception as e:
         error_handler.handle(e)
+
+
+def plan_command(
+    job_id: str,
+    pen: str = "0.3mm black",
+    interactive: bool = False,
+):
+    """Plan a job for plotting."""
+    try:
+        from ..planner import JobPlanner
+        from ..config import load_config
+        from pathlib import Path
+
+        cfg = load_config(None)
+        job_dir = Path(cfg.workspace) / "jobs" / job_id
+
+        if not job_dir.exists():
+            raise typer.BadParameter(f"Job {job_id} not found")
+
+        planner = JobPlanner(cfg)
+        planner.plan_job(job_id, pen, interactive)
+
+        show_status(f"Job {job_id} planned successfully", "success")
+
+    except Exception as e:
+        error_handler.handle(e)
+
+
+def record_test_command(
+    job_id: str,
+    seconds: int = 5,
+):
+    """Record a test plot for timing."""
+    try:
+        from ..plotting import MultiPenPlotter
+        from ..config import load_config
+        from pathlib import Path
+
+        cfg = load_config(None)
+        job_dir = Path(cfg.workspace) / "jobs" / job_id
+
+        if not job_dir.exists():
+            raise typer.BadParameter(f"Job {job_id} not found")
+
+        # Find SVG file
+        svg_file = job_dir / "multipen.svg"
+        if not svg_file.exists():
+            svg_file = job_dir / "src.svg"
+
+        if not svg_file.exists():
+            raise typer.BadParameter(f"No SVG file found for job {job_id}")
+
+        show_status(f"Recording test plot for {job_id} ({seconds}s)...", "info")
+
+        plotter = MultiPenPlotter()
+        result = plotter.record_test_plot(svg_file, seconds)
+
+        if result["success"]:
+            show_status(f"Test plot recorded for {job_id}", "success")
+        else:
+            show_status(
+                f"Test plot failed: {result.get('error', 'Unknown error')}", "error"
+            )
+
+    except Exception as e:
+        error_handler.handle(e)
+
+
+__all__ = ["start_command", "plan_command", "record_test_command"]
