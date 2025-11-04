@@ -21,7 +21,7 @@ from .job import check_job
 check_app = typer.Typer(no_args_is_help=True, help="System and device checking")
 
 # Add device subcommand group
-check_app.add_typer(device_check_app, name="device", help="Device checking commands")
+check_app.add_typer(device_check_app, name="plotter", help="Plotter checking commands")
 
 # Register test commands
 check_app.command("servo", help="Test servo motor operation")(servo_test)

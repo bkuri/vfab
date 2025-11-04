@@ -44,7 +44,7 @@ app.command("interactive", help="Start interactive plotting session")(
     interactive_command
 )
 app.command("start", help="Start plotting a job")(start_command)
-app.command("plan", help="Plan a job for plotting")(plan_command)
+app.command("prepare", help="Prepare a job for plotting")(plan_command)
 app.command("record-test", help="Record a test plot for timing")(record_test_command)
 
 # Add sub-apps (alphabetical order)
