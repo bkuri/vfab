@@ -204,44 +204,4 @@ def plan_command(
         error_handler.handle(e)
 
 
-def record_test_command(
-    job_id: str,
-    seconds: int = 5,
-):
-    """Record a test plot for timing."""
-    try:
-        from ..plotting import MultiPenPlotter
-        from ..config import load_config
-        from pathlib import Path
-
-        cfg = load_config(None)
-        job_dir = Path(cfg.workspace) / "jobs" / job_id
-
-        if not job_dir.exists():
-            raise typer.BadParameter(f"Job {job_id} not found")
-
-        # Find SVG file
-        svg_file = job_dir / "multipen.svg"
-        if not svg_file.exists():
-            svg_file = job_dir / "src.svg"
-
-        if not svg_file.exists():
-            raise typer.BadParameter(f"No SVG file found for job {job_id}")
-
-        show_status(f"Recording test plot for {job_id} ({seconds}s)...", "info")
-
-        plotter = MultiPenPlotter()
-        result = plotter.record_test_plot(svg_file, seconds)
-
-        if result["success"]:
-            show_status(f"Test plot recorded for {job_id}", "success")
-        else:
-            show_status(
-                f"Test plot failed: {result.get('error', 'Unknown error')}", "error"
-            )
-
-    except Exception as e:
-        error_handler.handle(e)
-
-
-__all__ = ["start_command", "plan_command", "record_test_command"]
+__all__ = ["start_command", "plan_command"]
