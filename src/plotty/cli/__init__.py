@@ -9,18 +9,23 @@ from __future__ import annotations
 import typer
 from importlib import metadata
 
+from .add import add_app
+from .remove import remove_app
 from .job import job_app
-from .config import config_app
+from .list import list_app
 from .device import device_app
-from .recovery import recovery_app
-from .guard import guard_app
+from .sos import sos_app
 from .stats import stats_app
 from .batch import batch_app
-from .logging import logging_app
+from .logs import logs_app
 from .backup import backup_app
 
 # Import status commands
 from .status import status_app
+
+# Import main level commands
+from .list.setup_wizard import setup, check_config
+from .list.session_management import session_reset
 
 # Get version
 try:
@@ -31,17 +36,23 @@ except metadata.PackageNotFoundError:
 # Create main app
 app = typer.Typer(no_args_is_help=True)
 
-# Add sub-apps
-app.add_typer(status_app, name="status", help="Status and monitoring commands")
-app.add_typer(job_app, name="job", help="Job management commands")
-app.add_typer(config_app, name="config", help="Configuration commands")
-app.add_typer(device_app, name="device", help="Device management commands")
-app.add_typer(recovery_app, name="recovery", help="Crash recovery commands")
-app.add_typer(guard_app, name="guard", help="System guard commands")
-app.add_typer(stats_app, name="stats", help="Statistics and analytics commands")
-app.add_typer(batch_app, name="batch", help="Batch operations commands")
-app.add_typer(logging_app, name="logging", help="Logging system commands")
+# Add main level commands
+app.command("setup", help="Run setup wizard")(setup)
+app.command("check", help="Check configuration")(check_config)
+app.command("reset", help="Reset session")(session_reset)
+
+# Add sub-apps (alphabetical order)
+app.add_typer(add_app, name="add", help="Add new resources")
 app.add_typer(backup_app, name="backup", help="Backup and restore commands")
+app.add_typer(batch_app, name="batch", help="Batch operations commands")
+app.add_typer(device_app, name="device", help="Device management commands")
+app.add_typer(job_app, name="job", help="Job management commands")
+app.add_typer(list_app, name="list", help="List and manage resources")
+app.add_typer(logs_app, name="logs", help="Logging system commands")
+app.add_typer(remove_app, name="remove", help="Remove resources")
+app.add_typer(sos_app, name="sos", help="Recovery and rescue commands")
+app.add_typer(stats_app, name="stats", help="Statistics and analytics commands")
+app.add_typer(status_app, name="status", help="Status and monitoring commands")
 
 
 @app.callback()

@@ -21,6 +21,8 @@ from .plan import job as plan_job
 from .remove import job as remove_job
 from .info import record_test as record_test_func
 from .start import start_job, complete_job_id
+from ..guard.check import check_guards
+from ..guard.validate import validate_transition
 
 # Create main job app
 job_app = typer.Typer(name="job", help="Job management commands", no_args_is_help=True)
@@ -83,3 +85,15 @@ def record_test(
 ):
     """Record a test plot for timing."""
     return record_test_func(job_id, seconds)
+
+
+@job_app.command()
+def check():
+    """Check system guards for job operations."""
+    return check_guards()
+
+
+@job_app.command()
+def validate():
+    """Validate job state transitions."""
+    return validate_transition()
