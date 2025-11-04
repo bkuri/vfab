@@ -18,7 +18,7 @@ from .pen_test import test_pen_operation
 plot_app = typer.Typer(no_args_is_help=True, help="Plotting commands")
 
 # Register commands
-plot_app.command("plot")(plot_job)
+plot_app.command("plot", help="Plot a job")(plot_job)
 plot_app.command("interactive")(interactive_session)
 plot_app.command("presets")(list_plot_presets)
 plot_app.command("pen-test")(test_pen_operation)

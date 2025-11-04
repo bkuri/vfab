@@ -11,6 +11,7 @@ Provides CLI interface for managing plotting jobs including:
 
 from __future__ import annotations
 
+from typing import Optional
 import typer
 
 # Import command functions
@@ -19,6 +20,7 @@ from .list import jobs as list_jobs_func
 from .plan import job as plan_job
 from .remove import job as remove_job
 from .info import record_test as record_test_func
+from .start import start_job, complete_job_id
 
 # Create main job app
 job_app = typer.Typer(name="job", help="Job management commands", no_args_is_help=True)
@@ -57,6 +59,21 @@ def remove(
 ):
     """Remove a job from workspace."""
     return remove_job(job_id, force)
+
+
+@job_app.command()
+def start(
+    job_id: str = typer.Argument(
+        ..., autocompletion=complete_job_id, help="Job ID to start"
+    ),
+    preset: str = typer.Option(
+        None, "--preset", "-p", help="Plot preset (fast, safe, preview, detail, draft)"
+    ),
+    port: Optional[str] = typer.Option(None, "--port", help="Device port"),
+    model: int = typer.Option(1, "--model", help="Device model"),
+):
+    """Start plotting a job."""
+    return start_job(job_id, preset, port, model)
 
 
 @job_app.command()
