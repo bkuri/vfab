@@ -91,22 +91,26 @@ class StateTransition:
 class JobFSM:
     """Finite State Machine for managing job lifecycle."""
 
-    # Valid state transitions as per PRD
+    # Valid state transitions with correct semantics:
+    # READY = "ready to be queued", QUEUED = "added to plotting queue"
     VALID_TRANSITIONS = {
         JobState.NEW: [
             JobState.ANALYZED,
-            JobState.QUEUED,
-        ],  # Can start analysis or go directly to queued
-        JobState.QUEUED: [
             JobState.READY,
-            JobState.ABORTED,
-        ],  # Ready for device assignment or abort
+        ],  # Can start analysis or go directly to ready (pristine)
         JobState.ANALYZED: [JobState.OPTIMIZED, JobState.FAILED],
         JobState.OPTIMIZED: [
-            JobState.QUEUED,
+            JobState.READY,
             JobState.FAILED,
-        ],  # Back to queued after optimization
-        JobState.READY: [JobState.ARMED, JobState.ABORTED],
+        ],  # Ready after optimization
+        JobState.READY: [
+            JobState.QUEUED,
+            JobState.ABORTED,
+        ],  # Can be queued or aborted
+        JobState.QUEUED: [
+            JobState.ARMED,
+            JobState.ABORTED,
+        ],  # Can be armed for plotting or aborted
         JobState.ARMED: [JobState.PLOTTING, JobState.ABORTED],
         JobState.PLOTTING: [
             JobState.PAUSED,
@@ -132,7 +136,7 @@ class JobFSM:
         self.job_dir = workspace / "jobs" / job_id
         self.current_state = JobState.NEW
         self.transitions: List[StateTransition] = []
-        self.config = load_config()
+        self.config = load_config()  # This will respect PLOTTY_CONFIG env var
         self.hook_executor = create_hook_executor(job_id, workspace)
         self.guard_system = create_guard_system(self.config, workspace)
         self._last_guard_checks: List[Any] = []
@@ -149,6 +153,29 @@ class JobFSM:
         except Exception:
             # Crash recovery not available, continue without it
             pass
+
+    @classmethod
+    def from_job(cls, job, workspace: Path) -> JobFSM:
+        """Create FSM from a Job object.
+
+        Args:
+            job: Job model instance
+            workspace: Path to workspace directory
+
+        Returns:
+            JobFSM instance
+        """
+        fsm = cls(job.name, workspace)
+
+        # Set current state from job if available
+        if hasattr(job, "status") and job.status:
+            try:
+                fsm.current_state = JobState(job.status)
+            except ValueError:
+                # Invalid state, keep NEW
+                pass
+
+        return fsm
 
     def _load_journal(self) -> None:
         """Load existing journal for crash recovery."""
@@ -390,9 +417,239 @@ class JobFSM:
 
         return self.transition_to(JobState.READY, "Job ready for plotting", {})
 
+    def queue_ready_job(self) -> bool:
+        """Queue a job that is in READY state."""
+        if self.current_state != JobState.READY:
+            return False
+
+        return self.transition_to(JobState.QUEUED, "Job added to plotting queue", {})
+
+    def validate_file(self) -> bool:
+        """Validate file based on type (SVG or Plob)."""
+        try:
+            # Determine file type from job metadata
+            job_file = self.job_dir / "job.json"
+            if not job_file.exists():
+                return False
+
+            job_data = json.loads(job_file.read_text())
+            file_type = job_data.get("metadata", {}).get("file_type", "svg")
+
+            if file_type == "plob":
+                return self._validate_plob_file()
+            else:
+                return self._validate_svg_file()
+        except Exception as e:
+            logger.error(f"File validation failed: {e}")
+            return False
+
+    def _validate_plob_file(self) -> bool:
+        """Validate Plob file format and integrity."""
+        try:
+            plob_file = self.job_dir / "multipen.plob"
+            if not plob_file.exists():
+                logger.error("Plob file not found")
+                return False
+
+            # Basic Plob validation - check if it's valid text/XML-like structure
+            content = plob_file.read_text()
+            if not content.strip():
+                logger.error("Plob file is empty")
+                return False
+
+            # Check for basic Plob structure indicators
+            if not any(
+                indicator in content.lower() for indicator in ["svg", "path", "d="]
+            ):
+                logger.warning("Plob file may not contain valid path data")
+                return False
+
+            logger.info("Plob file validation passed")
+            return True
+        except Exception as e:
+            logger.error(f"Plob validation failed: {e}")
+            return False
+
+    def _validate_svg_file(self) -> bool:
+        """Validate SVG file format and compatibility."""
+        try:
+            src_file = self.job_dir / "src.svg"
+            if not src_file.exists():
+                logger.error("Source SVG file not found")
+                return False
+
+            # Basic SVG validation
+            content = src_file.read_text()
+
+            # Check XML structure
+            if not content.strip().startswith("<?xml"):
+                logger.error("File does not appear to be valid XML/SVG")
+                return False
+
+            # Check for SVG namespace
+            if 'xmlns="http://www.w3.org/2000/svg"' not in content:
+                logger.error("Missing SVG namespace")
+                return False
+
+            # Check for basic SVG elements
+            if not any(
+                element in content for element in ["<svg", "<path", "<circle", "<rect"]
+            ):
+                logger.error("SVG file contains no plottable elements")
+                return False
+
+            # Check file size (basic sanity check)
+            if len(content) > 50 * 1024 * 1024:  # 50MB limit
+                logger.warning("SVG file is very large, may cause performance issues")
+
+            logger.info("SVG file validation passed")
+            return True
+        except Exception as e:
+            logger.error(f"SVG validation failed: {e}")
+            return False
+
+    def apply_optimizations(
+        self, preset: Optional[str] = None, digest: Optional[int] = None
+    ) -> bool:
+        """Apply optimizations to transition from ANALYZED to OPTIMIZED state.
+
+        Args:
+            preset: Optimization preset (fast, default, hq)
+            digest: Digest level for AxiDraw acceleration (0-2)
+
+        Returns:
+            True if optimization succeeded, False otherwise
+        """
+        if self.current_state != JobState.ANALYZED:
+            logger.error(f"Cannot apply optimizations in state {self.current_state}")
+            return False
+
+        try:
+            # Get job metadata to determine file type and mode
+            job_file = self.job_dir / "job.json"
+            if not job_file.exists():
+                logger.error("Job metadata not found")
+                return False
+
+            job_data = json.loads(job_file.read_text())
+            mode = job_data.get("metadata", {}).get("mode", "normal")
+            file_type = job_data.get("metadata", {}).get("file_type", "svg")
+
+            # Skip optimization for plob files
+            if mode == "plob" or file_type == ".plob":
+                logger.info("Skipping optimization for Plob file")
+                return self.transition_to(
+                    JobState.OPTIMIZED,
+                    "Plob file - optimization skipped",
+                    {"optimization": "skipped", "mode": mode},
+                )
+
+            # Get optimization settings
+            config = self.config
+            effective_preset = preset or config.optimization.default_level
+            effective_digest = (
+                digest if digest is not None else config.optimization.default_digest
+            )
+
+            # Validate preset
+            if effective_preset not in config.optimization.levels:
+                available = ", ".join(config.optimization.levels.keys())
+                logger.error(
+                    f"Unknown preset '{effective_preset}'. Available: {available}"
+                )
+                return False
+
+            # Validate digest
+            if effective_digest not in config.optimization.digest_levels:
+                available = ", ".join(
+                    map(str, config.optimization.digest_levels.keys())
+                )
+                logger.error(
+                    f"Invalid digest level {effective_digest}. Available: {available}"
+                )
+                return False
+
+            # Get source SVG file
+            src_svg = self.job_dir / "src.svg"
+            if not src_svg.exists():
+                logger.error("Source SVG file not found")
+                return False
+
+            # Apply VPype optimizations
+            preset_config = config.optimization.levels[effective_preset]
+            vpype_preset = preset_config.vpype_preset
+
+            # Use plan_layers for optimization
+            result = plan_layers(
+                src_svg=src_svg,
+                preset=vpype_preset,
+                presets_file=config.vpype.presets_file,
+                pen_map=None,  # Will use default pen mapping
+                out_dir=self.job_dir,
+                interactive=False,
+                paper_size="A4",  # Could be configurable
+            )
+
+            if not result:
+                logger.error("VPype optimization failed")
+                return False
+
+            # Generate Plob file with digest if requested
+            plob_file = self.job_dir / "multipen.plob"
+            optimized_svg = self.job_dir / "multipen.svg"
+
+            if optimized_svg.exists():
+                # Import here to avoid circular imports
+                try:
+                    from .plob import generate_plob_file
+
+                    success, msg = generate_plob_file(
+                        svg_file=optimized_svg,
+                        output_file=plob_file,
+                        digest_level=effective_digest,
+                        preset=effective_preset,
+                    )
+
+                    if not success:
+                        logger.warning(f"Plob generation failed: {msg}")
+                        # Continue without Plob file
+                    else:
+                        logger.info(
+                            f"Generated Plob file with digest level {effective_digest}"
+                        )
+                except ImportError:
+                    logger.warning("Plob generation not available, skipping")
+                except Exception as e:
+                    logger.warning(f"Plob generation failed: {e}")
+
+            # Update job metadata with optimization info
+            job_data["metadata"]["optimization"] = {
+                "preset": effective_preset,
+                "digest": effective_digest,
+                "applied_at": datetime.now(timezone.utc).isoformat(),
+            }
+            job_file.write_text(json.dumps(job_data, indent=2))
+
+            # Transition to OPTIMIZED state
+            return self.transition_to(
+                JobState.OPTIMIZED,
+                f"Applied optimizations: preset={effective_preset}, digest={effective_digest}",
+                {
+                    "optimization": {
+                        "preset": effective_preset,
+                        "digest": effective_digest,
+                        "mode": mode,
+                    }
+                },
+            )
+
+        except Exception as e:
+            logger.error(f"Optimization failed: {e}")
+            return self.fail_job(f"Optimization failed: {e}")
+
     def arm_job(self) -> bool:
         """Arm job for plotting (pre-flight checks)."""
-        if self.current_state != JobState.READY:
+        if self.current_state != JobState.QUEUED:
             return False
 
         # Validate checklist before arming

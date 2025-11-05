@@ -6,6 +6,7 @@ This module provides commands for adding new resources like pens, paper, jobs, a
 
 from __future__ import annotations
 
+from typing import Optional
 import typer
 from pathlib import Path
 
@@ -14,94 +15,147 @@ add_app = typer.Typer(no_args_is_help=True, help="Add new resources")
 
 
 def add_single_job(
-    src: str,
-    name: str = typer.Option("", "--name", "-n", help="Job name"),
-    paper: str = typer.Option("A4", "--paper", "-p", help="Paper size"),
-    pristine: bool = typer.Option(
-        False, "--pristine", help="Skip optimization (add in pristine state)"
-    ),
+    job_name: str,
+    file_path: Path,
+    preset: Optional[str] = None,
+    digest: Optional[int] = None,
+    force: bool = False,
 ) -> None:
-    """Add a single job to workspace."""
+    """Add a single job to the system."""
+    from plotty.fsm import create_fsm, JobState
+    from plotty.config import get_config, load_config
+    from plotty.utils import error_handler
+    from plotty.progress import show_status
+    from pathlib import Path
+    import json
+    from datetime import datetime, timezone
+
+    # Validate file exists
+    if not file_path.exists():
+        typer.echo(f"Error: File '{file_path}' not found")
+        raise typer.Exit(1)
+
+    # Detect file type and determine mode
+    file_ext = file_path.suffix.lower()
+    is_plob_file = file_ext == ".plob"
+
+    # Get config for optimization settings
+    config = get_config()
+
+    # Determine preset and digest based on file type and overrides
+    if is_plob_file:
+        # Plob files always use pristine mode (no optimization)
+        effective_preset = None
+        effective_digest = None
+        mode = "plob"
+    elif preset:
+        # User-specified preset
+        effective_preset = preset
+        effective_digest = (
+            digest if digest is not None else config.optimization.default_digest
+        )
+        mode = "normal"
+    else:
+        # Use default optimization
+        effective_preset = config.optimization.default_level
+        effective_digest = (
+            digest if digest is not None else config.optimization.default_digest
+        )
+        mode = "normal"
+
+    # Create job directory and files (following add_jobs pattern)
+    cfg = load_config(None)
+    job_id = job_name
+    jdir = Path(cfg.workspace) / "jobs" / job_id
+
+    # Check if job already exists
+    if not force and jdir.exists():
+        typer.echo(f"Error: Job '{job_name}' already exists. Use --force to override.")
+        raise typer.Exit(1)
+
+    # Create job directory
+    jdir.mkdir(parents=True, exist_ok=True)
+
+    # Copy source file to appropriate location
+    if is_plob_file:
+        # Plob files go to multipen.plob
+        (jdir / "multipen.plob").write_bytes(file_path.read_bytes())
+    else:
+        # SVG files go to src.svg
+        (jdir / "src.svg").write_bytes(file_path.read_bytes())
+
+    # Create initial job metadata with NEW state
+    job_data = {
+        "id": job_id,
+        "name": job_name,
+        "paper": "A4",  # Default paper
+        "state": JobState.NEW.value,
+        "config_status": "DEFAULTS",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "metadata": {
+            "mode": mode,
+            "file_type": file_ext,
+            "preset": effective_preset,
+            "digest": effective_digest,
+        },
+    }
+
+    (jdir / "job.json").write_text(json.dumps(job_data, indent=2))
+
+    # Create FSM and handle transitions
+    fsm = create_fsm(job_id, Path(cfg.workspace))
+
     try:
-        from ...config import load_config
-        from ...fsm import create_fsm, JobState
-        from ...utils import error_handler, validate_file_exists
-        from ...progress import show_status
-        import uuid
-        import json
-        from datetime import datetime, timezone
-
-        cfg = load_config(None)
-
-        # Validate source file exists
-        src_path = Path(src)
-        validate_file_exists(src_path, "Source SVG file")
-
-        # Generate 6-character job ID for better usability
-        job_id = uuid.uuid4().hex[:6]
-        jdir = Path(cfg.workspace) / "jobs" / job_id
-
-        # Create job directory
-        jdir.mkdir(parents=True, exist_ok=True)
-
-        # Copy source file
-        (jdir / "src.svg").write_bytes(src_path.read_bytes())
-
-        # Create initial job metadata with NEW state
-        job_data = {
-            "id": job_id,
-            "name": name or src_path.stem,
-            "paper": paper,
-            "state": JobState.NEW.value,
-            "config_status": "DEFAULTS",
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "optimization": {
-                "level": "none" if pristine else "pending",
-                "applied_at": None,
-                "version": "1.0",
-            },
-        }
-
-        (jdir / "job.json").write_text(json.dumps(job_data, indent=2))
-
-        # Create FSM and handle transitions
-        fsm = create_fsm(job_id, Path(cfg.workspace))
-
-        if pristine:
-            # NEW -> QUEUED (skip optimization, ready to plot)
+        if mode == "plob":
+            # Plob files: NEW -> READY -> QUEUED (skip analysis and optimization)
             success = fsm.transition_to(
-                JobState.QUEUED, reason="Job added in pristine mode - ready to plot"
+                JobState.READY,
+                reason="Plob file - ready to queue",
             )
+            if success:
+                success = fsm.queue_ready_job()
         else:
-            # NEW -> ANALYZED -> OPTIMIZED -> QUEUED
-            # Analyze phase
+            # Normal files: NEW -> ANALYZED -> OPTIMIZED -> READY -> QUEUED
             success = fsm.transition_to(
                 JobState.ANALYZED, reason="Starting job analysis"
             )
 
             if success:
-                # Optimization phase (using FSM's built-in optimization)
-                success = fsm.optimize_job(interactive=False)
+                success = fsm.apply_optimizations(
+                    preset=effective_preset, digest=effective_digest
+                )
 
                 if success:
-                    # Queue phase (job is ready after optimization)
                     success = fsm.transition_to(
-                        JobState.QUEUED,
-                        reason="Job optimization completed, queued for plotting",
+                        JobState.READY, reason="Job ready to queue"
                     )
+                    if success:
+                        success = fsm.queue_ready_job()
 
         if success:
-            show_status(f"✓ Added job {job_id}: {job_data['name']}", "success")
-            print(job_id)
+            # Show final status
+            mode_desc = (
+                "Plob file" if mode == "plob" else f"Optimized ({effective_preset})"
+            )
+            show_status(f"✓ Added and queued job: {job_name}", "success")
+            typer.echo(f"  File: {file_path}")
+            typer.echo(f"  Mode: {mode_desc}")
+            if effective_preset:
+                typer.echo(f"  Preset: {effective_preset}")
+            if effective_digest is not None:
+                typer.echo(f"  Digest: {effective_digest}")
         else:
-            # Handle failure - FSM should have transitioned to FAILED state
-            show_status(f"✗ Failed to add job {job_id}", "error")
+            show_status(f"✗ Failed to add job {job_name}", "error")
             raise typer.Exit(1)
 
     except Exception as e:
-        from ...utils import error_handler
+        # Cleanup on failure
+        import shutil
 
+        if jdir.exists():
+            shutil.rmtree(jdir)
         error_handler.handle(e)
+        raise typer.Exit(1)
 
 
 def add_pen(
@@ -292,13 +346,16 @@ def add_jobs(
                 fsm = create_fsm(job_id, Path(cfg.workspace))
 
                 if pristine:
-                    # NEW -> QUEUED (skip optimization, ready to plot)
+                    # NEW -> READY -> QUEUED (skip optimization, auto-queue)
                     success = fsm.transition_to(
-                        JobState.QUEUED,
-                        reason="Job added in pristine mode - ready to plot",
+                        JobState.READY,
+                        reason="Job added in pristine mode - ready to queue",
                     )
+                    if success:
+                        # Automatic transition to QUEUED
+                        success = fsm.queue_ready_job()
                 else:
-                    # NEW -> ANALYZED -> OPTIMIZED -> QUEUED
+                    # NEW -> ANALYZED -> OPTIMIZED -> READY -> QUEUED
                     # Analyze phase
                     success = fsm.transition_to(
                         JobState.ANALYZED, reason="Starting job analysis"
@@ -309,15 +366,20 @@ def add_jobs(
                         success = fsm.optimize_job(interactive=False)
 
                         if success:
-                            # Queue phase (job is ready after optimization)
+                            # Ready phase (job is ready to be queued)
                             success = fsm.transition_to(
-                                JobState.QUEUED,
-                                reason="Job optimization completed, queued for plotting",
+                                JobState.READY,
+                                reason="Job optimization completed, ready to queue",
                             )
+                            if success:
+                                # Automatic transition to QUEUED
+                                success = fsm.queue_ready_job()
 
                 if success:
                     added_jobs.append(job_id)
-                    show_status(f"✓ Added job {job_id}: {src_path.name}", "success")
+                    show_status(
+                        f"✓ Added and queued job {job_id}: {src_path.name}", "success"
+                    )
                 else:
                     failed_jobs.append((file_path, "FSM transition failed"))
                     show_status(

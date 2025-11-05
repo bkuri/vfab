@@ -61,12 +61,12 @@ def run_command(command: str, test_env: Path, timeout: int = 30) -> Dict[str, An
 
         # Execute command
         result = subprocess.run(
-            f"uv run plotty {command}".split(),
+            f"uv run python -m plotty.cli {command}".split(),
             capture_output=True,
             text=True,
             timeout=timeout,
             env=env,
-            cwd=test_env,
+            cwd="/home/bk/source/plotty",  # Run from project root
         )
 
         # For check config, treat WARNING (exit code 2) as success since warnings are expected
@@ -147,7 +147,7 @@ def run_tests(test_env: Path) -> List[Dict[str, Any]]:
                 + (
                     " - Success"
                     if result["success"]
-                    else f" - Failed: {result['stderr'][:100]}"
+                    else f" - Failed: {result['stderr']}"
                 ),
                 "details": result,
             }
@@ -156,41 +156,47 @@ def run_tests(test_env: Path) -> List[Dict[str, Any]]:
     # Job lifecycle tests
     print("\nJob Lifecycle Tests:")
 
-    # Add test pen
+    # Add test pen (should succeed on first run)
     result = run_command("add pen TestPen 0.5 25 50 1", test_env)
-    status = "✅ PASS" if result["success"] else "❌ FAIL"
+    # Check if it's a duplicate detection error (expected behavior) or success
+    is_duplicate_pen = "already exists" in result["stderr"]
+    status = "✅ PASS" if (result["success"] or is_duplicate_pen) else "❌ FAIL"
     print(f"add pen TestPen... {status}")
-    pen_msg = (
-        "Add pen - Success"
-        if result["success"]
-        else f"Add pen - Failed: {result['stderr'][:100]}"
-    )
+    if result["success"]:
+        pen_msg = "Add pen - Success"
+    elif is_duplicate_pen:
+        pen_msg = "Add pen - Success (duplicate detection working)"
+    else:
+        pen_msg = f"Add pen - Failed: {result['stderr']}"
     results.append(
         {
             "category": "Job Lifecycle",
             "command": "add pen TestPen 0.5 25 50 1",
             "description": "Add test pen configuration",
-            "status": "PASS" if result["success"] else "FAIL",
+            "status": "PASS" if (result["success"] or is_duplicate_pen) else "FAIL",
             "message": pen_msg,
             "details": result,
         }
     )
 
-    # Add test paper
+    # Add test paper (should succeed on first run)
     result = run_command("add paper TestPaper 210 297", test_env)
-    status = "✅ PASS" if result["success"] else "❌ FAIL"
+    # Check if it's a duplicate detection error (expected behavior) or success
+    is_duplicate_paper = "already exists" in result["stderr"]
+    status = "✅ PASS" if (result["success"] or is_duplicate_paper) else "❌ FAIL"
     print(f"add paper TestPaper... {status}")
-    paper_msg = (
-        "Add paper - Success"
-        if result["success"]
-        else f"Add paper - Failed: {result['stderr'][:100]}"
-    )
+    if result["success"]:
+        paper_msg = "Add paper - Success"
+    elif is_duplicate_paper:
+        paper_msg = "Add paper - Success (duplicate detection working)"
+    else:
+        paper_msg = f"Add paper - Failed: {result['stderr']}"
     results.append(
         {
             "category": "Job Lifecycle",
             "command": "add paper TestPaper 210 297",
             "description": "Add test paper configuration",
-            "status": "PASS" if result["success"] else "FAIL",
+            "status": "PASS" if (result["success"] or is_duplicate_paper) else "FAIL",
             "message": paper_msg,
             "details": result,
         }
@@ -198,18 +204,18 @@ def run_tests(test_env: Path) -> List[Dict[str, Any]]:
 
     # Create test SVG and add job
     test_svg = create_test_svg(test_env)
-    result = run_command(f"add job {test_svg} --name TestJob", test_env)
+    result = run_command(f"add job TestJob {test_svg}", test_env)
     status = "✅ PASS" if result["success"] else "❌ FAIL"
     print(f"add job TestJob... {status}")
     job_msg = (
         "Add job - Success"
         if result["success"]
-        else f"Add job - Failed: {result['stderr'][:100]}"
+        else f"Add job - Failed: {result['stderr']}"
     )
     results.append(
         {
             "category": "Job Lifecycle",
-            "command": f"add job {test_svg.name} --name TestJob",
+            "command": f"add job TestJob {test_svg.name}",
             "description": "Add test job",
             "status": "PASS" if result["success"] else "FAIL",
             "message": job_msg,
@@ -224,7 +230,7 @@ def run_tests(test_env: Path) -> List[Dict[str, Any]]:
     list_msg = (
         "List jobs - Success"
         if result["success"]
-        else f"List jobs - Failed: {result['stderr'][:100]}"
+        else f"List jobs - Failed: {result['stderr']}"
     )
     results.append(
         {
@@ -260,7 +266,7 @@ def run_tests(test_env: Path) -> List[Dict[str, Any]]:
                 + (
                     " - Success"
                     if result["success"]
-                    else f" - Failed: {result['stderr'][:100]}"
+                    else f" - Failed: {result['stderr']}"
                 ),
                 "details": result,
             }

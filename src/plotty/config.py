@@ -35,6 +35,75 @@ class DeviceCfg(BaseModel):
     detection_timeout: int = 5
 
 
+class OptimizationLevelCfg(BaseModel):
+    description: str
+    vpype_preset: str
+    digest_default: int
+
+
+class DigestLevelCfg(BaseModel):
+    description: str
+    enabled: bool
+    compression: str = "standard"
+
+
+class FileTypeCfg(BaseModel):
+    mode: str
+    auto_pristine: bool = False
+    skip_optimization: bool = False
+
+
+class OptimizationCfg(BaseModel):
+    levels: dict[str, OptimizationLevelCfg] = Field(
+        default_factory=lambda: {
+            "fast": OptimizationLevelCfg(
+                description="Fast optimization for quick plotting",
+                vpype_preset="fast",
+                digest_default=1,
+            ),
+            "default": OptimizationLevelCfg(
+                description="Standard optimization balanced for speed and quality",
+                vpype_preset="default",
+                digest_default=1,
+            ),
+            "hq": OptimizationLevelCfg(
+                description="High quality optimization for best results",
+                vpype_preset="hq",
+                digest_default=2,
+            ),
+        }
+    )
+    digest_levels: dict[int, DigestLevelCfg] = Field(
+        default_factory=lambda: {
+            0: DigestLevelCfg(
+                description="No digest generation (slower plotting)", enabled=False
+            ),
+            1: DigestLevelCfg(
+                description="Standard digest for AxiDraw acceleration",
+                enabled=True,
+                compression="standard",
+            ),
+            2: DigestLevelCfg(
+                description="High compression digest for maximum speed",
+                enabled=True,
+                compression="high",
+            ),
+        }
+    )
+    file_types: dict[str, FileTypeCfg] = Field(
+        default_factory=lambda: {
+            ".plob": FileTypeCfg(
+                mode="plob", auto_pristine=True, skip_optimization=True
+            ),
+            ".svg": FileTypeCfg(
+                mode="normal", auto_pristine=False, skip_optimization=False
+            ),
+        }
+    )
+    default_level: str = "default"
+    default_digest: int = 1
+
+
 class VpypeCfg(BaseModel):
     preset: str = "fast"
     presets_file: str = str(Path("config/vpype-presets.yaml"))
@@ -88,6 +157,7 @@ class Settings(BaseModel):
     database: DatabaseCfg = Field(default_factory=DatabaseCfg)
     device: DeviceCfg = Field(default_factory=DeviceCfg)
     vpype: VpypeCfg = Field(default_factory=VpypeCfg)
+    optimization: OptimizationCfg = Field(default_factory=OptimizationCfg)
     paper: PaperCfg = Field(default_factory=PaperCfg)
     hooks: HooksCfg = Field(default_factory=HooksCfg)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
@@ -103,3 +173,22 @@ def load_config(path: str | None = None) -> Settings:
         data["workspace"] = str(Path(expanded_path).expanduser())
 
     return Settings(**(data or {}))
+
+
+def get_config() -> Settings:
+    """Get the current configuration instance."""
+    return load_config()
+
+
+def load_vpype_presets(presets_file: str | None = None) -> dict:
+    """Load VPype presets from YAML file."""
+    if presets_file is None:
+        cfg = load_config()
+        presets_file = cfg.vpype.presets_file
+
+    p = Path(presets_file)
+    if not p.exists():
+        return {}
+
+    with open(p, "r") as f:
+        return yaml.safe_load(f) or {}
