@@ -73,28 +73,22 @@ def add_single_job(
                 JobState.QUEUED, reason="Job added in pristine mode - ready to plot"
             )
         else:
-            # NEW -> QUEUED -> ANALYZED -> OPTIMIZED -> READY
-            # First queue the job
+            # NEW -> ANALYZED -> OPTIMIZED -> QUEUED
+            # Analyze phase
             success = fsm.transition_to(
-                JobState.QUEUED, reason="Job queued for processing"
+                JobState.ANALYZED, reason="Starting job analysis"
             )
 
             if success:
-                # Analyze phase
-                success = fsm.transition_to(
-                    JobState.ANALYZED, reason="Starting job analysis"
-                )
+                # Optimization phase (using FSM's built-in optimization)
+                success = fsm.optimize_job(interactive=False)
 
                 if success:
-                    # Optimization phase (using FSM's built-in optimization)
-                    success = fsm.optimize_job(interactive=False)
-
-                    if success:
-                        # Ready phase (job is ready after optimization)
-                        success = fsm.transition_to(
-                            JobState.READY,
-                            reason="Job optimization completed, ready for plotting",
-                        )
+                    # Queue phase (job is ready after optimization)
+                    success = fsm.transition_to(
+                        JobState.QUEUED,
+                        reason="Job optimization completed, queued for plotting",
+                    )
 
         if success:
             show_status(f"✓ Added job {job_id}: {job_data['name']}", "success")
@@ -298,34 +292,28 @@ def add_jobs(
                 fsm = create_fsm(job_id, Path(cfg.workspace))
 
                 if pristine:
-                    # NEW -> READY (skip optimization, ready to plot)
+                    # NEW -> QUEUED (skip optimization, ready to plot)
                     success = fsm.transition_to(
-                        JobState.READY,
+                        JobState.QUEUED,
                         reason="Job added in pristine mode - ready to plot",
                     )
                 else:
-                    # NEW -> QUEUED -> ANALYZED -> OPTIMIZED -> READY
-                    # First queue the job
+                    # NEW -> ANALYZED -> OPTIMIZED -> QUEUED
+                    # Analyze phase
                     success = fsm.transition_to(
-                        JobState.QUEUED, reason="Job queued for processing"
+                        JobState.ANALYZED, reason="Starting job analysis"
                     )
 
                     if success:
-                        # Analyze phase
-                        success = fsm.transition_to(
-                            JobState.ANALYZED, reason="Starting job analysis"
-                        )
+                        # Optimization phase (using FSM's built-in optimization)
+                        success = fsm.optimize_job(interactive=False)
 
                         if success:
-                            # Optimization phase (using FSM's built-in optimization)
-                            success = fsm.optimize_job(interactive=False)
-
-                            if success:
-                                # Ready phase (job is ready after optimization)
-                                success = fsm.transition_to(
-                                    JobState.READY,
-                                    reason="Job optimization completed, ready for plotting",
-                                )
+                            # Queue phase (job is ready after optimization)
+                            success = fsm.transition_to(
+                                JobState.QUEUED,
+                                reason="Job optimization completed, queued for plotting",
+                            )
 
                 if success:
                     added_jobs.append(job_id)

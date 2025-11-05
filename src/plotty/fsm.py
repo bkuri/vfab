@@ -93,10 +93,19 @@ class JobFSM:
 
     # Valid state transitions as per PRD
     VALID_TRANSITIONS = {
-        JobState.NEW: [JobState.QUEUED],
-        JobState.QUEUED: [JobState.ANALYZED, JobState.ABORTED],
+        JobState.NEW: [
+            JobState.ANALYZED,
+            JobState.QUEUED,
+        ],  # Can start analysis or go directly to queued
+        JobState.QUEUED: [
+            JobState.READY,
+            JobState.ABORTED,
+        ],  # Ready for device assignment or abort
         JobState.ANALYZED: [JobState.OPTIMIZED, JobState.FAILED],
-        JobState.OPTIMIZED: [JobState.READY, JobState.FAILED],
+        JobState.OPTIMIZED: [
+            JobState.QUEUED,
+            JobState.FAILED,
+        ],  # Back to queued after optimization
         JobState.READY: [JobState.ARMED, JobState.ABORTED],
         JobState.ARMED: [JobState.PLOTTING, JobState.ABORTED],
         JobState.PLOTTING: [
