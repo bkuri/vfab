@@ -96,4 +96,9 @@ class Settings(BaseModel):
 def load_config(path: str | None = None) -> Settings:
     p = Path(path or os.environ.get("PLOTTY_CONFIG", "config/config.yaml"))
     data = yaml.safe_load(p.read_text()) if p.exists() else {}
+
+    # Expand workspace path if present
+    if data and "workspace" in data:
+        data["workspace"] = str(Path(data["workspace"]).expanduser())
+
     return Settings(**(data or {}))
