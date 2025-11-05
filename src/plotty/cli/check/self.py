@@ -402,7 +402,12 @@ def generate_integrated_report(results: list, console: Console) -> dict:
         # Add rows to table (but don't print yet)
         for category, category_results in categories.items():
             for result in category_results:
-                status = "✅" if result["success"] else "❌"
+                # Create colored status emojis
+                if result["success"]:
+                    status_text = Text("✅", style="green")
+                else:
+                    status_text = Text("❌", style="red")
+
                 test_name = (
                     result["name"].split(": ", 1)[1]
                     if ": " in result["name"]
@@ -418,27 +423,34 @@ def generate_integrated_report(results: list, console: Console) -> dict:
                 if len(message) > 37:
                     message = message[:34] + "..."
 
-                table.add_row(status, category, test_name, message)
+                # Add color coding for failed tests
+                row_style = "red" if not result["success"] else "white"
+                table.add_row(
+                    status_text, category, test_name, message, style=row_style
+                )
 
         # Calculate table width (approximately)
         # Status: 6, Category: 15, Test: 25, Result: 40, plus borders and spacing: ~7
         table_width = 6 + 15 + 25 + 40 + 7  # ~93 characters
 
-        # Summary panel with calculated width
+        # Summary panel with calculated width and color coding
         summary_text = Text()
         summary_text.append("Total: ", style="bold")
-        summary_text.append(f"{len(results)} ")
+        summary_text.append(f"{len(results)} ", style="cyan")
         summary_text.append("Passed: ", style="bold")
-        summary_text.append(f"{passed} ")
+        summary_text.append(f"{passed} ", style="green")
         summary_text.append("Failed: ", style="bold")
-        summary_text.append(f"{failed} ")
-        summary_text.append(f"({success_rate:.1f}%)")
+        summary_text.append(f"{failed} ", style="red")
+        summary_text.append(
+            f"({success_rate:.1f}%)", style="yellow" if failed > 0 else "green"
+        )
 
         panel = Panel(
             summary_text,
-            title="ploTTY Self-Test Results",
+            title="[bold blue]ploTTY Self-Test Results[/bold blue]",
             width=table_width,
             padding=(1, 2),
+            border_style="blue",
         )
         console.print(panel)
 
