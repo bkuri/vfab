@@ -87,10 +87,10 @@ def start_command(
 
         job_data = json.loads(job_file.read_text())
 
-        # Check if job is planned
-        if job_data.get("state") not in ["OPTIMIZED", "READY"]:
+        # Check if job is queued for plotting
+        if job_data.get("state") not in ["QUEUED"]:
             show_status(
-                f"Job {job_id} must be planned first. Run: plotty plan {job_id}",
+                f"Job {job_id} must be added first. Run: plotty add job {job_id}",
                 "warning",
             )
             return
@@ -143,6 +143,21 @@ def start_command(
             else:
                 console.print("⚠️  Could not estimate time", style="yellow")
 
+        # Create FSM for proper state management
+        from ..fsm import create_fsm, JobState
+
+        fsm = create_fsm(job_id, Path(cfg.workspace))
+
+        # Transition: QUEUED -> ARMED (pre-flight checks)
+        if not fsm.arm_job():
+            show_status(f"Failed to arm job {job_id} for plotting", "error")
+            return
+
+        # Transition: ARMED -> PLOTTING
+        if not fsm.transition_to(JobState.PLOTTING, "Starting plotting process"):
+            show_status(f"Failed to start plotting for job {job_id}", "error")
+            return
+
         # Use MultiPenPlotter for actual plotting
         from ..plotting import MultiPenPlotter
 
@@ -168,11 +183,18 @@ def start_command(
         result = plotter.plot_with_axidraw_layers(optimized_svg)
 
         if result["success"]:
+            # Transition: PLOTTING -> COMPLETED
+            fsm.transition_to(JobState.COMPLETED, "Plotting completed successfully")
             show_status(f"Job {job_id} plotted successfully", "success")
             if console:
                 console.print(f"   Time: {result['time_elapsed']:.1f}s")
                 console.print(f"   Distance: {result['distance_pendown']:.1f}mm")
         else:
+            # Transition: PLOTTING -> FAILED
+            fsm.transition_to(
+                JobState.FAILED,
+                f"Plotting failed: {result.get('error', 'Unknown error')}",
+            )
             show_status(
                 f"Plotting failed: {result.get('error', 'Unknown error')}", "error"
             )
@@ -236,27 +258,48 @@ def optimize_command(
     job_ids: Optional[str] = typer.Argument(
         None, help="Comma-separated job IDs to optimize"
     ),
+    preset: Optional[str] = typer.Option(
+        None, "--preset", "-p", help="Optimization preset (fast, default, hq)"
+    ),
+    digest: Optional[int] = typer.Option(
+        None, "--digest", "-d", help="Digest level for AxiDraw acceleration (0-2)"
+    ),
     apply: bool = create_apply_option(
         "Actually perform optimization (preview by default)"
     ),
 ) -> None:
     """Optimize jobs with preview by default."""
     try:
-        from ..config import load_config
+        from ..config import load_config, get_config
         from ..utils import error_handler
         from ..progress import show_status
-        from ..planner import plan_layers
+        from ..fsm import create_fsm
         from pathlib import Path
         import json
 
         cfg = load_config(None)
+        config = get_config()
         jobs_dir = Path(cfg.workspace) / "jobs"
+
+        # Validate preset if provided
+        if preset and preset not in config.optimization.levels:
+            available = ", ".join(config.optimization.levels.keys())
+            raise typer.BadParameter(
+                f"Unknown preset '{preset}'. Available: {available}"
+            )
+
+        # Validate digest if provided
+        if digest is not None and digest not in config.optimization.digest_levels:
+            available = ", ".join(map(str, config.optimization.digest_levels.keys()))
+            raise typer.BadParameter(
+                f"Invalid digest level '{digest}'. Available: {available}"
+            )
 
         # Get target jobs
         if job_ids:
             target_ids = [job_id.strip() for job_id in job_ids.split(",")]
         else:
-            # Get all pristine jobs
+            # Get all jobs that can be optimized (READY or ANALYZED)
             target_ids = []
             if jobs_dir.exists():
                 for job_dir in jobs_dir.iterdir():
@@ -265,10 +308,9 @@ def optimize_command(
                         if job_file.exists():
                             try:
                                 job_data = json.loads(job_file.read_text())
-                                if (
-                                    job_data.get("optimization", {}).get("level")
-                                    == "none"
-                                ):
+                                state = job_data.get("state")
+                                # Can optimize jobs in READY or ANALYZED state
+                                if state in ["READY", "ANALYZED"]:
                                     target_ids.append(job_dir.name)
                             except Exception:
                                 continue
@@ -287,15 +329,18 @@ def optimize_command(
                     job_data = json.loads(job_file.read_text())
                     src_file = job_dir / "src.svg"
                     current_size = src_file.stat().st_size if src_file.exists() else 0
+                    current_state = job_data.get("state", "unknown")
+                    current_preset = job_data.get("metadata", {}).get("preset", "none")
+                    current_digest = job_data.get("metadata", {}).get("digest", "none")
 
                     jobs_data.append(
                         {
                             "id": job_id,
                             "name": job_data.get("name", "Unknown"),
                             "current_size": current_size,
-                            "status": job_data.get("optimization", {}).get(
-                                "level", "none"
-                            ),
+                            "state": current_state,
+                            "preset": current_preset,
+                            "digest": current_digest,
                         }
                     )
                 except Exception:
@@ -304,7 +349,9 @@ def optimize_command(
                             "id": job_id,
                             "name": "Unknown",
                             "current_size": 0,
-                            "status": "error",
+                            "state": "error",
+                            "preset": "error",
+                            "digest": "error",
                         }
                     )
 
@@ -318,8 +365,9 @@ def optimize_command(
             table = Table()
             table.add_column("Job ID", style="cyan")
             table.add_column("Name", style="white")
-            table.add_column("Current Size", style="yellow")
-            table.add_column("Status", style="green")
+            table.add_column("State", style="yellow")
+            table.add_column("Current Preset", style="blue")
+            table.add_column("Current Digest", style="magenta")
 
             for job in jobs_data:
                 size_str = (
@@ -327,17 +375,36 @@ def optimize_command(
                     if job["current_size"] > 0
                     else "Unknown"
                 )
-                status_style = "red" if job["status"] == "none" else "green"
-                status_text = "Pristine" if job["status"] == "none" else "Optimized"
 
                 table.add_row(
                     job["id"],
                     job["name"],
-                    size_str,
-                    f"[{status_style}]{status_text}[/{status_style}]",
+                    job["state"],
+                    str(job["preset"]),
+                    str(job["digest"]),
                 )
 
             console.print(table)
+
+            # Show optimization settings
+            console.print()
+            console.print("🎯 Optimization Settings:", style="bold")
+            if preset:
+                console.print(f"  Preset: {preset}", style="green")
+            else:
+                console.print(
+                    f"  Preset: {config.optimization.default_level} (default)",
+                    style="yellow",
+                )
+
+            if digest is not None:
+                console.print(f"  Digest: {digest}", style="green")
+            else:
+                console.print(
+                    f"  Digest: {config.optimization.default_digest} (default)",
+                    style="yellow",
+                )
+
             console.print()
             console.print(
                 f"💡 Use --apply to optimize {len(jobs_data)} jobs", style="yellow"
@@ -351,52 +418,48 @@ def optimize_command(
                     if job["current_size"] > 0
                     else "Unknown"
                 )
-                status_text = "Pristine" if job["status"] == "none" else "Optimized"
-                print(f"{job['id']}: {job['name']} ({size_str}) - {status_text}")
+                print(f"{job['id']}: {job['name']} ({size_str}) - {job['state']}")
+            print("\nOptimization settings:")
+            print(f"  Preset: {preset or config.optimization.default_level}")
+            print(f"  Digest: {digest or config.optimization.default_digest}")
             print(f"\nUse --apply to optimize {len(jobs_data)} jobs")
 
         if not apply:
             return
 
-        # Perform optimization
+        # Perform optimization using FSM
         show_status(f"Optimizing {len(jobs_data)} jobs...", "info")
         optimized_count = 0
         failed_count = 0
 
         for job_id in target_ids:
             try:
-                # Find source SVG file
-                src_svg = jobs_dir / job_id / "src.svg"
-                if not src_svg.exists():
-                    raise FileNotFoundError(f"Source SVG not found for job {job_id}")
+                # Create FSM for the job
+                fsm = create_fsm(job_id, Path(cfg.workspace))
 
-                # Plan the job using plan_layers function
-                plan_layers(
-                    src_svg=src_svg,
-                    preset=cfg.vpype.preset,
-                    presets_file=cfg.vpype.presets_file,
-                    pen_map=None,  # Will use default pen mapping
-                    out_dir=jobs_dir / job_id,
-                    interactive=False,
-                    paper_size="A4",
+                # Apply optimizations with specified or default settings
+                effective_preset = preset or config.optimization.default_level
+                effective_digest = (
+                    digest if digest is not None else config.optimization.default_digest
                 )
 
-                # Update optimization metadata
-                job_file = jobs_dir / job_id / "job.json"
-                if job_file.exists():
-                    job_data = json.loads(job_file.read_text())
-                    job_data["optimization"] = {
-                        "level": "full",
-                        "applied_at": str(Path.cwd()),
-                        "version": "1.0",
-                    }
-                    job_file.write_text(json.dumps(job_data, indent=2))
-
-                optimized_count += 1
-                if console:
-                    console.print(f"  ✓ Optimized {job_id}", style="green")
+                if fsm.apply_optimizations(
+                    preset=effective_preset, digest=effective_digest
+                ):
+                    optimized_count += 1
+                    if console:
+                        console.print(
+                            f"  ✓ Optimized {job_id} (preset: {effective_preset}, digest: {effective_digest})",
+                            style="green",
+                        )
+                    else:
+                        print(f"  Optimized {job_id}")
                 else:
-                    print(f"  Optimized {job_id}")
+                    failed_count += 1
+                    if console:
+                        console.print(f"  ❌ Failed to optimize {job_id}", style="red")
+                    else:
+                        print(f"  Failed to optimize {job_id}")
 
             except Exception as e:
                 failed_count += 1
@@ -414,4 +477,53 @@ def optimize_command(
         error_handler.handle(e)
 
 
-__all__ = ["start_command", "plan_command", "optimize_command"]
+def queue_command(
+    job_id: str = typer.Argument(
+        ..., autocompletion=complete_job_id, help="Job ID to queue for plotting"
+    ),
+):
+    """Manually queue a job for plotting (READY → QUEUED).
+
+    Note: 'plotty add job' automatically queues jobs. Use this command for manual control
+    or when you need to queue jobs that were added with --no-queue flag (future feature).
+    """
+    try:
+        from ..config import load_config
+        from ..fsm import create_fsm
+        from pathlib import Path
+        import json
+
+        cfg = load_config(None)
+        job_dir = Path(cfg.workspace) / "jobs" / job_id
+
+        if not job_dir.exists():
+            raise typer.BadParameter(f"Job {job_id} not found")
+
+        # Load job metadata
+        job_file = job_dir / "job.json"
+        if not job_file.exists():
+            raise typer.BadParameter(f"Job metadata not found for {job_id}")
+
+        job_data = json.loads(job_file.read_text())
+        current_state = job_data.get("state")
+
+        # Check if job is in READY state
+        if current_state != "READY":
+            raise typer.BadParameter(
+                f"Job {job_id} is in '{current_state}' state, must be in 'READY' state to queue"
+            )
+
+        # Create FSM and transition to QUEUED using proper method
+        fsm = create_fsm(job_id, Path(cfg.workspace))
+
+        if fsm.queue_ready_job():
+            show_status(f"✓ Job {job_id} manually queued for plotting", "success")
+        else:
+            show_status(f"✗ Failed to queue job {job_id}", "error")
+            raise typer.Exit(1)
+
+    except Exception as e:
+        error_handler.handle(e)
+
+
+__all__ = ["start_command", "plan_command", "optimize_command", "queue_command"]

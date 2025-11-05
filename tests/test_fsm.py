@@ -22,21 +22,22 @@ def test_fsm_basic():
         print("✓ Initial state correct")
 
         # Test valid transitions
-        assert fsm.can_transition_to(JobState.QUEUED)
+        assert fsm.can_transition_to(JobState.ANALYZED)
+        assert not fsm.can_transition_to(JobState.QUEUED)  # Can't go directly to QUEUED
         assert not fsm.can_transition_to(JobState.PLOTTING)
         print("✓ Transition validation works")
 
         # Test state transition
-        result = fsm.transition_to(JobState.QUEUED, "Test queue", {})
+        result = fsm.transition_to(JobState.ANALYZED, "File analyzed", {})
         assert result
-        assert fsm.current_state == JobState.QUEUED
+        assert fsm.current_state == JobState.ANALYZED
         print("✓ State transition works")
 
         # Test history
         history = fsm.get_state_history()
         assert len(history) == 1
         assert history[0]["from_state"] == JobState.NEW.value
-        assert history[0]["to_state"] == JobState.QUEUED.value
+        assert history[0]["to_state"] == JobState.ANALYZED.value
         print("✓ State history works")
 
         print("All FSM tests passed!")

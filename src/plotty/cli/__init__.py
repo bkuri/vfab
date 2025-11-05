@@ -14,12 +14,13 @@ from .add import add_app
 from .check import check_app
 from .info import status_app
 from .interactive import interactive_command
-from .job_commands import optimize_command, start_command
+from .job_commands import optimize_command, queue_command, start_command
 from .list import list_app
 from .list.setup_wizard import setup
 from .remove import remove_app
 from .restart import restart_command
 from .resume import resume_command
+from .stats import stats_app
 from .system import system_app
 
 # Get version
@@ -38,9 +39,11 @@ app.add_typer(status_app, name="info", help="Status and monitoring commands")
 app.command("interactive", help="Start an interactive plot")(interactive_command)
 app.add_typer(list_app, name="list", help="List and manage resources")
 app.command("optimize", help="Optimize jobs for plotting")(optimize_command)
+app.command("queue", help="Queue a job for plotting")(queue_command)
 app.add_typer(remove_app, name="remove", help="Remove resources")
 app.command("resume", help="Resume interrupted plotting jobs")(resume_command)
 app.command("restart", help="Restart job from beginning")(restart_command)
+app.add_typer(stats_app, name="stats", help="Statistics and analytics")
 app.command("setup", help="Run setup wizard")(setup)
 app.command("start", help="Start plotting a job")(start_command)
 app.add_typer(system_app, name="system", help="System management commands")

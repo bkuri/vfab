@@ -12,6 +12,7 @@ import typer
 from .system import show_status_overview, show_system_status, show_quick_status
 from .job import show_job_details
 from .session import session_reset, session_info
+from .queue import show_job_queue
 from .utils import complete_job_id
 
 # Create status command group
@@ -76,6 +77,19 @@ def status_reset(
 def status_session():
     """Show current session information."""
     session_info()
+
+
+@status_app.command("queue")
+def status_queue(
+    limit: int = typer.Option(10, "--limit", "-l", help="Limit number of jobs shown"),
+    state: str = typer.Option(None, "--state", "-s", help="Filter by job state"),
+    json_output: bool = typer.Option(False, "--json", help="Export as JSON"),
+    csv_output: bool = typer.Option(False, "--csv", help="Export as CSV"),
+):
+    """Show job queue status."""
+    show_job_queue(
+        limit=limit, state=state, json_output=json_output, csv_output=csv_output
+    )
 
 
 __all__ = ["status_app"]

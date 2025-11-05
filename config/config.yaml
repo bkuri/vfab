@@ -6,7 +6,7 @@ vpype:  { preset: default, presets_file: "config/vpype-presets.yaml" }
 paper: { default_size: A4, default_margin_mm: 10, default_orientation: portrait, require_one_per_session: true, track_usage: true, auto_detect_size: true }
 
 optimization:
-  default_level: "full"
+  default_level: "default"
   interactive_mode: false
   fallback_preset: "default"
 
@@ -26,10 +26,10 @@ hooks:
     - command: "echo '🔍 Analyzing layers for job {job_id}'"
   OPTIMIZED:
     - command: "echo '⚡ Optimization completed for job {job_id}'"
-  QUEUED:
-    - command: "notify-send 'ploTTY: Job {job_id} queued and ready for plotting'"
   READY:
-    - command: "echo '🎯 Job {job_id} ready for device assignment'"
+    - command: "echo '🎯 Job {job_id} processing complete, ready to queue'"
+  QUEUED:
+    - command: "notify-send 'ploTTY: Job {job_id} added to plotting queue'"
   ARMED:
     - command: "echo '🎯 Job {job_id} armed - starting camera recording'"
   PLOTTING:
