@@ -4,6 +4,7 @@ include CHANGELOG.md
 include RELEASE_NOTES.md
 include *.yaml
 include *.yml
+recursive-include config *.yaml
 recursive-include src/plotty *.py
 recursive-include completions *
 recursive-include packaging *

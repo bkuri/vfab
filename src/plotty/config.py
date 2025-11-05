@@ -99,6 +99,7 @@ def load_config(path: str | None = None) -> Settings:
 
     # Expand workspace path if present
     if data and "workspace" in data:
-        data["workspace"] = str(Path(data["workspace"]).expanduser())
+        expanded_path = os.path.expandvars(data["workspace"])
+        data["workspace"] = str(Path(expanded_path).expanduser())
 
     return Settings(**(data or {}))

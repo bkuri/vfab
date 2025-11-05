@@ -16,7 +16,7 @@ add_app = typer.Typer(no_args_is_help=True, help="Add new resources")
 def add_single_job(
     src: str,
     name: str = typer.Option("", "--name", "-n", help="Job name"),
-    paper: str = typer.Option("A3", "--paper", "-p", help="Paper size"),
+    paper: str = typer.Option("A4", "--paper", "-p", help="Paper size"),
     pristine: bool = typer.Option(
         False, "--pristine", help="Skip optimization (add in pristine state)"
     ),
@@ -24,10 +24,12 @@ def add_single_job(
     """Add a single job to workspace."""
     try:
         from ...config import load_config
+        from ...fsm import create_fsm, JobState
         from ...utils import error_handler, validate_file_exists
         from ...progress import show_status
         import uuid
         import json
+        from datetime import datetime, timezone
 
         cfg = load_config(None)
 
@@ -45,25 +47,62 @@ def add_single_job(
         # Copy source file
         (jdir / "src.svg").write_bytes(src_path.read_bytes())
 
-        # Create job metadata
+        # Create initial job metadata with NEW state
         job_data = {
             "id": job_id,
             "name": name or src_path.stem,
             "paper": paper,
-            "state": "QUEUED",
+            "state": JobState.NEW.value,
             "config_status": "DEFAULTS",
-            "created_at": str(Path.cwd()),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             "optimization": {
-                "level": "none" if pristine else "full",
-                "applied_at": None if pristine else str(Path.cwd()),
+                "level": "none" if pristine else "pending",
+                "applied_at": None,
                 "version": "1.0",
             },
         }
 
         (jdir / "job.json").write_text(json.dumps(job_data, indent=2))
 
-        show_status(f"✓ Added job {job_id}: {job_data['name']}", "success")
-        print(job_id)
+        # Create FSM and handle transitions
+        fsm = create_fsm(job_id, Path(cfg.workspace))
+
+        if pristine:
+            # NEW -> QUEUED (skip optimization)
+            success = fsm.transition_to(
+                JobState.QUEUED, reason="Job added in pristine mode"
+            )
+        else:
+            # NEW -> QUEUED -> ANALYZED -> OPTIMIZED -> QUEUED
+            # First queue the job
+            success = fsm.transition_to(
+                JobState.QUEUED, reason="Job queued for processing"
+            )
+
+            if success:
+                # Analyze phase
+                success = fsm.transition_to(
+                    JobState.ANALYZED, reason="Starting job analysis"
+                )
+
+                if success:
+                    # Optimization phase (using FSM's built-in optimization)
+                    success = fsm.optimize_job(interactive=False)
+
+                    if success:
+                        # Ready phase (job is ready after optimization)
+                        success = fsm.transition_to(
+                            JobState.READY,
+                            reason="Job optimization completed, ready for plotting",
+                        )
+
+        if success:
+            show_status(f"✓ Added job {job_id}: {job_data['name']}", "success")
+            print(job_id)
+        else:
+            # Handle failure - FSM should have transitioned to FAILED state
+            show_status(f"✗ Failed to add job {job_id}", "error")
+            raise typer.Exit(1)
 
     except Exception as e:
         from ...utils import error_handler
@@ -200,10 +239,14 @@ def add_jobs(
     """Add multiple jobs using file pattern."""
     try:
         from ...config import load_config
+        from ...fsm import create_fsm, JobState
         from ...utils import error_handler
         from ...progress import show_status
         from pathlib import Path
         import glob
+        import uuid
+        import json
+        from datetime import datetime, timezone
 
         cfg = load_config(None)
 
@@ -216,16 +259,15 @@ def add_jobs(
 
         show_status(f"Found {len(files)} files matching pattern", "info")
 
-        # Process each file using single job flow
+        # Process each file using FSM-based flow
         added_jobs = []
+        failed_jobs = []
+
         for file_path in files:
             try:
-                # Use the same logic as add_single_job but without the function call overhead
                 src_path = Path(file_path)
 
                 # Generate 6-character job ID
-                import uuid
-
                 job_id = uuid.uuid4().hex[:6]
                 jdir = Path(cfg.workspace) / "jobs" / job_id
 
@@ -235,52 +277,78 @@ def add_jobs(
                 # Copy source file
                 (jdir / "src.svg").write_bytes(src_path.read_bytes())
 
-                # Create job metadata
-                import json
-
+                # Create initial job metadata with NEW state
                 job_data = {
                     "id": job_id,
                     "name": src_path.stem,
-                    "paper": "A3",  # Default paper
-                    "state": "QUEUED",
+                    "paper": "A4",  # Default paper
+                    "state": JobState.NEW.value,
                     "config_status": "DEFAULTS",
-                    "created_at": str(Path.cwd()),
+                    "created_at": datetime.now(timezone.utc).isoformat(),
                     "optimization": {
-                        "level": "none" if pristine else "full",
-                        "applied_at": None if pristine else str(Path.cwd()),
+                        "level": "none" if pristine else "pending",
+                        "applied_at": None,
                         "version": "1.0",
                     },
                 }
 
                 (jdir / "job.json").write_text(json.dumps(job_data, indent=2))
 
-                # Run optimization if not pristine
-                if not pristine:
-                    from ...planner import plan_layers
+                # Create FSM and handle transitions
+                fsm = create_fsm(job_id, Path(cfg.workspace))
 
-                    # Plan the job using plan_layers function
-                    plan_layers(
-                        src_svg=jdir / "src.svg",
-                        preset=cfg.vpype.preset,
-                        presets_file=cfg.vpype.presets_file,
-                        pen_map=None,  # Will use default pen mapping
-                        out_dir=jdir,
-                        interactive=False,
-                        paper_size="A4",
+                if pristine:
+                    # NEW -> QUEUED (skip optimization)
+                    success = fsm.transition_to(
+                        JobState.QUEUED, reason="Job added in pristine mode"
                     )
-                    job_data["optimization"]["level"] = "full"
-                    job_data["optimization"]["applied_at"] = str(Path.cwd())
-                    (jdir / "job.json").write_text(json.dumps(job_data, indent=2))
+                else:
+                    # NEW -> QUEUED -> ANALYZED -> OPTIMIZED -> READY
+                    # First queue the job
+                    success = fsm.transition_to(
+                        JobState.QUEUED, reason="Job queued for processing"
+                    )
 
-                added_jobs.append(job_id)
-                show_status(f"✓ Added job {job_id}: {src_path.name}", "success")
+                    if success:
+                        # Analyze phase
+                        success = fsm.transition_to(
+                            JobState.ANALYZED, reason="Starting job analysis"
+                        )
+
+                        if success:
+                            # Optimization phase (using FSM's built-in optimization)
+                            success = fsm.optimize_job(interactive=False)
+
+                            if success:
+                                # Ready phase (job is ready after optimization)
+                                success = fsm.transition_to(
+                                    JobState.READY,
+                                    reason="Job optimization completed, ready for plotting",
+                                )
+
+                if success:
+                    added_jobs.append(job_id)
+                    show_status(f"✓ Added job {job_id}: {src_path.name}", "success")
+                else:
+                    failed_jobs.append((file_path, "FSM transition failed"))
+                    show_status(
+                        f"✗ Failed to add {src_path.name}: FSM transition failed",
+                        "error",
+                    )
 
             except Exception as e:
+                failed_jobs.append((file_path, str(e)))
                 show_status(f"Failed to add {file_path}: {e}", "error")
 
+        # Summary
         show_status(f"Successfully added {len(added_jobs)} jobs", "success")
         if added_jobs:
             print("Added job IDs:", ", ".join(added_jobs))
+
+        if failed_jobs:
+            show_status(f"Failed to add {len(failed_jobs)} jobs:", "error")
+            for file_path, error in failed_jobs:
+                print(f"  {file_path}: {error}")
 
     except Exception as e:
         from ...utils import error_handler

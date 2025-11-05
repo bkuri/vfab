@@ -1,30 +1,44 @@
-workspace: ~/.local/share/plotty/workspace
-database: { url: "sqlite:///$HOME/.local/share/plotty/plotty.db", echo: false }
-camera: { mode: ip, url: "http://127.0.0.1:8881/stream.mjpeg", enabled: true, timelapse_fps: 1 }
+workspace: "$XDG_DATA_HOME/plotty/workspace"
+database: { url: "sqlite:///$XDG_DATA_HOME/plotty/plotty.db" }
+camera: { mode: ip, url: "", enabled: false, timelapse_fps: 1 }
 device: { preferred: "axidraw:auto", pause_ink_swatch: true }
-vpype:  { preset: fast, presets_file: "$HOME/.local/share/plotty/config/vpype-presets.yaml" }
-paper: { default_size: A4, default_margin_mm: 10, default_orientation: portrait, require_one_per_session: true, track_usage: true }
+vpype:  { preset: default, presets_file: "config/vpype-presets.yaml" }
+paper: { default_size: A4, default_margin_mm: 10, default_orientation: portrait, require_one_per_session: true, track_usage: true, auto_detect_size: true }
+
+optimization:
+  default_level: "full"
+  interactive_mode: false
+  fallback_preset: "default"
+
+recovery:
+  enabled: true
+  auto_resume: false
+  max_retries: 3
+
+logging:
+  level: "INFO"
+  file: "$XDG_DATA_HOME/plotty/logs/plotty.log"
 
 hooks:
   NEW:
-    - command: "notify-send 'ploTTY: Job {job_id} created'"
-  QUEUED:
-    - command: "echo 'Job {job_id} queued for processing'"
+    - command: "notify-send 'ploTTY: Job {job_id} created - starting analysis'"
   ANALYZED:
-    - command: "echo 'Analysis completed for {job_id}'"
+    - command: "echo '🔍 Analyzing layers for job {job_id}'"
   OPTIMIZED:
-    - command: "echo 'Optimization completed for {job_id}'"
+    - command: "echo '⚡ Optimization completed for job {job_id}'"
+  QUEUED:
+    - command: "notify-send 'ploTTY: Job {job_id} queued and ready for plotting'"
   READY:
-    - command: "echo 'Job {job_id} ready for plotting'"
+    - command: "echo '✅ Job {job_id} ready for device assignment'"
   ARMED:
-    - command: "echo 'Job {job_id} armed - starting recording'"
+    - command: "echo '🎯 Job {job_id} armed - starting camera recording'"
   PLOTTING:
-    - command: "echo 'Job {job_id} now plotting'"
+    - command: "echo '📊 Job {job_id} now plotting'"
   PAUSED:
-    - command: "notify-send 'ploTTY: Job {job_id} paused'"
+    - command: "notify-send 'ploTTY: Job {job_id} paused - resume available'"
   COMPLETED:
-    - command: "notify-send 'ploTTY: Job {job_id} completed successfully'"
+    - command: "notify-send 'ploTTY: Job {job_id} completed successfully 🎉'"
   ABORTED:
-    - command: "notify-send 'ploTTY: Job {job_id} aborted'"
+    - command: "notify-send 'ploTTY: Job {job_id} aborted by user'"
   FAILED:
-    - command: "notify-send 'ploTTY: Job {job_id} failed: {error}'"
+    - command: "notify-send 'ploTTY: Job {job_id} failed: {error} ❌'"

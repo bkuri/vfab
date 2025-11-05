@@ -1,4 +1,7 @@
 presets:
+  default:
+    pipe: "read {src} pagesize {pagesize} crop 0 0 {width_mm:g}mm {height_mm:g}mm linemerge linesort write {dst}"
+  
   fast:
     pipe: "read {src} pagesize {pagesize} crop 0 0 {width_mm:g}mm {height_mm:g}mm linemerge linesort write {dst}"
   
