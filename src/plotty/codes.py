@@ -31,6 +31,7 @@ class ExitCode:
     BUSY = 14  # Resource is busy
     NOT_IMPLEMENTED = 15  # Feature not implemented
     INTERNAL_ERROR = 16  # Internal application error
+    TESTS_FAILED = 17  # One or more tests failed
 
 
 def exit_with_code(code: int, message: Optional[str] = None) -> None:

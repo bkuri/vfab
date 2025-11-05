@@ -11,7 +11,6 @@ from typing import Literal
 
 import typer
 from rich.console import Console
-from rich.prompt import Confirm
 
 from plotty.backup import BackupManager, BackupType
 
@@ -36,8 +35,8 @@ def export_command(
         "-o",
         help="Directory to save export to (default: ./backup)",
     ),
-    force: bool = typer.Option(
-        False, "--force", "-f", help="Skip confirmation prompts"
+    apply: bool = typer.Option(
+        False, "--apply", help="Actually perform the export (default is dry-run)"
     ),
 ) -> None:
     """Export system data and configurations.
@@ -46,20 +45,20 @@ def export_command(
     what to export, or omit to export everything.
 
     Examples:
-        plotty system export --only=config
-        plotty system export --only=database --output-dir /tmp/backup
-        plotty system export --force
+        plotty system export --only=config              # Dry run export config
+        plotty system export --only=database --apply    # Actually export database
+        plotty system export --apply                    # Export everything
     """
     try:
         # Show what will be exported
         console.print(f"[bold blue]Export:[/bold blue] {only}")
         console.print(f"[bold]Output directory:[/bold] {output_dir}")
 
-        # Confirm unless forced
-        if not force:
-            if not Confirm.ask(f"Export {only}?"):
-                console.print("[yellow]Export cancelled.[/yellow]")
-                raise typer.Exit(0)
+        # Confirm unless apply is used
+        if not apply:
+            console.print("[dim]Dry run mode - use --apply to actually export[/dim]")
+            console.print(f"[yellow]Would export {only} to {output_dir}[/yellow]")
+            raise typer.Exit(0)
 
         # Create the backup using BackupManager
         console.print("[dim]Creating export...[/dim]")
@@ -83,6 +82,9 @@ def export_command(
 
         console.print(f"[green]✓[/green] Export completed: {backup_path}")
 
+    except typer.Exit:
+        # Re-raise typer.Exit exceptions (used for controlled exit)
+        raise
     except Exception as e:
         console.print(f"[red]✗[/red] Export failed: {e}")
         raise typer.Exit(1)
