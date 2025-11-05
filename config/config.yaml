@@ -27,7 +27,7 @@ hooks:
   OPTIMIZED:
     - command: "echo '⚡ Optimization completed for job {job_id}'"
   QUEUED:
-    - command: "notify-send 'ploTTY: Job {job_id} queued and ready for plotting'"
+    - command: "notify-send 'ploTTY: Job {job_id} queued and ready for processing'"
   READY:
     - command: "echo '✅ Job {job_id} ready for device assignment'"
   ARMED:

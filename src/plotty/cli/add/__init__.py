@@ -68,12 +68,12 @@ def add_single_job(
         fsm = create_fsm(job_id, Path(cfg.workspace))
 
         if pristine:
-            # NEW -> QUEUED (skip optimization)
+            # NEW -> QUEUED (skip optimization, ready to plot)
             success = fsm.transition_to(
-                JobState.QUEUED, reason="Job added in pristine mode"
+                JobState.QUEUED, reason="Job added in pristine mode - ready to plot"
             )
         else:
-            # NEW -> QUEUED -> ANALYZED -> OPTIMIZED -> QUEUED
+            # NEW -> QUEUED -> ANALYZED -> OPTIMIZED -> READY
             # First queue the job
             success = fsm.transition_to(
                 JobState.QUEUED, reason="Job queued for processing"
@@ -298,9 +298,10 @@ def add_jobs(
                 fsm = create_fsm(job_id, Path(cfg.workspace))
 
                 if pristine:
-                    # NEW -> QUEUED (skip optimization)
+                    # NEW -> READY (skip optimization, ready to plot)
                     success = fsm.transition_to(
-                        JobState.QUEUED, reason="Job added in pristine mode"
+                        JobState.READY,
+                        reason="Job added in pristine mode - ready to plot",
                     )
                 else:
                     # NEW -> QUEUED -> ANALYZED -> OPTIMIZED -> READY
