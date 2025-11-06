@@ -49,17 +49,19 @@ app.command("start", help="Start plotting a job")(start_command)
 app.add_typer(system_app, name="system", help="System management commands")
 
 
-@app.callback()
+@app.callback(invoke_without_command=True)
 def main_callback(
     ctx: typer.Context,
-    version: bool = typer.Option(
-        False, "--version", "-v", help="Show version and exit"
-    ),
+    version: bool = typer.Option(False, "--version", help="Show version and exit"),
 ):
     """ploTTY - Plotter management system."""
     if version:
         typer.echo(f"ploTTY v{__version__}")
         raise typer.Exit()
+
+    # If no command and no version, show help
+    if ctx.invoked_subcommand is None:
+        typer.echo(ctx.get_help())
 
 
 def main():
