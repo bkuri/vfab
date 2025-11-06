@@ -31,8 +31,8 @@ def complete_job_id(incomplete: str):
         cfg = load_config(None)
         workspace = Path(cfg.workspace)
         recovery = get_crash_recovery(workspace)
-        recoverable_jobs = recovery.get_recoverable_jobs()
-        return [job_id for job_id in recoverable_jobs if job_id.startswith(incomplete)]
+        resumable_jobs = recovery.get_resumable_jobs()
+        return [job_id for job_id in resumable_jobs if job_id.startswith(incomplete)]
     except Exception:
         return []
 
@@ -64,15 +64,15 @@ def resume_command(
                     print(f"Error: {status['error']}")
                 raise typer.Exit(ExitCode.NOT_FOUND)
 
-            if not status.get("recoverable"):
+            if not status.get("resumable"):
                 if console:
                     console.print(
-                        f"❌ Job '{job_id}' is not recoverable (state: {status.get('current_state')})",
+                        f"❌ Job '{job_id}' is not resumable (state: {status.get('current_state')})",
                         style="red",
                     )
                 else:
                     print(
-                        f"Job '{job_id}' is not recoverable (state: {status.get('current_state')})"
+                        f"Job '{job_id}' is not resumable (state: {status.get('current_state')})"
                     )
                 raise typer.Exit(ExitCode.INVALID_INPUT)
 
@@ -127,10 +127,10 @@ def resume_command(
                 raise typer.Exit(ExitCode.ERROR)
 
         else:
-            # Resume all recoverable jobs
-            recoverable_jobs = recovery.get_recoverable_jobs()
+            # Resume all resumable jobs
+            resumable_jobs = recovery.get_resumable_jobs()
 
-            if not recoverable_jobs:
+            if not resumable_jobs:
                 if console:
                     console.print("✅ No jobs need resuming", style="green")
                 else:
@@ -139,12 +139,12 @@ def resume_command(
 
             # Show what will be done
             if console:
-                console.print(f"🔄 Will resume {len(recoverable_jobs)} jobs:")
-                for job_id in recoverable_jobs:
+                console.print(f"🔄 Will resume {len(resumable_jobs)} jobs:")
+                for job_id in resumable_jobs:
                     console.print(f"  • {job_id}")
             else:
-                print(f"Will resume {len(recoverable_jobs)} jobs:")
-                for job_id in recoverable_jobs:
+                print(f"Will resume {len(resumable_jobs)} jobs:")
+                for job_id in resumable_jobs:
                     print(f"  • {job_id}")
 
             if not apply:
@@ -158,12 +158,12 @@ def resume_command(
 
             # Confirm and perform resume
             if console and Confirm:
-                if not Confirm.ask(f"Resume all {len(recoverable_jobs)} jobs?"):
+                if not Confirm.ask(f"Resume all {len(resumable_jobs)} jobs?"):
                     show_status("Resume cancelled", "info")
                     return
             else:
                 response = (
-                    input(f"Resume all {len(recoverable_jobs)} jobs? [y/N]: ")
+                    input(f"Resume all {len(resumable_jobs)} jobs? [y/N]: ")
                     .strip()
                     .lower()
                 )
@@ -171,30 +171,30 @@ def resume_command(
                     print("Resume cancelled")
                     return
 
-            show_status(f"Resuming {len(recoverable_jobs)} jobs...", "info")
-            recovered_fsms = []
+            show_status(f"Resuming {len(resumable_jobs)} jobs...", "info")
+            resumed_fsms = []
 
-            for job_id in recoverable_jobs:
+            for job_id in resumable_jobs:
                 fsm = recovery.recover_job(job_id)
                 if fsm:
                     recovery.register_fsm(fsm)
-                    recovered_fsms.append(fsm)
+                    resumed_fsms.append(fsm)
 
             if console:
                 console.print(
-                    f"✅ Successfully resumed {len(recovered_fsms)} jobs", style="green"
+                    f"✅ Successfully resumed {len(resumed_fsms)} jobs", style="green"
                 )
-                if recovered_fsms:
+                if resumed_fsms:
                     console.print("Resumed jobs:")
-                    for fsm in recovered_fsms:
+                    for fsm in resumed_fsms:
                         console.print(
                             f"  • {fsm.job_id} (state: {fsm.current_state.value})"
                         )
             else:
-                print(f"Successfully resumed {len(recovered_fsms)} jobs")
-                if recovered_fsms:
+                print(f"Successfully resumed {len(resumed_fsms)} jobs")
+                if resumed_fsms:
                     print("Resumed jobs:")
-                    for fsm in recovered_fsms:
+                    for fsm in resumed_fsms:
                         print(f"  • {fsm.job_id} (state: {fsm.current_state.value})")
 
     except typer.Exit:

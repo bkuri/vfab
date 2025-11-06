@@ -32,9 +32,9 @@ def list_recoverable(
         workspace = Path(cfg.workspace)
         recovery = get_crash_recovery(workspace)
 
-        recoverable_jobs = recovery.get_recoverable_jobs()
+        resumable_jobs = recovery.get_resumable_jobs()
 
-        if not recoverable_jobs:
+        if not resumable_jobs:
             if console:
                 console.print("✅ No jobs need recovery", style="green")
             else:
@@ -42,10 +42,10 @@ def list_recoverable(
             return
 
         # Prepare data
-        headers = ["Job ID", "Current State", "Emergency Shutdown", "Recoverable"]
+        headers = ["Job ID", "Current State", "Emergency Shutdown", "Resumable"]
         rows = []
 
-        for job_id in recoverable_jobs:
+        for job_id in resumable_jobs:
             status = recovery.get_job_status(job_id)
             if "error" not in status:
                 rows.append(
@@ -53,7 +53,7 @@ def list_recoverable(
                         job_id,
                         status.get("current_state", "Unknown"),
                         "Yes" if status.get("emergency_shutdown") else "No",
-                        "Yes" if status.get("recoverable") else "No",
+                        "Yes" if status.get("resumable") else "No",
                     ]
                 )
 
@@ -62,7 +62,7 @@ def list_recoverable(
             import json
 
             jobs_data = []
-            for job_id in recoverable_jobs:
+            for job_id in resumable_jobs:
                 status = recovery.get_job_status(job_id)
                 if "error" not in status:
                     jobs_data.append(
@@ -72,12 +72,12 @@ def list_recoverable(
                             "emergency_shutdown": status.get(
                                 "emergency_shutdown", False
                             ),
-                            "recoverable": status.get("recoverable", False),
+                            "resumable": status.get("resumable", False),
                         }
                     )
             output_data = {
-                "recoverable_jobs": jobs_data,
-                "total_count": len(recoverable_jobs),
+                "resumable_jobs": jobs_data,
+                "total_count": len(resumable_jobs),
             }
             typer.echo(json.dumps(output_data, indent=2, default=str))
         elif csv_output:
@@ -88,10 +88,10 @@ def list_recoverable(
             writer.writerow(headers)
             writer.writerows(rows)
             writer.writerow([])
-            writer.writerow(["Total", str(len(recoverable_jobs))])
+            writer.writerow(["Total", str(len(resumable_jobs))])
         else:
             # Markdown output (default)
-            typer.echo("# 🔄 Recoverable Jobs")
+            typer.echo("# 🔄 Resumable Jobs")
             typer.echo()
             typer.echo("| " + " | ".join(headers) + " |")
             typer.echo("| " + " | ".join(["---"] * len(headers)) + " |")
@@ -100,7 +100,7 @@ def list_recoverable(
                 typer.echo("| " + " | ".join(row) + " |")
 
             typer.echo()
-            typer.echo(f"Found {len(recoverable_jobs)} recoverable job(s)")
+            typer.echo(f"Found {len(resumable_jobs)} resumable job(s)")
 
     except Exception as e:
         error_handler.handle(e)
@@ -151,7 +151,7 @@ def job_status(
                 ]
             )
             writer.writerow(
-                ["Recoverable", "Yes" if status_info.get("recoverable") else "No"]
+                ["Resumable", "Yes" if status_info.get("resumable") else "No"]
             )
             writer.writerow(
                 ["Journal Entries", str(status_info.get("journal_entries", 0))]
@@ -180,7 +180,7 @@ def job_status(
                 f"| Emergency Shutdown | {'Yes' if status_info.get('emergency_shutdown') else 'No'} |"
             )
             typer.echo(
-                f"| Recoverable | {'Yes' if status_info.get('recoverable') else 'No'} |"
+                f"| Resumable | {'Yes' if status_info.get('resumable') else 'No'} |"
             )
             typer.echo(f"| Journal Entries | {status_info.get('journal_entries', 0)} |")
 

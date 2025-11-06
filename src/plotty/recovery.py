@@ -207,17 +207,17 @@ class CrashRecovery:
             logger.error(f"Failed to recover job {job_id}: {e}")
             return None
 
-    def get_recoverable_jobs(self) -> List[str]:
-        """Get list of jobs that can be recovered.
+    def get_resumable_jobs(self) -> List[str]:
+        """Get list of jobs that can be resumed.
 
         Returns:
-            List of recoverable job IDs
+            List of resumable job IDs
         """
         jobs_dir = self.workspace / "jobs"
         if not jobs_dir.exists():
             return []
 
-        recoverable = []
+        resumable = []
 
         for job_dir in jobs_dir.iterdir():
             if not job_dir.is_dir():
@@ -245,22 +245,21 @@ class CrashRecovery:
                         except (json.JSONDecodeError, KeyError):
                             continue
 
-                    # If we found a state change, check if it's recoverable
+                    # If we found a state change, check if it's resumable
                     if last_state_change:
                         state = JobState[last_state_change["to_state"]]
-                        # Job is recoverable if not in terminal state
+                        # Job is resumable if not in terminal state
                         if state not in [
                             JobState.COMPLETED,
                             JobState.ABORTED,
-                            JobState.FAILED,
                         ]:
-                            recoverable.append(job_id)
+                            resumable.append(job_id)
 
             except Exception as e:
-                logger.warning(f"Error checking recoverability of {job_id}: {e}")
+                logger.warning(f"Error checking resumability of {job_id}: {e}")
                 continue
 
-        return recoverable
+        return resumable
 
     def get_job_status(self, job_id: str) -> Dict[str, Any]:
         """Get detailed status of a job from journal.
@@ -316,9 +315,8 @@ class CrashRecovery:
                 "last_transition": last_transition,
                 "job_info": job_info,
                 "journal_entries": len(entries),
-                "recoverable": (
-                    current_state
-                    not in [JobState.COMPLETED, JobState.ABORTED, JobState.FAILED]
+                "resumable": (
+                    current_state not in [JobState.COMPLETED, JobState.ABORTED]
                     if current_state
                     else False
                 ),
@@ -396,24 +394,24 @@ def get_crash_recovery(workspace: Path) -> CrashRecovery:
     return _crash_recovery_instance
 
 
-def recover_all_jobs(workspace: Path) -> List[JobFSM]:
-    """Recover all recoverable jobs.
+def resume_all_jobs(workspace: Path) -> List[JobFSM]:
+    """Resume all resumable jobs.
 
     Args:
         workspace: Path to workspace directory
 
     Returns:
-        List of recovered FSMs
+        List of resumed FSMs
     """
     recovery = get_crash_recovery(workspace)
-    recoverable_jobs = recovery.get_recoverable_jobs()
+    resumable_jobs = recovery.get_resumable_jobs()
 
-    recovered = []
-    for job_id in recoverable_jobs:
+    resumed = []
+    for job_id in resumable_jobs:
         fsm = recovery.recover_job(job_id)
         if fsm:
-            recovered.append(fsm)
+            resumed.append(fsm)
             recovery.register_fsm(fsm)
 
-    logger.info(f"Recovered {len(recovered)} jobs: {[fsm.job_id for fsm in recovered]}")
-    return recovered
+    logger.info(f"Resumed {len(resumed)} jobs: {[fsm.job_id for fsm in resumed]}")
+    return resumed

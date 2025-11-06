@@ -23,16 +23,17 @@ from plotty.fsm import JobState
 # Import enhanced test modules
 try:
     # Try to import from modular structure
-    sys.path.insert(0, str(Path(__file__).parent))
-    from .self.core import create_test_environment
-    from .self.basic import run_basic_command_tests
-    from .self.intermediate import run_job_lifecycle_tests, run_job_management_tests
-    from .self.advanced import (
+    self_modules_path = Path(__file__).parent / "self_modules_backup"
+    sys.path.insert(0, str(self_modules_path))
+    from core import create_test_environment
+    from basic import run_basic_command_tests
+    from intermediate import run_job_lifecycle_tests, run_job_management_tests
+    from advanced import (
         run_system_validation_tests,
         run_resource_management_tests,
     )
-    from .self.integration import run_system_integration_tests
-    from .self.reporting import generate_report
+    from integration import run_system_integration_tests
+    from reporting import generate_report
 
     MODULAR_AVAILABLE = True
 except ImportError:
@@ -371,6 +372,44 @@ def run_integrated_resource_management_tests(test_env: dict) -> list:
     return results
 
 
+def run_integrated_recovery_system_tests(test_env: dict) -> list:
+    """Run integrated recovery system tests."""
+    results = []
+
+    # Test list jobs --failed flag
+    result = run_integrated_command("plotty list jobs --failed")
+    results.append(
+        create_test_result(
+            "Recovery System: Failed jobs listing",
+            result["success"],
+            "✓ Passed" if result["success"] else f"✗ Failed: {result['stderr']}",
+        )
+    )
+
+    # Test list jobs --resumable flag
+    result = run_integrated_command("plotty list jobs --resumable")
+    results.append(
+        create_test_result(
+            "Recovery System: Resumable jobs listing",
+            result["success"],
+            "✓ Passed" if result["success"] else f"✗ Failed: {result['stderr']}",
+        )
+    )
+
+    # Test check job with recovery info (if we have a test job)
+    if test_env.get("test_job_id"):
+        result = run_integrated_command(f"plotty check job {test_env['test_job_id']}")
+        results.append(
+            create_test_result(
+                "Recovery System: Job check with recovery info",
+                result["success"],
+                "✓ Passed" if result["success"] else f"✗ Failed: {result['stderr']}",
+            )
+        )
+
+    return results
+
+
 def run_integrated_system_integration_tests(test_env: dict) -> list:
     """Run integrated system integration tests."""
     results = []
@@ -589,9 +628,9 @@ def run_self_test(
 
     * **basic**: Core command tests (4 tests)
     * **intermediate**: Job lifecycle and management (8 tests)
-    * **advanced**: System validation and resource management (7 tests)
+    * **advanced**: System validation, resource management, and recovery system (10 tests)
     * **integration**: System integration tests (2 tests)
-    * **all**: Run all tests (21 tests total)
+    * **all**: Run all tests (22 tests total)
 
     Each test runs in isolated environments with proper cleanup.
     """
@@ -625,6 +664,7 @@ def run_self_test(
         job_management_tests = run_integrated_job_management_tests
         system_validation_tests = run_integrated_system_validation_tests
         resource_management_tests = run_integrated_resource_management_tests
+        recovery_system_tests = run_integrated_recovery_system_tests
         integration_tests = run_integrated_system_integration_tests
         report_func = generate_integrated_report
 
@@ -654,6 +694,10 @@ def run_self_test(
             if verbose:
                 console.print("[blue]Running resource management tests...[/blue]")
             all_results.extend(resource_management_tests(test_env))
+
+            if verbose:
+                console.print("[blue]Running recovery system tests...[/blue]")
+            all_results.extend(recovery_system_tests(test_env))
 
         if level in ["integration", "all"]:
             if verbose:

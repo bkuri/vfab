@@ -10,6 +10,7 @@ from pathlib import Path
 from ...config import load_config
 from ...guards import create_guard_system
 from ...codes import ExitCode
+from ...recovery import get_crash_recovery
 from ..core import get_available_job_ids
 
 try:
@@ -46,7 +47,7 @@ def check_job(
         if guard_name:
             # Check specific guard
             result = guard_system.check_guard(guard_name, job_id)
-            if result.passed:
+            if result.result.value == "pass":
                 if console:
                     console.print(
                         f"✅ Guard '{guard_name}' passed for job {job_id}",
@@ -66,7 +67,7 @@ def check_job(
                     )
         else:
             # Check all guards
-            results = guard_system.check_all_guards(job_id)
+            results = guard_system.check_all(job_id)
 
             if console and Table:
                 table = Table()
@@ -74,11 +75,11 @@ def check_job(
                 table.add_column("Status", style="white")
                 table.add_column("Message", style="white")
 
-                for guard_name, result in results.items():
-                    status = "✅ PASS" if result.passed else "❌ FAIL"
-                    status_style = "green" if result.passed else "red"
+                for result in results:
+                    status = "✅ PASS" if result.result.value == "pass" else "❌ FAIL"
+                    status_style = "green" if result.result.value == "pass" else "red"
                     table.add_row(
-                        guard_name,
+                        result.name,
                         f"[{status_style}]{status}[/{status_style}]",
                         result.message,
                     )
@@ -88,9 +89,38 @@ def check_job(
             else:
                 print(f"\nGuard Check Results for Job {job_id}")
                 print("=" * 50)
-                for guard_name, result in results.items():
-                    status = "PASS" if result.passed else "FAIL"
-                    print(f"{guard_name}: {status} - {result.message}")
+                for result in results:
+                    status = "PASS" if result.result.value == "pass" else "FAIL"
+                    print(f"{result.name}: {status} - {result.message}")
+
+        # After guard checks, show recovery info if available
+        try:
+            workspace = Path(cfg.workspace)
+            recovery = get_crash_recovery(workspace)
+
+            status_info = recovery.get_job_status(job_id)
+            if "error" not in status_info and status_info.get("resumable", False):
+                if console:
+                    console.print("\n🔄 Recovery Information", style="bold blue")
+                    console.print(
+                        f"Current State: {status_info.get('current_state', 'Unknown')}"
+                    )
+                    console.print(
+                        f"Emergency Shutdown: {'Yes' if status_info.get('emergency_shutdown') else 'No'}"
+                    )
+                    console.print(f"Use 'plotty resume {job_id}' to recover this job")
+                else:
+                    print("\nRecovery Information:")
+                    print(
+                        f"Current State: {status_info.get('current_state', 'Unknown')}"
+                    )
+                    print(
+                        f"Emergency Shutdown: {'Yes' if status_info.get('emergency_shutdown') else 'No'}"
+                    )
+                    print(f"Use 'plotty resume {job_id}' to recover this job")
+        except Exception:
+            # Recovery info not available, silently skip
+            pass
 
     except Exception as e:
         from ...utils import error_handler

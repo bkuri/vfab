@@ -8,7 +8,7 @@ import typer
 from pathlib import Path
 
 from ...config import load_config
-from ...recovery import get_crash_recovery, recover_all_jobs
+from ...recovery import get_crash_recovery, resume_all_jobs
 from ...progress import show_status
 from ...codes import ExitCode
 from ...utils import error_handler
@@ -39,15 +39,15 @@ def recover_job(job_id: str) -> None:
                 print(f"Error: {status['error']}")
             raise typer.Exit(ExitCode.NOT_FOUND)
 
-        if not status.get("recoverable"):
+        if not status.get("resumable"):
             if console:
                 console.print(
-                    f"❌ Job '{job_id}' is not recoverable (state: {status.get('current_state')})",
+                    f"❌ Job '{job_id}' is not resumable (state: {status.get('current_state')})",
                     style="red",
                 )
             else:
                 print(
-                    f"Job '{job_id}' is not recoverable (state: {status.get('current_state')})"
+                    f"Job '{job_id}' is not resumable (state: {status.get('current_state')})"
                 )
             raise typer.Exit(ExitCode.INVALID_INPUT)
 
@@ -105,9 +105,9 @@ def recover_all_jobs_cmd() -> None:
         workspace = Path(cfg.workspace)
         recovery = get_crash_recovery(workspace)
 
-        recoverable_jobs = recovery.get_recoverable_jobs()
+        resumable_jobs = recovery.get_resumable_jobs()
 
-        if not recoverable_jobs:
+        if not resumable_jobs:
             if console:
                 console.print("✅ No jobs need recovery", style="green")
             else:
@@ -116,14 +116,12 @@ def recover_all_jobs_cmd() -> None:
 
         # Confirm recovery
         if console and Confirm:
-            if not Confirm.ask(
-                f"Recover all {len(recoverable_jobs)} recoverable jobs?"
-            ):
+            if not Confirm.ask(f"Resume all {len(resumable_jobs)} resumable jobs?"):
                 show_status("Recovery cancelled", "info")
                 return
         else:
             response = (
-                input(f"Recover all {len(recoverable_jobs)} recoverable jobs? [y/N]: ")
+                input(f"Resume all {len(resumable_jobs)} resumable jobs? [y/N]: ")
                 .strip()
                 .lower()
             )
@@ -132,24 +130,24 @@ def recover_all_jobs_cmd() -> None:
                 return
 
         # Perform recovery
-        show_status(f"Recovering {len(recoverable_jobs)} jobs...", "info")
-        recovered_fsms = recover_all_jobs(workspace)
+        show_status(f"Resuming {len(resumable_jobs)} jobs...", "info")
+        resumed_fsms = resume_all_jobs(workspace)
 
         if console:
             console.print(
-                f"✅ Successfully recovered {len(recovered_fsms)} jobs", style="green"
+                f"✅ Successfully resumed {len(resumed_fsms)} jobs", style="green"
             )
-            if recovered_fsms:
-                console.print("Recovered jobs:")
-                for fsm in recovered_fsms:
+            if resumed_fsms:
+                console.print("Resumed jobs:")
+                for fsm in resumed_fsms:
                     console.print(
                         f"  • {fsm.job_id} (state: {fsm.current_state.value})"
                     )
         else:
-            print(f"Successfully recovered {len(recovered_fsms)} jobs")
-            if recovered_fsms:
-                print("Recovered jobs:")
-                for fsm in recovered_fsms:
+            print(f"Successfully resumed {len(resumed_fsms)} jobs")
+            if resumed_fsms:
+                print("Resumed jobs:")
+                for fsm in resumed_fsms:
                     print(f"  • {fsm.job_id} (state: {fsm.current_state.value})")
 
     except typer.Exit:

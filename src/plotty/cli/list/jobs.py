@@ -13,6 +13,7 @@ from ...config import load_config
 from ...utils import error_handler
 from ...progress import show_status
 from ..info.output import get_output_manager
+from ...recovery import get_crash_recovery
 
 
 def jobs(
@@ -22,9 +23,14 @@ def jobs(
         "-s",
         help="Filter by job state (NEW, QUEUED, OPTIMIZED, READY, PLOTTING, COMPLETED, FAILED, etc.)",
     ),
-    failed: bool = typer.Option(False, "--failed", help="Show only failed jobs"),
+    failed: bool = typer.Option(
+        False, "--failed", help="Show failed and resumable (interrupted) jobs"
+    ),
     resumed: bool = typer.Option(False, "--resumed", help="Show only resumed jobs"),
     finished: bool = typer.Option(False, "--finished", help="Show only finished jobs"),
+    resumable: bool = typer.Option(
+        False, "--resumable", help="Show only resumable (interrupted) jobs"
+    ),
     json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
     csv_output: bool = typer.Option(False, "--csv", help="Output in CSV format"),
 ):
@@ -66,6 +72,9 @@ def jobs(
                         "paper": job_data.get("paper", "Unknown"),
                         "time_estimate": time_estimate,
                         "layer_count": layer_count,
+                        "created_at": job_data.get("created_at"),
+                        "modified_at": job_data.get("modified_at"),
+                        "dir_mtime": job_dir.stat().st_mtime,  # Directory modification time as fallback
                     }
                 )
             except Exception:
@@ -84,15 +93,45 @@ def jobs(
             state_upper = state.upper()
             jobs = [j for j in jobs if j["state"] == state_upper]
         elif failed:
-            jobs = [j for j in jobs if j["state"] == "FAILED"]
+            # Show failed jobs AND resumable jobs
+            try:
+                workspace = Path(cfg.workspace)
+                recovery = get_crash_recovery(workspace)
+                resumable_jobs = set(recovery.get_resumable_jobs())
+                jobs = [
+                    j
+                    for j in jobs
+                    if j["state"] == "FAILED" or j["id"] in resumable_jobs
+                ]
+            except Exception:
+                # Fallback: show failed jobs plus potentially resumable states
+                jobs = [
+                    j
+                    for j in jobs
+                    if j["state"] in ["FAILED", "PLOTTING", "ARMED", "QUEUED"]
+                ]
         elif resumed:
             jobs = [
                 j for j in jobs if j["state"] in ["PLOTTING", "ARMED", "READY"]
             ]  # Jobs that were resumed
         elif finished:
             jobs = [j for j in jobs if j["state"] in ["COMPLETED", "ABORTED"]]
+        elif resumable:
+            # Show only resumable jobs
+            try:
+                workspace = Path(cfg.workspace)
+                recovery = get_crash_recovery(workspace)
+                resumable_jobs = set(recovery.get_resumable_jobs())
+                jobs = [j for j in jobs if j["id"] in resumable_jobs]
+            except Exception:
+                # Fallback: show potentially resumable states
+                jobs = [
+                    j
+                    for j in jobs
+                    if j["state"] in ["PLOTTING", "ARMED", "QUEUED", "FAILED"]
+                ]
 
-        # Sort by state priority
+        # Sort by state priority first, then by reverse chronological order
         state_priority = {
             "PLOTTING": 0,
             "ARMED": 1,
@@ -106,7 +145,54 @@ def jobs(
             "ABORTED": 9,
             "FAILED": 10,
         }
-        jobs.sort(key=lambda j: state_priority.get(j["state"], 99))
+
+        def sort_key(job):
+            # Primary sort: state priority
+            priority = state_priority.get(job["state"], 99)
+
+            # Secondary sort: reverse chronological (newest first)
+            # Try multiple timestamp sources in order of preference
+            timestamp = None
+            if job.get("modified_at"):
+                timestamp = job["modified_at"]
+                # Convert string timestamps to float if needed
+                if isinstance(timestamp, str):
+                    try:
+                        # Try ISO format first
+                        from datetime import datetime
+
+                        timestamp = datetime.fromisoformat(
+                            timestamp.replace("Z", "+00:00")
+                        ).timestamp()
+                    except (ValueError, AttributeError):
+                        try:
+                            timestamp = float(timestamp)
+                        except ValueError:
+                            timestamp = 0
+            elif job.get("created_at"):
+                timestamp = job["created_at"]
+                # Convert string timestamps to float if needed
+                if isinstance(timestamp, str):
+                    try:
+                        # Try ISO format first
+                        from datetime import datetime
+
+                        timestamp = datetime.fromisoformat(
+                            timestamp.replace("Z", "+00:00")
+                        ).timestamp()
+                    except (ValueError, AttributeError):
+                        try:
+                            timestamp = float(timestamp)
+                        except ValueError:
+                            timestamp = 0
+            else:
+                timestamp = job["dir_mtime"]
+
+            # For reverse chronological, we negate the timestamp
+            # (newer timestamps should come first)
+            return (priority, -timestamp if timestamp else 0)
+
+        jobs.sort(key=sort_key)
 
         if json_output:
             # JSON output for LLM parsing
@@ -144,11 +230,13 @@ def jobs(
         if state:
             title_parts.append(f"{state.upper()} Jobs")
         elif failed:
-            title_parts.append("Failed")
+            title_parts.append("Failed & Resumable")
         elif resumed:
             title_parts.append("Resumed")
         elif finished:
             title_parts.append("Finished")
+        elif resumable:
+            title_parts.append("Resumable")
         else:
             title_parts.append("All")
 
