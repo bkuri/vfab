@@ -65,14 +65,15 @@ def servo_test(
                 "info",
             )
 
-            # Set penlift option before connecting
-            manager.setup_interactive_context(penlift=penlift_setting)
-
             # Connect in interactive mode for servo testing
             if not manager.connect():
                 raise Exception("Failed to connect to AxiDraw")
 
             show_status("✓ Connected to AxiDraw", "success")
+
+            # Set penlift option after connecting
+            manager.ad.options.penlift = penlift_setting
+            manager.ad.update()
 
             # Test servo up/down using interactive mode
             show_status("Testing servo up/down cycle...", "info")
