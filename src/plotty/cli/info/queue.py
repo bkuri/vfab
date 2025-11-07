@@ -14,7 +14,7 @@ from ...config import load_config
 from ...utils import error_handler
 from .utils import (
     collect_jobs,
-    sort_jobs_by_state,
+    sort_jobs_by_queue_priority,
     format_time,
 )
 from .output import get_output_manager
@@ -45,8 +45,8 @@ def show_job_queue(
             output.print_markdown(content=markdown_content)
             return
 
-        # Sort by state (prioritize active jobs)
-        jobs = sort_jobs_by_state(jobs)
+        # Sort by queue priority first, then state
+        jobs = sort_jobs_by_queue_priority(jobs)
 
         # Limit results
         jobs = jobs[:limit]

@@ -10,7 +10,7 @@ import typer
 from pathlib import Path
 
 from ..config import load_config
-from ..recovery import get_crash_recovery
+from ..recovery import get_crash_recovery, requeue_job_to_front
 from ..progress import show_status
 from ..codes import ExitCode
 from ..utils import error_handler
@@ -46,7 +46,9 @@ def resume_command(
     apply: bool = typer.Option(
         False, "--apply", help="Apply resume changes (dry-run by default)"
     ),
-    json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
+    now: bool = typer.Option(
+        False, "--now", help="Prioritize resumed job to front of queue"
+    ),
 ) -> None:
     """Resume interrupted plotting jobs."""
     try:
@@ -111,6 +113,27 @@ def resume_command(
 
             if fsm:
                 recovery.register_fsm(fsm)
+
+                # Handle queue positioning if requested
+                if now:
+                    try:
+                        requeue_job_to_front(job_id, workspace)
+                        if console:
+                            console.print(
+                                f"🚀 Job '{job_id}' moved to front of queue",
+                                style="blue",
+                            )
+                        else:
+                            print(f"Job '{job_id}' moved to front of queue")
+                    except Exception as e:
+                        if console:
+                            console.print(
+                                f"⚠️  Failed to move job to front of queue: {e}",
+                                style="yellow",
+                            )
+                        else:
+                            print(f"Warning: Failed to move job to front of queue: {e}")
+
                 if console:
                     console.print(
                         f"✅ Successfully resumed job '{job_id}'", style="green"

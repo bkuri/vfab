@@ -14,6 +14,7 @@ from ..config import load_config
 from ..progress import show_status
 from ..codes import ExitCode
 from ..utils import error_handler
+from ..recovery import requeue_job_to_front
 
 try:
     from rich.console import Console
@@ -52,6 +53,9 @@ def restart_command(
     ),
     apply: bool = typer.Option(
         False, "--apply", help="Apply restart changes (dry-run by default)"
+    ),
+    now: bool = typer.Option(
+        False, "--now", help="Move job to front of queue after restart"
     ),
     json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
 ) -> None:
@@ -170,6 +174,24 @@ def restart_command(
                     )
                 else:
                     print(f"  Failed to remove {dir_path.name}/: {e}")
+
+        # Handle queue positioning if requested
+        if now:
+            try:
+                requeue_job_to_front(job_id, workspace)
+                if console:
+                    console.print(
+                        f"🚀 Job '{job_id}' moved to front of queue", style="blue"
+                    )
+                else:
+                    print(f"Job '{job_id}' moved to front of queue")
+            except Exception as e:
+                if console:
+                    console.print(
+                        f"⚠️  Failed to move job to front of queue: {e}", style="yellow"
+                    )
+                else:
+                    print(f"Warning: Failed to move job to front of queue: {e}")
 
         if console:
             console.print(f"✅ Successfully restarted job '{job_id}'", style="green")

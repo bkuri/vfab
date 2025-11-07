@@ -132,6 +132,7 @@ def collect_jobs(
                 "layer_count": layer_count,
                 "created_at": job_data.get("created_at"),
                 "updated_at": job_data.get("updated_at"),
+                "queue_priority": job_data.get("queue_priority", 0),
                 "error": job_data.get("error"),
             }
         )
@@ -163,6 +164,45 @@ def sort_jobs_by_state(jobs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     }
 
     return sorted(jobs, key=lambda j: state_priority.get(j["state"], 99))
+
+
+def sort_jobs_by_queue_priority(jobs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Sort jobs by queue priority and timestamp.
+
+    Args:
+        jobs: List of job dictionaries
+
+    Returns:
+        Sorted list of jobs with queue priority respected
+    """
+
+    def sort_key(job: Dict[str, Any]) -> tuple:
+        # Primary sort: queue priority (higher = more priority)
+        priority = job.get("queue_priority", 0)
+
+        # Secondary sort: state priority (active jobs first)
+        state_priority = {
+            "PLOTTING": 0,
+            "ARMED": 1,
+            "READY": 2,
+            "OPTIMIZED": 3,
+            "ANALYZED": 4,
+            "QUEUED": 5,
+            "NEW": 6,
+            "PAUSED": 7,
+            "COMPLETED": 8,
+            "ABORTED": 9,
+            "FAILED": 10,
+        }
+        state_order = state_priority.get(job.get("state", "UNKNOWN"), 99)
+
+        # Tertiary sort: updated_at timestamp (newer first for same priority)
+        updated_at = job.get("updated_at", "")
+
+        # For queue priority, we want higher numbers first, so negate it
+        return (-priority, state_order, updated_at)
+
+    return sorted(jobs, key=sort_key)
 
 
 def format_time(seconds: Optional[float]) -> str:

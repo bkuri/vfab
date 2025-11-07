@@ -391,7 +391,71 @@ def get_crash_recovery(workspace: Path) -> CrashRecovery:
     if _crash_recovery_instance is None:
         _crash_recovery_instance = CrashRecovery(workspace)
 
-    return _crash_recovery_instance
+        return _crash_recovery_instance
+
+
+def requeue_job_to_front(job_id: str, workspace: Path) -> bool:
+    """Move job to front of queue by updating timestamp and priority.
+
+    Args:
+        job_id: Job identifier to requeue
+        workspace: Path to workspace directory
+
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        job_file = workspace / "jobs" / job_id / "job.json"
+        if not job_file.exists():
+            logger.warning(f"Job file not found for requeue: {job_id}")
+            return False
+
+        job_data = json.loads(job_file.read_text())
+
+        # Set to far future timestamp to ensure front position
+        # and add high priority flag
+        job_data["updated_at"] = datetime(2100, 1, 1, tzinfo=timezone.utc).isoformat()
+        job_data["queue_priority"] = 1  # High priority flag
+
+        job_file.write_text(json.dumps(job_data, indent=2))
+        logger.info(f"Requeued job {job_id} to front of queue")
+        return True
+
+    except Exception as e:
+        logger.error(f"Failed to requeue job {job_id} to front: {e}")
+        return False
+
+
+def requeue_job_to_end(job_id: str, workspace: Path) -> bool:
+    """Move job to end of queue with current timestamp.
+
+    Args:
+        job_id: Job identifier to requeue
+        workspace: Path to workspace directory
+
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        job_file = workspace / "jobs" / job_id / "job.json"
+        if not job_file.exists():
+            logger.warning(f"Job file not found for requeue: {job_id}")
+            return False
+
+        job_data = json.loads(job_file.read_text())
+
+        # Set to current time for end position
+        # and normal priority
+        job_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+        job_data["queue_priority"] = 0  # Normal priority
+
+        job_file.write_text(json.dumps(job_data, indent=2))
+        logger.info(f"Requeued job {job_id} to end of queue")
+        return True
+
+    except Exception as e:
+        logger.error(f"Failed to requeue job {job_id} to end: {e}")
+        return False
 
 
 def resume_all_jobs(workspace: Path) -> List[JobFSM]:
