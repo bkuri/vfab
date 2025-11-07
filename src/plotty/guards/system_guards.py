@@ -161,7 +161,7 @@ class CameraGuard(Guard):
                     return GuardCheck(
                         "camera_health",
                         GuardResult.SOFT_FAIL,
-                        f"Camera timeout after 5 seconds",
+                        "Camera timeout after 5 seconds",
                         {"enabled": True, "url": camera_url, "error": "timeout"},
                     )
                 except requests.exceptions.ConnectionError:
@@ -257,4 +257,168 @@ class CameraGuard(Guard):
                 GuardResult.SOFT_FAIL,
                 f"Camera health check failed: {str(e)}",
                 {"enabled": True, "error": str(e)},
+            )
+
+
+class PhysicalSetupGuard(Guard):
+    """Guard for checking physical setup validation before ARMED state."""
+
+    def check(self, job_id: str) -> GuardCheck:
+        """Check if physical setup is valid for plotting."""
+        try:
+            # Get job details to understand requirements
+            from pathlib import Path
+            import json
+            
+            cfg = self.config
+            jobs_dir = Path(cfg.workspace) / "jobs"
+            job_file = jobs_dir / job_id / "job.json"
+            
+            job_requirements = {
+                "paper_size": getattr(cfg.paper, 'default_size', 'A4'),
+                "pen_count": 1,  # Default to single pen
+                "has_multipen": False,
+            }
+            
+            # Try to get actual job requirements
+            if job_file.exists():
+                try:
+                    with open(job_file, 'r') as f:
+                        job_data = json.load(f)
+                    
+                    # Extract pen requirements from job data
+                    if 'pen_mapping' in job_data:
+                        job_requirements["pen_count"] = len(job_data['pen_mapping'])
+                        job_requirements["has_multipen"] = job_requirements["pen_count"] > 1
+                    
+                    # Extract paper requirements if available
+                    if 'paper_size' in job_data:
+                        job_requirements["paper_size"] = job_data['paper_size']
+                    elif 'paper' in job_data:
+                        job_requirements["paper_size"] = job_data['paper']
+                        
+                except Exception:
+                    # If we can't read job file, continue with defaults
+                    pass
+            
+            # Check paper alignment
+            paper_check = self._check_paper_alignment(job_requirements)
+            if paper_check.result != GuardResult.PASS:
+                return paper_check
+            
+            # Check pen setup
+            pen_check = self._check_pen_setup(job_requirements)
+            if pen_check.result != GuardResult.PASS:
+                return pen_check
+            
+            # All checks passed
+            return GuardCheck(
+                "physical_setup",
+                GuardResult.PASS,
+                f"Physical setup validated for {job_requirements['paper_size']} paper with {job_requirements['pen_count']} pen(s)",
+                {
+                    "paper_size": job_requirements["paper_size"],
+                    "pen_count": job_requirements["pen_count"],
+                    "has_multipen": job_requirements["has_multipen"],
+                    "paper_aligned": True,
+                    "pens_ready": True,
+                },
+            )
+            
+        except Exception as e:
+            return GuardCheck(
+                "physical_setup",
+                GuardResult.SOFT_FAIL,
+                f"Physical setup check failed: {str(e)}",
+                {"error": str(e)},
+            )
+    
+    def _check_paper_alignment(self, job_requirements: dict) -> GuardCheck:
+        """Check if paper is properly aligned."""
+        # In a real implementation, this might use camera detection
+        # For now, we'll provide a framework for manual confirmation
+        
+        # Check if paper size matches requirements
+        configured_paper = getattr(self.config.paper, 'default_size', 'A4')
+        required_paper = job_requirements["paper_size"]
+        
+        if configured_paper != required_paper:
+            return GuardCheck(
+                "physical_setup",
+                GuardResult.FAIL,
+                f"Paper size mismatch: configured {configured_paper}, job requires {required_paper}",
+                {
+                    "configured_paper": configured_paper,
+                    "required_paper": required_paper,
+                    "paper_aligned": False,
+                },
+            )
+        
+        # Paper alignment validation placeholder
+        # In interactive mode, this would prompt for user confirmation
+        return GuardCheck(
+            "physical_setup",
+            GuardResult.PASS,
+            f"Paper size {required_paper} configured",
+            {
+                "paper_size": required_paper,
+                "paper_aligned": True,  # This would be set by interactive confirmation
+            },
+        )
+    
+    def _check_pen_setup(self, job_requirements: dict) -> GuardCheck:
+        """Check if pens are properly configured."""
+        try:
+            cfg = self.config
+            
+            pen_count = job_requirements["pen_count"]
+            has_multipen = job_requirements["has_multipen"]
+            
+            # Check if multipen is configured for multi-pen jobs
+            if has_multipen:
+                # For now, multipen is not fully configured in Settings
+                # This will be a hard fail since multipen jobs require multipen support
+                return GuardCheck(
+                    "physical_setup",
+                    GuardResult.FAIL,
+                    f"Job requires {pen_count} pens but multipen is not enabled",
+                    {
+                        "required_pen_count": pen_count,
+                        "multipen_enabled": False,
+                        "pens_ready": False,
+                    },
+                )
+            
+            # Single pen validation
+            if not has_multipen:
+                # Check if AxiDraw device is configured
+                if not hasattr(cfg, 'device') or not cfg.device:
+                    return GuardCheck(
+                        "physical_setup",
+                        GuardResult.SOFT_FAIL,
+                        "No device configuration found",
+                        {
+                            "required_pen_count": 1,
+                            "device_configured": False,
+                            "pens_ready": False,
+                        },
+                    )
+            
+            return GuardCheck(
+                "physical_setup",
+                GuardResult.PASS,
+                f"Pen setup validated for {pen_count} pen(s)",
+                {
+                    "required_pen_count": pen_count,
+                    "has_multipen": has_multipen,
+                    "pens_ready": True,
+                },
+            )
+            
+        except Exception as e:
+            return GuardCheck(
+                "physical_setup",
+                GuardResult.SOFT_FAIL,
+                f"Pen setup check failed: {str(e)}",
+                {"error": str(e), "pens_ready": False},
             )

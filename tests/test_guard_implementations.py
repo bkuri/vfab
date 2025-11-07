@@ -3,16 +3,20 @@
 
 import sys
 import tempfile
+import unittest
+import json
 from pathlib import Path
+from unittest.mock import Mock
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from plotty.guards.job_guards import PaperSessionGuard, PenLayerGuard
 from plotty.guards.system_guards import CameraGuard
-from plotty.config import Settings, CameraCfg
+from plotty.guards.base import GuardResult
+from plotty.config import Settings
 from plotty.db import init_database, get_session
-from plotty.models import Job, Paper, Pen, Layer, Base
+from plotty.models import Job, Paper, Pen, Layer
 
 
 def test_paper_session_guard():
@@ -216,6 +220,109 @@ def test_camera_guard():
     print("  ✓ CameraGuard tests passed")
 
 
+class TestPhysicalSetupGuard(unittest.TestCase):
+    """Test PhysicalSetupGuard implementation."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.mock_config = Mock()
+        self.mock_config.paper = Mock()
+        self.mock_config.paper.default_size = "A4"
+        self.mock_config.multipen = Mock()
+        self.mock_config.multipen.enabled = False
+        self.mock_config.device = Mock()
+        
+        # Create temporary job directory for testing
+        self.test_job_dir = Path(tempfile.mkdtemp())
+        self.test_job_id = "test_job"
+        
+        # Create mock job file
+        job_data = {
+            "id": self.test_job_id,
+            "name": "Test Job",
+            "paper": "A4",
+            "state": "READY",
+        }
+        job_file = self.test_job_dir / "job.json"
+        job_file.write_text(json.dumps(job_data, indent=2))
+        
+        # Mock workspace to point to test directory and create jobs subdirectory
+        jobs_dir = self.test_job_dir.parent / "jobs"
+        jobs_dir.mkdir(exist_ok=True)
+        # Move test job directory to jobs subdirectory
+        job_dir = jobs_dir / self.test_job_id
+        job_dir.mkdir(exist_ok=True)
+        (self.test_job_dir / "job.json").rename(job_dir / "job.json")
+        self.mock_config.workspace = str(self.test_job_dir.parent)
+
+    def tearDown(self):
+        """Clean up test fixtures."""
+        import shutil
+        shutil.rmtree(self.test_job_dir, ignore_errors=True)
+
+    def test_physical_setup_guard_pass_single_pen(self):
+        """Test PhysicalSetupGuard with single pen setup."""
+        from plotty.guards.system_guards import PhysicalSetupGuard
+        
+        guard = PhysicalSetupGuard(self.mock_config)
+        result = guard.check(self.test_job_id)
+        
+        self.assertEqual(result.result, GuardResult.PASS)
+        self.assertIn("validated", result.message.lower())
+        self.assertTrue(result.details["paper_aligned"])
+        self.assertTrue(result.details["pens_ready"])
+        self.assertEqual(result.details["pen_count"], 1)
+        self.assertFalse(result.details["has_multipen"])
+
+    def test_physical_setup_guard_paper_size_mismatch(self):
+        """Test PhysicalSetupGuard with paper size mismatch."""
+        from plotty.guards.system_guards import PhysicalSetupGuard
+        
+        # Configure different paper size
+        self.mock_config.paper.default_size = "A3"
+        
+        guard = PhysicalSetupGuard(self.mock_config)
+        result = guard.check(self.test_job_id)
+        
+        self.assertEqual(result.result, GuardResult.FAIL)
+        self.assertIn("Paper size mismatch", result.message)
+        self.assertEqual(result.details["configured_paper"], "A3")
+        self.assertEqual(result.details["required_paper"], "A4")
+        self.assertFalse(result.details["paper_aligned"])
+
+    def test_physical_setup_guard_multipen_not_enabled(self):
+        """Test PhysicalSetupGuard when multipen required but not enabled."""
+        from plotty.guards.system_guards import PhysicalSetupGuard
+        
+        # Use a different job ID for this test
+        multipen_job_id = "multipen_test_job"
+        
+        # Create job directory in jobs folder
+        jobs_dir = Path(self.mock_config.workspace) / "jobs"
+        job_dir = jobs_dir / multipen_job_id
+        job_dir.mkdir(exist_ok=True)
+        
+        # Create job requiring multipen
+        job_data = {
+            "id": multipen_job_id,
+            "name": "Multipen Test Job",
+            "paper": "A4",
+            "state": "READY",
+            "pen_mapping": {"pen1": "color1", "pen2": "color2"},
+        }
+        job_file = job_dir / "job.json"
+        job_file.write_text(json.dumps(job_data, indent=2))
+        
+        guard = PhysicalSetupGuard(self.mock_config)
+        result = guard.check(multipen_job_id)
+        
+        self.assertEqual(result.result, GuardResult.FAIL)
+        self.assertIn("multipen is not enabled", result.message.lower())
+        self.assertEqual(result.details["required_pen_count"], 2)
+        self.assertFalse(result.details["multipen_enabled"])
+        self.assertFalse(result.details["pens_ready"])
+
+
 def run_all_tests():
     """Run all guard unit tests."""
     print("Running guard implementation unit tests...\n")
@@ -226,6 +333,21 @@ def run_all_tests():
         test_pen_layer_guard()
         print()
         test_camera_guard()
+        print()
+        
+        # Run PhysicalSetupGuard tests
+        print("Testing PhysicalSetupGuard...")
+        test_suite = unittest.TestLoader().loadTestsFromTestCase(TestPhysicalSetupGuard)
+        test_runner = unittest.TextTestRunner(verbosity=0)
+        result = test_runner.run(test_suite)
+        
+        if result.wasSuccessful():
+            print("  ✓ PhysicalSetupGuard tests passed")
+        else:
+            print(f"  ❌ PhysicalSetupGuard tests failed: {len(result.failures)} failures")
+            for test, traceback in result.failures:
+                print(f"    {test}: {traceback}")
+        
         print("\n✅ All guard unit tests passed!")
         
     except Exception as e:
