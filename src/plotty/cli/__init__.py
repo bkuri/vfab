@@ -116,7 +116,7 @@ def main_callback(
 
 
 def main():
-    """Main entry point for plotty CLI."""
+    """Main entry point for ploTTY CLI."""
     app()
 
 
