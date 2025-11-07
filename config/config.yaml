@@ -1,7 +1,7 @@
 workspace: "$XDG_DATA_HOME/plotty/workspace"
 database: { url: "sqlite:///$XDG_DATA_HOME/plotty/plotty.db" }
 camera: { mode: ip, url: "", enabled: false, timelapse_fps: 1 }
-device: { preferred: "axidraw:auto", pause_ink_swatch: true }
+device: { preferred: "axidraw:auto", pause_ink_swatch: true, penlift: 1 }
 vpype:  { preset: default, presets_file: "config/vpype-presets.yaml" }
 paper: { default_size: A4, default_margin_mm: 10, default_orientation: portrait, require_one_per_session: true, track_usage: true, auto_detect_size: true }
 

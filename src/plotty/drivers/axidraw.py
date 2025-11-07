@@ -37,6 +37,7 @@ class AxiDrawManager:
         self.port = port
         self.model = model
         self.connected = False
+        self.default_penlift = 1  # Default penlift setting
 
     def setup_plot_context(self, svg_file: Path, **options) -> None:
         """Setup Plot context for SVG file.
@@ -227,14 +228,25 @@ class AxiDrawManager:
         self.ad.options.units = unit_map[units]
         self.ad.update()
 
-    def cycle_pen(self) -> Dict[str, Any]:
+    def cycle_pen(self, penlift: Optional[int] = None) -> Dict[str, Any]:
         """Cycle pen down then up for setup.
+
+        Args:
+            penlift: Pen lift servo configuration (1-3). 1: Default for AxiDraw model. 
+                    2: Standard servo (lowest connector position). 
+                    3: Narrow-band brushless servo (3rd position up).
+                    If None, uses the manager's default_penlift setting.
 
         Returns:
             Dictionary with operation result
         """
         self.ad.plot_setup()
         self.ad.options.mode = "cycle"
+        
+        # Apply penlift setting - use provided value, otherwise use default
+        effective_penlift = penlift if penlift is not None else getattr(self, 'default_penlift', 1)
+        self.ad.options.penlift = effective_penlift
+            
         try:
             self.ad.plot_run()
             return {"success": True}
@@ -307,12 +319,13 @@ def get_axidraw_install_instructions() -> str:
     return _IMPORT_ERROR
 
 
-def create_manager(port: Optional[str] = None, model: int = 1) -> AxiDrawManager:
+def create_manager(port: Optional[str] = None, model: int = 1, penlift: Optional[int] = None) -> AxiDrawManager:
     """Factory function to create AxiDraw manager.
 
     Args:
         port: USB port or nickname for AxiDraw
         model: AxiDraw model number
+        penlift: Pen lift servo configuration (1-3). If None, uses config default.
 
     Returns:
         AxiDrawManager instance
@@ -320,4 +333,18 @@ def create_manager(port: Optional[str] = None, model: int = 1) -> AxiDrawManager
     Raises:
         ImportError: If pyaxidraw is not available
     """
-    return AxiDrawManager(port=port, model=model)
+    manager = AxiDrawManager(port=port, model=model)
+    
+    # Set penlift if provided, otherwise use config
+    if penlift is None:
+        try:
+            from ..config import get_config
+            config = get_config()
+            manager.default_penlift = config.device.penlift
+        except Exception:
+            # Fallback to default if config unavailable
+            manager.default_penlift = 1
+    else:
+        manager.default_penlift = penlift
+    
+    return manager

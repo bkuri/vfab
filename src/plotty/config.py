@@ -31,6 +31,7 @@ class DeviceCfg(BaseModel):
     speed_pendown: int = 25
     speed_penup: int = 75
     units: str = "inches"
+    penlift: int = 1  # 1: Default for AxiDraw model, 2: Standard servo, 3: Brushless servo
     remote_detection_host: str | None = None
     detection_timeout: int = 5
 

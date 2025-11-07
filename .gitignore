@@ -145,4 +145,5 @@ coverage.xml
 !config/vpype-presets.yaml
 !tests/fixtures/test_design.svg
 !packaging/
+packaging/*.tar.*
 !alembic.ini
