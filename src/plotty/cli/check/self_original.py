@@ -291,9 +291,11 @@ def run_tests(test_env: Path) -> List[Dict[str, Any]]:
                 "category": "Job Management",
                 "command": "queue TestJob",
                 "description": "Test manual job queuing",
-                "status": "PASS"
-                if (result["success"] or is_state_error or is_not_found)
-                else "FAIL",
+                "status": (
+                    "PASS"
+                    if (result["success"] or is_state_error or is_not_found)
+                    else "FAIL"
+                ),
                 "message": queue_msg,
                 "details": result,
             }
@@ -474,9 +476,11 @@ def run_tests(test_env: Path) -> List[Dict[str, Any]]:
             "category": "Resource Management",
             "command": "remove pen TestPen",
             "description": "Test pen removal with cleanup",
-            "status": "PASS"
-            if (result["success"] or is_dependency_error or is_prompt_error)
-            else "FAIL",
+            "status": (
+                "PASS"
+                if (result["success"] or is_dependency_error or is_prompt_error)
+                else "FAIL"
+            ),
             "message": remove_pen_msg,
             "details": result,
         }
@@ -507,9 +511,11 @@ def run_tests(test_env: Path) -> List[Dict[str, Any]]:
             "category": "Resource Management",
             "command": "remove paper TestPaper",
             "description": "Test paper removal with cleanup",
-            "status": "PASS"
-            if (result["success"] or is_dependency_error or is_prompt_error)
-            else "FAIL",
+            "status": (
+                "PASS"
+                if (result["success"] or is_dependency_error or is_prompt_error)
+                else "FAIL"
+            ),
             "message": remove_paper_msg,
             "details": result,
         }
