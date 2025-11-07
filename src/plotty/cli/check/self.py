@@ -637,7 +637,7 @@ def generate_integrated_report(results: list, console: Console) -> dict:
     if use_rich:
         # Rich formatting for terminal
         from rich.table import Table
-        from rich.panel import Panel
+        
         from rich.text import Text
 
         # Group results by category first to calculate table width
@@ -694,9 +694,7 @@ def generate_integrated_report(results: list, console: Console) -> dict:
                     status_text, category, test_name, message, style=row_style
                 )
 
-        # Calculate table width (approximately)
-        # Status: 6, Category: 15, Test: 25, Result: 40, plus borders and spacing: ~7
-        table_width = 6 + 15 + 25 + 40 + 7  # ~93 characters
+        
 
         # Summary panel with calculated width and color coding
         summary_text = Text()
