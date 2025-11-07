@@ -197,7 +197,7 @@ def sort_jobs_by_queue_priority(jobs: List[Dict[str, Any]]) -> List[Dict[str, An
         state_order = state_priority.get(job.get("state", "UNKNOWN"), 99)
 
         # Tertiary sort: updated_at timestamp (newer first for same priority)
-        updated_at = job.get("updated_at", "")
+        updated_at = job.get("updated_at") or ""
 
         # For queue priority, we want higher numbers first, so negate it
         return (-priority, state_order, updated_at)
