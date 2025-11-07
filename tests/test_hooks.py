@@ -47,7 +47,12 @@ hooks:
         # Test state transitions with hooks
         print("Testing hooks integration...")
 
-        # Transition to QUEUED (should execute NEW and QUEUED hooks)
+        # Transition to READY first (valid from NEW)
+        result = fsm.transition_to(JobState.READY, "Test ready", {})
+        assert result
+        print("✓ READY transition with hooks executed")
+
+        # Transition to QUEUED (should execute QUEUED hooks)
         result = fsm.transition_to(JobState.QUEUED, "Test queue", {})
         assert result
         print("✓ QUEUED transition with hooks executed")
