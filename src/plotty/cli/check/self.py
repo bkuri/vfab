@@ -19,9 +19,36 @@ from rich.console import Console
 from plotty.cli.common import console as cli_console
 from plotty.cli.info.output import get_output_manager
 from plotty.fsm import JobState
+from plotty.progress import progress_task
 
 # Modular structure was removed, always use integrated implementation
 MODULAR_AVAILABLE = False
+
+
+class TestProgressTracker:
+    """Track and display progress for test execution with test names."""
+
+    def __init__(self, total_tests: int, update_func) -> None:
+        """Initialize tracker with total test count and update function.
+
+        Args:
+            total_tests: Total number of tests to run
+            update_func: Callable to update progress display
+        """
+        self.total_tests = total_tests
+        self.current_test = 0
+        self.update_func = update_func
+        self.current_test_name = ""
+
+    def advance(self, test_name: str) -> None:
+        """Advance progress to next test.
+
+        Args:
+            test_name: Name of the test being run
+        """
+        self.current_test += 1
+        self.current_test_name = test_name
+        self.update_func(1, f"[{self.current_test}/{self.total_tests}] {test_name}")
 
 
 def create_integrated_test_environment() -> dict:
@@ -93,7 +120,7 @@ def create_test_result(
     }
 
 
-def run_integrated_basic_tests(test_env: dict) -> list:
+def run_integrated_basic_tests(test_env: dict, progress_tracker=None) -> list:
     """Run integrated basic tests."""
     results = []
 
@@ -105,6 +132,10 @@ def run_integrated_basic_tests(test_env: dict) -> list:
     ]
 
     for cmd, description in basic_tests:
+        test_name = f"Basic: {description}"
+        if progress_tracker:
+            progress_tracker.advance(test_name)
+
         result = run_integrated_command(f"plotty {cmd}")
 
         # Special handling for check config - warnings (exit code 2) are expected
@@ -117,7 +148,7 @@ def run_integrated_basic_tests(test_env: dict) -> list:
 
         results.append(
             create_test_result(
-                f"Basic: {description}",
+                test_name,
                 success,
                 message,
             )
@@ -126,21 +157,35 @@ def run_integrated_basic_tests(test_env: dict) -> list:
     return results
 
 
-def run_integrated_job_lifecycle_tests(test_env: dict) -> list:
+def run_integrated_job_lifecycle_tests(test_env: dict, progress_tracker=None) -> list:
     """Run integrated job lifecycle tests."""
     results = []
 
     # Create test SVG
+    test_name = "Job Lifecycle: Test SVG creation"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
     if not create_integrated_test_svg(test_env["test_svg"]):
         results.append(
-            create_test_result(
-                "Job Lifecycle: Test SVG creation", False, "✗ Failed to create test SVG"
-            )
+            create_test_result(test_name, False, "✗ Failed to create test SVG")
         )
         return results
 
+    results.append(
+        create_test_result(
+            test_name,
+            True,
+            "✓ Passed",
+        )
+    )
+
     # Test job creation (use unique name to avoid conflicts)
     import uuid
+
+    test_name = "Job Lifecycle: Job creation"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
 
     unique_job_id = f"test-job-{uuid.uuid4().hex[:6]}"
     result = run_integrated_command(
@@ -155,7 +200,7 @@ def run_integrated_job_lifecycle_tests(test_env: dict) -> list:
             test_env["test_job_id"] = job_id_match.group(1)
             results.append(
                 create_test_result(
-                    "Job Lifecycle: Job creation",
+                    test_name,
                     True,
                     f"✓ Created job {test_env['test_job_id']}",
                 )
@@ -163,24 +208,26 @@ def run_integrated_job_lifecycle_tests(test_env: dict) -> list:
         else:
             results.append(
                 create_test_result(
-                    "Job Lifecycle: Job creation",
+                    test_name,
                     False,
                     "✗ Could not extract job ID from output",
                 )
             )
     else:
         results.append(
-            create_test_result(
-                "Job Lifecycle: Job creation", False, f"✗ Failed: {result['stderr']}"
-            )
+            create_test_result(test_name, False, f"✗ Failed: {result['stderr']}")
         )
 
     # Test job status check
     if test_env.get("test_job_id"):
+        test_name = "Job Lifecycle: Job status check"
+        if progress_tracker:
+            progress_tracker.advance(test_name)
+
         result = run_integrated_command(f"plotty info job {test_env['test_job_id']}")
         results.append(
             create_test_result(
-                "Job Lifecycle: Job status check",
+                test_name,
                 result["success"],
                 "✓ Passed" if result["success"] else f"✗ Failed: {result['stderr']}",
             )
@@ -189,35 +236,47 @@ def run_integrated_job_lifecycle_tests(test_env: dict) -> list:
     return results
 
 
-def run_integrated_job_management_tests(test_env: dict) -> list:
+def run_integrated_job_management_tests(test_env: dict, progress_tracker=None) -> list:
     """Run integrated job management tests."""
     results = []
 
     # Test job listing
+    test_name = "Job Management: Job listing"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
     result = run_integrated_command("plotty list jobs")
     results.append(
         create_test_result(
-            "Job Management: Job listing",
+            test_name,
             result["success"],
             "✓ Passed" if result["success"] else f"✗ Failed: {result['stderr']}",
         )
     )
 
     # Test queue status
+    test_name = "Job Management: Queue status"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
     result = run_integrated_command("plotty info queue")
     results.append(
         create_test_result(
-            "Job Management: Queue status",
+            test_name,
             result["success"],
             "✓ Passed" if result["success"] else f"✗ Failed: {result['stderr']}",
         )
     )
 
     # Test session info
+    test_name = "Job Management: Session info"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
     result = run_integrated_command("plotty info session")
     results.append(
         create_test_result(
-            "Job Management: Session info",
+            test_name,
             result["success"],
             "✓ Passed" if result["success"] else f"✗ Failed: {result['stderr']}",
         )
@@ -225,10 +284,14 @@ def run_integrated_job_management_tests(test_env: dict) -> list:
 
     # Test job removal (if we have a test job)
     if test_env.get("test_job_id"):
+        test_name = "Job Management: Job removal"
+        if progress_tracker:
+            progress_tracker.advance(test_name)
+
         result = run_integrated_command(f"plotty remove job {test_env['test_job_id']}")
         results.append(
             create_test_result(
-                "Job Management: Job removal",
+                test_name,
                 result["success"],
                 "✓ Passed" if result["success"] else f"✗ Failed: {result['stderr']}",
             )
@@ -237,36 +300,50 @@ def run_integrated_job_management_tests(test_env: dict) -> list:
     return results
 
 
-def run_integrated_system_validation_tests(test_env: dict) -> list:
+def run_integrated_system_validation_tests(
+    test_env: dict, progress_tracker=None
+) -> list:
     """Run integrated system validation tests."""
     results = []
 
     # Test system readiness
+    test_name = "System Validation: System readiness"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
     result = run_integrated_command("plotty check ready")
     results.append(
         create_test_result(
-            "System Validation: System readiness",
+            test_name,
             result["success"],
             "✓ Passed" if result["success"] else f"✗ Failed: {result['stderr']}",
         )
     )
 
     # Test camera check
+    test_name = "System Validation: Camera check"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
     result = run_integrated_command("plotty check camera")
     results.append(
         create_test_result(
-            "System Validation: Camera check",
+            test_name,
             result["success"],
             "✓ Passed" if result["success"] else f"✗ Failed: {result['stderr']}",
         )
     )
 
     # Test servo check (hardware-dependent)
+    test_name = "System Validation: Servo check"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
     result = run_integrated_command("plotty check servo")
     if result["success"]:
         results.append(
             create_test_result(
-                "System Validation: Servo check",
+                test_name,
                 True,
                 "✓ Passed - Servo motor operational",
             )
@@ -274,7 +351,7 @@ def run_integrated_system_validation_tests(test_env: dict) -> list:
     elif "AxiDraw support not available" in result["stdout"]:
         results.append(
             create_test_result(
-                "System Validation: Servo check",
+                test_name,
                 True,  # Mark as passed since it's expected without hardware
                 "⚠️ Skipped - AxiDraw hardware not available",
             )
@@ -282,18 +359,22 @@ def run_integrated_system_validation_tests(test_env: dict) -> list:
     else:
         results.append(
             create_test_result(
-                "System Validation: Servo check",
+                test_name,
                 False,
                 f"✗ Failed: {result['stderr']}",
             )
         )
 
     # Test timing check (hardware-dependent)
+    test_name = "System Validation: Timing check"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
     result = run_integrated_command("plotty check timing")
     if result["success"]:
         results.append(
             create_test_result(
-                "System Validation: Timing check",
+                test_name,
                 True,
                 "✓ Passed - Device timing operational",
             )
@@ -301,7 +382,7 @@ def run_integrated_system_validation_tests(test_env: dict) -> list:
     elif "AxiDraw support not available" in result["stdout"]:
         results.append(
             create_test_result(
-                "System Validation: Timing check",
+                test_name,
                 True,  # Mark as passed since it's expected without hardware
                 "⚠️ Skipped - AxiDraw hardware not available",
             )
@@ -309,7 +390,7 @@ def run_integrated_system_validation_tests(test_env: dict) -> list:
     else:
         results.append(
             create_test_result(
-                "System Validation: Timing check",
+                test_name,
                 False,
                 f"✗ Failed: {result['stderr']}",
             )
@@ -318,35 +399,49 @@ def run_integrated_system_validation_tests(test_env: dict) -> list:
     return results
 
 
-def run_integrated_resource_management_tests(test_env: dict) -> list:
+def run_integrated_resource_management_tests(
+    test_env: dict, progress_tracker=None
+) -> list:
     """Run integrated resource management tests."""
     results = []
 
     # Test statistics
+    test_name = "Resource Management: Statistics summary"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
     result = run_integrated_command("plotty stats summary")
     results.append(
         create_test_result(
-            "Resource Management: Statistics summary",
+            test_name,
             result["success"],
             "✓ Passed" if result["success"] else f"✗ Failed: {result['stderr']}",
         )
     )
 
     # Test job statistics
+    test_name = "Resource Management: Job statistics"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
     result = run_integrated_command("plotty stats jobs")
     results.append(
         create_test_result(
-            "Resource Management: Job statistics",
+            test_name,
             result["success"],
             "✓ Passed" if result["success"] else f"✗ Failed: {result['stderr']}",
         )
     )
 
     # Test performance statistics
+    test_name = "Resource Management: Performance statistics"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
     result = run_integrated_command("plotty stats performance")
     results.append(
         create_test_result(
-            "Resource Management: Performance statistics",
+            test_name,
             result["success"],
             "✓ Passed" if result["success"] else f"✗ Failed: {result['stderr']}",
         )
@@ -355,31 +450,43 @@ def run_integrated_resource_management_tests(test_env: dict) -> list:
     return results
 
 
-def run_integrated_recovery_system_tests(test_env: dict) -> list:
+def run_integrated_recovery_system_tests(test_env: dict, progress_tracker=None) -> list:
     """Run integrated recovery system tests."""
     results = []
 
     # Test list jobs --failed flag
+    test_name = "Recovery System: Failed jobs listing"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
     result = run_integrated_command("plotty list jobs --failed")
     results.append(
         create_test_result(
-            "Recovery System: Failed jobs listing",
+            test_name,
             result["success"],
             "✓ Passed" if result["success"] else f"✗ Failed: {result['stderr']}",
         )
     )
 
     # Test list jobs --resumable flag
+    test_name = "Recovery System: Resumable jobs listing"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
     result = run_integrated_command("plotty list jobs --resumable")
     results.append(
         create_test_result(
-            "Recovery System: Resumable jobs listing",
+            test_name,
             result["success"],
             "✓ Passed" if result["success"] else f"✗ Failed: {result['stderr']}",
         )
     )
 
     # Test interrupt detection functionality
+    test_name = "Recovery System: Interrupt detection"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
     try:
         from plotty.recovery import detect_interrupted_jobs
         from plotty.config import load_config
@@ -392,7 +499,7 @@ def run_integrated_recovery_system_tests(test_env: dict) -> list:
         interrupted_jobs = detect_interrupted_jobs(workspace, 5)
         results.append(
             create_test_result(
-                "Recovery System: Interrupt detection",
+                test_name,
                 True,
                 f"✓ Passed - Found {len(interrupted_jobs)} interrupted jobs",
             )
@@ -400,13 +507,17 @@ def run_integrated_recovery_system_tests(test_env: dict) -> list:
     except Exception as e:
         results.append(
             create_test_result(
-                "Recovery System: Interrupt detection",
+                test_name,
                 False,
                 f"✗ Failed: {str(e)}",
             )
         )
 
     # Test recovery config loading
+    test_name = "Recovery System: Config loading"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
     try:
         from plotty.config import load_config
 
@@ -417,7 +528,7 @@ def run_integrated_recovery_system_tests(test_env: dict) -> list:
 
         results.append(
             create_test_result(
-                "Recovery System: Config loading",
+                test_name,
                 True,
                 f"✓ Passed - Grace: {grace_minutes}min, Auto-detect: {auto_detect}, Max attempts: {max_attempts}",
             )
@@ -425,17 +536,21 @@ def run_integrated_recovery_system_tests(test_env: dict) -> list:
     except Exception as e:
         results.append(
             create_test_result(
-                "Recovery System: Config loading",
+                test_name,
                 False,
                 f"✗ Failed: {str(e)}",
             )
         )
 
     # Test resume command (dry-run)
+    test_name = "Recovery System: Resume command availability"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
     result = run_integrated_command("plotty resume --help")
     results.append(
         create_test_result(
-            "Recovery System: Resume command availability",
+            test_name,
             result["success"],
             "✓ Passed" if result["success"] else f"✗ Failed: {result['stderr']}",
         )
@@ -443,10 +558,14 @@ def run_integrated_recovery_system_tests(test_env: dict) -> list:
 
     # Test check job with recovery info (if we have a test job)
     if test_env.get("test_job_id"):
+        test_name = "Recovery System: Job check with recovery info"
+        if progress_tracker:
+            progress_tracker.advance(test_name)
+
         result = run_integrated_command(f"plotty check job {test_env['test_job_id']}")
         results.append(
             create_test_result(
-                "Recovery System: Job check with recovery info",
+                test_name,
                 result["success"],
                 "✓ Passed" if result["success"] else f"✗ Failed: {result['stderr']}",
             )
@@ -455,33 +574,39 @@ def run_integrated_recovery_system_tests(test_env: dict) -> list:
     return results
 
 
-def run_integrated_system_integration_tests(test_env: dict) -> list:
+def run_integrated_system_integration_tests(
+    test_env: dict, progress_tracker=None
+) -> list:
     """Run integrated system integration tests."""
     results = []
 
     # Test job FSM
+    test_name = "System Integration: Job FSM"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
     try:
         # Just test that we can import and access the class
         current_state = JobState.NEW
         results.append(
             create_test_result(
-                "System Integration: Job FSM",
+                test_name,
                 True,
                 f"✓ JobFSM available, default state: {current_state.value}",
             )
         )
     except Exception as e:
-        results.append(
-            create_test_result(
-                "System Integration: Job FSM", False, f"✗ Failed: {str(e)}"
-            )
-        )
+        results.append(create_test_result(test_name, False, f"✗ Failed: {str(e)}"))
 
     # Test help system
+    test_name = "System Integration: Help system"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
     result = run_integrated_command("plotty --help")
     results.append(
         create_test_result(
-            "System Integration: Help system",
+            test_name,
             result["success"],
             "✓ Passed" if result["success"] else f"✗ Failed: {result['stderr']}",
         )
@@ -651,6 +776,47 @@ def generate_integrated_report(results: list, console: Console) -> dict:
     }
 
 
+def _calculate_total_tests(level: str) -> int:
+    """Calculate total number of tests for the given level.
+
+    Args:
+        level: Test level (basic, intermediate, advanced, integration, or all)
+
+    Returns:
+        Total number of tests for the level
+    """
+    # Test counts per category
+    basic_count = 4  # 4 tests
+    job_lifecycle_count = 3  # 3 tests
+    job_management_count = 4  # 4 tests
+    system_validation_count = 4  # 4 tests
+    resource_management_count = 3  # 3 tests
+    recovery_system_count = 6  # 6 tests (5 + 1 for job check with recovery info)
+    integration_count = 2  # 2 tests
+
+    if level == "basic":
+        return basic_count
+    elif level == "intermediate":
+        return job_lifecycle_count + job_management_count
+    elif level == "advanced":
+        return (
+            system_validation_count + resource_management_count + recovery_system_count
+        )
+    elif level == "integration":
+        return integration_count
+    elif level == "all":
+        return (
+            basic_count
+            + job_lifecycle_count
+            + job_management_count
+            + system_validation_count
+            + resource_management_count
+            + recovery_system_count
+            + integration_count
+        )
+    return 0
+
+
 def run_self_test(
     level: str = typer.Option(
         "basic",
@@ -672,10 +838,10 @@ def run_self_test(
     Tests are organized by complexity levels:
 
     * **basic**: Core command tests (4 tests)
-    * **intermediate**: Job lifecycle and management (8 tests)
-    * **advanced**: System validation, resource management, and recovery system (10 tests)
+    * **intermediate**: Job lifecycle and management (7 tests)
+    * **advanced**: System validation, resource management, and recovery system (13 tests)
     * **integration**: System integration tests (2 tests)
-    * **all**: Run all tests (22 tests total)
+    * **all**: Run all tests (26 tests total)
 
     Each test runs in isolated environments with proper cleanup.
     """
@@ -683,6 +849,9 @@ def run_self_test(
 
     if verbose:
         console.print(f"[blue]Starting ploTTY self-test (level: {level})...[/blue]")
+
+    # Calculate total tests for progress tracking
+    total_tests = _calculate_total_tests(level)
 
     # Always use integrated test structure
     if verbose:
@@ -701,38 +870,44 @@ def run_self_test(
     all_results = []
 
     try:
-        # Run tests based on level
-        if level in ["basic", "all"]:
-            if verbose:
-                console.print("[blue]Running basic tests...[/blue]")
-            all_results.extend(basic_tests(test_env))
+        # Create progress tracker
+        with progress_task("Running tests", total=total_tests) as update_progress:
+            progress_tracker = TestProgressTracker(total_tests, update_progress)
 
-        if level in ["intermediate", "all"]:
-            if verbose:
-                console.print("[blue]Running job lifecycle tests...[/blue]")
-            all_results.extend(job_lifecycle_tests(test_env))
+            # Run tests based on level
+            if level in ["basic", "all"]:
+                if verbose:
+                    console.print("[blue]Running basic tests...[/blue]")
+                all_results.extend(basic_tests(test_env, progress_tracker))
 
-            if verbose:
-                console.print("[blue]Running job management tests...[/blue]")
-            all_results.extend(job_management_tests(test_env))
+            if level in ["intermediate", "all"]:
+                if verbose:
+                    console.print("[blue]Running job lifecycle tests...[/blue]")
+                all_results.extend(job_lifecycle_tests(test_env, progress_tracker))
 
-        if level in ["advanced", "all"]:
-            if verbose:
-                console.print("[blue]Running system validation tests...[/blue]")
-            all_results.extend(system_validation_tests(test_env))
+                if verbose:
+                    console.print("[blue]Running job management tests...[/blue]")
+                all_results.extend(job_management_tests(test_env, progress_tracker))
 
-            if verbose:
-                console.print("[blue]Running resource management tests...[/blue]")
-            all_results.extend(resource_management_tests(test_env))
+            if level in ["advanced", "all"]:
+                if verbose:
+                    console.print("[blue]Running system validation tests...[/blue]")
+                all_results.extend(system_validation_tests(test_env, progress_tracker))
 
-            if verbose:
-                console.print("[blue]Running recovery system tests...[/blue]")
-            all_results.extend(recovery_system_tests(test_env))
+                if verbose:
+                    console.print("[blue]Running resource management tests...[/blue]")
+                all_results.extend(
+                    resource_management_tests(test_env, progress_tracker)
+                )
 
-        if level in ["integration", "all"]:
-            if verbose:
-                console.print("[blue]Running system integration tests...[/blue]")
-            all_results.extend(integration_tests(test_env))
+                if verbose:
+                    console.print("[blue]Running recovery system tests...[/blue]")
+                all_results.extend(recovery_system_tests(test_env, progress_tracker))
+
+            if level in ["integration", "all"]:
+                if verbose:
+                    console.print("[blue]Running system integration tests...[/blue]")
+                all_results.extend(integration_tests(test_env, progress_tracker))
 
         # Generate report
         report = report_func(all_results, console)
