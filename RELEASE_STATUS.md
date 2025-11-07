@@ -1,19 +1,18 @@
-# ploTTY v1.0.0 Release Status
+# ploTTY v0.2.0 Development Status
 
 ## ✅ Completed
 
-### 🎯 Core Release
-- **GitHub Release**: Created and published
-- **Version Tag**: v1.0.0 pushed to repository
-- **CI/CD Pipeline**: All tests passing (Python 3.11, 3.12, 3.13)
-- **Package Build**: Wheel built successfully
-- **Security**: XML vulnerabilities fixed with defusedxml
-- **Documentation**: Comprehensive release notes published
+### 🎯 Version Restructuring
+- **Version Reset**: Restructured from v1.x to v0.x for honest versioning
+- **Git Tags**: All tags remapped to v0.1.x/v0.2.x series
+- **Documentation**: Updated CHANGELOG.md with new version structure
+- **Configuration**: pyproject.toml updated to v0.2.0
+- **Strategy**: Comprehensive STRATEGY.md created for v1.0.0 roadmap
 
 ### 📦 Package Information
 - **Package Name**: `plotty`
-- **Version**: `1.0.0`
-- **Wheel**: `plotty-1.0.0-py3-none-any.whl`
+- **Version**: `0.2.0` (Development)
+- **Status**: Active development toward v1.0.0
 - **Source**: Available on GitHub
 
 ### 🚀 Installation Options
@@ -31,52 +30,48 @@ uv pip install -e ".[dev,vpype]"
 bash scripts/install_pyaxidraw.sh
 ```
 
-## ⚠️ Pending: PyPI Publishing
+## 🚧 Current Development Status
 
-### Issue
-PyPI publishing requires authentication setup. The CI/CD pipeline is configured but needs:
+### Active Work: v0.3.0 - Core Implementation
+- **PaperSessionGuard**: Placeholder implementation needs actual validation logic
+- **PenLayerGuard**: Placeholder implementation needs compatibility validation
+- **CameraHealthGuard**: Placeholder implementation needs real health checks
+- **Setup Wizard**: Configuration saving functionality not implemented
 
-1. **PyPI API Token** (recommended for immediate publishing)
-2. **OR PyPI Trusted Publishing** setup
+### Next Milestones
+- **v0.3.0**: Complete core functionality implementation
+- **v0.4.0**: Fix CLI documentation vs reality mismatch
+- **v0.5.0**: User experience improvements
+- **v0.6.0**: Testing and quality assurance
+- **v0.7.0**: Complete documentation suite
+- **v0.8.0**: Release candidate preparation
+- **v0.9.0**: Final release candidate
+- **v1.0.0**: Production release
 
-### Manual PyPI Publishing (if needed)
-```bash
-# Build package
-uv build --wheel
+### PyPI Publishing Status
+PyPI publishing will be considered after v0.9.0 release candidate validation.
 
-# Upload to PyPI (requires token)
-uvx twine upload dist/plotty-1.0.0-py3-none-any.whl
-```
+## 🎯 Current Capabilities
 
-### To Complete PyPI Setup
-
-#### Option 1: PyPI API Token
-1. Go to https://pypi.org/manage/account/token/
-2. Create new API token with scope: "entire account"
-3. Add as repository secret: `PYPI_API_TOKEN`
-4. Trigger new release
-
-#### Option 2: PyPI Trusted Publishing
-1. Go to https://pypi.org/manage/projects/
-2. Add project: `plotty`
-3. Configure trusted publishers with GitHub repository
-4. Trigger new release
-
-## 🎉 Release Highlights
-
-### Features Ready
+### ✅ Implemented Features
 - ✅ FSM plotter management engine
-- ✅ Complete CLI with all commands
+- ✅ Core CLI with job management commands
 - ✅ AxiDraw integration with multipen support
 - ✅ Statistics and analytics database
 - ✅ Backup and recovery system
 - ✅ Cross-platform user directories
 - ✅ Comprehensive testing suite
-- ✅ Security hardening
+- ✅ Security hardening with defusedxml
+
+### ⚠️ Known Issues
+- ❌ PaperSessionGuard, PenLayerGuard, CameraHealthGuard return SKIPPED
+- ❌ Setup wizard doesn't save configuration
+- ❌ CLI documentation mismatch (README shows commands that don't exist)
+- ❌ Some placeholder implementations remain
 
 ### Documentation
-- ✅ README.md with usage examples
-- ✅ RELEASE_NOTES.md with comprehensive guide
+- ✅ README.md with usage examples (needs CLI updates)
+- ✅ STRATEGY.md with comprehensive roadmap
 - ✅ CHANGELOG.md with version history
 - ✅ Built-in CLI help (`plotty --help`)
 
@@ -89,20 +84,20 @@ uvx twine upload dist/plotty-1.0.0-py3-none-any.whl
 ## 📊 Quality Metrics
 
 - **Tests**: 100+ tests passing
-- **Coverage**: Comprehensive test suite
+- **Coverage**: Good test coverage (needs improvement to 90%)
 - **Security**: XML vulnerabilities addressed
 - **Code Quality**: Black formatting, Ruff linting
-- **Documentation**: Complete user and developer docs
+- **Documentation**: Comprehensive but needs CLI updates
 
 ## 🔗 Links
 
-- **GitHub Release**: https://github.com/bkuri/plotty/releases/tag/v1.0.0
 - **Repository**: https://github.com/bkuri/plotty
 - **Documentation**: https://github.com/bkuri/plotty/blob/main/README.md
+- **Strategy**: https://github.com/bkuri/plotty/blob/main/STRATEGY.md
 - **Issues**: https://github.com/bkuri/plotty/issues
 
 ---
 
-**ploTTY v1.0.0 is production-ready and waiting for PyPI publication!** 🚀
+**ploTTY v0.2.0 is in active development with clear path to v1.0.0!** 🚧
 
-The release is complete from a technical standpoint. Users can install and use ploTTY immediately from source, with PyPI availability pending authentication setup.
+See STRATEGY.md for complete roadmap to production release.

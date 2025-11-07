@@ -5,9 +5,28 @@ All notable changes to ploTTY will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2025-11-03
+## [0.2.0] - 2025-11-07
 
-### 🎉 Initial Release: FSM Plotter Manager
+### 🔄 Version Restructuring: Foundation Reset
+
+### 🎯 Current Development State
+- **Version Reset**: Restructured from v1.x to v0.x for honest versioning
+- **CLI Documentation**: Updated to reflect actual command structure
+- **Foundation**: Solid FSM architecture with comprehensive feature set
+- **Development**: Active development toward v1.0.0 release
+
+### ✨ Core Features (Implemented)
+- **FSM Architecture**: Complete finite state machine for plotter job management
+- **Job Management**: Add, start, list, remove, and monitor plotting jobs
+- **Device Support**: AxiDraw integration with multipen detection and switching
+- **Batch Processing**: Queue and plot multiple jobs sequentially
+- **Interactive Control**: Real-time plotter control and pen testing
+- **Statistics Engine**: Comprehensive analytics with database-driven metrics
+- **CSV Export**: Hierarchical data export for all commands
+- **Backup System**: Complete backup and restore functionality
+- **Guard System**: Pre-flight checks and validation (partially implemented)
+- **Hook System**: Configurable commands for state transitions
+- **Recovery System**: Crash recovery and job state restoration
 
 ### ✨ Core Features
 - **FSM Architecture**: Complete finite state machine for plotter job management
@@ -96,10 +115,41 @@ plotty stats summary           # View statistics
 
 ## [Unreleased]
 
-### Future Plans
+### 🚧 Development in Progress
+
+### v0.3.0 - Core Implementation (Planned)
+- Implement `PaperSessionGuard.check()` with actual validation logic
+- Implement `PenLayerGuard.check()` with compatibility validation  
+- Implement `CameraHealthGuard.check()` with real health checks
+- Complete setup wizard configuration saving functionality
+
+### v0.4.0 - CLI Consistency (Planned)
+- Add missing `plotty plan` command or update documentation
+- Add missing `plotty plot` command or update documentation
+- Add missing `plotty axidraw` subcommand or update documentation
+- Ensure all README.md examples work end-to-end
+
+### Future Plans (v0.5.0+)
 - **TUI Interface**: Terminal user interface for job management
 - **Multi-Device**: Support for multiple plotters simultaneously
 - **Web Interface**: Browser-based management dashboard
 - **Plugin System**: Extensible architecture for custom features
 - **Cloud Sync**: Remote workspace synchronization
 - **Mobile App**: Job monitoring and control from mobile devices
+
+## [0.1.0] - 2025-11-03
+
+### 🎉 Initial Development: FSM Plotter Manager
+
+### ✨ Core Features
+- **FSM Architecture**: Complete finite state machine for plotter job management
+- **Job Management**: Add, plan, list, remove, and monitor plotting jobs
+- **Device Support**: AxiDraw integration with multipen detection and switching
+- **Batch Processing**: Queue and plot multiple jobs sequentially
+- **Interactive Control**: Real-time plotter control and pen testing
+- **Statistics Engine**: Comprehensive analytics with database-driven metrics
+- **CSV Export**: Hierarchical data export for all commands
+- **Backup System**: Complete backup and restore functionality
+- **Guard System**: Pre-flight checks and validation
+- **Hook System**: Configurable commands for state transitions
+- **Recovery System**: Crash recovery and job state restoration

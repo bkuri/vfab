@@ -105,7 +105,9 @@ hooks: {}
 
             # Test full guard evaluation
             print("\n4. Testing full guard evaluation:")
-            can_transition, guard_checks = guard_system.can_transition("test123", "ARMED")
+            can_transition, guard_checks = guard_system.can_transition(
+                "test123", "ARMED"
+            )
             print(f"   Can transition to ARMED: {can_transition}")
             print(f"   Number of guard checks: {len(guard_checks)}")
 

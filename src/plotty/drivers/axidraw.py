@@ -232,8 +232,8 @@ class AxiDrawManager:
         """Cycle pen down then up for setup.
 
         Args:
-            penlift: Pen lift servo configuration (1-3). 1: Default for AxiDraw model. 
-                    2: Standard servo (lowest connector position). 
+            penlift: Pen lift servo configuration (1-3). 1: Default for AxiDraw model.
+                    2: Standard servo (lowest connector position).
                     3: Narrow-band brushless servo (3rd position up).
                     If None, uses the manager's default_penlift setting.
 
@@ -242,11 +242,13 @@ class AxiDrawManager:
         """
         self.ad.plot_setup()
         self.ad.options.mode = "cycle"
-        
+
         # Apply penlift setting - use provided value, otherwise use default
-        effective_penlift = penlift if penlift is not None else getattr(self, 'default_penlift', 1)
+        effective_penlift = (
+            penlift if penlift is not None else getattr(self, "default_penlift", 1)
+        )
         self.ad.options.penlift = effective_penlift
-            
+
         try:
             self.ad.plot_run()
             return {"success": True}
@@ -319,7 +321,9 @@ def get_axidraw_install_instructions() -> str:
     return _IMPORT_ERROR
 
 
-def create_manager(port: Optional[str] = None, model: int = 1, penlift: Optional[int] = None) -> AxiDrawManager:
+def create_manager(
+    port: Optional[str] = None, model: int = 1, penlift: Optional[int] = None
+) -> AxiDrawManager:
     """Factory function to create AxiDraw manager.
 
     Args:
@@ -334,11 +338,12 @@ def create_manager(port: Optional[str] = None, model: int = 1, penlift: Optional
         ImportError: If pyaxidraw is not available
     """
     manager = AxiDrawManager(port=port, model=model)
-    
+
     # Set penlift if provided, otherwise use config
     if penlift is None:
         try:
             from ..config import get_config
+
             config = get_config()
             manager.default_penlift = config.device.penlift
         except Exception:
@@ -346,5 +351,5 @@ def create_manager(port: Optional[str] = None, model: int = 1, penlift: Optional
             manager.default_penlift = 1
     else:
         manager.default_penlift = penlift
-    
+
     return manager
