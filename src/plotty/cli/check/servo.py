@@ -4,7 +4,6 @@ Servo test command for ploTTY CLI.
 
 from __future__ import annotations
 import signal
-import sys
 import typer
 
 
@@ -18,7 +17,7 @@ def servo_test(
         None,
         "--penlift",
         "-p",
-        help="Pen lift servo configuration (1=Default, 2=Standard, 3=Brushless). Overrides config setting."
+        help="Pen lift servo configuration (1=Default, 2=Standard, 3=Brushless). Overrides config setting.",
     )
 ) -> None:
     """Test servo motor operation."""
@@ -37,7 +36,7 @@ def servo_test(
 
         # Get configuration for penlift setting
         config = get_config()
-        
+
         # Use command-line option if provided, otherwise use config
         if penlift is not None:
             penlift_setting = penlift
@@ -45,13 +44,15 @@ def servo_test(
         else:
             penlift_setting = config.device.penlift
             source = "config"
-            
+
         penlift_descriptions = {
             1: "Default for AxiDraw model",
             2: "Standard servo (lowest connector position)",
-            3: "Brushless servo (3rd position up)"
+            3: "Brushless servo (3rd position up)",
         }
-        penlift_desc = penlift_descriptions.get(penlift_setting, f"Custom ({penlift_setting})")
+        penlift_desc = penlift_descriptions.get(
+            penlift_setting, f"Custom ({penlift_setting})"
+        )
 
         # Set a timeout for hardware operations
         signal.signal(signal.SIGALRM, timeout_handler)
@@ -59,30 +60,42 @@ def servo_test(
 
         try:
             manager = create_manager()
-            show_status(f"Attempting to connect to AxiDraw with penlift={penlift_setting} ({penlift_desc}) [{source}]...", "info")
-            
-            # Test servo up/down using cycle mode with configured penlift setting
-            result = manager.cycle_pen(penlift=penlift_setting)
+            show_status(
+                f"Attempting to connect to AxiDraw with penlift={penlift_setting} ({penlift_desc}) [{source}]...",
+                "info",
+            )
+
+            # Set penlift option before connecting
+            manager.setup_interactive_context(penlift=penlift_setting)
+
+            # Connect in interactive mode for servo testing
+            if not manager.connect():
+                raise Exception("Failed to connect to AxiDraw")
+
+            show_status("✓ Connected to AxiDraw", "success")
+
+            # Test servo up/down using interactive mode
+            show_status("Testing servo up/down cycle...", "info")
+            manager.pen_up()
+            manager.pen_down()
+
+            manager.disconnect()
             signal.alarm(0)  # Cancel timeout
-            
-            if result["success"]:
-                show_status(f"✓ Servo cycle completed with penlift={penlift_setting}", "success")
-            else:
-                error_msg = result.get('error', 'Unknown error')
-                show_status(f"Error details: {error_msg}", "error")
-                if "no AxiDraw found" in error_msg.lower() or "device" in error_msg.lower():
-                    show_status("⚠️  No AxiDraw device found - servo test requires hardware", "warning")
-                else:
-                    raise Exception(f"Servo cycle failed: {error_msg}")
-            
+
+            show_status(
+                f"✓ Servo cycle completed with penlift={penlift_setting}", "success"
+            )
             show_status("✅ Servo test completed successfully", "success")
-            
+
         except TimeoutError:
             signal.alarm(0)  # Cancel timeout
-            show_status("⚠️  Servo test timed out - no AxiDraw device responding", "warning")
+            show_status(
+                "⚠️  Servo test timed out - no AxiDraw device responding", "warning"
+            )
             show_status("💡 Connect an AxiDraw device to test servo operation", "info")
 
     except Exception as e:
         from ...utils import error_handler
+
         signal.alarm(0)  # Ensure timeout is cancelled
         error_handler.handle(e)
