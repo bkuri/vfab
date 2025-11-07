@@ -23,7 +23,7 @@ except ImportError:
 def setup() -> None:
     """Interactive setup wizard for ploTTY configuration."""
     try:
-        from ...config import load_config
+        from ...config import load_config, Settings
         from ...progress import show_status, show_boxed_progress
         from ...codes import ExitCode
 
@@ -34,10 +34,12 @@ def setup() -> None:
             print("=" * 30)
 
         # Load current config
+        cfg = None
         try:
             cfg = load_config(None)
         except Exception:
-            cfg = None
+            # Use default config if loading fails
+            cfg = Settings()
 
         # Workspace setup
         if console and Prompt:
@@ -69,6 +71,7 @@ def setup() -> None:
         show_boxed_progress("Detecting devices", 2, 3)
         axidraw_available = False
         camera_available = False
+        detector = None
 
         try:
             from ...detection import DeviceDetector
@@ -108,14 +111,16 @@ def setup() -> None:
             from ...detection import DeviceDetector
 
             # Detect Camera (reuse detector if available)
-            if "detector" not in locals():
+            if detector is not None:
+                camera_result = detector.detect_camera_devices()
+            else:
+                # detector not defined, create new one
                 remote_host = (
                     getattr(cfg.device, "remote_detection_host", None) if cfg else None
                 )
                 timeout = getattr(cfg.device, "detection_timeout", 5) if cfg else 5
                 detector = DeviceDetector(remote_host=remote_host, timeout=timeout)
-
-            camera_result = detector.detect_camera_devices()
+                camera_result = detector.detect_camera_devices()
             camera_available = camera_result["count"] > 0
 
             if camera_available:
@@ -149,8 +154,24 @@ def setup() -> None:
             )
 
             if Confirm and Confirm.ask("\nSave this configuration?"):
-                # TODO: Save configuration to file
-                show_status("✓ Configuration saved", "success")
+                # Save configuration to file
+                try:
+                    from ...config import save_config, Settings
+                    
+                    # Create updated configuration
+                    if cfg is None:
+                        cfg = Settings()
+                    
+                    # Update workspace path
+                    cfg.workspace = str(workspace_path)
+                    
+                    # Save configuration
+                    save_config(cfg)
+                    show_status("✓ Configuration saved to config/config.yaml", "success")
+                    
+                except Exception as e:
+                    show_status(f"✗ Failed to save configuration: {e}", "error")
+                    raise typer.Exit(ExitCode.ERROR)
             else:
                 show_status("Setup cancelled", "info")
         else:
@@ -165,8 +186,24 @@ def setup() -> None:
 
             response = input("\nSave this configuration? [Y/n]: ").strip().lower()
             if response in ["", "y", "yes"]:
-                # TODO: Save configuration to file
-                show_status("✓ Configuration saved", "success")
+                # Save configuration to file
+                try:
+                    from ...config import save_config, Settings
+                    
+                    # Create updated configuration
+                    if cfg is None:
+                        cfg = Settings()
+                    
+                    # Update workspace path
+                    cfg.workspace = str(workspace_path)
+                    
+                    # Save configuration
+                    save_config(cfg)
+                    show_status("✓ Configuration saved to config/config.yaml", "success")
+                    
+                except Exception as e:
+                    show_status(f"✗ Failed to save configuration: {e}", "error")
+                    raise typer.Exit(ExitCode.ERROR)
             else:
                 show_status("Setup cancelled", "info")
 
@@ -189,6 +226,14 @@ def check_config() -> None:
         else:
             print("🔍 Configuration Validation")
             print("=" * 30)
+
+        # Load configuration for validation
+        cfg = None
+        try:
+            cfg = load_config(None)
+        except Exception:
+            from ...config import Settings
+            cfg = Settings()
 
         issues = []
         warnings = []

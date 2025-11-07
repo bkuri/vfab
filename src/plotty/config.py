@@ -186,8 +186,26 @@ def load_config(path: str | None = None) -> Settings:
 
 
 def get_config() -> Settings:
-    """Get the current configuration instance."""
+    """Get current configuration instance."""
     return load_config()
+
+def save_config(config: Settings, path: str | None = None) -> None:
+    """Save configuration to YAML file.
+    
+    Args:
+        config: Settings instance to save
+        path: Path to save config file (default: config/config.yaml)
+    """
+    p = Path(path or os.environ.get("PLOTTY_CONFIG", "config/config.yaml"))
+    
+    # Ensure parent directory exists
+    p.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Convert config to dictionary and save as YAML
+    config_dict = config.model_dump(exclude_none=True)
+    
+    with open(p, 'w') as f:
+        yaml.dump(config_dict, f, default_flow_style=False, indent=2)
 
 
 def load_vpype_presets(presets_file: str | None = None) -> dict:

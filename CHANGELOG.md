@@ -5,6 +5,51 @@ All notable changes to ploTTY will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-11-07
+
+### 🎯 Core Implementation: Complete Guard System
+
+### ✨ Implemented Features
+- **PaperSessionGuard**: Actual validation logic for paper session management
+  - Validates job has paper assigned
+  - Prevents multiple jobs from using same paper simultaneously
+  - Provides detailed error messages and context
+- **PenLayerGuard**: Complete pen-layer compatibility validation
+  - Checks all layers have valid pen assignments
+  - Validates pen existence and compatibility
+  - Returns appropriate PASS/SOFT_FAIL/FAIL results
+- **CameraHealthGuard**: Real camera health checks
+  - IP camera connectivity testing with HTTP requests
+  - Device camera accessibility verification
+  - Graceful degradation when camera unavailable
+  - Comprehensive error reporting with context
+
+### 🔧 Configuration System
+- **Setup Wizard**: Complete configuration saving functionality
+  - Saves workspace and device settings to config.yaml
+  - Handles both Rich and basic terminal interfaces
+  - Provides clear success/error feedback
+- **Config Module**: Added `save_config()` function
+  - YAML-based configuration persistence
+  - Automatic directory creation
+  - Proper error handling
+
+### 🧪 Testing & Quality
+- **Unit Tests**: Comprehensive test suite for new guard implementations
+  - PaperSessionGuard: 4 test scenarios
+  - PenLayerGuard: 5 test scenarios  
+  - CameraGuard: 4 test scenarios
+- **Integration Tests**: All existing tests continue to pass
+- **Error Handling**: Robust exception handling throughout
+
+### 📋 Technical Details
+- **Database Integration**: Proper session management and query handling
+- **Type Safety**: Fixed SQLAlchemy type issues and variable scoping
+- **Import Management**: Avoided circular imports with proper module structure
+- **Configuration**: Environment variable support and fallback handling
+
+---
+
 ## [0.2.0] - 2025-11-07
 
 ### 🔄 Version Restructuring: Foundation Reset

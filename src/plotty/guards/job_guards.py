@@ -72,13 +72,76 @@ class PaperSessionGuard(Guard):
 
     def check(self, job_id: str) -> GuardCheck:
         """Check if paper session is valid."""
-        # TODO: Implement paper session validation
-        return GuardCheck(
-            "paper_session_valid",
-            GuardResult.SKIPPED,
-            "Paper session validation not implemented",
-            {"warning": "not_implemented"},
-        )
+        from ..db import get_session
+        
+        try:
+            with get_session() as session:
+                # Import models here to avoid circular imports
+                from ..models import Job, Paper
+                
+                # Get the current job
+                job = session.query(Job).filter(Job.id == job_id).first()
+                if not job:
+                    return GuardCheck(
+                        "paper_session_valid",
+                        GuardResult.FAIL,
+                        f"Job {job_id} not found",
+                        {"error": "job_not_found"},
+                    )
+                
+                # Check if job has paper assigned
+                if job.paper_id is None:
+                    return GuardCheck(
+                        "paper_session_valid",
+                        GuardResult.FAIL,
+                        "Job has no paper assigned",
+                        {"job_id": job_id, "paper_id": None},
+                    )
+                
+                # Check if there are other active jobs with the same paper
+                # Active jobs are those in states that would conflict with paper usage
+                active_states = ["QUEUED", "ARMED", "PLOTTING", "PAUSED"]
+                conflicting_jobs = session.query(Job).filter(
+                    Job.paper_id == job.paper_id,
+                    Job.id != job_id,
+                    Job.state.in_(active_states)
+                ).all()
+                
+                if conflicting_jobs:
+                    job_ids = [str(j.id) for j in conflicting_jobs]
+                    return GuardCheck(
+                        "paper_session_valid",
+                        GuardResult.FAIL,
+                        f"Paper already in use by jobs: {', '.join(job_ids)}",
+                        {
+                            "job_id": job_id,
+                            "paper_id": job.paper_id,
+                            "conflicting_jobs": job_ids,
+                        },
+                    )
+                
+                # Get paper details for context
+                paper = session.query(Paper).filter(Paper.id == job.paper_id).first()
+                paper_name = paper.name if paper else f"ID:{job.paper_id}"
+                
+                return GuardCheck(
+                    "paper_session_valid",
+                    GuardResult.PASS,
+                    f"Paper '{paper_name}' is available for job {job_id}",
+                    {
+                        "job_id": job_id,
+                        "paper_id": job.paper_id,
+                        "paper_name": paper_name,
+                    },
+                )
+                
+        except Exception as e:
+            return GuardCheck(
+                "paper_session_valid",
+                GuardResult.FAIL,
+                f"Failed to validate paper session: {str(e)}",
+                {"error": str(e), "job_id": job_id},
+            )
 
 
 class PenLayerGuard(Guard):
@@ -86,10 +149,100 @@ class PenLayerGuard(Guard):
 
     def check(self, job_id: str) -> GuardCheck:
         """Check if pen configuration is compatible with layers."""
-        # TODO: Implement pen-layer compatibility validation
-        return GuardCheck(
-            "pen_layer_compatible",
-            GuardResult.SKIPPED,
-            "Pen-layer compatibility check not implemented",
-            {"warning": "not_implemented"},
-        )
+        from ..db import get_session
+        
+        try:
+            with get_session() as session:
+                # Import models here to avoid circular imports
+                from ..models import Job, Layer, Pen
+                
+                # Get the current job with layers
+                job = session.query(Job).filter(Job.id == job_id).first()
+                if not job:
+                    return GuardCheck(
+                        "pen_layer_compatible",
+                        GuardResult.FAIL,
+                        f"Job {job_id} not found",
+                        {"error": "job_not_found"},
+                    )
+                
+                # Get all layers for this job, ordered by index
+                layers = session.query(Layer).filter(
+                    Layer.job_id == job_id
+                ).order_by(Layer.order_index).all()
+                
+                if not layers:
+                    return GuardCheck(
+                        "pen_layer_compatible",
+                        GuardResult.SOFT_FAIL,
+                        f"Job {job_id} has no layers defined",
+                        {"job_id": job_id, "layer_count": 0},
+                    )
+                
+                # Check each layer for pen compatibility
+                issues = []
+                compatible_layers = 0
+                layer_details = []
+                
+                for layer in layers:
+                    layer_info = {
+                        "layer_name": layer.layer_name,
+                        "order_index": layer.order_index,
+                        "pen_id": layer.pen_id,
+                    }
+                    
+                    if layer.pen_id is None:
+                        issues.append(f"Layer '{layer.layer_name}' has no pen assigned")
+                        layer_info["status"] = "no_pen"
+                    else:
+                        # Check if pen exists
+                        pen = session.query(Pen).filter(Pen.id == layer.pen_id).first()
+                        if not pen:
+                            issues.append(f"Layer '{layer.layer_name}' references non-existent pen ID {layer.pen_id}")
+                            layer_info["status"] = "pen_not_found"
+                        else:
+                            layer_info["pen_name"] = pen.name
+                            layer_info["status"] = "compatible"
+                            compatible_layers += 1
+                    
+                    layer_details.append(layer_info)
+                
+                # Determine overall result
+                total_layers = len(layers)
+                if len(issues) == 0:
+                    return GuardCheck(
+                        "pen_layer_compatible",
+                        GuardResult.PASS,
+                        f"All {total_layers} layers have compatible pen assignments",
+                        {
+                            "job_id": job_id,
+                            "total_layers": total_layers,
+                            "compatible_layers": compatible_layers,
+                            "layers": layer_details,
+                        },
+                    )
+                else:
+                    # If some layers are compatible but others have issues, it's a soft fail
+                    # If no layers are compatible, it's a hard fail
+                    result = GuardResult.SOFT_FAIL if compatible_layers > 0 else GuardResult.FAIL
+                    
+                    return GuardCheck(
+                        "pen_layer_compatible",
+                        result,
+                        f"Pen-layer compatibility issues found: {'; '.join(issues)}",
+                        {
+                            "job_id": job_id,
+                            "total_layers": total_layers,
+                            "compatible_layers": compatible_layers,
+                            "issues": issues,
+                            "layers": layer_details,
+                        },
+                    )
+                
+        except Exception as e:
+            return GuardCheck(
+                "pen_layer_compatible",
+                GuardResult.FAIL,
+                f"Failed to validate pen-layer compatibility: {str(e)}",
+                {"error": str(e), "job_id": job_id},
+            )

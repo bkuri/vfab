@@ -1,4 +1,4 @@
-# ploTTY v0.2.0 Development Status
+# ploTTY v0.3.0 Development Status
 
 ## ✅ Completed
 
@@ -30,17 +30,31 @@ uv pip install -e ".[dev,vpype]"
 bash scripts/install_pyaxidraw.sh
 ```
 
+## ✅ Completed
+
+### 🎯 v0.3.0 - Core Implementation Complete
+- **PaperSessionGuard**: ✅ Implemented with actual validation logic
+- **PenLayerGuard**: ✅ Implemented with compatibility validation
+- **CameraHealthGuard**: ✅ Implemented with real health checks
+- **Setup Wizard**: ✅ Complete configuration saving functionality
+- **Unit Tests**: ✅ Comprehensive test suite for all implementations
+- **Configuration**: ✅ Added save_config() function to config module
+
+### 📦 Package Information
+- **Package Name**: `plotty`
+- **Version**: `0.3.0` (Development)
+- **Status**: Core implementation complete, ready for CLI consistency work
+- **Source**: Available on GitHub
+
 ## 🚧 Current Development Status
 
-### Active Work: v0.3.0 - Core Implementation
-- **PaperSessionGuard**: Placeholder implementation needs actual validation logic
-- **PenLayerGuard**: Placeholder implementation needs compatibility validation
-- **CameraHealthGuard**: Placeholder implementation needs real health checks
-- **Setup Wizard**: Configuration saving functionality not implemented
+### Next Milestone: v0.4.0 - CLI Consistency
+- **CLI Documentation**: Fix mismatch between README and actual commands
+- **Missing Commands**: Add `plotty plan`, `plotty plot`, `plotty axidraw` or update docs
+- **User Workflows**: Ensure all documented examples work end-to-end
+- **Integration Tests**: Add CLI integration test coverage
 
-### Next Milestones
-- **v0.3.0**: Complete core functionality implementation
-- **v0.4.0**: Fix CLI documentation vs reality mismatch
+### Future Roadmap
 - **v0.5.0**: User experience improvements
 - **v0.6.0**: Testing and quality assurance
 - **v0.7.0**: Complete documentation suite
