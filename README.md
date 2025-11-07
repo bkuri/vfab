@@ -75,13 +75,13 @@ uv run plotty plot <job_id> --preview
 uv run plotty interactive
 
 # Test pen up/down movement
-uv run plotty pen-test
+uv run plotty check servo
 
 # List available pens from database
-uv run plotty pen-list
+uv run plotty list pens
 
 # Add new pen to database
-uv run plotty pen-add
+uv run plotty setup
 ```
 
 ### Smart Multipen Detection
@@ -131,15 +131,14 @@ The `{pagesize}`, `{width_mm}`, and `{height_mm}` placeholders are automatically
 Add AxiDraw device configuration to your config:
 
 ```yaml
-devices:
-  axidraw:
-    port: /dev/ttyUSB0          # or COM3 on Windows, auto-detect if None
-    model: 1                   # 1=V2/V3/SE/A4, 2=V3/A3/SE/A3, etc.
-    pen_up_position: 50          # 0-100, higher = more up
-    pen_down_position: 30        # 0-100, lower = more down
-    pen_speed: 50                # 1-100, percentage of max speed
-    pen_lift_speed: 75           # 1-100, percentage of max speed
-    units: mm                   # mm, cm, or inches
+device:
+  port: /dev/ttyUSB0          # or COM3 on Windows, auto-detect if None
+  model: 1                   # 1=V2/V3/SE/A4, 2=V3/A3/SE/A3, etc.
+  pen_pos_up: 60              # 0-100, higher = more up
+  pen_pos_down: 40            # 0-100, lower = more down
+  speed_pendown: 25           # 1-100, percentage of max speed
+  speed_penup: 75             # 1-100, percentage of max speed
+  units: inches               # mm, cm, or inches
 ```
 
 ### Error Handling
@@ -155,20 +154,23 @@ All non-AxiDraw features (planning, optimization, simulation) work without the a
 ### AxiDraw CLI Commands
 
 ```bash
-# Check AxiDraw status and list connected devices
-uv run plotty axidraw status
+# Check system readiness including AxiDraw
+uv run plotty check ready
+
+# Check servo operation (pen up/down)
+uv run plotty check servo
 
 # Plot a job with AxiDraw (with time estimation)
-uv run plotty axidraw plot <job_id>
+uv run plotty plot <job_id>
 
-# Preview plot without moving the pen
-uv run plotty axidraw plot <job_id> --preview
+# Preview plot without moving pen
+uv run plotty plot <job_id> --dry-run
 
 # Interactive XY control
-uv run plotty axidraw interactive
+uv run plotty interactive
 
-# Test pen up/down movement
-uv run plotty axidraw pen-test
+# Check device timing
+uv run plotty check timing
 ```
 
 ### AxiDraw Configuration
@@ -176,15 +178,14 @@ uv run plotty axidraw pen-test
 Add AxiDraw device configuration to your config:
 
 ```yaml
-devices:
-  axidraw:
-    port: /dev/ttyUSB0          # or COM3 on Windows
-    model: AxiDraw V3/A3        # AxiDraw V3/A3, AxiDraw V3/A2, etc.
-    pen_up_position: 50          # 0-100, higher = more up
-    pen_down_position: 30        # 0-100, lower = more down
-    pen_speed: 50                # 1-100, percentage of max speed
-    pen_lift_speed: 75           # 1-100, percentage of max speed
-    units: mm                   # mm, cm, or inches
+device:
+  port: /dev/ttyUSB0          # or COM3 on Windows
+  model: 1                   # 1=V2/V3/SE/A4, 2=V3/A3/SE/A3, etc.
+  pen_pos_up: 60              # 0-100, higher = more up
+  pen_pos_down: 40            # 0-100, lower = more down
+  speed_pendown: 25           # 1-100, percentage of max speed
+  speed_penup: 75             # 1-100, percentage of max speed
+  units: inches               # mm, cm, or inches
 ```
 
 ## Common Development Tasks
@@ -204,7 +205,7 @@ uv run plotty plan "$(cat /tmp/J)" --interactive
 uv run plotty record_test "$(cat /tmp/J)" --seconds 5
 
 # test AxiDraw integration (if hardware available)
-uv run plotty pen-test --cycles 1
+uv run plotty check servo --cycles 1
 uv run plotty interactive --help
 ```
 

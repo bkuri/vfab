@@ -5,6 +5,60 @@ All notable changes to ploTTY will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-11-07
+
+### 🎯 CLI Consistency & Physical Setup Validation
+
+### ✨ Implemented Features
+- **PhysicalSetupGuard**: Complete physical setup validation system
+  - Validates paper size alignment between configuration and job requirements
+  - Checks multipen requirements vs. configuration availability
+  - Provides detailed failure reasons and context
+  - Prevents unsafe ARMED state transitions with invalid setup
+- **Universal Dry-Run Infrastructure**: Enhanced safety across all CLI commands
+  - **Remove Commands**: `plotty remove pen/paper/job` - dry-run by default with `--apply`
+  - **Start/Plot Commands**: `plotty start/plot` - preview mode with `--apply` and `--dry-run`
+  - **Add Commands**: `plotty add job/jobs` - preview mode with `--apply` and `--dry-run`
+  - **Operation Type Support**: Different emojis and messages for destructive, state_change, file_op, and physical operations
+- **Missing CLI Commands**: Added `plotty plan` and `plotty plot` commands
+  - `plotty plan` - Plan a job for plotting (alias for start with planning focus)
+  - `plotty plot` - Plot a job (alias for start with plotting focus)
+
+### 🔧 CLI Documentation Fixes
+- **README.md Updates**: Fixed all CLI command mismatches
+  - `plotty pen-test` → `plotty check servo`
+  - `plotty pen-list` → `plotty list pens`
+  - `plotty pen-add` → `plotty setup`
+  - `plotty axidraw` commands → integrated into main CLI structure
+- **Configuration Examples**: Updated device configuration format to match actual Settings model
+- **Command Examples**: All README examples now work end-to-end
+
+### 🧪 Testing & Quality
+- **PhysicalSetupGuard Tests**: Comprehensive test coverage with 3 test scenarios
+  - Single pen setup validation (PASS)
+  - Paper size mismatch detection (FAIL)
+  - Multipen requirement validation (FAIL)
+- **Integration Tests**: Verified all CLI commands work correctly
+  - Dry-run functionality works across all command types
+  - Apply flag properly triggers execution
+  - Error handling and user feedback working correctly
+- **Code Quality**: Fixed linting issues and improved type safety
+
+### 📋 Technical Details
+- **Guard Integration**: PhysicalSetupGuard properly integrated into guard manager
+- **Configuration Handling**: Fixed guard to use `self.config` instead of `load_config()`
+- **Job File Reading**: Enhanced to extract paper size from both `paper` and `paper_size` fields
+- **Test Isolation**: Fixed test file conflicts using different job IDs
+- **Error Handling**: Robust exception handling with clear error messages
+
+### 🛡️ Safety Improvements
+- **Physical Setup Validation**: Prevents plotting with misaligned paper or wrong pens
+- **Interactive Confirmation**: Clear prompts and confirmation workflow for physical operations
+- **Preview Mode**: Users can always preview destructive operations before executing
+- **Consistent Pattern**: Universal dry-run/apply pattern creates predictable user experience
+
+---
+
 ## [0.3.0] - 2025-11-07
 
 ### 🎯 Core Implementation: Complete Guard System

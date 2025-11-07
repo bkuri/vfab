@@ -14,7 +14,7 @@ from ..progress import show_status
 from ..config import load_config
 from ..planner import plan_layers
 from .core import get_available_job_ids
-from .common import create_apply_option
+from .common import create_apply_option, create_dry_run_option
 
 try:
     from rich.console import Console
@@ -40,9 +40,25 @@ def start_command(
     ),
     port: Optional[str] = typer.Option(None, "--port", help="Device port"),
     model: int = typer.Option(1, "--model", help="Device model"),
+    apply: bool = create_apply_option("Start plotting (dry-run by default)"),
+    dry_run: bool = create_dry_run_option("Preview plotting without moving pen"),
 ):
     """Start plotting a job."""
     try:
+        # Check for dry-run/preview mode
+        if dry_run or not apply:
+            if console:
+                console.print("🔄 Plot Preview Mode:")
+                console.print(f"  Job ID: {job_id}")
+                if preset:
+                    console.print(f"  Preset: {preset}")
+                console.print("💡 Use --apply to start actual plotting", style="yellow")
+            else:
+                print(f"Plot Preview for job {job_id}")
+                if preset:
+                    print(f"  Preset: {preset}")
+                print("Use --apply to start actual plotting")
+            return
         # Import presets locally to avoid import issues
         import sys
         import os

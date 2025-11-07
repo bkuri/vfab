@@ -9,28 +9,30 @@ from __future__ import annotations
 import typer
 from pathlib import Path
 
+from ..common import create_apply_option
+
 # Create remove command group
 remove_app = typer.Typer(no_args_is_help=True, help="Remove resources")
 
 
-def remove_pen(name: str) -> None:
+def remove_pen(
+    name: str,
+    apply: bool = create_apply_option("Apply pen removal (dry-run by default)"),
+) -> None:
     """Remove a pen configuration."""
     try:
         from ...db import get_session
-        from ...models import Pen
+        from ...models import Pen, Layer
         from ...codes import ExitCode
-        from ...progress import show_status
 
         with get_session() as session:
-            # Find the pen
+            # Find pen
             pen = session.query(Pen).filter(Pen.name == name).first()
             if not pen:
                 typer.echo(f"Error: Pen '{name}' not found", err=True)
                 raise typer.Exit(ExitCode.NOT_FOUND)
 
             # Check if pen is in use
-            from ...models import Layer
-
             layers_using_pen = (
                 session.query(Layer).filter(Layer.pen_id == pen.id).count()
             )
@@ -41,17 +43,30 @@ def remove_pen(name: str) -> None:
                 )
                 raise typer.Exit(ExitCode.BUSY)
 
-            # Confirm removal
-            response = input(f"Remove pen '{name}'? [y/N]: ").strip().lower()
-            if response not in ["y", "yes"]:
-                show_status("Operation cancelled", "info")
+            # Create items list for dry-run
+            items_to_remove = [f"pen '{name}'" + (f" (used by {layers_using_pen} layers)" if layers_using_pen > 0 else "")]
+            
+            def execute_removal():
+                session.delete(pen)
+                session.commit()
+                return f"Removed pen '{name}'"
+            
+            # Use enhanced dry-run context
+            from ..common import DryRunContext
+            ctx = DryRunContext(
+                operation_name="remove pen configuration",
+                apply_flag=apply,
+                items=items_to_remove,
+                item_type="pen",
+                operation_type="destructive",
+            )
+            
+            if not ctx.should_execute():
                 return
-
-            # Remove the pen
-            session.delete(pen)
-            session.commit()
-
-            typer.echo(f"✅ Removed pen '{name}' successfully")
+            
+            # Execute removal
+            result = execute_removal()
+            typer.echo(f"✅ {result}")
 
     except typer.Exit:
         raise
@@ -63,24 +78,24 @@ def remove_pen(name: str) -> None:
         raise typer.Exit(ExitCode.ERROR)
 
 
-def remove_paper(name: str) -> None:
+def remove_paper(
+    name: str,
+    apply: bool = create_apply_option("Apply paper removal (dry-run by default)"),
+) -> None:
     """Remove a paper configuration."""
     try:
         from ...db import get_session
-        from ...models import Paper
+        from ...models import Paper, Job
         from ...codes import ExitCode
-        from ...progress import show_status
 
         with get_session() as session:
-            # Find the paper
+            # Find paper
             paper = session.query(Paper).filter(Paper.name == name).first()
             if not paper:
                 typer.echo(f"Error: Paper '{name}' not found", err=True)
                 raise typer.Exit(ExitCode.NOT_FOUND)
 
             # Check if paper is in use
-            from ...models import Job
-
             jobs_using_paper = (
                 session.query(Job).filter(Job.paper_id == paper.id).count()
             )
@@ -91,17 +106,30 @@ def remove_paper(name: str) -> None:
                 )
                 raise typer.Exit(ExitCode.BUSY)
 
-            # Confirm removal
-            response = input(f"Remove paper '{name}'? [y/N]: ").strip().lower()
-            if response not in ["y", "yes"]:
-                show_status("Operation cancelled", "info")
+            # Create items list for dry-run
+            items_to_remove = [f"paper '{name}'" + (f" (used by {jobs_using_paper} jobs)" if jobs_using_paper > 0 else "")]
+            
+            def execute_removal():
+                session.delete(paper)
+                session.commit()
+                return f"Removed paper '{name}'"
+            
+            # Use enhanced dry-run context
+            from ..common import DryRunContext
+            ctx = DryRunContext(
+                operation_name="remove paper configuration",
+                apply_flag=apply,
+                items=items_to_remove,
+                item_type="paper",
+                operation_type="destructive",
+            )
+            
+            if not ctx.should_execute():
                 return
-
-            # Remove the paper
-            session.delete(paper)
-            session.commit()
-
-            typer.echo(f"✅ Removed paper '{name}' successfully")
+            
+            # Execute removal
+            result = execute_removal()
+            typer.echo(f"✅ {result}")
 
     except typer.Exit:
         raise

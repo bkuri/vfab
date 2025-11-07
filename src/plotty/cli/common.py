@@ -30,6 +30,7 @@ class DryRunContext:
         items: Optional[list] = None,
         item_type: str = "items",
         console_instance: Optional[Console] = None,
+        operation_type: str = "destructive",  # destructive, state_change, file_op, physical
     ):
         self.operation_name = operation_name
         self.apply_flag = apply_flag
@@ -37,6 +38,7 @@ class DryRunContext:
         self.item_type = item_type
         self.console = console_instance or console
         self.confirmed = False
+        self.operation_type = operation_type
 
     def show_preview(self) -> None:
         """Show what will be done in dry-run mode."""
@@ -49,15 +51,37 @@ class DryRunContext:
                 print(f"No {self.item_type} to {self.operation_name}")
             return
 
+        # Customize message based on operation type
+        if self.operation_type == "destructive":
+            emoji = "🗑️"
+            action = f"permanently {self.operation_name}"
+        elif self.operation_type == "state_change":
+            emoji = "🔄"
+            action = f"{self.operation_name}"
+        elif self.operation_type == "file_op":
+            emoji = "📁"
+            action = f"{self.operation_name}"
+        elif self.operation_type == "physical":
+            emoji = "⚙️"
+            action = f"{self.operation_name}"
+        else:
+            emoji = "🔄"
+            action = f"{self.operation_name}"
+
         if self.console:
             self.console.print(
-                f"🔄 Will {self.operation_name} {len(self.items)} {self.item_type}:"
+                f"{emoji} Will {action} {len(self.items)} {self.item_type}:"
             )
             for item in self.items:
                 self.console.print(f"  • {item}")
-            self.console.print("💡 Use --apply to actually execute", style="yellow")
+            
+            # Customize call to action based on operation type
+            if self.operation_type == "physical":
+                self.console.print("💡 Use --apply to proceed with physical setup", style="yellow")
+            else:
+                self.console.print("💡 Use --apply to actually execute", style="yellow")
         else:
-            print(f"Will {self.operation_name} {len(self.items)} {self.item_type}:")
+            print(f"Will {action} {len(self.items)} {self.item_type}:")
             for item in self.items:
                 print(f"  • {item}")
             print("Use --apply to actually execute")
@@ -175,6 +199,235 @@ def dry_run_apply(
     return decorator
 
 
+def state_transition_apply(
+    operation_name: str,
+    success_message: Optional[str] = None,
+    error_message: Optional[str] = None,
+) -> Callable:
+    """
+    Decorator for state transition operations with dry-run/apply support.
+    
+    Usage:
+        @state_transition_apply("start plotting", "Job started successfully")
+        def start_command(job_id: str, apply: bool = False, dry_run: bool = False):
+            # Function should return (job_id, current_state, target_state, execution_func)
+            pass
+    """
+    
+    def decorator(func: Callable) -> Callable:
+        def wrapper(*args, **kwargs) -> Any:
+            # Extract flags
+            apply_flag = kwargs.get("apply", False)
+            dry_run_flag = kwargs.get("dry_run", False)
+            preview_flag = kwargs.get("preview", False)
+            
+            # Call original function to get transition info
+            result = func(*args, **kwargs)
+            
+            # Handle different return patterns
+            if isinstance(result, tuple) and len(result) >= 3:
+                job_id, current_state, target_state = result[:3]
+                execution_func = result[3] if len(result) > 3 else None
+            else:
+                # If no transition info returned, just return result
+                return result
+            
+            # Create state transition context
+            ctx = StateTransitionContext(
+                operation_name=operation_name,
+                apply_flag=apply_flag,
+                dry_run_flag=dry_run_flag,
+                preview_flag=preview_flag,
+                job_id=job_id or "",
+                current_state=current_state or "",
+                target_state=target_state or "",
+            )
+            
+            # Check if should execute
+            if not ctx.should_execute():
+                return None
+            
+            # Execute state transition
+            try:
+                if execution_func:
+                    result = execution_func()
+                else:
+                    result = None
+                
+                # Show success message
+                if success_message:
+                    if console:
+                        console.print(f"✅ {success_message}", style="green")
+                    else:
+                        print(f"✅ {success_message}")
+                
+                return result
+                
+            except Exception as e:
+                if error_message:
+                    if console:
+                        console.print(f"❌ {error_message}: {e}", style="red")
+                    else:
+                        print(f"❌ {error_message}: {e}")
+                raise
+        
+        return wrapper
+    
+    return decorator
+
+
+def physical_setup_apply(
+    operation_name: str,
+    success_message: Optional[str] = None,
+    error_message: Optional[str] = None,
+) -> Callable:
+    """
+    Decorator for physical setup operations with validation.
+    
+    Usage:
+        @physical_setup_apply("plot job", "Physical setup validated, starting plot")
+        def plot_command(job_id: str, apply: bool = False):
+            # Function should return (requirements_dict, execution_func)
+            pass
+    """
+    
+    def decorator(func: Callable) -> Callable:
+        def wrapper(*args, **kwargs) -> Any:
+            # Extract apply flag
+            apply_flag = kwargs.get("apply", False)
+            
+            # Call original function to get requirements
+            result = func(*args, **kwargs)
+            
+            # Handle different return patterns
+            if isinstance(result, tuple) and len(result) == 2:
+                requirements, execution_func = result
+            elif callable(result):
+                requirements = {}
+                execution_func = result
+            else:
+                # If no execution function returned, just return result
+                return result
+            
+            # Create physical setup context
+            ctx = PhysicalSetupContext(
+                operation_name=operation_name,
+                apply_flag=apply_flag,
+                requirements=requirements or {},
+            )
+            
+            # Check if should execute
+            if not ctx.should_execute():
+                return None
+            
+            # Execute operation
+            try:
+                result = execution_func() if execution_func else None
+                
+                # Show success message
+                if success_message:
+                    if console:
+                        console.print(f"✅ {success_message}", style="green")
+                    else:
+                        print(f"✅ {success_message}")
+                
+                return result
+                
+            except Exception as e:
+                if error_message:
+                    if console:
+                        console.print(f"❌ {error_message}: {e}", style="red")
+                    else:
+                        print(f"❌ {error_message}: {e}")
+                raise
+        
+        return wrapper
+    
+    return decorator
+
+
+def enhanced_dry_run_apply(
+    operation_name: str,
+    item_type: str = "items",
+    operation_type: str = "destructive",
+    success_message: Optional[str] = None,
+    error_message: Optional[str] = None,
+) -> Callable:
+    """
+    Enhanced version of dry_run_apply with operation type support.
+    
+    Args:
+        operation_name: Name of operation (e.g., "remove", "delete", "reset")
+        item_type: Type of items being operated on (e.g., "jobs", "backups", "pens")
+        operation_type: Type of operation ("destructive", "state_change", "file_op", "physical")
+        success_message: Optional custom success message
+        error_message: Optional custom error message
+    """
+    
+    def decorator(func: Callable) -> Callable:
+        def wrapper(*args, **kwargs) -> Any:
+            # Extract apply flag from kwargs
+            apply_flag = kwargs.get("apply", False)
+            
+            # Call original function to get items to operate on
+            result = func(*args, **kwargs)
+            
+            # Handle different return patterns
+            if isinstance(result, tuple) and len(result) == 2:
+                items_to_process, execution_func = result
+            elif callable(result):
+                # If only execution function returned, assume no preview items
+                items_to_process = []
+                execution_func = result
+            else:
+                # If no execution function returned, just return result
+                return result
+            
+            # Create enhanced dry-run context
+            ctx = DryRunContext(
+                operation_name=operation_name,
+                apply_flag=apply_flag,
+                items=items_to_process,
+                item_type=item_type,
+                operation_type=operation_type,
+            )
+            
+            # Check if should execute
+            if not ctx.should_execute():
+                return None
+            
+            # Execute operation
+            try:
+                if items_to_process:
+                    result = execution_func(items_to_process)
+                else:
+                    result = execution_func()
+                
+                # Show success message
+                if success_message:
+                    if console:
+                        console.print(f"✅ {success_message}", style="green")
+                    else:
+                        print(f"✅ {success_message}")
+                
+                return result
+                
+            except Exception as e:
+                if error_message:
+                    if console:
+                        console.print(f"❌ {error_message}: {e}", style="red")
+                    else:
+                        print(f"❌ {error_message}: {e}")
+                raise
+        
+        return wrapper
+    
+    return decorator
+
+
+    return decorator
+
+
 def confirm_destructive_operation(
     operation_name: str,
     item_description: str,
@@ -209,11 +462,161 @@ def confirm_destructive_operation(
     return ctx.should_execute()
 
 
+class StateTransitionContext:
+    """Context for state transition operations (FSM-based)."""
+    
+    def __init__(
+        self,
+        operation_name: str,
+        apply_flag: bool,
+        dry_run_flag: bool = False,
+        preview_flag: bool = False,
+        job_id: Optional[str] = None,
+        current_state: Optional[str] = None,
+        target_state: Optional[str] = None,
+        console_instance: Optional[Console] = None,
+    ):
+        self.operation_name = operation_name
+        self.apply_flag = apply_flag
+        self.dry_run_flag = dry_run_flag
+        self.preview_flag = preview_flag
+        self.job_id = job_id
+        self.current_state = current_state
+        self.target_state = target_state
+        self.console = console_instance or console
+        self.confirmed = False
+        
+        # Determine if we should execute
+        self.should_execute_op = apply_flag and not dry_run_flag and not preview_flag
+    
+    def show_preview(self) -> None:
+        """Show state transition preview."""
+        if self.console:
+            self.console.print(f"🔄 State Transition Preview: {self.operation_name}")
+            if self.job_id:
+                self.console.print(f"  Job ID: {self.job_id}")
+            if self.current_state:
+                self.console.print(f"  Current State: {self.current_state}")
+            if self.target_state:
+                self.console.print(f"  Target State: {self.target_state}")
+            
+            if self.should_execute_op:
+                self.console.print("✅ Will execute state transition", style="green")
+            else:
+                self.console.print("💡 Use --apply to execute state transition", style="yellow")
+        else:
+            print(f"State Transition Preview: {self.operation_name}")
+            if self.job_id:
+                print(f"  Job ID: {self.job_id}")
+            if self.current_state:
+                print(f"  Current State: {self.current_state}")
+            if self.target_state:
+                print(f"  Target State: {self.target_state}")
+            
+            if self.should_execute_op:
+                print("Will execute state transition")
+            else:
+                print("Use --apply to execute state transition")
+    
+    def confirm_execution(self) -> bool:
+        """Confirm state transition execution."""
+        if not self.should_execute_op:
+            return False
+        
+        if self.console:
+            from rich.prompt import Confirm
+            return Confirm.ask(
+                f"Execute {self.operation_name} for job {self.job_id}?"
+            )
+        else:
+            response = input(f"Execute {self.operation_name} for job {self.job_id}? [y/N]: ").strip().lower()
+            return response in ["y", "yes"]
+    
+    def should_execute(self) -> bool:
+        """Check if operation should be executed."""
+        self.show_preview()
+        return self.confirm_execution()
+
+
+class PhysicalSetupContext:
+    """Context for physical setup validation operations."""
+    
+    def __init__(
+        self,
+        operation_name: str,
+        apply_flag: bool,
+        requirements: Optional[dict] = None,
+        console_instance: Optional[Console] = None,
+    ):
+        self.operation_name = operation_name
+        self.apply_flag = apply_flag
+        self.requirements = requirements or {}
+        self.console = console_instance or console
+        self.confirmed = False
+    
+    def show_requirements(self) -> None:
+        """Show physical setup requirements."""
+        if self.console:
+            self.console.print("⚙️  Physical Setup Requirements:")
+            for req_name, req_value in self.requirements.items():
+                self.console.print(f"  • {req_name}: {req_value}")
+        else:
+            print("Physical Setup Requirements:")
+            for req_name, req_value in self.requirements.items():
+                print(f"  • {req_name}: {req_value}")
+    
+    def confirm_physical_setup(self) -> bool:
+        """Confirm physical setup is ready."""
+        if not self.apply_flag:
+            return False
+        
+        if self.console:
+            from rich.prompt import Confirm
+            
+            # Show requirements first
+            self.show_requirements()
+            
+            # Ask for confirmation
+            return Confirm.ask(
+                f"Is physical setup ready for {self.operation_name}?",
+                default=False,
+            )
+        else:
+            self.show_requirements()
+            response = input(f"Is physical setup ready for {self.operation_name}? [y/N]: ").strip().lower()
+            return response in ["y", "yes"]
+    
+    def should_execute(self) -> bool:
+        """Check if operation should proceed."""
+        if not self.apply_flag:
+            if self.console:
+                self.console.print("💡 Use --apply to proceed with physical setup validation", style="yellow")
+            else:
+                print("Use --apply to proceed with physical setup validation")
+            return False
+        
+        return self.confirm_physical_setup()
+
+
 def create_apply_option(
     help_text: str = "Apply changes (dry-run by default)",
 ):
     """Create a standardized --apply option for CLI commands."""
     return typer.Option(False, "--apply", help=help_text)
+
+
+def create_dry_run_option(
+    help_text: str = "Preview changes without executing (dry-run mode)",
+):
+    """Create a standardized --dry-run option for CLI commands."""
+    return typer.Option(False, "--dry-run", help=help_text)
+
+
+def create_preview_option(
+    help_text: str = "Preview operation without executing",
+):
+    """Create a standardized --preview option for CLI commands."""
+    return typer.Option(False, "--preview", help=help_text)
 
 
 def format_item_list(items: list, max_items: int = 10) -> str:

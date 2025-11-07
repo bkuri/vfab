@@ -10,6 +10,8 @@ from typing import Optional
 import typer
 from pathlib import Path
 
+from ..common import create_apply_option, create_dry_run_option, DryRunContext
+
 # Create add command group
 add_app = typer.Typer(no_args_is_help=True, help="Add new resources")
 
@@ -20,6 +22,8 @@ def add_single_job(
     preset: Optional[str] = None,
     digest: Optional[int] = None,
     force: bool = False,
+    apply: bool = create_apply_option("Add job (dry-run by default)"),
+    dry_run: bool = create_dry_run_option("Preview job addition without creating files"),
 ) -> None:
     """Add a single job to the system."""
     from plotty.fsm import create_fsm, JobState
@@ -73,6 +77,26 @@ def add_single_job(
         typer.echo(f"Error: Job '{job_name}' already exists. Use --force to override.")
         raise typer.Exit(1)
 
+    # Dry-run/preview mode
+    if dry_run or not apply:
+        items_to_add = [
+            f"job '{job_name}' from '{file_path}'",
+            f"target directory: {jdir}",
+            f"preset: {preset or 'default'}",
+            f"digest: {digest or 'default'}",
+        ]
+        
+        ctx = DryRunContext(
+            operation_name="add job",
+            apply_flag=apply,
+            items=items_to_add,
+            item_type="job",
+            operation_type="file_op",
+        )
+        
+        if not ctx.should_execute():
+            return
+    
     # Create job directory
     jdir.mkdir(parents=True, exist_ok=True)
 
@@ -283,6 +307,8 @@ def add_jobs(
     pristine: bool = typer.Option(
         False, "--pristine", help="Skip optimization (add in pristine state)"
     ),
+    apply: bool = create_apply_option("Add jobs (dry-run by default)"),
+    dry_run: bool = create_dry_run_option("Preview job addition without creating files"),
 ) -> None:
     """Add multiple jobs using file pattern."""
     try:
@@ -304,6 +330,24 @@ def add_jobs(
         if not files:
             show_status(f"No files found matching pattern: {pattern}", "warning")
             return
+
+        # Dry-run/preview mode
+        if dry_run or not apply:
+            items_to_add = [
+                f"{len(files)} jobs from pattern '{pattern}'",
+                f"mode: {'pristine' if pristine else 'optimized'}",
+            ]
+            
+            ctx = DryRunContext(
+                operation_name="add multiple jobs",
+                apply_flag=apply,
+                items=items_to_add,
+                item_type="job batch",
+                operation_type="file_op",
+            )
+            
+            if not ctx.should_execute():
+                return
 
         show_status(f"Found {len(files)} files matching pattern", "info")
 

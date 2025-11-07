@@ -9,7 +9,7 @@ from typing import List
 import logging
 
 from .base import GuardCheck, GuardResult
-from .system_guards import DeviceGuard, CameraGuard
+from .system_guards import DeviceGuard, CameraGuard, PhysicalSetupGuard
 from .job_guards import ChecklistGuard, PaperSessionGuard, PenLayerGuard
 
 logger = logging.getLogger(__name__)
@@ -24,6 +24,7 @@ class GuardSystem:
         self.guards = {
             "device_idle": DeviceGuard(config),
             "camera_health": CameraGuard(config),
+            "physical_setup": PhysicalSetupGuard(config),
             "checklist_complete": ChecklistGuard(config),
             "paper_session_valid": PaperSessionGuard(config),
             "pen_layer_compatible": PenLayerGuard(config),
@@ -87,7 +88,7 @@ class GuardSystem:
             )
 
     def evaluate_guards(
-        self, job_id: str, target_state: str, current_state: str = None
+        self, job_id: str, target_state: str, current_state: str | None = None
     ) -> List[GuardCheck]:
         """Evaluate guards for a state transition."""
         guards = []
@@ -114,6 +115,9 @@ class GuardSystem:
                 # Pen layer guard - one pen per layer
                 guards.append(self.guards["pen_layer_compatible"].check(job_id))
 
+                # Physical setup guard - validate paper and pen setup
+                guards.append(self.guards["physical_setup"].check(job_id))
+
         # Camera health check (soft-fail allowed) for plotting states
         if target_state == "PLOTTING":
             guards.append(self.guards["camera_health"].check(job_id))
@@ -121,7 +125,7 @@ class GuardSystem:
         return guards
 
     def can_transition(
-        self, job_id: str, target_state: str, current_state: str = None
+        self, job_id: str, target_state: str, current_state: str | None = None
     ) -> tuple[bool, List[GuardCheck]]:
         """Check if transition is allowed by guards."""
         guard_checks = self.evaluate_guards(job_id, target_state, current_state)

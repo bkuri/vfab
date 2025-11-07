@@ -55,8 +55,8 @@ This document outlines the strategic roadmap for advancing ploTTY from its curre
 
 ---
 
-### **v0.4.0 - CLI Consistency** (2-3 weeks)
-**Objective**: Align CLI interface with documented user workflow
+### **v0.4.0 - CLI Consistency & Physical Setup Validation** (2-3 weeks)
+**Objective**: Align CLI interface with documented user workflow and add critical safety validation
 
 **Tasks**:
 - [ ] Add missing `plotty plan` command OR update documentation
@@ -64,8 +64,22 @@ This document outlines the strategic roadmap for advancing ploTTY from its curre
 - [ ] Add missing `plotty axidraw` subcommand OR update documentation
 - [ ] Ensure all README.md examples work end-to-end
 - [ ] Add CLI integration tests
+- [ ] **Implement PhysicalSetupGuard for paper alignment and pen validation**
+- [ ] **Add --apply flag to job addition with interactive confirmation flow**
+- [ ] **Enhance guard manager to include physical setup validation**
+- [ ] **Add comprehensive tests for physical setup validation**
 
-**Success Criteria**: All documented commands work as described
+**Success Criteria**: 
+- All documented commands work as described
+- Physical setup validation prevents unsafe ARMED state transitions
+- Interactive confirmation flow ensures user verifies physical setup before plotting
+- Comprehensive test coverage for new safety features
+
+**Key Features**:
+- **PhysicalSetupGuard**: Validates paper alignment and pen characteristics
+- **Interactive --apply Mode**: Confirms physical setup before ARMING jobs
+- **Enhanced Safety**: Prevents plotting with misaligned paper or wrong pens
+- **User Experience**: Clear prompts and confirmation workflow
 
 ---
 
@@ -78,6 +92,8 @@ This document outlines the strategic roadmap for advancing ploTTY from its curre
 - [ ] Improve self-check suite coverage and reporting
 - [ ] Add configuration validation with clear error messages
 - [ ] Implement progress indicators for long-running operations
+- [ ] Refine physical setup confirmation prompts based on user feedback
+- [ ] Add configuration options for physical setup requirements
 
 **Success Criteria**: User experience is intuitive and helpful
 
