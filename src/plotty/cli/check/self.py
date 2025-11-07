@@ -108,12 +108,17 @@ def create_integrated_test_svg(output_path: str) -> bool:
 
 
 def create_test_result(
-    name: str, success: bool, message: str = "", details: dict | None = None
+    name: str, 
+    success: bool, 
+    message: str = "", 
+    details: dict | None = None,
+    skipped: bool = False
 ) -> dict:
     """Create a standardized test result."""
     return {
         "name": name,
         "success": success,
+        "skipped": skipped,
         "message": message,
         "details": details or {},
         "timestamp": time.time(),
@@ -352,8 +357,9 @@ def run_integrated_system_validation_tests(
         results.append(
             create_test_result(
                 test_name,
-                True,  # Mark as passed since it's expected without hardware
+                True,  # Success for tracking purposes
                 "⚠️ Skipped - AxiDraw hardware not available",
+                skipped=True,
             )
         )
     else:
@@ -383,8 +389,9 @@ def run_integrated_system_validation_tests(
         results.append(
             create_test_result(
                 test_name,
-                True,  # Mark as passed since it's expected without hardware
+                True,  # Success for tracking purposes
                 "⚠️ Skipped - AxiDraw hardware not available",
+                skipped=True,
             )
         )
     else:
@@ -617,9 +624,10 @@ def run_integrated_system_integration_tests(
 
 def generate_integrated_report(results: list, console: Console) -> dict:
     """Generate integrated test report using OutputManager for consistent formatting."""
-    passed = sum(1 for r in results if r["success"])
-    failed = len(results) - passed
-    success_rate = (passed / len(results)) * 100 if results else 0
+    passed = sum(1 for r in results if r["success"] and not r.get("skipped", False))
+    skipped = sum(1 for r in results if r.get("skipped", False))
+    failed = sum(1 for r in results if not r["success"] and not r.get("skipped", False))
+    success_rate = (passed / (passed + failed)) * 100 if (passed + failed) > 0 else 100
 
     output_manager = get_output_manager()
 
@@ -641,7 +649,9 @@ def generate_integrated_report(results: list, console: Console) -> dict:
             categories[category].append(result)
 
         # Create results table first to determine width
-        table = Table(title="ploTTY Self-Test Results", show_header=True, header_style="bold")
+        table = Table(
+            title="ploTTY Self-Test Results", show_header=True, header_style="bold"
+        )
         table.add_column("Status", width=6, justify="center")
         table.add_column("Category", width=15)
         table.add_column("Test", width=25)
@@ -651,7 +661,9 @@ def generate_integrated_report(results: list, console: Console) -> dict:
         for category, category_results in categories.items():
             for result in category_results:
                 # Create colored status emojis
-                if result["success"]:
+                if result.get("skipped", False):
+                    status_text = Text(" ", style="cyan")
+                elif result["success"]:
                     status_text = Text("✅", style="green")
                 else:
                     status_text = Text("❌", style="red")
@@ -671,8 +683,13 @@ def generate_integrated_report(results: list, console: Console) -> dict:
                 if len(message) > 37:
                     message = message[:34] + "..."
 
-                # Add color coding for failed tests
-                row_style = "red" if not result["success"] else "white"
+                # Add color coding for different test results
+                if result.get("skipped", False):
+                    row_style = "cyan"
+                elif not result["success"]:
+                    row_style = "red"
+                else:
+                    row_style = "white"
                 table.add_row(
                     status_text, category, test_name, message, style=row_style
                 )
@@ -687,6 +704,8 @@ def generate_integrated_report(results: list, console: Console) -> dict:
         summary_text.append(f"{len(results)} ", style="cyan")
         summary_text.append("Passed: ", style="bold")
         summary_text.append(f"{passed} ", style="green")
+        summary_text.append("Skipped: ", style="bold")
+        summary_text.append(f"{skipped} ", style="cyan")
         summary_text.append("Failed: ", style="bold")
         summary_text.append(f"{failed} ", style="red")
         summary_text.append(
@@ -703,14 +722,15 @@ def generate_integrated_report(results: list, console: Console) -> dict:
         # Plain markdown for redirected output
         markdown_content = f"""# ploTTY Self-Test Results
 
-## Summary
+ ## Summary
 
-| Metric | Value |
-|--------|-------|
-| Total Tests | {len(results)} |
-| ✅ Passed | {passed} |
-| ❌ Failed | {failed} |
-| Success Rate | {success_rate:.1f}% |
+ | Metric | Value |
+ |--------|-------|
+ | Total Tests | {len(results)} |
+ | ✅ Passed | {passed} |
+ | ⚠️ Skipped | {skipped} |
+ | ❌ Failed | {failed} |
+ | Success Rate | {success_rate:.1f}% |
 
 ## Test Results
 
@@ -728,7 +748,12 @@ def generate_integrated_report(results: list, console: Console) -> dict:
         # Add test results to markdown table
         for category, category_results in categories.items():
             for result in category_results:
-                status = "✅" if result["success"] else "❌"
+                if result.get("skipped", False):
+                    status = " "
+                elif result["success"]:
+                    status = "✅"
+                else:
+                    status = "❌"
                 test_name = (
                     result["name"].split(": ", 1)[1]
                     if ": " in result["name"]
@@ -753,17 +778,7 @@ def generate_integrated_report(results: list, console: Console) -> dict:
     return {
         "total": len(results),
         "passed": passed,
-        "failed": failed,
-        "success_rate": success_rate,
-        "results": results,
-    }
-
-    # Use OutputManager to print (handles Rich rendering vs plain markdown)
-    output_manager.print_markdown(markdown_content)
-
-    return {
-        "total": len(results),
-        "passed": passed,
+        "skipped": skipped,
         "failed": failed,
         "success_rate": success_rate,
         "results": results,

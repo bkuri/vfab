@@ -55,6 +55,14 @@ def check_job(
                     )
                 else:
                     print(f"✅ Guard '{guard_name}' passed for job {job_id}")
+            elif result.result.value == "skipped":
+                if console:
+                    console.print(
+                        f"  Guard '{guard_name}' skipped for job {job_id}: {result.message}",
+                        style="cyan",
+                    )
+                else:
+                    print(f"  Guard '{guard_name}' skipped for job {job_id}: {result.message}")
             else:
                 if console:
                     console.print(
@@ -76,8 +84,15 @@ def check_job(
                 table.add_column("Message", style="white")
 
                 for result in results:
-                    status = "✅ PASS" if result.result.value == "pass" else "❌ FAIL"
-                    status_style = "green" if result.result.value == "pass" else "red"
+                    if result.result.value == "pass":
+                        status = "✅ PASS"
+                        status_style = "green"
+                    elif result.result.value == "skipped":
+                        status = "  SKIP"
+                        status_style = "cyan"
+                    else:
+                        status = "❌ FAIL"
+                        status_style = "red"
                     table.add_row(
                         result.name,
                         f"[{status_style}]{status}[/{status_style}]",
@@ -90,7 +105,12 @@ def check_job(
                 print(f"\nGuard Check Results for Job {job_id}")
                 print("=" * 50)
                 for result in results:
-                    status = "PASS" if result.result.value == "pass" else "FAIL"
+                    if result.result.value == "pass":
+                        status = "PASS"
+                    elif result.result.value == "skipped":
+                        status = "SKIP"
+                    else:
+                        status = "FAIL"
                     print(f"{result.name}: {status} - {result.message}")
 
         # After guard checks, show recovery info if available

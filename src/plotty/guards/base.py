@@ -15,6 +15,7 @@ class GuardResult(Enum):
     """Result of guard evaluation."""
 
     PASS = "pass"
+    SKIPPED = "skipped"  # Test didn't run for expected reasons
     FAIL = "fail"
     SOFT_FAIL = "soft_fail"  # Allow transition but warn
 

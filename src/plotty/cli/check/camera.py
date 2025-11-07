@@ -11,6 +11,20 @@ def camera_test() -> None:
         from ...detection import DeviceDetector
         from ...utils import error_handler
         from ...progress import show_status
+        from ...config import load_config
+
+        # Check if camera is enabled in configuration
+        try:
+            cfg = load_config(None)
+            if not cfg.camera.enabled:
+                show_status(
+                    "  Camera test skipped - Camera disabled in configuration", 
+                    "warning"  # Using warning for appropriate visibility
+                )
+                return
+        except Exception:
+            # If config can't be loaded, proceed with hardware check
+            pass
 
         show_status("Testing camera...", "info")
 

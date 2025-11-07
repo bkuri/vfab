@@ -22,8 +22,8 @@ class ChecklistGuard(Guard):
         if create_checklist is None:
             return GuardCheck(
                 "checklist_complete",
-                GuardResult.SOFT_FAIL,
-                "Checklist system not available - check skipped",
+                GuardResult.SKIPPED,
+                "Checklist system not available",
                 {"warning": "checklist_not_available"},
             )
 
@@ -75,7 +75,7 @@ class PaperSessionGuard(Guard):
         # TODO: Implement paper session validation
         return GuardCheck(
             "paper_session_valid",
-            GuardResult.SOFT_FAIL,
+            GuardResult.SKIPPED,
             "Paper session validation not implemented",
             {"warning": "not_implemented"},
         )
@@ -89,7 +89,7 @@ class PenLayerGuard(Guard):
         # TODO: Implement pen-layer compatibility validation
         return GuardCheck(
             "pen_layer_compatible",
-            GuardResult.SOFT_FAIL,
+            GuardResult.SKIPPED,
             "Pen-layer compatibility check not implemented",
             {"warning": "not_implemented"},
         )

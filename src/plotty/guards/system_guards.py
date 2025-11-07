@@ -21,8 +21,8 @@ class DeviceGuard(Guard):
         if create_manager is None:
             return GuardCheck(
                 "device_idle",
-                GuardResult.SOFT_FAIL,
-                "AxiDraw integration not available - device check skipped",
+                GuardResult.SKIPPED,
+                "AxiDraw integration not available",
                 {"warning": "axidraw_not_available"},
             )
 
@@ -98,7 +98,7 @@ class CameraGuard(Guard):
         # TODO: Implement actual camera health checks
         return GuardCheck(
             "camera_health",
-            GuardResult.SOFT_FAIL,
+            GuardResult.SKIPPED,
             "Camera health check not implemented",
             {"warning": "not_implemented"},
         )
