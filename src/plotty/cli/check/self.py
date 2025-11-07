@@ -641,7 +641,7 @@ def generate_integrated_report(results: list, console: Console) -> dict:
             categories[category].append(result)
 
         # Create results table first to determine width
-        table = Table(title="Test Results", show_header=True, header_style="bold")
+        table = Table(title="ploTTY Self-Test Results", show_header=True, header_style="bold")
         table.add_column("Status", width=6, justify="center")
         table.add_column("Category", width=15)
         table.add_column("Test", width=25)
@@ -693,17 +693,11 @@ def generate_integrated_report(results: list, console: Console) -> dict:
             f"({success_rate:.1f}%)", style="yellow" if failed > 0 else "green"
         )
 
-        panel = Panel(
-            summary_text,
-            title="[bold blue]ploTTY Self-Test Results[/bold blue]",
-            width=table_width,
-            padding=(1, 2),
-            border_style="blue",
-        )
-        console.print(panel)
-
         # Print the table
         console.print(table)
+
+        # Print summary on separate line
+        console.print(summary_text)
 
     else:
         # Plain markdown for redirected output
