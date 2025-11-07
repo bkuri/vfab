@@ -131,6 +131,12 @@ class HooksCfg(BaseModel):
     FAILED: list[dict[str, str]] = Field(default_factory=list)
 
 
+class RecoveryCfg(BaseModel):
+    interrupt_grace_minutes: int = 5
+    auto_detect_enabled: bool = True
+    max_resume_attempts: int = 3
+
+
 class LoggingSettings(BaseModel):
     enabled: bool = True
     level: str = "INFO"
@@ -160,6 +166,7 @@ class Settings(BaseModel):
     optimization: OptimizationCfg = Field(default_factory=OptimizationCfg)
     paper: PaperCfg = Field(default_factory=PaperCfg)
     hooks: HooksCfg = Field(default_factory=HooksCfg)
+    recovery: RecoveryCfg = Field(default_factory=RecoveryCfg)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
 
 

@@ -59,6 +59,57 @@ def main_callback(
         typer.echo(f"ploTTY v{__version__}")
         raise typer.Exit()
 
+    # Check for interrupted jobs before any command
+    try:
+        from ..config import load_config
+        from ..recovery import detect_interrupted_jobs, prompt_interrupted_resume
+        from pathlib import Path
+
+        cfg = load_config(None)
+        workspace = Path(cfg.workspace)
+
+        # Get grace period from config or default to 5 minutes
+        grace_minutes = 5  # Default value
+        if hasattr(cfg, "recovery") and hasattr(
+            cfg.recovery, "interrupt_grace_minutes"
+        ):
+            grace_minutes = cfg.recovery.interrupt_grace_minutes
+
+        interrupted_jobs = detect_interrupted_jobs(workspace, grace_minutes)
+        if interrupted_jobs:
+            if prompt_interrupted_resume(interrupted_jobs):
+                # User chose to resume - execute resume command
+                from ..recovery import get_crash_recovery
+
+                recovery = get_crash_recovery(workspace)
+                resumed_count = 0
+
+                for job_info in interrupted_jobs:
+                    job_id = job_info["job_id"]
+                    fsm = recovery.recover_job(job_id)
+                    if fsm:
+                        recovery.register_fsm(fsm)
+                        resumed_count += 1
+
+                if resumed_count > 0:
+                    try:
+                        from rich.console import Console
+
+                        console = Console()
+                        console.print(
+                            f"✅ Resumed {resumed_count} interrupted jobs",
+                            style="green",
+                        )
+                    except ImportError:
+                        print(f"Resumed {resumed_count} interrupted jobs")
+
+                    # Exit after resume to avoid running original command
+                    raise typer.Exit(0)
+
+    except Exception:
+        # Don't let interrupt detection break CLI functionality
+        pass
+
     # If no command and no version, show help
     if ctx.invoked_subcommand is None:
         typer.echo(ctx.get_help())

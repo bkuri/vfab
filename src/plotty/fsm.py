@@ -686,7 +686,23 @@ class JobFSM:
         if self.current_state != JobState.ARMED:
             return False
 
-        return self.transition_to(JobState.PLOTTING, "Plotting started", {})
+        # Get current time estimate from job data
+        job_data = self._load_job_data()
+        estimated_duration = job_data.get("estimated_time", 0)
+
+        # Record start and calculate end time
+        from datetime import datetime, timedelta
+
+        start_time = datetime.now(timezone.utc)
+        estimated_end_time = start_time + timedelta(seconds=estimated_duration)
+
+        metadata = {
+            "plotting_started_at": start_time.isoformat(),
+            "estimated_end_time": estimated_end_time.isoformat(),
+            "estimated_duration_seconds": estimated_duration,
+        }
+
+        return self.transition_to(JobState.PLOTTING, "Plotting started", metadata)
 
     def pause_plotting(self) -> bool:
         """Pause plotting."""

@@ -458,6 +458,119 @@ def requeue_job_to_end(job_id: str, workspace: Path) -> bool:
         return False
 
 
+def detect_interrupted_jobs(
+    workspace: Path, grace_minutes: int = 5
+) -> List[Dict[str, Any]]:
+    """Detect jobs that should have finished but are still PLOTTING.
+
+    Args:
+        workspace: Path to workspace directory
+        grace_minutes: Grace period beyond estimated end time
+
+    Returns:
+        List of interrupted job information
+    """
+    from datetime import datetime, timedelta
+
+    current_time = datetime.now(timezone.utc)
+    interrupted = []
+
+    jobs_dir = workspace / "jobs"
+    if not jobs_dir.exists():
+        return interrupted
+
+    for job_dir in jobs_dir.iterdir():
+        if not job_dir.is_dir():
+            continue
+
+        job_file = job_dir / "job.json"
+        if not job_file.exists():
+            continue
+
+        try:
+            job_data = json.loads(job_file.read_text())
+            if job_data.get("state") != "PLOTTING":
+                continue
+
+            # Check if we have timing data
+            est_end_time_str = job_data.get("estimated_end_time")
+            if not est_end_time_str:
+                continue
+
+            est_end_time = datetime.fromisoformat(
+                est_end_time_str.replace("Z", "+00:00")
+            )
+            grace_period = timedelta(minutes=grace_minutes)
+
+            if current_time > est_end_time + grace_period:
+                overdue_minutes = (current_time - est_end_time).total_seconds() / 60
+                interrupted.append(
+                    {
+                        "job_id": job_dir.name,
+                        "job_data": job_data,
+                        "overdue_minutes": overdue_minutes,
+                        "estimated_end_time": est_end_time_str,
+                        "plotting_started_at": job_data.get("plotting_started_at"),
+                    }
+                )
+        except Exception as e:
+            logger.warning(f"Error checking job {job_dir.name} for interrupts: {e}")
+            continue
+
+    return interrupted
+
+
+def prompt_interrupted_resume(interrupted_jobs: List[Dict[str, Any]]) -> bool:
+    """Prompt user to resume interrupted jobs.
+
+    Args:
+        interrupted_jobs: List of interrupted job information
+
+    Returns:
+        True if user chose to resume, False otherwise
+    """
+    if not interrupted_jobs:
+        return False
+
+    try:
+        from rich.console import Console
+        from rich.prompt import Confirm
+
+        console = Console()
+    except ImportError:
+        console = None
+        Confirm = None
+
+    # Show interrupted jobs
+    if console:
+        console.print("⚠️  Interrupted plot(s) detected:", style="yellow")
+        for job in interrupted_jobs:
+            job_id = job["job_id"]
+            overdue = job["overdue_minutes"]
+            end_time = job["estimated_end_time"]
+            console.print(
+                f"  • {job_id} - {overdue:.1f}min overdue (was due at {end_time})"
+            )
+    else:
+        print("Interrupted plot(s) detected:")
+        for job in interrupted_jobs:
+            job_id = job["job_id"]
+            overdue = job["overdue_minutes"]
+            print(f"  • {job_id} - {overdue:.1f}min overdue")
+
+    # Ask if user wants to resume
+    if len(interrupted_jobs) == 1:
+        prompt_text = f"Resume interrupted job {interrupted_jobs[0]['job_id']}?"
+    else:
+        prompt_text = f"Resume {len(interrupted_jobs)} interrupted jobs?"
+
+    if console and Confirm:
+        return Confirm.ask(prompt_text, default=True)
+    else:
+        response = input(f"{prompt_text} [Y/n]: ").strip().lower()
+        return response in ["y", "yes", ""]
+
+
 def resume_all_jobs(workspace: Path) -> List[JobFSM]:
     """Resume all resumable jobs.
 

@@ -46,9 +46,6 @@ def resume_command(
     apply: bool = typer.Option(
         False, "--apply", help="Apply resume changes (dry-run by default)"
     ),
-    now: bool = typer.Option(
-        False, "--now", help="Prioritize resumed job to front of queue"
-    ),
 ) -> None:
     """Resume interrupted plotting jobs."""
     try:
@@ -114,25 +111,24 @@ def resume_command(
             if fsm:
                 recovery.register_fsm(fsm)
 
-                # Handle queue positioning if requested
-                if now:
-                    try:
-                        requeue_job_to_front(job_id, workspace)
-                        if console:
-                            console.print(
-                                f"🚀 Job '{job_id}' moved to front of queue",
-                                style="blue",
-                            )
-                        else:
-                            print(f"Job '{job_id}' moved to front of queue")
-                    except Exception as e:
-                        if console:
-                            console.print(
-                                f"⚠️  Failed to move job to front of queue: {e}",
-                                style="yellow",
-                            )
-                        else:
-                            print(f"Warning: Failed to move job to front of queue: {e}")
+                # Always move resumed jobs to front of queue
+                try:
+                    requeue_job_to_front(job_id, workspace)
+                    if console:
+                        console.print(
+                            f"🚀 Job '{job_id}' moved to front of queue",
+                            style="blue",
+                        )
+                    else:
+                        print(f"Job '{job_id}' moved to front of queue")
+                except Exception as e:
+                    if console:
+                        console.print(
+                            f"⚠️  Failed to move job to front of queue: {e}",
+                            style="yellow",
+                        )
+                    else:
+                        print(f"Warning: Failed to move job to front of queue: {e}")
 
                 if console:
                     console.print(

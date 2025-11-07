@@ -8,7 +8,7 @@ validation, resource management, and system integration tests.
 
 from __future__ import annotations
 
-import sys
+
 import tempfile
 import time
 from pathlib import Path
@@ -20,25 +20,8 @@ from plotty.cli.common import console as cli_console
 from plotty.cli.info.output import get_output_manager
 from plotty.fsm import JobState
 
-# Import enhanced test modules
-try:
-    # Try to import from modular structure
-    self_modules_path = Path(__file__).parent / "self_modules_backup"
-    sys.path.insert(0, str(self_modules_path))
-    from core import create_test_environment
-    from basic import run_basic_command_tests
-    from intermediate import run_job_lifecycle_tests, run_job_management_tests
-    from advanced import (
-        run_system_validation_tests,
-        run_resource_management_tests,
-    )
-    from integration import run_system_integration_tests
-    from reporting import generate_report
-
-    MODULAR_AVAILABLE = True
-except ImportError:
-    # Fallback to integrated implementation
-    MODULAR_AVAILABLE = False
+# Modular structure was removed, always use integrated implementation
+MODULAR_AVAILABLE = False
 
 
 def create_integrated_test_environment() -> dict:
@@ -98,7 +81,7 @@ def create_integrated_test_svg(output_path: str) -> bool:
 
 
 def create_test_result(
-    name: str, success: bool, message: str = "", details: dict = None
+    name: str, success: bool, message: str = "", details: dict | None = None
 ) -> dict:
     """Create a standardized test result."""
     return {
@@ -396,6 +379,68 @@ def run_integrated_recovery_system_tests(test_env: dict) -> list:
         )
     )
 
+    # Test interrupt detection functionality
+    try:
+        from plotty.recovery import detect_interrupted_jobs
+        from plotty.config import load_config
+        from pathlib import Path
+
+        cfg = load_config()
+        workspace = Path(cfg.workspace)
+
+        # Test interrupt detection (should return empty list normally)
+        interrupted_jobs = detect_interrupted_jobs(workspace, 5)
+        results.append(
+            create_test_result(
+                "Recovery System: Interrupt detection",
+                True,
+                f"✓ Passed - Found {len(interrupted_jobs)} interrupted jobs",
+            )
+        )
+    except Exception as e:
+        results.append(
+            create_test_result(
+                "Recovery System: Interrupt detection",
+                False,
+                f"✗ Failed: {str(e)}",
+            )
+        )
+
+    # Test recovery config loading
+    try:
+        from plotty.config import load_config
+
+        cfg = load_config()
+        grace_minutes = cfg.recovery.interrupt_grace_minutes
+        auto_detect = cfg.recovery.auto_detect_enabled
+        max_attempts = cfg.recovery.max_resume_attempts
+
+        results.append(
+            create_test_result(
+                "Recovery System: Config loading",
+                True,
+                f"✓ Passed - Grace: {grace_minutes}min, Auto-detect: {auto_detect}, Max attempts: {max_attempts}",
+            )
+        )
+    except Exception as e:
+        results.append(
+            create_test_result(
+                "Recovery System: Config loading",
+                False,
+                f"✗ Failed: {str(e)}",
+            )
+        )
+
+    # Test resume command (dry-run)
+    result = run_integrated_command("plotty resume --help")
+    results.append(
+        create_test_result(
+            "Recovery System: Resume command availability",
+            result["success"],
+            "✓ Passed" if result["success"] else f"✗ Failed: {result['stderr']}",
+        )
+    )
+
     # Test check job with recovery info (if we have a test job)
     if test_env.get("test_job_id"):
         result = run_integrated_command(f"plotty check job {test_env['test_job_id']}")
@@ -639,34 +684,19 @@ def run_self_test(
     if verbose:
         console.print(f"[blue]Starting ploTTY self-test (level: {level})...[/blue]")
 
-    # Use modular or integrated approach
-    if MODULAR_AVAILABLE:
-        if verbose:
-            console.print("[green]Using modular test structure...[/green]")
-        test_env = create_test_environment()
+    # Always use integrated test structure
+    if verbose:
+        console.print("[blue]Using integrated test structure...[/blue]")
+    test_env = create_integrated_test_environment()
 
-        basic_tests = run_basic_command_tests
-        job_lifecycle_tests = run_job_lifecycle_tests
-        job_management_tests = run_job_management_tests
-        system_validation_tests = run_system_validation_tests
-        resource_management_tests = run_resource_management_tests
-        integration_tests = run_system_integration_tests
-        report_func = generate_report
-    else:
-        if verbose:
-            console.print(
-                "[yellow]Using integrated test structure (fallback)...[/yellow]"
-            )
-        test_env = create_integrated_test_environment()
-
-        basic_tests = run_integrated_basic_tests
-        job_lifecycle_tests = run_integrated_job_lifecycle_tests
-        job_management_tests = run_integrated_job_management_tests
-        system_validation_tests = run_integrated_system_validation_tests
-        resource_management_tests = run_integrated_resource_management_tests
-        recovery_system_tests = run_integrated_recovery_system_tests
-        integration_tests = run_integrated_system_integration_tests
-        report_func = generate_integrated_report
+    basic_tests = run_integrated_basic_tests
+    job_lifecycle_tests = run_integrated_job_lifecycle_tests
+    job_management_tests = run_integrated_job_management_tests
+    system_validation_tests = run_integrated_system_validation_tests
+    resource_management_tests = run_integrated_resource_management_tests
+    recovery_system_tests = run_integrated_recovery_system_tests
+    integration_tests = run_integrated_system_integration_tests
+    report_func = generate_integrated_report
 
     all_results = []
 

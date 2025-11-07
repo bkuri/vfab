@@ -11,9 +11,9 @@ optimization:
   fallback_preset: "default"
 
 recovery:
-  enabled: true
-  auto_resume: false
-  max_retries: 3
+  interrupt_grace_minutes: 5
+  auto_detect_enabled: true
+  max_resume_attempts: 3
 
 logging:
   level: "INFO"
