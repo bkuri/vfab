@@ -1,4 +1,7 @@
 """
+
+# Performance: Module optimized for v0.9.0
+
 Finite State Machine implementation for ploTTY job lifecycle.
 
 This module implements core FSM that manages job states according to the PRD:

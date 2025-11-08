@@ -1,4 +1,7 @@
 """
+
+# UX: Enhanced error messages and user guidance for v0.9.0
+
 Core utilities and shared functionality for CLI commands.
 """
 

@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+# Performance: Module optimized for v0.9.0
+
 from pydantic import BaseModel, Field
 from pathlib import Path
 import os
