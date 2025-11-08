@@ -163,7 +163,6 @@ def setup() -> None:
                     except ImportError:
                         # Fallback if init module not available
                         import platformdirs
-                        from pathlib import Path
 
                         def get_default_config_path() -> Path:
                             return (
