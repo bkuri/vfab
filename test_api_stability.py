@@ -7,10 +7,9 @@ considered stable public API vs internal implementation details.
 """
 
 import ast
-import inspect
 import sys
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List
 
 
 def analyze_module_public_api(module_path: Path) -> Dict[str, List[str]]:
@@ -131,7 +130,7 @@ def generate_api_stability_report() -> str:
     config_api = analyze_config_api()
     
     # Generate report
-    report = f"""# ploTTY v0.9.0 API Stability Report
+    report = """# ploTTY v0.9.0 API Stability Report
 
 ## Executive Summary
 

@@ -8,10 +8,10 @@ import tempfile
 import pytest
 from pathlib import Path
 from datetime import datetime, timezone
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 
 from plotty.recovery import CrashRecovery, get_crash_recovery, requeue_job_to_front
-from plotty.fsm import JobFSM, JobState, StateTransition
+from plotty.fsm import JobState
 
 
 class TestCrashRecovery:

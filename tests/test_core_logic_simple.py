@@ -4,7 +4,7 @@ import pytest
 import tempfile
 import sqlite3
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from datetime import datetime
 
 from plotty.backup import BackupManager, BackupType

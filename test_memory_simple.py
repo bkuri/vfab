@@ -11,7 +11,6 @@ import sys
 import tempfile
 import time
 import tracemalloc
-from pathlib import Path
 
 
 def get_memory_usage() -> int:
@@ -78,7 +77,7 @@ def run_memory_test():
         pre_memory = get_memory_usage()
         
         # Run command
-        result = os.system(cmd + " > /dev/null 2>&1")
+        _ = os.system(cmd + " > /dev/null 2>&1")
         
         # Measure memory after command
         post_memory = get_memory_usage()
@@ -102,7 +101,7 @@ def run_memory_test():
     try:
         # Test job creation
         pre_memory = get_memory_usage()
-        job_result = os.system(f'plotty add job memory-test "{test_svg}" --apply > /dev/null 2>&1')
+        _ = os.system(f'plotty add job memory-test "{test_svg}" --apply > /dev/null 2>&1')
         post_memory = get_memory_usage()
         memory_samples.append(post_memory)
         
@@ -110,7 +109,7 @@ def run_memory_test():
         
         # Test job listing
         pre_memory = get_memory_usage()
-        list_result = os.system("plotty list jobs > /dev/null 2>&1")
+        _ = os.system("plotty list jobs > /dev/null 2>&1")
         post_memory = get_memory_usage()
         memory_samples.append(post_memory)
         
@@ -159,7 +158,7 @@ def run_memory_test():
     # Stop memory tracing
     tracemalloc.stop()
     
-    print(f"\n🎯 Memory test completed successfully!")
+    print("\n🎯 Memory test completed successfully!")
     return True
 
 

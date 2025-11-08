@@ -3,10 +3,8 @@
 Quick validation script for ploTTY release readiness.
 """
 
-import os
 import subprocess
 import sys
-from pathlib import Path
 
 
 def run_command(cmd: str, check: bool = True) -> subprocess.CompletedProcess:

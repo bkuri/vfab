@@ -7,10 +7,9 @@ API stability analysis and existing code structure.
 """
 
 import ast
-import inspect
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 
 def extract_docstring(element_path: str, element_type: str) -> Optional[str]:
@@ -63,8 +62,8 @@ ploTTY uses a hierarchical configuration system based on Pydantic models. All co
         docs += f"Configuration class for {cls.replace('Cfg', '').lower()} settings.\n\n"
         docs += "```python\n"
         docs += f"from plotty.config import {cls}\n\n"
-        docs += f"# Access configuration\n"
-        docs += f"config = get_config()\n"
+        docs += "# Access configuration\n"
+        docs += "config = get_config()\n"
         docs += f"setting = config.{cls.lower() if cls != 'Settings' else 'settings'}\n"
         docs += "```\n\n"
     
@@ -101,8 +100,8 @@ ploTTY uses SQLAlchemy models for database persistence. All models are defined i
         docs += f"{description}.\n\n"
         docs += "```python\n"
         docs += f"from plotty.models import {cls}\n\n"
-        docs += f"# Query model\n"
-        docs += f"with get_session() as session:\n"
+        docs += "# Query model\n"
+        docs += "with get_session() as session:\n"
         docs += f"    items = session.query({cls}).all()\n"
         docs += "```\n\n"
     

@@ -6,11 +6,10 @@ This script implements final UX polish and improvements
 for v1.0.0 production readiness.
 """
 
-import os
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List
 
 
 class UXImprovements:
@@ -319,8 +318,6 @@ class UXImprovements:
                 
                 # Add user-friendly app description
                 if "ploTTY" in content and "plotter" not in content.lower():
-                    app_desc = '\napp = typer.Typer(\n    help="🎨 ploTTY - Professional plotter management for artists and makers"\n)'
-                    
                     if "typer.Typer(" in content and "help=" not in content:
                         content = re.sub(
                             r'typer\.Typer\(\)',
@@ -510,7 +507,7 @@ def main():
         
         # Display summary
         improvements = ux_improver.improvements
-        print(f"\n📊 UX Improvements Summary:")
+        print("\n📊 UX Improvements Summary:")
         print(f"  CLI help improvements: {improvements['cli_help_improvements']}")
         print(f"  Error message enhancements: {improvements['error_message_enhancements']}")
         print(f"  Progress indicators: {improvements['progress_indicators']}")

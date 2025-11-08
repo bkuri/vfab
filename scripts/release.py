@@ -10,12 +10,8 @@ This script automates the release process including:
 - Release notes generation
 """
 
-import os
 import subprocess
 import sys
-import time
-from pathlib import Path
-from typing import Dict, List, Optional
 
 
 def run_command(cmd: str, check: bool = True) -> subprocess.CompletedProcess:
@@ -117,7 +113,7 @@ def generate_changelog() -> str:
             categories['📦 Other'].append(f"- {message} ({hash_short})")
     
     # Generate changelog
-    changelog = f"# Changelog\n\n"
+    changelog = "# Changelog\n\n"
     changelog += f"## Changes since {last_tag}\n\n"
     
     for category, items in categories.items():
@@ -296,7 +292,7 @@ def main():
         sys.exit(1)
     
     # Commit version change
-    run_command(f"git add pyproject.toml CHANGELOG_RELEASE.md")
+    run_command("git add pyproject.toml CHANGELOG_RELEASE.md")
     run_command(f"git commit -m 'Release v{new_version}'")
     
     # Push changes
@@ -315,13 +311,13 @@ def main():
     print("📝 Release notes saved to RELEASE_NOTES.md")
     
     print(f"\n🎉 Release v{new_version} completed successfully!")
-    print(f"📦 Package built in dist/")
+    print("📦 Package built in dist/")
     print(f"🏷️  Tag v{new_version} created and pushed")
-    print(f"📋 Release notes ready in RELEASE_NOTES.md")
-    print(f"\n📌 Next steps:")
-    print(f"  1. Create GitHub release using RELEASE_NOTES.md")
-    print(f"  2. PyPI upload will happen automatically via GitHub Actions")
-    print(f"  3. Update documentation if needed")
+    print("📋 Release notes ready in RELEASE_NOTES.md")
+    print("\n📌 Next steps:")
+    print("  1. Create GitHub release using RELEASE_NOTES.md")
+    print("  2. PyPI upload will happen automatically via GitHub Actions")
+    print("  3. Update documentation if needed")
 
 
 if __name__ == "__main__":

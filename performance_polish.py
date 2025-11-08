@@ -6,14 +6,11 @@ This script implements final performance optimizations and polish
 for v1.0.0 production readiness.
 """
 
-import gc
-import os
 import sys
 import time
 import tracemalloc
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
-import subprocess
+from typing import Dict, List
 
 
 class PerformancePolish:
@@ -310,7 +307,6 @@ def lazy_import(module_name: str):
         start_time = time.time()
         try:
             # Test core import
-            import plotty
             import_time = time.time() - start_time
             benchmarks["import_time"] = {
                 "value": import_time,
@@ -329,7 +325,7 @@ def lazy_import(module_name: str):
         try:
             # Simulate basic operations
             from plotty.config import get_config
-            config = get_config()
+            _ = get_config()
             
             current, peak = tracemalloc.get_traced_memory()
             tracemalloc.stop()
@@ -516,7 +512,7 @@ def main():
         
         # Display summary
         results = polisher.results
-        print(f"\n📊 Performance Polish Summary:")
+        print("\n📊 Performance Polish Summary:")
         print(f"  Optimizations applied: {results['optimizations_applied']}")
         print(f"  Memory improvements: {results['memory_improvements']}")
         print(f"  Speed improvements: {results['speed_improvements']}")

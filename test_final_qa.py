@@ -159,7 +159,7 @@ def test_error_handling():
     ]
     
     # For error handling tests, we expect non-zero exit codes for proper error handling
-    print(f"\n🔄 Testing error handling...")
+    print("\n🔄 Testing error handling...")
     passed = 0
     total = len(tests)
     
@@ -206,7 +206,7 @@ def generate_qa_report(results: Dict[str, bool]) -> str:
         status = "✅ PASSED" if passed else "❌ FAILED"
         report += f"- **{suite_name}**: {status}\n"
     
-    report += f"""
+    report += """
 
 ## Performance Highlights
 
@@ -322,19 +322,19 @@ def main():
     with open('QA_REPORT.md', 'w') as f:
         f.write(report)
     
-    print(f"\n📋 Detailed QA report saved to: QA_REPORT.md")
+    print("\n📋 Detailed QA report saved to: QA_REPORT.md")
     
     # Final assessment
     if success_rate >= 90:
-        print(f"\n🎉 EXCELLENT! ploTTY v0.8.0 is ready for release!")
+        print("\n🎉 EXCELLENT! ploTTY v0.8.0 is ready for release!")
         print("✅ All critical tests passed with excellent performance metrics")
         return True
     elif success_rate >= 80:
-        print(f"\n✅ GOOD! ploTTY v0.8.0 is ready for release with minor notes")
+        print("\n✅ GOOD! ploTTY v0.8.0 is ready for release with minor notes")
         print("⚠️  Some non-critical issues found but acceptable for release")
         return True
     else:
-        print(f"\n❌ NEEDS ATTENTION! Address failing tests before release")
+        print("\n❌ NEEDS ATTENTION! Address failing tests before release")
         return False
 
 

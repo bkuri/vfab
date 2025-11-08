@@ -5,17 +5,14 @@ Database performance analysis and optimization for ploTTY.
 This script analyzes database performance and suggests optimizations.
 """
 
-import os
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 try:
-    from plotty.config import load_config
     from plotty.db import get_session
     from plotty.models import Job, Layer, Pen, Paper, JobStatistics
 except ImportError as e:
@@ -64,7 +61,7 @@ def analyze_database_performance():
             
             # Test complex join query
             start_time = time.time()
-            job_details = session.query(Job, Paper).join(Paper).limit(10).all()
+            _ = session.query(Job, Paper).join(Paper).limit(10).all()
             join_time = time.time() - start_time
             print(f"  Job-paper join (10 records): {join_time:.4f}s")
             
@@ -152,7 +149,7 @@ def analyze_database_performance():
             for index in recommended_indexes:
                 print(f"    - {index}")
         
-        print(f"\n🎉 Database analysis completed!")
+        print("\n🎉 Database analysis completed!")
         return True
         
     except Exception as e:
@@ -181,7 +178,7 @@ def test_database_concurrency():
             try:
                 start_time = time.time()
                 with get_session() as session:
-                    jobs = session.query(Job).limit(10).all()
+                    _ = session.query(Job).limit(10).all()
                 end_time = time.time()
                 results.put(end_time - start_time)
             except Exception as e:

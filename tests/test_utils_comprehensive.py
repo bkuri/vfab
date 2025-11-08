@@ -1,10 +1,9 @@
 """Test utility functions and error handling."""
 
 import pytest
-import sys
 import json
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from typer import BadParameter
 
 from plotty.utils import (

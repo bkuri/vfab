@@ -6,7 +6,7 @@ from __future__ import annotations
 import tempfile
 import pytest
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 
 from plotty.planner import plan_layers, plan_axidraw_layers
 

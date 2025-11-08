@@ -6,11 +6,9 @@ import tempfile
 import os
 import sys
 import subprocess
-import sqlite3
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict
 import psutil
-import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Add ploTTY to path
@@ -18,7 +16,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from plotty.db import init_database, get_session
 from plotty.models import Job, Paper
-from plotty.config import load_config
 
 
 class LoadTestScenario:
@@ -78,14 +75,14 @@ class LoadTestScenario:
             
             # Test filtering
             start_time = time.time()
-            queued_jobs = session.query(Job).filter(Job.state == "QUEUED").all()
+            _ = session.query(Job).filter(Job.state == "QUEUED").all()
             filter_time = time.time() - start_time
             
             # Test pagination
             start_time = time.time()
             page_size = 20
             for page in range(0, len(jobs), page_size):
-                page_jobs = session.query(Job).offset(page).limit(page_size).all()
+                _ = session.query(Job).offset(page).limit(page_size).all()
             pagination_time = time.time() - start_time
             
             self.results['database'] = {
@@ -96,7 +93,7 @@ class LoadTestScenario:
                 'jobs_per_second': len(jobs) / query_time if query_time > 0 else 0
             }
             
-            print(f"📈 Database Results:")
+            print("📈 Database Results:")
             print(f"   Total jobs: {len(jobs)}")
             print(f"   Query time: {query_time:.3f}s")
             print(f"   Filter time: {filter_time:.3f}s")
@@ -182,7 +179,7 @@ class LoadTestScenario:
             'memory_per_job_kb': (memory_growth * 1024) / self.num_jobs if self.num_jobs > 0 else 0
         }
         
-        print(f"💾 Memory Results:")
+        print("💾 Memory Results:")
         print(f"   Initial: {initial_memory:.1f}MB")
         print(f"   Final: {final_memory:.1f}MB")
         print(f"   Growth: {memory_growth:.1f}MB")
@@ -250,7 +247,7 @@ class LoadTestScenario:
             'success_rate': len(successful_workers) / num_workers * 100
         }
         
-        print(f"🔄 Concurrent Results:")
+        print("🔄 Concurrent Results:")
         print(f"   Workers: {num_workers}")
         print(f"   Successful: {len(successful_workers)}/{num_workers}")
         print(f"   Success rate: {self.results['concurrent']['success_rate']:.1f}%")
@@ -265,7 +262,7 @@ class LoadTestScenario:
         # Database performance
         if 'database' in self.results:
             db = self.results['database']
-            print(f"\n🗄️ Database Performance:")
+            print("\n🗄️ Database Performance:")
             print(f"   Total jobs: {db['total_jobs']}")
             print(f"   Query time: {db['query_time']:.3f}s")
             print(f"   Jobs/second: {db['jobs_per_second']:.0f}")
@@ -273,7 +270,7 @@ class LoadTestScenario:
         
         # CLI performance
         if 'cli' in self.results:
-            print(f"\n🖥️ CLI Performance:")
+            print("\n🖥️ CLI Performance:")
             for cmd_name, results in self.results['cli'].items():
                 if 'timeout' in results:
                     print(f"   {cmd_name}: ❌ TIMEOUT (>30s)")
@@ -284,7 +281,7 @@ class LoadTestScenario:
         # Memory usage
         if 'memory' in self.results:
             mem = self.results['memory']
-            print(f"\n💾 Memory Usage:")
+            print("\n💾 Memory Usage:")
             print(f"   Memory growth: {mem['memory_growth_mb']:.1f}MB")
             print(f"   Per job: {mem['memory_per_job_kb']:.1f}KB")
             print(f"   Efficiency: {'✅ Excellent' if mem['memory_per_job_kb'] < 10 else '⚠️ Acceptable' if mem['memory_per_job_kb'] < 50 else '❌ Poor'}")
@@ -292,13 +289,13 @@ class LoadTestScenario:
         # Concurrent access
         if 'concurrent' in self.results:
             conc = self.results['concurrent']
-            print(f"\n🔄 Concurrent Access:")
+            print("\n🔄 Concurrent Access:")
             print(f"   Success rate: {conc['success_rate']:.1f}%")
             print(f"   Avg execution time: {conc['avg_execution_time']:.3f}s")
             print(f"   Reliability: {'✅ Excellent' if conc['success_rate'] > 95 else '⚠️ Acceptable' if conc['success_rate'] > 80 else '❌ Poor'}")
         
         # Overall assessment
-        print(f"\n🎯 Overall Assessment:")
+        print("\n🎯 Overall Assessment:")
         
         performance_score = 0
         max_score = 4
@@ -328,13 +325,13 @@ class LoadTestScenario:
         print(f"   Status: {status}")
         
         if percentage < 75:
-            print(f"\n💡 Recommendations:")
+            print("\n💡 Recommendations:")
             if 'database' in self.results and self.results['database']['jobs_per_second'] < 500:
-                print(f"   - Add database indexes for better query performance")
+                print("   - Add database indexes for better query performance")
             if 'memory' in self.results and self.results['memory']['memory_per_job_kb'] > 50:
-                print(f"   - Optimize memory usage in job processing")
+                print("   - Optimize memory usage in job processing")
             if 'concurrent' in self.results and self.results['concurrent']['success_rate'] < 80:
-                print(f"   - Improve concurrent access handling")
+                print("   - Improve concurrent access handling")
         
         print("="*60)
         
@@ -345,7 +342,7 @@ class LoadTestScenario:
         try:
             import shutil
             shutil.rmtree(self.temp_dir)
-            print(f"🧹 Cleaned up test environment")
+            print("🧹 Cleaned up test environment")
         except Exception as e:
             print(f"⚠️ Cleanup warning: {e}")
     

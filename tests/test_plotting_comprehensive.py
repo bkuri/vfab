@@ -6,8 +6,7 @@ from __future__ import annotations
 import tempfile
 import pytest
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime
+from unittest.mock import Mock, patch
 
 from plotty.plotting import PenSwapPrompt, MultiPenPlotter
 
@@ -298,7 +297,7 @@ class TestMultiPenPlotter:
                     progress_calls.append((current, total, layer_result))
                 
                 with patch('builtins.print'):
-                    result = plotter.plot_multipen_job(job_dir, layers, pen_map, progress_callback)
+                    _ = plotter.plot_multipen_job(job_dir, layers, pen_map, progress_callback)
                 
                 assert len(progress_calls) == 1
                 assert progress_calls[0][0] == 1  # current layer
@@ -472,7 +471,7 @@ class TestPlottingIntegration:
                     # Mock file existence checks
                     with patch('pathlib.Path.exists', return_value=True):
                         with patch('builtins.print'):
-                            result = plotter.plot_multipen_job(job_dir, layers, pen_map)
+                            _ = plotter.plot_multipen_job(job_dir, layers, pen_map)
                 
                 # Verify layers were plotted in correct order (0, 1, 2)
                 assert mock_manager.plot_file.call_count == 3

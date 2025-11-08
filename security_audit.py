@@ -7,11 +7,10 @@ for v1.0.0 production readiness.
 """
 
 import ast
-import os
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Set
+from typing import Dict, List
 
 
 class SecurityAudit:
@@ -283,7 +282,7 @@ def main():
     stats = auditor.scan_codebase()
     
     # Display summary
-    print(f"\n📊 Security Audit Summary:")
+    print("\n📊 Security Audit Summary:")
     print(f"  Files scanned: {stats['files_scanned']}")
     print(f"  Total issues: {stats['security_issues']}")
     print(f"  Critical issues: {stats['critical_issues']}")
