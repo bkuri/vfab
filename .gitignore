@@ -129,6 +129,9 @@ logs/
 backups/
 temp/
 _temp/
+tests/workspace/
+tests/logs/
+tests/temp/
 *.backup
 *.db
 *.sqlite
