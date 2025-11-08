@@ -5,9 +5,63 @@ _plotty_completion() {
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     
-    if [[ ${cur} == * ]] ; then
-        COMPREPLY=( $(compgen -W "job plot batch stats backup recovery guard config logging status --help --version" -- ${cur}) 
-        return 0
-    fi
+    # Main commands
+    local main_commands="interactive optimize plan queue resume restart setup start plot add check info list remove stats system --help --version"
+    
+    # Subcommands for each group command
+    local add_commands="job jobs pen paper"
+    local check_commands="camera config job ready self servo timing"
+    local info_commands="system tldr job reset session queue"
+    local list_commands="pens papers presets jobs guards"
+    local remove_commands="pen paper job jobs"
+    local stats_commands="summary jobs performance"
+    local system_commands="export import logs stats"
+    
+    # Plot presets
+    local presets="fast safe preview detail draft"
+    
+    # Optimization presets
+    local opt_presets="fast default hq"
+    
+    case "${prev}" in
+        plotty)
+            COMPREPLY=( $(compgen -W "${main_commands}" -- ${cur}) )
+            ;;
+        add)
+            COMPREPLY=( $(compgen -W "${add_commands}" -- ${cur}) )
+            ;;
+        check)
+            COMPREPLY=( $(compgen -W "${check_commands}" -- ${cur}) )
+            ;;
+        info)
+            COMPREPLY=( $(compgen -W "${info_commands}" -- ${cur}) )
+            ;;
+        list)
+            COMPREPLY=( $(compgen -W "${list_commands}" -- ${cur}) )
+            ;;
+        remove)
+            COMPREPLY=( $(compgen -W "${remove_commands}" -- ${cur}) )
+            ;;
+        stats)
+            COMPREPLY=( $(compgen -W "${stats_commands}" -- ${cur}) )
+            ;;
+        system)
+            COMPREPLY=( $(compgen -W "${system_commands}" -- ${cur}) )
+            ;;
+        --preset|-p)
+            COMPREPLY=( $(compgen -W "${presets}" -- ${cur}) )
+            ;;
+        --digest|-d)
+            COMPREPLY=( $(compgen -W "0 1 2" -- ${cur}) )
+            ;;
+        --units)
+            COMPREPLY=( $(compgen -W "inches millimeters centimeters" -- ${cur}) )
+            ;;
+        *)
+            COMPREPLY=( $(compgen -W "${main_commands}" -- ${cur}) )
+            ;;
+    esac
+    
+    return 0
 }
 complete -F _plotty_completion plotty
