@@ -16,6 +16,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, Optional
 
+import platformdirs
 from pydantic import BaseModel, Field
 from rich.console import Console
 from rich.logging import RichHandler
@@ -58,7 +59,9 @@ class LoggingConfig(BaseModel):
 
     # Output settings
     output: LogOutput = LogOutput.BOTH
-    log_file: Path = Field(default=Path("logs/plotty.log"))
+    log_file: Path = Field(
+        default=Path(platformdirs.user_data_dir("plotty")) / "logs" / "plotty.log"
+    )
     max_file_size: int = Field(default=10 * 1024 * 1024)  # 10MB
     backup_count: int = Field(default=5)
 
