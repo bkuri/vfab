@@ -127,7 +127,9 @@ dmypy.json
 workspace/
 logs/
 backups/
+temp/
 _temp/
+*.backup
 *.db
 *.sqlite
 *.sqlite3
