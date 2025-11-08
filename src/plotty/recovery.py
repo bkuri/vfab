@@ -391,7 +391,7 @@ def get_crash_recovery(workspace: Path) -> CrashRecovery:
     if _crash_recovery_instance is None:
         _crash_recovery_instance = CrashRecovery(workspace)
 
-        return _crash_recovery_instance
+    return _crash_recovery_instance
 
 
 def requeue_job_to_front(job_id: str, workspace: Path) -> bool:

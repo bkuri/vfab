@@ -105,9 +105,11 @@ class DeviceDetector:
                 return ""
         else:
             try:
+                # Use shlex for safe command parsing when shell features are needed
+                import shlex
+                cmd_parts = shlex.split(cmd)
                 result = subprocess.run(
-                    cmd,
-                    shell=True,
+                    cmd_parts,
                     capture_output=True,
                     text=True,
                     timeout=self.timeout,
@@ -120,28 +122,38 @@ class DeviceDetector:
 
     def _check_pyaxidraw_installed(self) -> bool:
         """Check if pyaxidraw module is available."""
-        cmd = "python3 -c 'import pyaxidraw; print(\"OK\")' 2>/dev/null"
-        return self._run_command(cmd) == "OK"
+        try:
+            import importlib.util
+            spec = importlib.util.find_spec("pyaxidraw")
+            return spec is not None
+        except ImportError:
+            return False
 
     def _detect_axidraw_usb(self) -> int:
         """Detect AxiDraw devices via USB."""
-        # Detect all Microchip devices (vendor ID 04d8) which includes various AxiDraw models
-        cmd = "lsusb | grep '04d8:' | wc -l"
         try:
-            count = int(self._run_command(cmd))
-            return count
-        except ValueError:
+            result = subprocess.run(
+                ["lsusb"], capture_output=True, text=True, timeout=self.timeout
+            )
+            if result.returncode == 0:
+                # Count lines containing Microchip vendor ID 04d8
+                return sum(1 for line in result.stdout.split('\n') if '04d8:' in line)
+            return 0
+        except (subprocess.TimeoutExpired, FileNotFoundError, Exception):
             return 0
 
     def _get_device_details(self) -> List[Dict[str, str]]:
         """Get detailed information about detected Microchip devices."""
-        cmd = "lsusb | grep '04d8:'"
         try:
-            output = self._run_command(cmd)
+            result = subprocess.run(
+                ["lsusb"], capture_output=True, text=True, timeout=self.timeout
+            )
+            if result.returncode != 0:
+                return []
+                
             devices = []
-
-            for line in output.split("\n"):
-                if line.strip():
+            for line in result.stdout.split("\n"):
+                if line.strip() and '04d8:' in line:
                     # Parse lsusb output format: Bus XXX Device XXX: ID XXXX:XXXX Description
                     parts = line.split("ID ")
                     if len(parts) >= 2:
@@ -150,43 +162,55 @@ class DeviceDetector:
                         devices.append({"id": device_id, "description": description})
 
             return devices
-        except Exception:
+        except (subprocess.TimeoutExpired, FileNotFoundError, Exception):
             return []
 
     def _test_axidraw_access(self) -> bool:
         """Test if AxiDraw devices are accessible."""
-        # Try to import and initialize pyaxidraw with simpler command for SSH compatibility
-        cmd = "python3 -c 'from pyaxidraw import axidraw; ad = axidraw.AxiDraw(); ad.interactive(); print(\"OK\")' 2>/dev/null"
-        result = self._run_command(cmd)
-        return result == "OK"
+        try:
+            from pyaxidraw import axidraw
+            ad = axidraw.AxiDraw()
+            ad.interactive()
+            return True
+        except Exception:
+            return False
 
     def _find_video_devices(self) -> List[str]:
         """Find video device paths."""
-        cmd = "ls /dev/video* 2>/dev/null || true"
-        result = self._run_command(cmd)
-        if not result:
+        import glob
+        try:
+            devices = glob.glob('/dev/video*')
+            return sorted(devices)
+        except Exception:
             return []
-
-        devices = [dev.strip() for dev in result.split("\n") if dev.strip()]
-        return sorted(devices)
 
     def _check_motion_running(self) -> bool:
         """Check if motion service is running."""
-        cmd = "ps aux | grep '[m]otion' | wc -l"
         try:
-            count = int(self._run_command(cmd))
-            return count > 0
-        except ValueError:
+            result = subprocess.run(
+                ["ps", "aux"], capture_output=True, text=True, timeout=self.timeout
+            )
+            if result.returncode == 0:
+                # Look for motion process, excluding the grep process itself
+                return any('motion' in line and '[m]otion' not in line 
+                          for line in result.stdout.split('\n'))
+            return False
+        except (subprocess.TimeoutExpired, FileNotFoundError, Exception):
             return False
 
     def _test_camera_access(self, device_path: str) -> bool:
         """Test if camera device is accessible."""
-        cmd = f"v4l2-ctl --device={device_path} --list-formats 2>/dev/null | head -1"
         try:
-            result = self._run_command(cmd)
+            result = subprocess.run(
+                ["v4l2-ctl", "--device={device_path}".format(device_path=device_path), "--list-formats"],
+                capture_output=True, text=True, timeout=self.timeout
+            )
             # Check if we got a valid response (not an error about device busy)
             return (
-                result != "" and "ioctl" not in result and "No such file" not in result
+                result.returncode == 0 and 
+                result.stdout != "" and 
+                "ioctl" not in result.stderr and 
+                "No such file" not in result.stderr
             )
-        except Exception:
+        except (subprocess.TimeoutExpired, FileNotFoundError, Exception):
             return False

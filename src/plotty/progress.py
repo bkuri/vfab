@@ -7,10 +7,12 @@ for long-running operations like planning, optimization, and plotting.
 
 from __future__ import annotations
 
+import time
 from contextlib import contextmanager
 from typing import Callable, Generator, Optional
 
-from rich.console import Console
+from rich.console import Console, ConsoleRenderable
+from rich.live import Live
 from rich.progress import (
     BarColumn,
     Progress,
@@ -21,6 +23,7 @@ from rich.progress import (
 )
 from rich.panel import Panel
 from rich.text import Text
+from rich.console import Group
 
 
 class PlottyProgress:
@@ -142,6 +145,109 @@ class PlottyProgress:
         self.console.print(panel)
 
 
+class TwoLineProgress:
+    """
+    Two-line progress indicator with spinner+description on line 1 and progress bar on line 2.
+    
+    Provides cleaner visual separation between status information and progress metrics,
+    allowing more space for descriptions and consistent progress bar width.
+    """
+
+    def __init__(self, console: Optional[Console] = None) -> None:
+        self.console = console or Console()
+        self.live = Live(console=self.console, refresh_per_second=10)
+        self.spinner_states = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+        self.spinner_index = 0
+        self.description = ""
+        self.current = 0
+        self.total = 0
+        self.start_time = time.time()
+        self._task_active = False
+
+    def _render(self) -> ConsoleRenderable:
+        """Render the two-line progress display."""
+        # Line 1: Spinner + Description
+        spinner = self.spinner_states[self.spinner_index % len(self.spinner_states)]
+        line1 = Text(f"{spinner} {self.description}", style="cyan")
+        
+        # Line 2: Progress bar + metrics
+        if self.total > 0:
+            percent = self.current / self.total
+            bar_width = 50
+            filled = int(bar_width * percent)
+            bar = "█" * filled + "░" * (bar_width - filled)
+            elapsed = time.time() - self.start_time
+            line2 = Text(f"[{bar}] {percent:.0%} ({elapsed:.1f}s)", style="blue")
+        else:
+            line2 = Text("Initializing...", style="dim")
+        
+        return Group(line1, line2)
+
+    def _update_display(self) -> None:
+        """Update the live display."""
+        if self._task_active:
+            self.live.update(self._render())
+            self.spinner_index += 1
+
+    @contextmanager
+    def task(
+        self, description: str, total: Optional[int] = None, show_spinner: bool = True
+    ) -> Generator[Callable[[int], None], None, None]:
+        """
+        Context manager for a two-line progress task.
+
+        Args:
+            description: Task description
+            total: Total number of steps (None for indeterminate)
+            show_spinner: Whether to show spinner (always True for two-line)
+
+        Yields:
+            Update function that takes the current progress
+        """
+        self.description = description
+        self.total = total or 0
+        self.current = 0
+        self.start_time = time.time()
+        self._task_active = True
+
+        try:
+            with self.live:
+                self._update_display()
+
+                def update(progress: int = 1, description: Optional[str] = None, *args) -> None:
+                    """Update the progress display."""
+                    if description:
+                        self.description = description
+                    self.current += progress
+                    self._update_display()
+
+                yield update
+        finally:
+            self._task_active = False
+            # Show final completion state
+            if self.total > 0:
+                self.current = self.total
+                # Stop live display first
+                self.live.stop()
+                # Clear terminal completely for clean results display
+                import subprocess
+                import sys
+                try:
+                    # Use subprocess to call clear/cls properly
+                    if sys.platform == "win32":
+                        subprocess.run("cls", shell=True, check=False)
+                    else:
+                        subprocess.run("clear", shell=True, check=False)
+                except Exception:
+                    # Fallback: print many newlines
+                    self.console.print("\n" * 50)
+                # Show clean completion message
+                self.console.print(f"✅ {self.description}")
+                time.sleep(0.3)  # Brief pause to show completion
+                # Print extra newline for proper separation from following content
+                self.console.print()
+
+
 class LayerProgress:
     """
     Specialized progress indicator for layer operations.
@@ -260,7 +366,7 @@ vpype_progress = VpypeProgress()
 
 @contextmanager
 def progress_task(
-    description: str, total: Optional[int] = None
+    description: str, total: Optional[int] = None, two_line: bool = False
 ) -> Generator[Callable[[int], None], None, None]:
     """
     Convenience function for creating a progress task.
@@ -268,12 +374,18 @@ def progress_task(
     Args:
         description: Task description
         total: Total number of steps
+        two_line: Use two-line progress display (spinner+description on line 1, bar+metrics on line 2)
 
     Yields:
         Update function
     """
-    with progress.task(description, total) as update:
-        yield update
+    if two_line:
+        two_line_progress = TwoLineProgress()
+        with two_line_progress.task(description, total) as update:
+            yield update
+    else:
+        with progress.task(description, total) as update:
+            yield update
 
 
 @contextmanager

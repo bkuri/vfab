@@ -83,19 +83,29 @@ This document outlines the strategic roadmap for advancing ploTTY from its curre
 
 ---
 
-### **v0.5.0 - User Experience** (3-4 weeks)
+### **v0.5.0 - User Experience** ✅ COMPLETED
 **Objective**: Polish user interface and improve usability
 
 **Tasks**:
-- [ ] Enhance error messages with actionable suggestions
-- [ ] Add comprehensive help text and usage examples
-- [ ] Improve self-check suite coverage and reporting
-- [ ] Add configuration validation with clear error messages
-- [ ] Implement progress indicators for long-running operations
-- [ ] Refine physical setup confirmation prompts based on user feedback
-- [ ] Add configuration options for physical setup requirements
+- [x] Enhance error messages with actionable suggestions
+- [x] Add comprehensive help text and usage examples
+- [x] Improve self-check suite coverage and reporting
+- [x] Add configuration validation with clear error messages
+- [x] Implement progress indicators for long-running operations
+- [x] Refine physical setup confirmation prompts based on user feedback
+- [x] Add configuration options for physical setup requirements
 
 **Success Criteria**: User experience is intuitive and helpful
+
+**Completed**: 2025-11-07
+- Enhanced error messages with 💡 actionable suggestions across CLI commands
+- Comprehensive help text with examples for `plotty add`, `remove`, `optimize` commands
+- Fixed self-check suite with `--apply` flag and improved regex patterns
+- Configuration validation with clear error messages and guidance
+- Progress indicators for `optimize`, `resume`, `restart` commands
+- Two-line progress display system with `TwoLineProgress` class
+- Enhanced physical setup confirmation prompts with rich checklist format
+- Added `PhysicalSetupCfg` configuration options for validation requirements
 
 ---
 
@@ -136,8 +146,14 @@ This document outlines the strategic roadmap for advancing ploTTY from its curre
 - [ ] Fix all remaining bugs and edge cases
 - [ ] Prepare comprehensive release notes
 - [ ] Validate installation on multiple platforms
+- [ ] **Set up GitHub Packages publishing for beta releases**
+- [ ] **Create installation documentation for package managers**
 
 **Success Criteria**: Beta testing successful, performance acceptable
+
+**Package Release Strategy**:
+- **v0.8.0**: First GitHub Packages release (beta testing)
+- **v1.0.0**: Dual release (GitHub Packages + PyPI)
 
 ---
 
@@ -240,6 +256,44 @@ Each version must pass these gates before proceeding:
 2. **Feature Branches**: Isolate development work by version
 3. **Automated Testing**: CI/CD pipeline ensures quality
 4. **Release Notes**: Comprehensive documentation of changes
+5. **Package Publishing**: Strategic release timing for maximum quality
+
+### Package Release Strategy
+**Phase 1: Development (v0.5.x - v0.7.x)**
+- Source-only installation (`git clone` + `uv pip install -e`)
+- No package releases to maintain quality standards
+- Focus on feature completion and testing
+
+**Phase 2: Beta Release (v0.8.0)**
+- **GitHub Packages**: First package release for beta testing
+- Target: Early adopters and community feedback
+- Installation: `pip install plotty --index-url https://pypi.org/simple/` (GitHub Packages)
+
+**Phase 3: Production Release (v1.0.0)**
+- **Dual Release**: GitHub Packages + PyPI
+- Maximum discoverability and user adoption
+- Full production support and documentation
+
+**Rationale**:
+- **Quality Assurance**: No premature releases that could damage reputation
+- **User Trust**: Stable, well-tested releases only
+- **Gradual Rollout**: Beta validation before production release
+- **Ecosystem Integration**: PyPI for broader Python community adoption
+
+## Release Targets Framework
+
+For detailed release criteria, quality gates, and success metrics, see **[RELEASE_TARGETS.md](RELEASE_TARGETS.md)**. This document provides:
+
+- Specific, measurable release targets for each version
+- Quality gates and performance benchmarks
+- Risk management and rollback criteria
+- Post-release monitoring and support procedures
+
+### **Key Release Target Principles**
+1. **Measurable Criteria**: Every release has specific, quantifiable success metrics
+2. **Quality Gates**: No release proceeds without meeting quality standards
+3. **Risk Management**: Clear rollback criteria and mitigation strategies
+4. **User-Centered**: Beta testing and user feedback integrated into releases
 
 ## Conclusion
 
@@ -247,7 +301,12 @@ This strategy provides a systematic path from the current development state to a
 
 The timeline of 8-9 weeks is realistic and allows for thorough testing and documentation while maintaining development momentum. Each milestone has clear success criteria and quality gates to ensure steady progress toward the final release.
 
+**Release Target Framework**: See [RELEASE_TARGETS.md](RELEASE_TARGETS.md) for detailed release criteria and quality gates.
+
 ---
 
 **Last Updated**: 2025-11-07  
-**Next Milestone**: v0.2.0 Implementation (Foundation Reset)
+**Current Version**: v0.5.0 (completed)  
+**Next Milestone**: v0.6.0 - Testing & Quality  
+**Release Targets**: [RELEASE_TARGETS.md](RELEASE_TARGETS.md)  
+**Package Strategy**: GitHub Packages at v0.8.0, PyPI at v1.0.0

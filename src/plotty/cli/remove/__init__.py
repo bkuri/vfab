@@ -16,10 +16,18 @@ remove_app = typer.Typer(no_args_is_help=True, help="Remove resources")
 
 
 def remove_pen(
-    name: str,
+    name: str = typer.Argument(..., help="Name of pen to remove"),
     apply: bool = create_apply_option("Apply pen removal (dry-run by default)"),
 ) -> None:
-    """Remove a pen configuration."""
+    """Remove a pen configuration from the database.
+
+    Examples:
+        plotty remove pen "0.3mm black"
+        plotty remove pen MyPen --apply
+
+    This command removes a pen configuration if it's not being used by any layers.
+    Use --apply to actually remove, otherwise runs in preview mode.
+    """
     try:
         from ...db import get_session
         from ...models import Pen, Layer
@@ -29,7 +37,11 @@ def remove_pen(
             # Find pen
             pen = session.query(Pen).filter(Pen.name == name).first()
             if not pen:
-                typer.echo(f"Error: Pen '{name}' not found", err=True)
+                typer.echo(f"❌ Error: Pen '{name}' not found")
+                typer.echo("💡 Suggestions:")
+                typer.echo("   • List available pens: plotty list pens")
+                typer.echo(f"   • Check pen name spelling: '{name}'")
+                typer.echo("   • Add new pen with: plotty setup")
                 raise typer.Exit(ExitCode.NOT_FOUND)
 
             # Check if pen is in use
@@ -38,9 +50,13 @@ def remove_pen(
             )
             if layers_using_pen > 0:
                 typer.echo(
-                    f"Error: Cannot remove pen '{name}': it is used by {layers_using_pen} layer(s)",
+                    f"❌ Error: Cannot remove pen '{name}': it is used by {layers_using_pen} layer(s)",
                     err=True,
                 )
+                typer.echo("💡 Suggestions:")
+                typer.echo("   • Reassign layers to a different pen first")
+                typer.echo("   • List layers using this pen: plotty info job <job_id>")
+                typer.echo("   • Remove jobs using this pen: plotty remove job <job_id>")
                 raise typer.Exit(ExitCode.BUSY)
 
             # Create items list for dry-run
@@ -79,10 +95,18 @@ def remove_pen(
 
 
 def remove_paper(
-    name: str,
+    name: str = typer.Argument(..., help="Name of paper configuration to remove"),
     apply: bool = create_apply_option("Apply paper removal (dry-run by default)"),
 ) -> None:
-    """Remove a paper configuration."""
+    """Remove a paper configuration from the database.
+
+    Examples:
+        plotty remove paper A4
+        plotty remove paper "Letter Size" --apply
+
+    This command removes a paper configuration if it's not being used by any jobs.
+    Use --apply to actually remove, otherwise runs in preview mode.
+    """
     try:
         from ...db import get_session
         from ...models import Paper, Job
@@ -92,7 +116,11 @@ def remove_paper(
             # Find paper
             paper = session.query(Paper).filter(Paper.name == name).first()
             if not paper:
-                typer.echo(f"Error: Paper '{name}' not found", err=True)
+                typer.echo(f"❌ Error: Paper '{name}' not found")
+                typer.echo("💡 Suggestions:")
+                typer.echo("   • List available papers: plotty list papers")
+                typer.echo(f"   • Check paper name spelling: '{name}'")
+                typer.echo("   • Add new paper with: plotty setup")
                 raise typer.Exit(ExitCode.NOT_FOUND)
 
             # Check if paper is in use
@@ -101,9 +129,13 @@ def remove_paper(
             )
             if jobs_using_paper > 0:
                 typer.echo(
-                    f"Error: Cannot remove paper '{name}': it is used by {jobs_using_paper} job(s)",
+                    f"❌ Error: Cannot remove paper '{name}': it is used by {jobs_using_paper} job(s)",
                     err=True,
                 )
+                typer.echo("💡 Suggestions:")
+                typer.echo("   • Remove jobs using this paper first: plotty remove job <job_id>")
+                typer.echo("   • List jobs using this paper: plotty list jobs")
+                typer.echo("   • Reassign jobs to a different paper")
                 raise typer.Exit(ExitCode.BUSY)
 
             # Create items list for dry-run

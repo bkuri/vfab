@@ -44,11 +44,19 @@ class TestProgressTracker:
         """Advance progress to next test.
 
         Args:
-            test_name: Name of the test being run
+            test_name: Name of test being run
         """
         self.current_test += 1
         self.current_test_name = test_name
-        self.update_func(1, f"[{self.current_test}/{self.total_tests}] {test_name}")
+        
+        # For two-line display, extract cleaner test name
+        if ": " in test_name:
+            category, clean_name = test_name.split(": ", 1)
+            display_name = f"[{self.current_test}/{self.total_tests}] {clean_name}"
+        else:
+            display_name = f"[{self.current_test}/{self.total_tests}] {test_name}"
+        
+        self.update_func(1, display_name)
 
 
 def create_integrated_test_environment() -> dict:
@@ -67,10 +75,13 @@ def create_integrated_test_environment() -> dict:
 def run_integrated_command(command: str, cwd: Path | None = None) -> dict:
     """Run integrated command when modular imports fail."""
     import subprocess
+    import shlex
 
     try:
+        # Parse command safely to prevent injection
+        cmd_parts = shlex.split(command)
         result = subprocess.run(
-            command, shell=True, capture_output=True, text=True, timeout=60, cwd=cwd
+            cmd_parts, capture_output=True, text=True, timeout=60, cwd=cwd
         )
 
         return {
@@ -194,13 +205,13 @@ def run_integrated_job_lifecycle_tests(test_env: dict, progress_tracker=None) ->
 
     unique_job_id = f"test-job-{uuid.uuid4().hex[:6]}"
     result = run_integrated_command(
-        f'plotty add job {unique_job_id} "{test_env["test_svg"]}"'
+        f'plotty add job {unique_job_id} "{test_env["test_svg"]}" --apply'
     )
     if result["success"]:
         # Extract job ID from output
         import re
 
-        job_id_match = re.search(r"job: ([\w-]+)", result["stdout"])
+        job_id_match = re.search(r"Added and queued job: ([\w-]+)", result["stdout"])
         if job_id_match:
             test_env["test_job_id"] = job_id_match.group(1)
             results.append(
@@ -877,8 +888,8 @@ def run_self_test(
     all_results = []
 
     try:
-        # Create progress tracker
-        with progress_task("Running tests", total=total_tests) as update_progress:
+        # Create progress tracker with two-line display
+        with progress_task("Running tests", total=total_tests, two_line=True) as update_progress:
             progress_tracker = TestProgressTracker(total_tests, update_progress)
 
             # Run tests based on level

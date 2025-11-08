@@ -140,6 +140,19 @@ class RecoveryCfg(BaseModel):
     max_resume_attempts: int = 3
 
 
+class PhysicalSetupCfg(BaseModel):
+    """Configuration for physical setup validation."""
+    require_confirmation: bool = True
+    show_guidance: bool = True
+    auto_detect_paper: bool = False
+    auto_detect_pen: bool = False
+    paper_alignment_tolerance: float = 2.0  # mm
+    pen_force_check: bool = True
+    device_connection_check: bool = True
+    skip_on_resume: bool = False
+    timeout_seconds: int = 30
+
+
 class LoggingSettings(BaseModel):
     enabled: bool = True
     level: str = "INFO"
@@ -170,6 +183,7 @@ class Settings(BaseModel):
     paper: PaperCfg = Field(default_factory=PaperCfg)
     hooks: HooksCfg = Field(default_factory=HooksCfg)
     recovery: RecoveryCfg = Field(default_factory=RecoveryCfg)
+    physical_setup: PhysicalSetupCfg = Field(default_factory=PhysicalSetupCfg)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
 
 

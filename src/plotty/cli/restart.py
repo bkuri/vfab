@@ -140,40 +140,47 @@ def restart_command(
                 print("Restart cancelled")
                 return
 
-        # Perform restart
-        show_status(f"Restarting job '{job_id}'...", "info")
+        # Perform restart with progress tracking
+        from ..progress import progress_task
+        
+        total_operations = len(files_to_remove) + len(dirs_to_remove)
+        
+        with progress_task(f"Restarting job '{job_id}'", total_operations) as update:
+            # Remove files
+            for file_path in files_to_remove:
+                try:
+                    file_path.unlink()
+                    if console:
+                        console.print(f"  ✓ Removed {file_path.name}", style="green")
+                    else:
+                        print(f"  Removed {file_path.name}")
+                except Exception as e:
+                    if console:
+                        console.print(
+                            f"  ❌ Failed to remove {file_path.name}: {e}", style="red"
+                        )
+                    else:
+                        print(f"  Failed to remove {file_path.name}: {e}")
+                finally:
+                    update(1)
 
-        # Remove files
-        for file_path in files_to_remove:
-            try:
-                file_path.unlink()
-                if console:
-                    console.print(f"  ✓ Removed {file_path.name}", style="green")
-                else:
-                    print(f"  Removed {file_path.name}")
-            except Exception as e:
-                if console:
-                    console.print(
-                        f"  ❌ Failed to remove {file_path.name}: {e}", style="red"
-                    )
-                else:
-                    print(f"  Failed to remove {file_path.name}: {e}")
-
-        # Remove directories
-        for dir_path in dirs_to_remove:
-            try:
-                shutil.rmtree(dir_path)
-                if console:
-                    console.print(f"  ✓ Removed {dir_path.name}/", style="green")
-                else:
-                    print(f"  Removed {dir_path.name}/")
-            except Exception as e:
-                if console:
-                    console.print(
-                        f"  ❌ Failed to remove {dir_path.name}/: {e}", style="red"
-                    )
-                else:
-                    print(f"  Failed to remove {dir_path.name}/: {e}")
+            # Remove directories
+            for dir_path in dirs_to_remove:
+                try:
+                    shutil.rmtree(dir_path)
+                    if console:
+                        console.print(f"  ✓ Removed {dir_path.name}/", style="green")
+                    else:
+                        print(f"  Removed {dir_path.name}/")
+                except Exception as e:
+                    if console:
+                        console.print(
+                            f"  ❌ Failed to remove {dir_path.name}/: {e}", style="red"
+                        )
+                    else:
+                        print(f"  Failed to remove {dir_path.name}/: {e}")
+                finally:
+                    update(1)
 
         # Handle queue positioning if requested
         if now:

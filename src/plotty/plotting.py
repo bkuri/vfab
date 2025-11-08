@@ -141,8 +141,14 @@ class MultiPenPlotter:
                         results["layers_skipped"].append(layer_name)
                         continue
 
-                # Plot the layer
+                # Plot the layer with enhanced progress display
+                progress_percent = ((i + 1) / len(sorted_layers)) * 100
+                bar_width = 20
+                filled = int(bar_width * progress_percent / 100)
+                progress_bar = "█" * filled + "░" * (bar_width - filled)
+                
                 print(f"\n📐 Plotting layer {i + 1}/{len(sorted_layers)}: {layer_name}")
+                print(f"   Progress: [{progress_bar}] {progress_percent:.0f}%")
                 print(f"   Pen: {target_pen}")
                 print(f"   Elements: {layer.get('element_count', 'unknown')}")
 

@@ -555,18 +555,41 @@ class PhysicalSetupContext:
         self.confirmed = False
     
     def show_requirements(self) -> None:
-        """Show physical setup requirements."""
+        """Show physical setup requirements with enhanced guidance."""
         if self.console:
-            self.console.print("⚙️  Physical Setup Requirements:")
+            self.console.print("📋 Physical Setup Checklist:", style="bold blue")
+            
+            # Show paper requirements with guidance
+            if "paper_size" in self.requirements:
+                paper_size = self.requirements["paper_size"]
+                self.console.print(f"  📄 Paper: {paper_size}", style="cyan")
+                self.console.print(f"     • Load {paper_size} paper and align to plot area boundaries")
+                self.console.print("     • Ensure paper is flat and secured")
+            
+            # Show pen requirements with guidance  
+            if "pen_count" in self.requirements:
+                pen_count = self.requirements["pen_count"]
+                has_multipen = self.requirements.get("has_multipen", False)
+                if has_multipen:
+                    self.console.print(f"  🖊️  Pens: {pen_count} (multipen setup)", style="cyan")
+                    self.console.print(f"     • Verify all {pen_count} pens are installed and functional")
+                    self.console.print("     • Check pen mapping configuration")
+                else:
+                    self.console.print("  🖊️  Pen: Single pen setup", style="cyan")
+                    self.console.print("     • Ensure pen is lowered and positioned correctly")
+                    self.console.print("     • Test pen movement and ink flow")
+            
+            # Show any additional requirements
             for req_name, req_value in self.requirements.items():
-                self.console.print(f"  • {req_name}: {req_value}")
+                if req_name not in ["paper_size", "pen_count", "has_multipen"]:
+                    self.console.print(f"  • {req_name}: {req_value}", style="cyan")
         else:
             print("Physical Setup Requirements:")
             for req_name, req_value in self.requirements.items():
                 print(f"  • {req_name}: {req_value}")
     
     def confirm_physical_setup(self) -> bool:
-        """Confirm physical setup is ready."""
+        """Confirm physical setup is ready with enhanced prompts."""
         if not self.apply_flag:
             return False
         
@@ -576,23 +599,39 @@ class PhysicalSetupContext:
             # Show requirements first
             self.show_requirements()
             
-            # Ask for confirmation
+            # Add visual separator
+            self.console.print()
+            self.console.print("🔍 Physical Setup Verification", style="bold yellow")
+            self.console.print("Please verify the following before proceeding:")
+            self.console.print("  • Paper is loaded and properly aligned")
+            self.console.print("  • Pen(s) are installed and functional") 
+            self.console.print("  • AxiDraw is connected and powered on")
+            self.console.print()
+            
+            # Ask for confirmation with clearer prompt
             return Confirm.ask(
-                f"Is physical setup ready for {self.operation_name}?",
+                f"✅ Confirm physical setup is ready for {self.operation_name}?",
                 default=False,
             )
         else:
             self.show_requirements()
-            response = input(f"Is physical setup ready for {self.operation_name}? [y/N]: ").strip().lower()
+            print("\nPhysical Setup Verification:")
+            print("Please verify:")
+            print("  • Paper is loaded and aligned")
+            print("  • Pen(s) are installed and functional")
+            print("  • Device is connected and powered")
+            response = input(f"\nConfirm physical setup ready for {self.operation_name}? [y/N]: ").strip().lower()
             return response in ["y", "yes"]
     
     def should_execute(self) -> bool:
-        """Check if operation should proceed."""
+        """Check if operation should proceed with enhanced guidance."""
         if not self.apply_flag:
             if self.console:
-                self.console.print("💡 Use --apply to proceed with physical setup validation", style="yellow")
+                self.console.print("💡 Physical setup check mode - use --apply to proceed with validation", style="yellow")
+                self.console.print("   This will show setup requirements and request confirmation before plotting.")
             else:
-                print("Use --apply to proceed with physical setup validation")
+                print("Physical setup check mode - use --apply to proceed with validation")
+                print("This will show setup requirements and request confirmation before plotting.")
             return False
         
         return self.confirm_physical_setup()

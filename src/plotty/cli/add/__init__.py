@@ -17,15 +17,24 @@ add_app = typer.Typer(no_args_is_help=True, help="Add new resources")
 
 
 def add_single_job(
-    job_name: str,
-    file_path: Path,
-    preset: Optional[str] = None,
-    digest: Optional[int] = None,
-    force: bool = False,
+    job_name: str = typer.Argument(..., help="Name for the new job"),
+    file_path: Path = typer.Argument(..., help="Path to SVG or PLOB file to add"),
+    preset: Optional[str] = typer.Option(None, "--preset", "-p", help="Optimization preset (fast, default, hq)"),
+    digest: Optional[int] = typer.Option(None, "--digest", "-d", help="Digest level for AxiDraw acceleration (0-2)"),
+    force: bool = typer.Option(False, "--force", "-f", help="Override existing job with same name"),
     apply: bool = create_apply_option("Add job (dry-run by default)"),
     dry_run: bool = create_dry_run_option("Preview job addition without creating files"),
 ) -> None:
-    """Add a single job to the system."""
+    """Add a new job from an SVG or PLOB file.
+
+    Examples:
+        plotty add job my_design drawing.svg
+        plotty add job my_design drawing.svg --preset hq --digest 2
+        plotty add job my_design drawing.svg --force --apply
+
+    This command analyzes the file, detects layers, and prepares it for plotting.
+    Use --apply to actually create the job, otherwise runs in preview mode.
+    """
     from plotty.fsm import create_fsm, JobState
     from plotty.config import get_config, load_config
     from plotty.utils import error_handler
@@ -36,7 +45,11 @@ def add_single_job(
 
     # Validate file exists
     if not file_path.exists():
-        typer.echo(f"Error: File '{file_path}' not found")
+        typer.echo(f"❌ Error: File '{file_path}' not found")
+        typer.echo("💡 Suggestions:")
+        typer.echo(f"   • Check if the file path is correct: {file_path}")
+        typer.echo("   • Use absolute path if the file is in a different directory")
+        typer.echo("   • List available files with: ls *.svg *.plob")
         raise typer.Exit(1)
 
     # Detect file type and determine mode
@@ -74,7 +87,11 @@ def add_single_job(
 
     # Check if job already exists
     if not force and jdir.exists():
-        typer.echo(f"Error: Job '{job_name}' already exists. Use --force to override.")
+        typer.echo(f"❌ Error: Job '{job_name}' already exists")
+        typer.echo("💡 Suggestions:")
+        typer.echo(f"   • Use --force to override existing job: plotty add job {job_name} {file_path} --force")
+        typer.echo(f"   • Choose a different job name: plotty add job {job_name}_v2 {file_path}")
+        typer.echo("   • List existing jobs: plotty list jobs")
         raise typer.Exit(1)
 
     # Dry-run/preview mode
@@ -302,15 +319,25 @@ def add_paper(
 
 def add_jobs(
     pattern: str = typer.Argument(
-        ..., help="File pattern for multiple jobs (e.g., *.svg)"
+        ..., help="File pattern for multiple jobs (e.g., '*.svg', 'designs/*.plob')"
     ),
     pristine: bool = typer.Option(
-        False, "--pristine", help="Skip optimization (add in pristine state)"
+        False, "--pristine", help="Skip optimization (add in pristine state for manual control)"
     ),
     apply: bool = create_apply_option("Add jobs (dry-run by default)"),
     dry_run: bool = create_dry_run_option("Preview job addition without creating files"),
 ) -> None:
-    """Add multiple jobs using file pattern."""
+    """Add multiple jobs using a file pattern.
+
+    Examples:
+        plotty add jobs "*.svg"
+        plotty add jobs "designs/*.svg" --apply
+        plotty add jobs "*.plob" --pristine --apply
+
+    This command processes all files matching the pattern and creates jobs for each one.
+    Use --apply to actually create the jobs, otherwise runs in preview mode.
+    The --pristine flag skips optimization for manual control over the plotting process.
+    """
     try:
         from ...config import load_config
         from ...fsm import create_fsm, JobState

@@ -43,7 +43,23 @@ def start_command(
     apply: bool = create_apply_option("Start plotting (dry-run by default)"),
     dry_run: bool = create_dry_run_option("Preview plotting without moving pen"),
 ):
-    """Start plotting a job."""
+    """Start plotting a job with physical setup validation.
+
+    Examples:
+        plotty plot my_design
+        plotty plot my_design --preset safe --apply
+        plotty plot my_design --dry-run --preview
+
+    This command validates physical setup (paper alignment, pen configuration) and
+    starts plotting. Use --apply to actually plot, otherwise runs in preview mode.
+    
+    Available presets:
+        fast    - Maximum speed for quick drafts
+        safe    - Conservative settings for reliability  
+        preview - Quick preview without pen down
+        detail  - High precision for detailed artwork
+        draft   - Quick draft with moderate quality
+    """
     try:
         # Check for dry-run/preview mode
         if dry_run or not apply:
@@ -70,7 +86,10 @@ def start_command(
         if preset and not get_preset(preset):
             available = ", ".join(preset_names())
             raise typer.BadParameter(
-                f"Unknown preset '{preset}'. Available: {available}"
+                f"❌ Unknown preset '{preset}'\n"
+                f"💡 Available presets: {available}\n"
+                f"   • List presets: plotty list presets\n"
+                f"   • Use default preset: omit --preset flag"
             )
 
         # Get preset details if provided
@@ -219,11 +238,20 @@ def start_command(
 
 
 def plan_command(
-    job_id: str,
-    pen: str = "0.3mm black",
-    interactive: bool = False,
+    job_id: str = typer.Argument(..., autocompletion=complete_job_id, help="Job ID to plan"),
+    pen: str = typer.Option("0.3mm black", "--pen", "-p", help="Default pen specification"),
+    interactive: bool = typer.Option(False, "--interactive", "-i", help="Interactive layer planning"),
 ):
-    """Plan a job for plotting."""
+    """Plan a job for plotting with layer analysis.
+
+    Examples:
+        plotty plan my_design
+        plotty plan my_design --pen "0.5mm red" --interactive
+        plotty plan my_design --pen "0.3mm black"
+
+    This command analyzes job layers, estimates plotting time, and creates a plan.
+    Interactive mode allows you to assign pens to layers and modify plotting order.
+    """
     try:
         from ..config import load_config
         from pathlib import Path
@@ -287,11 +315,7 @@ def optimize_command(
     """Optimize jobs with preview by default."""
     try:
         from ..config import load_config, get_config
-        from ..utils import error_handler
-        from ..progress import show_status
         from ..fsm import create_fsm
-        from pathlib import Path
-        import json
 
         cfg = load_config(None)
         config = get_config()
@@ -443,46 +467,54 @@ def optimize_command(
         if not apply:
             return
 
-        # Perform optimization using FSM
-        show_status(f"Optimizing {len(jobs_data)} jobs...", "info")
+        # Perform optimization using FSM with progress tracking
+        from ..progress import progress_task
+        
         optimized_count = 0
         failed_count = 0
 
-        for job_id in target_ids:
-            try:
-                # Create FSM for the job
-                fsm = create_fsm(job_id, Path(cfg.workspace))
+        with progress_task(f"Optimizing {len(jobs_data)} jobs", len(target_ids)) as update:
+            for i, job_id in enumerate(target_ids):
+                try:
+                    # Create FSM for the job
+                    fsm = create_fsm(job_id, Path(cfg.workspace))
 
-                # Apply optimizations with specified or default settings
-                effective_preset = preset or config.optimization.default_level
-                effective_digest = (
-                    digest if digest is not None else config.optimization.default_digest
-                )
+                    # Apply optimizations with specified or default settings
+                    effective_preset = preset or config.optimization.default_level
+                    effective_digest = (
+                        digest if digest is not None else config.optimization.default_digest
+                    )
 
-                if fsm.apply_optimizations(
-                    preset=effective_preset, digest=effective_digest
-                ):
-                    optimized_count += 1
-                    if console:
-                        console.print(
-                            f"  ✓ Optimized {job_id} (preset: {effective_preset}, digest: {effective_digest})",
-                            style="green",
-                        )
+                    if fsm.apply_optimizations(
+                        preset=effective_preset, digest=effective_digest
+                    ):
+                        optimized_count += 1
+                        if console:
+                            console.print(
+                                f"  ✓ Optimized {job_id} (preset: {effective_preset}, digest: {effective_digest})",
+                                style="green",
+                            )
+                        else:
+                            print(f"  Optimized {job_id}")
                     else:
-                        print(f"  Optimized {job_id}")
-                else:
+                        failed_count += 1
+                        if console:
+                            console.print(f"  ❌ Failed to optimize {job_id}", style="red")
+                        else:
+                            print(f"  Failed to optimize {job_id}")
+
+                    # Update progress
+                    update(1)
+
+                except Exception as e:
                     failed_count += 1
                     if console:
-                        console.print(f"  ❌ Failed to optimize {job_id}", style="red")
+                        console.print(f"  ❌ Failed to optimize {job_id}: {e}", style="red")
                     else:
-                        print(f"  Failed to optimize {job_id}")
-
-            except Exception as e:
-                failed_count += 1
-                if console:
-                    console.print(f"  ❌ Failed to optimize {job_id}: {e}", style="red")
-                else:
-                    print(f"  Failed to optimize {job_id}: {e}")
+                        print(f"  Failed to optimize {job_id}: {e}")
+                    
+                    # Still update progress even on failure
+                    update(1)
 
         show_status(
             f"Optimized {optimized_count} jobs, {failed_count} failed",
