@@ -3,6 +3,16 @@
 Headless-first FSM plotter manager with vpype optimization, smart multi-pen detection,
 and per-session recording (IP feed v1; native v4l2 later).
 
+## 📚 Documentation
+
+- **[Installation Guide](docs/installation.md)** - Multi-platform setup instructions
+- **[User Guide](docs/user-guide.md)** - Complete usage documentation  
+- **[API Reference](docs/api/)** - Developer documentation and integration
+- **[Troubleshooting](docs/troubleshooting/)** - Common issues and solutions
+- **[Changelog](CHANGELOG.md)** - Version history and release notes
+
+**Archived Documentation**: Historical development status, reports, and old release notes are available in [`.github/docs-archive/`](.github/docs-archive/) for reference.
+
 ## 🚀 Performance Highlights (v0.8.0)
 
 - **Enterprise-Grade Performance**: 114,087 jobs/second database throughput

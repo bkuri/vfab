@@ -76,6 +76,33 @@ sudo usermod -a -G uucp,video $USER
 uv run alembic upgrade head
 ```
 
+#### Arch Linux Troubleshooting
+
+**Mirror Issues:**
+If you encounter 404 errors during package installation, this is typically a temporary Arch mirror issue:
+
+```bash
+# Option 1: Update mirrors and retry
+sudo pacman-mirrors --geoip
+makepkg -si
+
+# Option 2: Clear cache and retry
+sudo pacman -Scc
+sudo pacman -Sy
+makepkg -si
+
+# Option 3: Install dependencies manually
+sudo pacman -S python python-pydantic python-yaml python-sqlalchemy \
+                 python-alembic python-rich python-jinja python-click \
+                 python-platformdirs python-defusedxml
+makepkg -si --noconfirm
+```
+
+**Common Arch-Specific Issues:**
+- **USB Permissions**: Add user to `uucp` and `video` groups
+- **Python Version**: Ensure Python 3.11+ is installed
+- **Build Tools**: Install `base-devel` for package building
+
 ### 2.2 Ubuntu/Debian
 
 ```bash
