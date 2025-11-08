@@ -41,7 +41,6 @@ jobs:
         
       - name: Install dependencies
         run: |
-          . .venv/bin/activate
           uv pip install -e ".[dev,vpype]"
           # Install pytest-cov separately for coverage
           uv pip install pytest-cov
@@ -49,24 +48,16 @@ jobs:
           bash scripts/install_pyaxidraw.sh
           
       - name: Run database migrations
-        run: |
-          . .venv/bin/activate
-          uv run alembic upgrade head
+        run: uv run alembic upgrade head
           
       - name: Run linting
-        run: |
-          . .venv/bin/activate
-          uvx ruff check .
+        run: uvx ruff check .
           
       - name: Run formatting check
-        run: |
-          . .venv/bin/activate
-          uvx black --check .
+        run: uvx black --check .
           
       - name: Run tests
-        run: |
-          . .venv/bin/activate
-          uv run pytest -q --cov=plotty --cov-report=xml || uv run pytest -q
+        run: uv run pytest -q --cov=plotty --cov-report=xml || uv run pytest -q
           
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.12' && matrix.os == 'ubuntu-latest'
@@ -75,12 +66,10 @@ jobs:
           file: ./coverage.xml
           flags: unittests
           name: codecov-umbrella
-      
+       
       - name: Run cross-platform tests
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
-        run: |
-          . .venv/bin/activate
-          uv run python test_cross_platform.py
+        run: uv run python test_cross_platform.py
 
   build:
     name: Build Package
