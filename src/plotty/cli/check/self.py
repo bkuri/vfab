@@ -142,6 +142,7 @@ def run_integrated_basic_tests(test_env: dict, progress_tracker=None) -> list:
 
     basic_tests = [
         ("check config", "Configuration validation"),
+        ("info paths", "XDG paths verification"),
         ("list pens", "Pen listing"),
         ("list papers", "Paper listing"),
         ("info system", "System information"),
@@ -158,6 +159,42 @@ def run_integrated_basic_tests(test_env: dict, progress_tracker=None) -> list:
         if "check config" in cmd:
             success = result["returncode"] <= 2  # 0=success, 1=error, 2=warnings
             message = "✓ Passed" if success else f"✗ Failed: {result['stderr']}"
+        elif "info paths" in cmd:
+            # Verify paths command shows expected sections
+            success = result["success"]
+            if success:
+                output = result["stdout"]
+                # Check for key sections in paths output
+                has_config = "Configuration:" in output
+                has_data = "Data Storage:" in output
+                has_workspace = "Workspace:" in output
+                has_database = "Database:" in output
+                has_tips = "Tips:" in output
+
+                if (
+                    has_config
+                    and has_data
+                    and has_workspace
+                    and has_database
+                    and has_tips
+                ):
+                    message = "✓ Passed - All path sections displayed correctly"
+                else:
+                    success = False
+                    missing = []
+                    if not has_config:
+                        missing.append("Configuration")
+                    if not has_data:
+                        missing.append("Data Storage")
+                    if not has_workspace:
+                        missing.append("Workspace")
+                    if not has_database:
+                        missing.append("Database")
+                    if not has_tips:
+                        missing.append("Tips")
+                    message = f"✗ Failed - Missing sections: {', '.join(missing)}"
+            else:
+                message = f"✗ Failed: {result['stderr']}"
         else:
             success = result["success"]
             message = "✓ Passed" if success else f"✗ Failed: {result['stderr']}"
@@ -1016,7 +1053,7 @@ def _calculate_total_tests(level: str) -> int:
         Total number of tests for the level
     """
     # Test counts per category
-    basic_count = 4  # 4 tests
+    basic_count = 5  # 5 tests
     job_lifecycle_count = 3  # 3 tests
     job_management_count = 4  # 4 tests
     system_validation_count = 4  # 4 tests
@@ -1075,13 +1112,13 @@ def run_self_test(
     Performs comprehensive testing of ploTTY installation and configuration.
     Tests are organized by complexity levels:
 
-    * **basic**: Core command tests (4 tests)
+    * **basic**: Core command tests (5 tests)
     * **intermediate**: Job lifecycle and management (7 tests)
     * **advanced**: System validation, resource management, and recovery system (13 tests)
     * **performance**: Memory profiling and performance analysis (2 tests)
     * **stress**: Load testing and stress analysis (1 test)
     * **integration**: System integration tests (3 tests)
-    * **all**: Run all tests (30 tests total)
+    * **all**: Run all tests (31 tests total)
 
     Each test runs in isolated environments with proper cleanup.
     """
