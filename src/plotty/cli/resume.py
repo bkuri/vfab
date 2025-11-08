@@ -191,15 +191,17 @@ def resume_command(
                     return
 
             from ..progress import progress_task
-            
+
             resumed_fsms = []
-            with progress_task(f"Resuming {len(resumable_jobs)} jobs", len(resumable_jobs)) as update:
+            with progress_task(
+                f"Resuming {len(resumable_jobs)} jobs", len(resumable_jobs)
+            ) as update:
                 for i, job_id in enumerate(resumable_jobs):
                     fsm = recovery.recover_job(job_id)
                     if fsm:
                         recovery.register_fsm(fsm)
                         resumed_fsms.append(fsm)
-                    
+
                     # Update progress for each job
                     update(1)
 

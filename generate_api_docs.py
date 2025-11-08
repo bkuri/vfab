@@ -18,23 +18,23 @@ def extract_docstring(element_path: str, element_type: str) -> Optional[str]:
         if element_type == "module":
             module_path = Path(element_path)
             if module_path.exists():
-                with open(module_path, 'r', encoding='utf-8') as f:
+                with open(module_path, "r", encoding="utf-8") as f:
                     content = f.read()
                 tree = ast.parse(content)
                 return ast.get_docstring(tree)
-        
+
         elif element_type == "class":
             # For classes, we'd need to parse the module and find the class
             # This is a simplified version
             return "Class documentation available in source code"
-        
+
         elif element_type == "function":
             # Similar for functions
             return "Function documentation available in source code"
-    
+
     except Exception:
         return None
-    
+
     return None
 
 
@@ -49,24 +49,36 @@ ploTTY uses a hierarchical configuration system based on Pydantic models. All co
 ## Configuration Classes
 
 """
-    
+
     config_classes = [
-        'CameraCfg', 'DatabaseCfg', 'DeviceCfg', 'OptimizationLevelCfg',
-        'DigestLevelCfg', 'FileTypeCfg', 'OptimizationCfg', 'VpypeCfg',
-        'PaperCfg', 'HooksCfg', 'RecoveryCfg', 'PhysicalSetupCfg',
-        'LoggingSettings', 'Settings'
+        "CameraCfg",
+        "DatabaseCfg",
+        "DeviceCfg",
+        "OptimizationLevelCfg",
+        "DigestLevelCfg",
+        "FileTypeCfg",
+        "OptimizationCfg",
+        "VpypeCfg",
+        "PaperCfg",
+        "HooksCfg",
+        "RecoveryCfg",
+        "PhysicalSetupCfg",
+        "LoggingSettings",
+        "Settings",
     ]
-    
+
     for cls in config_classes:
         docs += f"### {cls}\n\n"
-        docs += f"Configuration class for {cls.replace('Cfg', '').lower()} settings.\n\n"
+        docs += (
+            f"Configuration class for {cls.replace('Cfg', '').lower()} settings.\n\n"
+        )
         docs += "```python\n"
         docs += f"from plotty.config import {cls}\n\n"
         docs += "# Access configuration\n"
         docs += "config = get_config()\n"
         docs += f"setting = config.{cls.lower() if cls != 'Settings' else 'settings'}\n"
         docs += "```\n\n"
-    
+
     return docs
 
 
@@ -81,20 +93,20 @@ ploTTY uses SQLAlchemy models for database persistence. All models are defined i
 ## Model Classes
 
 """
-    
+
     model_classes = [
-        ('Device', 'Plotter device configuration and status'),
-        ('Pen', 'Pen tool configuration and settings'),
-        ('Paper', 'Paper size and margin definitions'),
-        ('Job', 'Plotting job metadata and state'),
-        ('Layer', 'Multi-pen layer configuration'),
-        ('StatisticsConfig', 'Statistics collection settings'),
-        ('JobStatistics', 'Job execution statistics'),
-        ('LayerStatistics', 'Layer-specific statistics'),
-        ('SystemStatistics', 'System-wide statistics'),
-        ('PerformanceMetrics', 'Performance measurement data')
+        ("Device", "Plotter device configuration and status"),
+        ("Pen", "Pen tool configuration and settings"),
+        ("Paper", "Paper size and margin definitions"),
+        ("Job", "Plotting job metadata and state"),
+        ("Layer", "Multi-pen layer configuration"),
+        ("StatisticsConfig", "Statistics collection settings"),
+        ("JobStatistics", "Job execution statistics"),
+        ("LayerStatistics", "Layer-specific statistics"),
+        ("SystemStatistics", "System-wide statistics"),
+        ("PerformanceMetrics", "Performance measurement data"),
     ]
-    
+
     for cls, description in model_classes:
         docs += f"### {cls}\n\n"
         docs += f"{description}.\n\n"
@@ -104,7 +116,7 @@ ploTTY uses SQLAlchemy models for database persistence. All models are defined i
         docs += "with get_session() as session:\n"
         docs += f"    items = session.query({cls}).all()\n"
         docs += "```\n\n"
-    
+
     return docs
 
 
@@ -119,24 +131,24 @@ The ploTTY FSM (Finite State Machine) manages job lifecycle with well-defined st
 ## Job States
 
 """
-    
+
     states = [
-        ('NEW', 'Job created but not yet processed'),
-        ('ANALYZED', 'Job analyzed and validated'),
-        ('OPTIMIZED', 'Job optimized for plotting'),
-        ('READY', 'Job ready for plotting'),
-        ('ARMED', 'Job armed and pre-flight checks passed'),
-        ('RUNNING', 'Job currently plotting'),
-        ('COMPLETED', 'Job successfully completed'),
-        ('FAILED', 'Job failed during execution'),
-        ('CANCELLED', 'Job cancelled by user'),
-        ('PAUSED', 'Job paused during execution')
+        ("NEW", "Job created but not yet processed"),
+        ("ANALYZED", "Job analyzed and validated"),
+        ("OPTIMIZED", "Job optimized for plotting"),
+        ("READY", "Job ready for plotting"),
+        ("ARMED", "Job armed and pre-flight checks passed"),
+        ("RUNNING", "Job currently plotting"),
+        ("COMPLETED", "Job successfully completed"),
+        ("FAILED", "Job failed during execution"),
+        ("CANCELLED", "Job cancelled by user"),
+        ("PAUSED", "Job paused during execution"),
     ]
-    
+
     for state, description in states:
         docs += f"### {state}\n\n"
         docs += f"{description}.\n\n"
-    
+
     docs += """## FSM Operations
 
 ```python
@@ -172,7 +184,7 @@ success = fsm.arm_job()
 - `update_job_data(data: dict) -> None`: Update job metadata
 
 """
-    
+
     return docs
 
 
@@ -231,7 +243,7 @@ info = get_system_info()
 - `get_available_memory() -> int`: Get available memory
 
 """
-    
+
     return docs
 
 
@@ -394,14 +406,14 @@ except Exception as e:
 ```
 
 """
-    
+
     return docs
 
 
 def generate_complete_api_docs() -> str:
     """Generate complete API documentation."""
     print("📚 Generating complete API documentation...")
-    
+
     docs = """# ploTTY v0.9.0 Complete API Documentation
 
 ## Overview
@@ -419,7 +431,7 @@ This is the comprehensive API documentation for ploTTY v0.9.0, covering all stab
 ---
 
 """
-    
+
     # Add all sections
     docs += generate_config_api_docs()
     docs += "\n---\n\n"
@@ -430,7 +442,7 @@ This is the comprehensive API documentation for ploTTY v0.9.0, covering all stab
     docs += generate_utility_api_docs()
     docs += "\n---\n\n"
     docs += generate_integration_examples()
-    
+
     docs += """
 
 ## API Stability Guarantee
@@ -471,7 +483,7 @@ For API questions and support:
 - 💬 [Discussions](https://github.com/your-repo/plotty/discussions)
 
 """
-    
+
     return docs
 
 
@@ -479,19 +491,19 @@ def main():
     """Main documentation generation."""
     print("📚 ploTTY v0.9.0 API Documentation Generation")
     print("=" * 60)
-    
+
     docs = generate_complete_api_docs()
-    
+
     # Save documentation
     output_path = Path("docs/api/complete-api-reference.md")
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    
-    with open(output_path, 'w') as f:
+
+    with open(output_path, "w") as f:
         f.write(docs)
-    
+
     print(f"📋 Complete API documentation saved to: {output_path}")
     print("🎯 Documentation covers all stable public APIs for v1.0.0")
-    
+
     return True
 
 

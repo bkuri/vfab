@@ -14,93 +14,89 @@ from typing import Dict, List
 
 def analyze_module_public_api(module_path: Path) -> Dict[str, List[str]]:
     """Analyze a Python module to identify public API elements."""
-    public_api = {
-        'classes': [],
-        'functions': [],
-        'constants': [],
-        'imports': []
-    }
-    
+    public_api = {"classes": [], "functions": [], "constants": [], "imports": []}
+
     try:
-        with open(module_path, 'r', encoding='utf-8') as f:
+        with open(module_path, "r", encoding="utf-8") as f:
             content = f.read()
-        
+
         tree = ast.parse(content)
-        
+
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef):
                 # Check if class is public (doesn't start with underscore)
-                if not node.name.startswith('_'):
-                    public_api['classes'].append(node.name)
-            
+                if not node.name.startswith("_"):
+                    public_api["classes"].append(node.name)
+
             elif isinstance(node, ast.FunctionDef):
                 # Check if function is public
-                if not node.name.startswith('_'):
-                    public_api['functions'].append(node.name)
-            
+                if not node.name.startswith("_"):
+                    public_api["functions"].append(node.name)
+
             elif isinstance(node, ast.Assign):
                 # Check for module-level constants
                 for target in node.targets:
-                    if isinstance(target, ast.Name) and not target.id.startswith('_'):
+                    if isinstance(target, ast.Name) and not target.id.startswith("_"):
                         if isinstance(node.value, (ast.Constant, ast.Str, ast.Num)):
-                            public_api['constants'].append(target.id)
-            
+                            public_api["constants"].append(target.id)
+
             elif isinstance(node, ast.ImportFrom):
-                if node.module and not node.module.startswith('_'):
+                if node.module and not node.module.startswith("_"):
                     for alias in node.names:
-                        if not alias.name.startswith('_'):
-                            public_api['imports'].append(f"{node.module}.{alias.name}")
-    
+                        if not alias.name.startswith("_"):
+                            public_api["imports"].append(f"{node.module}.{alias.name}")
+
     except Exception as e:
         print(f"Error analyzing {module_path}: {e}")
-    
+
     return public_api
 
 
 def analyze_cli_api() -> Dict[str, List[str]]:
     """Analyze CLI command structure."""
     cli_path = Path("src/plotty/cli")
-    cli_api = {
-        'commands': [],
-        'subcommands': []
-    }
-    
+    cli_api = {"commands": [], "subcommands": []}
+
     if not cli_path.exists():
         return cli_api
-    
+
     # Find main command modules
     for item in cli_path.iterdir():
-        if item.is_dir() and not item.name.startswith('_'):
-            cli_api['commands'].append(item.name)
-            
+        if item.is_dir() and not item.name.startswith("_"):
+            cli_api["commands"].append(item.name)
+
             # Check for subcommands
             for subitem in item.iterdir():
-                if subitem.is_file() and subitem.suffix == '.py' and not subitem.name.startswith('_'):
-                    cli_api['subcommands'].append(f"{item.name}.{subitem.stem}")
-    
+                if (
+                    subitem.is_file()
+                    and subitem.suffix == ".py"
+                    and not subitem.name.startswith("_")
+                ):
+                    cli_api["subcommands"].append(f"{item.name}.{subitem.stem}")
+
     return cli_api
 
 
 def analyze_config_api() -> Dict[str, List[str]]:
     """Analyze configuration API."""
     config_path = Path("src/plotty/config.py")
-    
+
     if not config_path.exists():
         return {}
-    
+
     try:
-        with open(config_path, 'r', encoding='utf-8') as f:
+        with open(config_path, "r", encoding="utf-8") as f:
             content = f.read()
-        
+
         tree = ast.parse(content)
-        
+
         config_classes = []
         for node in ast.walk(tree):
-            if isinstance(node, ast.ClassDef) and node.name.endswith('Cfg'):
+            if isinstance(node, ast.ClassDef) and node.name.endswith("Cfg"):
                 config_classes.append(node.name)
-        
-        return {'config_classes': config_classes}
-    
+
+        return {"config_classes": config_classes}
+
     except Exception as e:
         print(f"Error analyzing config API: {e}")
         return {}
@@ -109,26 +105,32 @@ def analyze_config_api() -> Dict[str, List[str]]:
 def generate_api_stability_report() -> str:
     """Generate comprehensive API stability report."""
     print("🔍 Analyzing ploTTY API structure...")
-    
+
     # Analyze core modules
     core_modules = [
-        'config.py', 'models.py', 'fsm.py', 'db.py',
-        'utils.py', 'stats.py', 'recovery.py', 'hooks.py'
+        "config.py",
+        "models.py",
+        "fsm.py",
+        "db.py",
+        "utils.py",
+        "stats.py",
+        "recovery.py",
+        "hooks.py",
     ]
-    
+
     api_analysis = {}
-    
+
     for module in core_modules:
         module_path = Path(f"src/plotty/{module}")
         if module_path.exists():
             api_analysis[module] = analyze_module_public_api(module_path)
-    
+
     # Analyze CLI API
     cli_api = analyze_cli_api()
-    
+
     # Analyze Config API
     config_api = analyze_config_api()
-    
+
     # Generate report
     report = """# ploTTY v0.9.0 API Stability Report
 
@@ -140,48 +142,48 @@ that should be maintained for v1.0.0 compatibility.
 ## Core Module APIs
 
 """
-    
+
     for module_name, api in api_analysis.items():
         report += f"### {module_name}\n\n"
-        
-        if api['classes']:
+
+        if api["classes"]:
             report += "**Public Classes:**\n"
-            for cls in api['classes']:
+            for cls in api["classes"]:
                 report += f"- `{cls}`\n"
             report += "\n"
-        
-        if api['functions']:
+
+        if api["functions"]:
             report += "**Public Functions:**\n"
-            for func in api['functions']:
+            for func in api["functions"]:
                 report += f"- `{func}()`\n"
             report += "\n"
-        
-        if api['constants']:
+
+        if api["constants"]:
             report += "**Public Constants:**\n"
-            for const in api['constants']:
+            for const in api["constants"]:
                 report += f"- `{const}`\n"
             report += "\n"
-        
+
         if not any(api.values()):
             report += "*No public API elements identified*\n\n"
-    
+
     # CLI API section
     report += "## CLI API\n\n"
     report += "### Main Commands\n\n"
-    for cmd in cli_api['commands']:
+    for cmd in cli_api["commands"]:
         report += f"- `plotty {cmd}`\n"
-    
+
     report += "\n### Command Subcommands\n\n"
-    for subcommand in cli_api['subcommands']:
+    for subcommand in cli_api["subcommands"]:
         report += f"- `{subcommand}`\n"
-    
+
     # Config API section
     report += "\n## Configuration API\n\n"
-    if config_api.get('config_classes'):
+    if config_api.get("config_classes"):
         report += "**Configuration Classes:**\n"
-        for cls in config_api['config_classes']:
+        for cls in config_api["config_classes"]:
             report += f"- `{cls}`\n"
-    
+
     # API Stability Recommendations
     report += """
 
@@ -254,7 +256,7 @@ that should be maintained for v1.0.0 compatibility.
 3. Add API compatibility tests to test suite
 4. Prepare v1.0.0 API stability guarantee
 """
-    
+
     return report
 
 
@@ -262,16 +264,16 @@ def main():
     """Main API stability analysis."""
     print("🔍 ploTTY v0.9.0 API Stability Analysis")
     print("=" * 50)
-    
+
     report = generate_api_stability_report()
-    
+
     # Save report
-    with open('API_STABILITY_REPORT.md', 'w') as f:
+    with open("API_STABILITY_REPORT.md", "w") as f:
         f.write(report)
-    
+
     print("📋 API stability report saved to: API_STABILITY_REPORT.md")
     print("🎯 Review the report to identify stable vs internal APIs")
-    
+
     return True
 
 

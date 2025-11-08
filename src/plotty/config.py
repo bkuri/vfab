@@ -145,6 +145,7 @@ class RecoveryCfg(BaseModel):
 
 class PhysicalSetupCfg(BaseModel):
     """Configuration for physical setup validation."""
+
     require_confirmation: bool = True
     show_guidance: bool = True
     auto_detect_paper: bool = False
@@ -206,22 +207,23 @@ def get_config() -> Settings:
     """Get current configuration instance."""
     return load_config()
 
+
 def save_config(config: Settings, path: str | None = None) -> None:
     """Save configuration to YAML file.
-    
+
     Args:
         config: Settings instance to save
         path: Path to save config file (default: config/config.yaml)
     """
     p = Path(path or os.environ.get("PLOTTY_CONFIG", "config/config.yaml"))
-    
+
     # Ensure parent directory exists
     p.parent.mkdir(parents=True, exist_ok=True)
-    
+
     # Convert config to dictionary and save as YAML
     config_dict = config.model_dump(exclude_none=True)
-    
-    with open(p, 'w') as f:
+
+    with open(p, "w") as f:
         yaml.dump(config_dict, f, default_flow_style=False, indent=2)
 
 

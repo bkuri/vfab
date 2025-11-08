@@ -73,12 +73,12 @@ class PaperSessionGuard(Guard):
     def check(self, job_id: str) -> GuardCheck:
         """Check if paper session is valid."""
         from ..db import get_session
-        
+
         try:
             with get_session() as session:
                 # Import models here to avoid circular imports
                 from ..models import Job, Paper
-                
+
                 # Get the current job
                 job = session.query(Job).filter(Job.id == job_id).first()
                 if not job:
@@ -88,7 +88,7 @@ class PaperSessionGuard(Guard):
                         f"Job {job_id} not found",
                         {"error": "job_not_found"},
                     )
-                
+
                 # Check if job has paper assigned
                 if job.paper_id is None:
                     return GuardCheck(
@@ -97,16 +97,20 @@ class PaperSessionGuard(Guard):
                         "Job has no paper assigned",
                         {"job_id": job_id, "paper_id": None},
                     )
-                
+
                 # Check if there are other active jobs with the same paper
                 # Active jobs are those in states that would conflict with paper usage
                 active_states = ["QUEUED", "ARMED", "PLOTTING", "PAUSED"]
-                conflicting_jobs = session.query(Job).filter(
-                    Job.paper_id == job.paper_id,
-                    Job.id != job_id,
-                    Job.state.in_(active_states)
-                ).all()
-                
+                conflicting_jobs = (
+                    session.query(Job)
+                    .filter(
+                        Job.paper_id == job.paper_id,
+                        Job.id != job_id,
+                        Job.state.in_(active_states),
+                    )
+                    .all()
+                )
+
                 if conflicting_jobs:
                     job_ids = [str(j.id) for j in conflicting_jobs]
                     return GuardCheck(
@@ -119,11 +123,11 @@ class PaperSessionGuard(Guard):
                             "conflicting_jobs": job_ids,
                         },
                     )
-                
+
                 # Get paper details for context
                 paper = session.query(Paper).filter(Paper.id == job.paper_id).first()
                 paper_name = paper.name if paper else f"ID:{job.paper_id}"
-                
+
                 return GuardCheck(
                     "paper_session_valid",
                     GuardResult.PASS,
@@ -134,7 +138,7 @@ class PaperSessionGuard(Guard):
                         "paper_name": paper_name,
                     },
                 )
-                
+
         except Exception as e:
             return GuardCheck(
                 "paper_session_valid",
@@ -150,12 +154,12 @@ class PenLayerGuard(Guard):
     def check(self, job_id: str) -> GuardCheck:
         """Check if pen configuration is compatible with layers."""
         from ..db import get_session
-        
+
         try:
             with get_session() as session:
                 # Import models here to avoid circular imports
                 from ..models import Job, Layer, Pen
-                
+
                 # Get the current job with layers
                 job = session.query(Job).filter(Job.id == job_id).first()
                 if not job:
@@ -165,12 +169,15 @@ class PenLayerGuard(Guard):
                         f"Job {job_id} not found",
                         {"error": "job_not_found"},
                     )
-                
+
                 # Get all layers for this job, ordered by index
-                layers = session.query(Layer).filter(
-                    Layer.job_id == job_id
-                ).order_by(Layer.order_index).all()
-                
+                layers = (
+                    session.query(Layer)
+                    .filter(Layer.job_id == job_id)
+                    .order_by(Layer.order_index)
+                    .all()
+                )
+
                 if not layers:
                     return GuardCheck(
                         "pen_layer_compatible",
@@ -178,19 +185,19 @@ class PenLayerGuard(Guard):
                         f"Job {job_id} has no layers defined",
                         {"job_id": job_id, "layer_count": 0},
                     )
-                
+
                 # Check each layer for pen compatibility
                 issues = []
                 compatible_layers = 0
                 layer_details = []
-                
+
                 for layer in layers:
                     layer_info = {
                         "layer_name": layer.layer_name,
                         "order_index": layer.order_index,
                         "pen_id": layer.pen_id,
                     }
-                    
+
                     if layer.pen_id is None:
                         issues.append(f"Layer '{layer.layer_name}' has no pen assigned")
                         layer_info["status"] = "no_pen"
@@ -198,15 +205,17 @@ class PenLayerGuard(Guard):
                         # Check if pen exists
                         pen = session.query(Pen).filter(Pen.id == layer.pen_id).first()
                         if not pen:
-                            issues.append(f"Layer '{layer.layer_name}' references non-existent pen ID {layer.pen_id}")
+                            issues.append(
+                                f"Layer '{layer.layer_name}' references non-existent pen ID {layer.pen_id}"
+                            )
                             layer_info["status"] = "pen_not_found"
                         else:
                             layer_info["pen_name"] = pen.name
                             layer_info["status"] = "compatible"
                             compatible_layers += 1
-                    
+
                     layer_details.append(layer_info)
-                
+
                 # Determine overall result
                 total_layers = len(layers)
                 if len(issues) == 0:
@@ -224,8 +233,12 @@ class PenLayerGuard(Guard):
                 else:
                     # If some layers are compatible but others have issues, it's a soft fail
                     # If no layers are compatible, it's a hard fail
-                    result = GuardResult.SOFT_FAIL if compatible_layers > 0 else GuardResult.FAIL
-                    
+                    result = (
+                        GuardResult.SOFT_FAIL
+                        if compatible_layers > 0
+                        else GuardResult.FAIL
+                    )
+
                     return GuardCheck(
                         "pen_layer_compatible",
                         result,
@@ -238,7 +251,7 @@ class PenLayerGuard(Guard):
                             "layers": layer_details,
                         },
                     )
-                
+
         except Exception as e:
             return GuardCheck(
                 "pen_layer_compatible",

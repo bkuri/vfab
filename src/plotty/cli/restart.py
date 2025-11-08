@@ -142,9 +142,9 @@ def restart_command(
 
         # Perform restart with progress tracking
         from ..progress import progress_task
-        
+
         total_operations = len(files_to_remove) + len(dirs_to_remove)
-        
+
         with progress_task(f"Restarting job '{job_id}'", total_operations) as update:
             # Remove files
             for file_path in files_to_remove:

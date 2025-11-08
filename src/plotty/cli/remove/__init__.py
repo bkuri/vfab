@@ -56,19 +56,29 @@ def remove_pen(
                 typer.echo("💡 Suggestions:")
                 typer.echo("   • Reassign layers to a different pen first")
                 typer.echo("   • List layers using this pen: plotty info job <job_id>")
-                typer.echo("   • Remove jobs using this pen: plotty remove job <job_id>")
+                typer.echo(
+                    "   • Remove jobs using this pen: plotty remove job <job_id>"
+                )
                 raise typer.Exit(ExitCode.BUSY)
 
             # Create items list for dry-run
-            items_to_remove = [f"pen '{name}'" + (f" (used by {layers_using_pen} layers)" if layers_using_pen > 0 else "")]
-            
+            items_to_remove = [
+                f"pen '{name}'"
+                + (
+                    f" (used by {layers_using_pen} layers)"
+                    if layers_using_pen > 0
+                    else ""
+                )
+            ]
+
             def execute_removal():
                 session.delete(pen)
                 session.commit()
                 return f"Removed pen '{name}'"
-            
+
             # Use enhanced dry-run context
             from ..common import DryRunContext
+
             ctx = DryRunContext(
                 operation_name="remove pen configuration",
                 apply_flag=apply,
@@ -76,10 +86,10 @@ def remove_pen(
                 item_type="pen",
                 operation_type="destructive",
             )
-            
+
             if not ctx.should_execute():
                 return
-            
+
             # Execute removal
             result = execute_removal()
             typer.echo(f"✅ {result}")
@@ -133,21 +143,31 @@ def remove_paper(
                     err=True,
                 )
                 typer.echo("💡 Suggestions:")
-                typer.echo("   • Remove jobs using this paper first: plotty remove job <job_id>")
+                typer.echo(
+                    "   • Remove jobs using this paper first: plotty remove job <job_id>"
+                )
                 typer.echo("   • List jobs using this paper: plotty list jobs")
                 typer.echo("   • Reassign jobs to a different paper")
                 raise typer.Exit(ExitCode.BUSY)
 
             # Create items list for dry-run
-            items_to_remove = [f"paper '{name}'" + (f" (used by {jobs_using_paper} jobs)" if jobs_using_paper > 0 else "")]
-            
+            items_to_remove = [
+                f"paper '{name}'"
+                + (
+                    f" (used by {jobs_using_paper} jobs)"
+                    if jobs_using_paper > 0
+                    else ""
+                )
+            ]
+
             def execute_removal():
                 session.delete(paper)
                 session.commit()
                 return f"Removed paper '{name}'"
-            
+
             # Use enhanced dry-run context
             from ..common import DryRunContext
+
             ctx = DryRunContext(
                 operation_name="remove paper configuration",
                 apply_flag=apply,
@@ -155,10 +175,10 @@ def remove_paper(
                 item_type="paper",
                 operation_type="destructive",
             )
-            
+
             if not ctx.should_execute():
                 return
-            
+
             # Execute removal
             result = execute_removal()
             typer.echo(f"✅ {result}")

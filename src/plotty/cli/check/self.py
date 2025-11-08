@@ -48,14 +48,14 @@ class TestProgressTracker:
         """
         self.current_test += 1
         self.current_test_name = test_name
-        
+
         # For two-line display, extract cleaner test name
         if ": " in test_name:
             category, clean_name = test_name.split(": ", 1)
             display_name = f"[{self.current_test}/{self.total_tests}] {clean_name}"
         else:
             display_name = f"[{self.current_test}/{self.total_tests}] {test_name}"
-        
+
         self.update_func(1, display_name)
 
 
@@ -119,11 +119,11 @@ def create_integrated_test_svg(output_path: str) -> bool:
 
 
 def create_test_result(
-    name: str, 
-    success: bool, 
-    message: str = "", 
+    name: str,
+    success: bool,
+    message: str = "",
     details: dict | None = None,
-    skipped: bool = False
+    skipped: bool = False,
 ) -> dict:
     """Create a standardized test result."""
     return {
@@ -648,7 +648,7 @@ def generate_integrated_report(results: list, console: Console) -> dict:
     if use_rich:
         # Rich formatting for terminal
         from rich.table import Table
-        
+
         from rich.text import Text
 
         # Group results by category first to calculate table width
@@ -704,8 +704,6 @@ def generate_integrated_report(results: list, console: Console) -> dict:
                 table.add_row(
                     status_text, category, test_name, message, style=row_style
                 )
-
-        
 
         # Summary panel with calculated width and color coding
         summary_text = Text()
@@ -889,7 +887,9 @@ def run_self_test(
 
     try:
         # Create progress tracker with two-line display
-        with progress_task("Running tests", total=total_tests, two_line=True) as update_progress:
+        with progress_task(
+            "Running tests", total=total_tests, two_line=True
+        ) as update_progress:
             progress_tracker = TestProgressTracker(total_tests, update_progress)
 
             # Run tests based on level

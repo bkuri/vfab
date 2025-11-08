@@ -52,10 +52,10 @@ def start_command(
 
     This command validates physical setup (paper alignment, pen configuration) and
     starts plotting. Use --apply to actually plot, otherwise runs in preview mode.
-    
+
     Available presets:
         fast    - Maximum speed for quick drafts
-        safe    - Conservative settings for reliability  
+        safe    - Conservative settings for reliability
         preview - Quick preview without pen down
         detail  - High precision for detailed artwork
         draft   - Quick draft with moderate quality
@@ -238,9 +238,15 @@ def start_command(
 
 
 def plan_command(
-    job_id: str = typer.Argument(..., autocompletion=complete_job_id, help="Job ID to plan"),
-    pen: str = typer.Option("0.3mm black", "--pen", "-p", help="Default pen specification"),
-    interactive: bool = typer.Option(False, "--interactive", "-i", help="Interactive layer planning"),
+    job_id: str = typer.Argument(
+        ..., autocompletion=complete_job_id, help="Job ID to plan"
+    ),
+    pen: str = typer.Option(
+        "0.3mm black", "--pen", "-p", help="Default pen specification"
+    ),
+    interactive: bool = typer.Option(
+        False, "--interactive", "-i", help="Interactive layer planning"
+    ),
 ):
     """Plan a job for plotting with layer analysis.
 
@@ -469,11 +475,13 @@ def optimize_command(
 
         # Perform optimization using FSM with progress tracking
         from ..progress import progress_task
-        
+
         optimized_count = 0
         failed_count = 0
 
-        with progress_task(f"Optimizing {len(jobs_data)} jobs", len(target_ids)) as update:
+        with progress_task(
+            f"Optimizing {len(jobs_data)} jobs", len(target_ids)
+        ) as update:
             for i, job_id in enumerate(target_ids):
                 try:
                     # Create FSM for the job
@@ -482,7 +490,9 @@ def optimize_command(
                     # Apply optimizations with specified or default settings
                     effective_preset = preset or config.optimization.default_level
                     effective_digest = (
-                        digest if digest is not None else config.optimization.default_digest
+                        digest
+                        if digest is not None
+                        else config.optimization.default_digest
                     )
 
                     if fsm.apply_optimizations(
@@ -499,7 +509,9 @@ def optimize_command(
                     else:
                         failed_count += 1
                         if console:
-                            console.print(f"  ❌ Failed to optimize {job_id}", style="red")
+                            console.print(
+                                f"  ❌ Failed to optimize {job_id}", style="red"
+                            )
                         else:
                             print(f"  Failed to optimize {job_id}")
 
@@ -509,10 +521,12 @@ def optimize_command(
                 except Exception as e:
                     failed_count += 1
                     if console:
-                        console.print(f"  ❌ Failed to optimize {job_id}: {e}", style="red")
+                        console.print(
+                            f"  ❌ Failed to optimize {job_id}: {e}", style="red"
+                        )
                     else:
                         print(f"  Failed to optimize {job_id}: {e}")
-                    
+
                     # Still update progress even on failure
                     update(1)
 

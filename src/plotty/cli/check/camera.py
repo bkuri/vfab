@@ -18,8 +18,8 @@ def camera_test() -> None:
             cfg = load_config(None)
             if not cfg.camera.enabled:
                 show_status(
-                    "  Camera test skipped - Camera disabled in configuration", 
-                    "warning"  # Using warning for appropriate visibility
+                    "  Camera test skipped - Camera disabled in configuration",
+                    "warning",  # Using warning for appropriate visibility
                 )
                 return
         except Exception:

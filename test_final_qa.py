@@ -25,12 +25,12 @@ def run_command(cmd: str, check: bool = True) -> subprocess.CompletedProcess:
     """Run a command and return result."""
     print(f"🔧 Running: {cmd}")
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-    
+
     if check and result.returncode != 0:
         print(f"❌ Command failed: {cmd}")
         print(f"STDERR: {result.stderr}")
         return None
-    
+
     return result
 
 
@@ -38,17 +38,17 @@ def run_test_suite(test_name: str, test_commands: List[Tuple[str, str]]) -> bool
     """Run a test suite with multiple commands."""
     print(f"\n🧪 {test_name}")
     print("=" * (len(test_name) + 4))
-    
+
     passed = 0
     total = len(test_commands)
-    
+
     for cmd, description in test_commands:
         print(f"\n  🔄 {description}...")
         start_time = time.time()
-        
+
         result = run_command(cmd, check=False)
         duration = time.time() - start_time
-        
+
         if result and result.returncode == 0:
             print(f"  ✅ {description} passed ({duration:.2f}s)")
             passed += 1
@@ -59,10 +59,10 @@ def run_test_suite(test_name: str, test_commands: List[Tuple[str, str]]) -> bool
             print(f"  ❌ {description} failed ({duration:.2f}s)")
             if result:
                 print(f"     Error: {result.stderr[:200]}...")
-    
+
     success_rate = (passed / total) * 100
     print(f"\n  📊 {test_name}: {passed}/{total} tests passed ({success_rate:.1f}%)")
-    
+
     return success_rate >= 80  # Consider 80%+ as acceptable
 
 
@@ -78,7 +78,7 @@ def test_core_functionality():
         ("plotty stats summary", "Statistics summary"),
         ("plotty stats performance", "Performance statistics"),
     ]
-    
+
     return run_test_suite("Core Functionality Tests", tests)
 
 
@@ -86,18 +86,20 @@ def test_job_lifecycle():
     """Test complete job lifecycle."""
     print("\n🔄 Job Lifecycle Tests")
     print("=" * 23)
-    
+
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
-        
+
         # Create test SVG
         test_svg = temp_path / "test.svg"
-        test_svg.write_text("""<?xml version="1.0" encoding="UTF-8"?>
+        test_svg.write_text(
+            """<?xml version="1.0" encoding="UTF-8"?>
 <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
   <rect x="10" y="10" width="80" height="80" fill="none" stroke="black" stroke-width="1"/>
   <circle cx="50" cy="50" r="20" fill="none" stroke="black" stroke-width="1"/>
-</svg>""")
-        
+</svg>"""
+        )
+
         tests = [
             (f'plotty add job qa-test "{test_svg}" --apply', "Job creation"),
             ("plotty list jobs", "Job listing"),
@@ -105,7 +107,7 @@ def test_job_lifecycle():
             ("plotty check job qa-test", "Job validation"),
             ("plotty remove job qa-test", "Job removal"),
         ]
-        
+
         return run_test_suite("Job Lifecycle Tests", tests)
 
 
@@ -116,7 +118,7 @@ def test_performance_suites():
         ("uv run python test_database_performance.py", "Database performance"),
         ("uv run python test_cross_platform.py", "Cross-platform compatibility"),
     ]
-    
+
     return run_test_suite("Performance Test Suites", performance_tests)
 
 
@@ -124,12 +126,12 @@ def test_load_testing():
     """Run load testing."""
     print("\n⚡ Load Testing")
     print("=" * 15)
-    
+
     # Quick load test
     tests = [
         ("uv run python test_load.py --quick", "Quick load test"),
     ]
-    
+
     return run_test_suite("Load Testing", tests)
 
 
@@ -137,13 +139,13 @@ def test_integration_workflows():
     """Test integration workflows."""
     print("\n🔗 Integration Workflows")
     print("=" * 26)
-    
+
     tests = [
         ("plotty check ready", "System readiness"),
         ("plotty check self --level=basic", "Basic self-test"),
         ("plotty check self --level=intermediate", "Intermediate self-test"),
     ]
-    
+
     return run_test_suite("Integration Workflows", tests)
 
 
@@ -151,35 +153,37 @@ def test_error_handling():
     """Test error handling and edge cases."""
     print("\n🚨 Error Handling Tests")
     print("=" * 24)
-    
+
     tests = [
         ("plotty info job nonexistent-job-12345", "Non-existent job handling"),
         ("plotty remove job nonexistent-job-12345", "Non-existent job removal"),
         ("plotty add job test /nonexistent/file.svg", "Invalid file handling"),
     ]
-    
+
     # For error handling tests, we expect non-zero exit codes for proper error handling
     print("\n🔄 Testing error handling...")
     passed = 0
     total = len(tests)
-    
+
     for cmd, description in tests:
         print(f"\n  🔄 {description}...")
         start_time = time.time()
-        
+
         result = run_command(cmd, check=False)
         duration = time.time() - start_time
-        
+
         # For error handling tests, non-zero exit codes are expected and correct
         if result and result.returncode != 0:
             print(f"  ✅ {description} correctly handled error ({duration:.2f}s)")
             passed += 1
         else:
             print(f"  ❌ {description} should have failed but didn't ({duration:.2f}s)")
-    
+
     success_rate = (passed / total) * 100
-    print(f"\n  📊 Error Handling Tests: {passed}/{total} tests passed ({success_rate:.1f}%)")
-    
+    print(
+        f"\n  📊 Error Handling Tests: {passed}/{total} tests passed ({success_rate:.1f}%)"
+    )
+
     return success_rate >= 80  # Consider 80%+ as acceptable
 
 
@@ -188,7 +192,7 @@ def generate_qa_report(results: Dict[str, bool]) -> str:
     passed = sum(results.values())
     total = len(results)
     success_rate = (passed / total) * 100
-    
+
     report = f"""# ploTTY v0.8.0 Final QA Report
 
 ## Executive Summary
@@ -201,11 +205,11 @@ def generate_qa_report(results: Dict[str, bool]) -> str:
 ## Test Suite Results
 
 """
-    
+
     for suite_name, passed in results.items():
         status = "✅ PASSED" if passed else "❌ FAILED"
         report += f"- **{suite_name}**: {status}\n"
-    
+
     report += """
 
 ## Performance Highlights
@@ -221,7 +225,7 @@ Based on comprehensive testing:
 ## Quality Assessment
 
 """
-    
+
     if success_rate >= 90:
         report += "🟢 **EXCELLENT** - Ready for production release\n"
     elif success_rate >= 80:
@@ -230,13 +234,13 @@ Based on comprehensive testing:
         report += "🟠 **ACCEPTABLE** - Some issues need attention\n"
     else:
         report += "🔴 **NEEDS WORK** - Significant issues found\n"
-    
+
     report += """
 
 ## Recommendations
 
 """
-    
+
     if success_rate == 100:
         report += "- ✅ All tests passed - Ready for immediate release\n"
         report += "- ✅ Performance metrics exceed targets\n"
@@ -247,7 +251,7 @@ Based on comprehensive testing:
     else:
         report += "- ⚠️  Address failing test suites before release\n"
         report += "- ⚠️  Review performance bottlenecks\n"
-    
+
     report += """
 
 ## Release Checklist
@@ -265,7 +269,7 @@ Based on comprehensive testing:
 ploTTY v0.8.0 demonstrates excellent performance, reliability, and cross-platform compatibility.
 The comprehensive test suite validates readiness for production deployment.
 """
-    
+
     return report
 
 
@@ -275,7 +279,7 @@ def main():
     print("=" * 50)
     print("Running comprehensive end-to-end integration tests...")
     print()
-    
+
     # Run all test suites
     test_suites = [
         ("Core Functionality", test_core_functionality),
@@ -285,45 +289,45 @@ def main():
         ("Integration Workflows", test_integration_workflows),
         ("Error Handling", test_error_handling),
     ]
-    
+
     results = {}
     start_time = time.time()
-    
+
     for suite_name, test_func in test_suites:
         try:
             results[suite_name] = test_func()
         except Exception as e:
             print(f"❌ {suite_name} failed with exception: {e}")
             results[suite_name] = False
-    
+
     total_duration = time.time() - start_time
-    
+
     # Generate and display results
     print(f"\n{'='*60}")
     print("📊 FINAL QA RESULTS")
     print("=" * 60)
-    
+
     passed = sum(results.values())
     total = len(results)
     success_rate = (passed / total) * 100
-    
+
     print(f"📈 Overall Success Rate: {success_rate:.1f}% ({passed}/{total} suites)")
     print(f"⏱️  Total Duration: {total_duration:.2f} seconds")
     print()
-    
+
     for suite_name, passed in results.items():
         status = "✅ PASSED" if passed else "❌ FAILED"
         print(f"  {suite_name}: {status}")
-    
+
     # Generate QA report
     report = generate_qa_report(results)
-    
+
     # Save report
-    with open('QA_REPORT.md', 'w') as f:
+    with open("QA_REPORT.md", "w") as f:
         f.write(report)
-    
+
     print("\n📋 Detailed QA report saved to: QA_REPORT.md")
-    
+
     # Final assessment
     if success_rate >= 90:
         print("\n🎉 EXCELLENT! ploTTY v0.8.0 is ready for release!")

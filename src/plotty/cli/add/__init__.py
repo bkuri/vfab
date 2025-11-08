@@ -19,11 +19,19 @@ add_app = typer.Typer(no_args_is_help=True, help="Add new resources")
 def add_single_job(
     job_name: str = typer.Argument(..., help="Name for the new job"),
     file_path: Path = typer.Argument(..., help="Path to SVG or PLOB file to add"),
-    preset: Optional[str] = typer.Option(None, "--preset", "-p", help="Optimization preset (fast, default, hq)"),
-    digest: Optional[int] = typer.Option(None, "--digest", "-d", help="Digest level for AxiDraw acceleration (0-2)"),
-    force: bool = typer.Option(False, "--force", "-f", help="Override existing job with same name"),
+    preset: Optional[str] = typer.Option(
+        None, "--preset", "-p", help="Optimization preset (fast, default, hq)"
+    ),
+    digest: Optional[int] = typer.Option(
+        None, "--digest", "-d", help="Digest level for AxiDraw acceleration (0-2)"
+    ),
+    force: bool = typer.Option(
+        False, "--force", "-f", help="Override existing job with same name"
+    ),
     apply: bool = create_apply_option("Add job (dry-run by default)"),
-    dry_run: bool = create_dry_run_option("Preview job addition without creating files"),
+    dry_run: bool = create_dry_run_option(
+        "Preview job addition without creating files"
+    ),
 ) -> None:
     """Add a new job from an SVG or PLOB file.
 
@@ -89,8 +97,12 @@ def add_single_job(
     if not force and jdir.exists():
         typer.echo(f"❌ Error: Job '{job_name}' already exists")
         typer.echo("💡 Suggestions:")
-        typer.echo(f"   • Use --force to override existing job: plotty add job {job_name} {file_path} --force")
-        typer.echo(f"   • Choose a different job name: plotty add job {job_name}_v2 {file_path}")
+        typer.echo(
+            f"   • Use --force to override existing job: plotty add job {job_name} {file_path} --force"
+        )
+        typer.echo(
+            f"   • Choose a different job name: plotty add job {job_name}_v2 {file_path}"
+        )
         typer.echo("   • List existing jobs: plotty list jobs")
         raise typer.Exit(1)
 
@@ -102,7 +114,7 @@ def add_single_job(
             f"preset: {preset or 'default'}",
             f"digest: {digest or 'default'}",
         ]
-        
+
         ctx = DryRunContext(
             operation_name="add job",
             apply_flag=apply,
@@ -110,10 +122,10 @@ def add_single_job(
             item_type="job",
             operation_type="file_op",
         )
-        
+
         if not ctx.should_execute():
             return
-    
+
     # Create job directory
     jdir.mkdir(parents=True, exist_ok=True)
 
@@ -322,10 +334,14 @@ def add_jobs(
         ..., help="File pattern for multiple jobs (e.g., '*.svg', 'designs/*.plob')"
     ),
     pristine: bool = typer.Option(
-        False, "--pristine", help="Skip optimization (add in pristine state for manual control)"
+        False,
+        "--pristine",
+        help="Skip optimization (add in pristine state for manual control)",
     ),
     apply: bool = create_apply_option("Add jobs (dry-run by default)"),
-    dry_run: bool = create_dry_run_option("Preview job addition without creating files"),
+    dry_run: bool = create_dry_run_option(
+        "Preview job addition without creating files"
+    ),
 ) -> None:
     """Add multiple jobs using a file pattern.
 
@@ -364,7 +380,7 @@ def add_jobs(
                 f"{len(files)} jobs from pattern '{pattern}'",
                 f"mode: {'pristine' if pristine else 'optimized'}",
             ]
-            
+
             ctx = DryRunContext(
                 operation_name="add multiple jobs",
                 apply_flag=apply,
@@ -372,7 +388,7 @@ def add_jobs(
                 item_type="job batch",
                 operation_type="file_op",
             )
-            
+
             if not ctx.should_execute():
                 return
 

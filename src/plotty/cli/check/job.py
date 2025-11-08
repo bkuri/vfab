@@ -62,7 +62,9 @@ def check_job(
                         style="cyan",
                     )
                 else:
-                    print(f"  Guard '{guard_name}' skipped for job {job_id}: {result.message}")
+                    print(
+                        f"  Guard '{guard_name}' skipped for job {job_id}: {result.message}"
+                    )
             else:
                 if console:
                     console.print(

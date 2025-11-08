@@ -157,18 +157,20 @@ def setup() -> None:
                 # Save configuration to file
                 try:
                     from ...config import save_config, Settings
-                    
+
                     # Create updated configuration
                     if cfg is None:
                         cfg = Settings()
-                    
+
                     # Update workspace path
                     cfg.workspace = str(workspace_path)
-                    
+
                     # Save configuration
                     save_config(cfg)
-                    show_status("✓ Configuration saved to config/config.yaml", "success")
-                    
+                    show_status(
+                        "✓ Configuration saved to config/config.yaml", "success"
+                    )
+
                 except Exception as e:
                     show_status(f"✗ Failed to save configuration: {e}", "error")
                     raise typer.Exit(ExitCode.ERROR)
@@ -189,18 +191,20 @@ def setup() -> None:
                 # Save configuration to file
                 try:
                     from ...config import save_config, Settings
-                    
+
                     # Create updated configuration
                     if cfg is None:
                         cfg = Settings()
-                    
+
                     # Update workspace path
                     cfg.workspace = str(workspace_path)
-                    
+
                     # Save configuration
                     save_config(cfg)
-                    show_status("✓ Configuration saved to config/config.yaml", "success")
-                    
+                    show_status(
+                        "✓ Configuration saved to config/config.yaml", "success"
+                    )
+
                 except Exception as e:
                     show_status(f"✗ Failed to save configuration: {e}", "error")
                     raise typer.Exit(ExitCode.ERROR)
@@ -233,6 +237,7 @@ def check_config() -> None:
             cfg = load_config(None)
         except Exception:
             from ...config import Settings
+
             cfg = Settings()
 
         issues = []
@@ -312,9 +317,15 @@ def check_config() -> None:
                         if "Workspace directory does not exist" in issue:
                             console.print("    💡 Run: plotty setup", style="dim cyan")
                         elif "Failed to load configuration" in issue:
-                            console.print("    💡 Check: config/config.yaml exists and is valid", style="dim cyan")
+                            console.print(
+                                "    💡 Check: config/config.yaml exists and is valid",
+                                style="dim cyan",
+                            )
                         elif "Database connection failed" in issue:
-                            console.print("    💡 Run: uv run alembic upgrade head", style="dim cyan")
+                            console.print(
+                                "    💡 Run: uv run alembic upgrade head",
+                                style="dim cyan",
+                            )
 
                 if warnings:
                     console.print("\n⚠️  Warnings:", style="bold yellow")
@@ -323,17 +334,35 @@ def check_config() -> None:
                         # Add actionable suggestions for common warnings
                         if "Missing subdirectory" in warning:
                             subdir = warning.split(": ")[1]
-                            console.print(f"    💡 Run: mkdir -p {subdir}", style="dim cyan")
+                            console.print(
+                                f"    💡 Run: mkdir -p {subdir}", style="dim cyan"
+                            )
                         elif "AxiDraw installed but no devices connected" in warning:
-                            console.print("    💡 Connect your AxiDraw device and check USB", style="dim cyan")
+                            console.print(
+                                "    💡 Connect your AxiDraw device and check USB",
+                                style="dim cyan",
+                            )
                         elif "AxiDraw not available" in warning:
-                            console.print("    💡 Run: uv pip install pyaxidraw", style="dim cyan")
+                            console.print(
+                                "    💡 Run: uv pip install pyaxidraw", style="dim cyan"
+                            )
                         elif "No camera devices found" in warning:
-                            console.print("    💡 Connect a camera or check /dev/video* devices", style="dim cyan")
-                        elif "Camera connected but blocked by motion service" in warning:
-                            console.print("    💡 Run: sudo systemctl stop motion", style="dim cyan")
+                            console.print(
+                                "    💡 Connect a camera or check /dev/video* devices",
+                                style="dim cyan",
+                            )
+                        elif (
+                            "Camera connected but blocked by motion service" in warning
+                        ):
+                            console.print(
+                                "    💡 Run: sudo systemctl stop motion",
+                                style="dim cyan",
+                            )
                         elif "Could not check device availability" in warning:
-                            console.print("    💡 Check device permissions and USB connections", style="dim cyan")
+                            console.print(
+                                "    💡 Check device permissions and USB connections",
+                                style="dim cyan",
+                            )
         else:
             if total_issues == 0:
                 print("✅ Configuration is valid!")
@@ -346,7 +375,9 @@ def check_config() -> None:
                         if "Workspace directory does not exist" in issue:
                             print("    💡 Run: plotty setup")
                         elif "Failed to load configuration" in issue:
-                            print("    💡 Check: config/config.yaml exists and is valid")
+                            print(
+                                "    💡 Check: config/config.yaml exists and is valid"
+                            )
                         elif "Database connection failed" in issue:
                             print("    💡 Run: uv run alembic upgrade head")
 
@@ -363,8 +394,12 @@ def check_config() -> None:
                         elif "AxiDraw not available" in warning:
                             print("    💡 Run: uv pip install pyaxidraw")
                         elif "No camera devices found" in warning:
-                            print("    💡 Connect a camera or check /dev/video* devices")
-                        elif "Camera connected but blocked by motion service" in warning:
+                            print(
+                                "    💡 Connect a camera or check /dev/video* devices"
+                            )
+                        elif (
+                            "Camera connected but blocked by motion service" in warning
+                        ):
                             print("    💡 Run: sudo systemctl stop motion")
                         elif "Could not check device availability" in warning:
                             print("    💡 Check device permissions and USB connections")

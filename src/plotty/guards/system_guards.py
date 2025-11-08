@@ -72,7 +72,7 @@ class DeviceGuard(Guard):
                     "firmware": sysinfo.get("fw_version", "Unknown"),
                 },
             )
-            
+
         except Exception as e:
             return GuardCheck(
                 "device_idle",
@@ -99,7 +99,7 @@ class CameraGuard(Guard):
         try:
             import requests
             from urllib.parse import urlparse
-            
+
             camera_url = self.config.camera.url
             if not camera_url:
                 return GuardCheck(
@@ -108,20 +108,26 @@ class CameraGuard(Guard):
                     "Camera enabled but no URL configured",
                     {"enabled": True, "url": None},
                 )
-            
+
             # Parse URL to determine camera type
             parsed_url = urlparse(camera_url)
-            
-            if self.config.camera.mode == "ip" and parsed_url.scheme in ["http", "https"]:
+
+            if self.config.camera.mode == "ip" and parsed_url.scheme in [
+                "http",
+                "https",
+            ]:
                 # Test IP camera connectivity
                 try:
                     # Set a reasonable timeout for camera check
                     response = requests.get(camera_url, timeout=5)
-                    
+
                     if response.status_code == 200:
                         # Check if we're getting actual image data
-                        content_type = response.headers.get('content-type', '').lower()
-                        if any(img_type in content_type for img_type in ['image', 'video', 'multipart']):
+                        content_type = response.headers.get("content-type", "").lower()
+                        if any(
+                            img_type in content_type
+                            for img_type in ["image", "video", "multipart"]
+                        ):
                             return GuardCheck(
                                 "camera_health",
                                 GuardResult.PASS,
@@ -156,7 +162,7 @@ class CameraGuard(Guard):
                                 "status_code": response.status_code,
                             },
                         )
-                        
+
                 except requests.exceptions.Timeout:
                     return GuardCheck(
                         "camera_health",
@@ -169,7 +175,11 @@ class CameraGuard(Guard):
                         "camera_health",
                         GuardResult.SOFT_FAIL,
                         f"Cannot connect to camera at {camera_url}",
-                        {"enabled": True, "url": camera_url, "error": "connection_error"},
+                        {
+                            "enabled": True,
+                            "url": camera_url,
+                            "error": "connection_error",
+                        },
                     )
                 except Exception as e:
                     return GuardCheck(
@@ -178,13 +188,14 @@ class CameraGuard(Guard):
                         f"Camera check failed: {str(e)}",
                         {"enabled": True, "url": camera_url, "error": str(e)},
                     )
-            
+
             elif self.config.camera.mode == "device" and self.config.camera.device:
                 # Test device camera (e.g., /dev/video0)
                 try:
                     import os
+
                     device_path = self.config.camera.device
-                    
+
                     if os.path.exists(device_path):
                         # Check if device is accessible
                         if os.access(device_path, os.R_OK):
@@ -205,7 +216,7 @@ class CameraGuard(Guard):
                                 f"Camera device {device_path} is not accessible",
                                 {
                                     "enabled": True,
-                                    "mode": "device", 
+                                    "mode": "device",
                                     "device": device_path,
                                     "error": "permission_denied",
                                 },
@@ -222,7 +233,7 @@ class CameraGuard(Guard):
                                 "error": "device_not_found",
                             },
                         )
-                        
+
                 except Exception as e:
                     return GuardCheck(
                         "camera_health",
@@ -230,7 +241,7 @@ class CameraGuard(Guard):
                         f"Device camera check failed: {str(e)}",
                         {"enabled": True, "mode": "device", "error": str(e)},
                     )
-            
+
             else:
                 return GuardCheck(
                     "camera_health",
@@ -242,14 +253,18 @@ class CameraGuard(Guard):
                         "url": camera_url,
                     },
                 )
-                
+
         except ImportError:
             # requests module not available - this is a soft dependency
             return GuardCheck(
                 "camera_health",
                 GuardResult.SOFT_FAIL,
                 "Camera health check requires 'requests' module",
-                {"enabled": True, "error": "missing_dependency", "dependency": "requests"},
+                {
+                    "enabled": True,
+                    "error": "missing_dependency",
+                    "dependency": "requests",
+                },
             )
         except Exception as e:
             return GuardCheck(
@@ -269,60 +284,62 @@ class PhysicalSetupGuard(Guard):
             # Get job details to understand requirements
             from pathlib import Path
             import json
-            
+
             cfg = self.config
             phys_cfg = cfg.physical_setup
             jobs_dir = Path(cfg.workspace) / "jobs"
             job_file = jobs_dir / job_id / "job.json"
-            
+
             job_requirements = {
-                "paper_size": getattr(cfg.paper, 'default_size', 'A4'),
+                "paper_size": getattr(cfg.paper, "default_size", "A4"),
                 "pen_count": 1,  # Default to single pen
                 "has_multipen": False,
             }
-            
+
             # Try to get actual job requirements
             if job_file.exists():
                 try:
-                    with open(job_file, 'r') as f:
+                    with open(job_file, "r") as f:
                         job_data = json.load(f)
-                    
+
                     # Extract pen requirements from job data
-                    if 'pen_mapping' in job_data:
-                        job_requirements["pen_count"] = len(job_data['pen_mapping'])
-                        job_requirements["has_multipen"] = job_requirements["pen_count"] > 1
-                    
+                    if "pen_mapping" in job_data:
+                        job_requirements["pen_count"] = len(job_data["pen_mapping"])
+                        job_requirements["has_multipen"] = (
+                            job_requirements["pen_count"] > 1
+                        )
+
                     # Extract paper requirements if available
-                    if 'paper_size' in job_data:
-                        job_requirements["paper_size"] = job_data['paper_size']
-                    elif 'paper' in job_data:
-                        job_requirements["paper_size"] = job_data['paper']
-                        
+                    if "paper_size" in job_data:
+                        job_requirements["paper_size"] = job_data["paper_size"]
+                    elif "paper" in job_data:
+                        job_requirements["paper_size"] = job_data["paper"]
+
                 except Exception:
                     # If we can't read job file, continue with defaults
                     pass
-            
+
             # Check paper alignment
             paper_check = self._check_paper_alignment(job_requirements)
             if paper_check.result != GuardResult.PASS:
                 return paper_check
-            
+
             # Check pen setup
             pen_check = self._check_pen_setup(job_requirements)
             if pen_check.result != GuardResult.PASS:
                 return pen_check
-            
+
             # Additional device connection check if enabled
             if phys_cfg.device_connection_check:
                 device_check = self._check_device_connection()
                 if device_check.result != GuardResult.PASS:
                     return device_check
-            
+
             # All checks passed
             guidance_msg = "Physical setup validated"
             if phys_cfg.show_guidance:
                 guidance_msg += f" for {job_requirements['paper_size']} paper with {job_requirements['pen_count']} pen(s)"
-            
+
             return GuardCheck(
                 "physical_setup",
                 GuardResult.PASS,
@@ -336,7 +353,7 @@ class PhysicalSetupGuard(Guard):
                     "device_connected": True,
                 },
             )
-            
+
         except Exception as e:
             return GuardCheck(
                 "physical_setup",
@@ -344,16 +361,16 @@ class PhysicalSetupGuard(Guard):
                 f"Physical setup check failed: {str(e)}",
                 {"error": str(e)},
             )
-    
+
     def _check_paper_alignment(self, job_requirements: dict) -> GuardCheck:
         """Check if paper is properly aligned."""
         # In a real implementation, this might use camera detection
         # For now, we'll provide a framework for manual confirmation
-        
+
         # Check if paper size matches requirements
-        configured_paper = getattr(self.config.paper, 'default_size', 'A4')
+        configured_paper = getattr(self.config.paper, "default_size", "A4")
         required_paper = job_requirements["paper_size"]
-        
+
         if configured_paper != required_paper:
             return GuardCheck(
                 "physical_setup",
@@ -365,7 +382,7 @@ class PhysicalSetupGuard(Guard):
                     "paper_aligned": False,
                 },
             )
-        
+
         # Enhanced paper alignment validation with actionable guidance
         return GuardCheck(
             "physical_setup",
@@ -377,15 +394,15 @@ class PhysicalSetupGuard(Guard):
                 "guidance": f"Load {required_paper} paper and align to top-left corner of plot area",
             },
         )
-    
+
     def _check_pen_setup(self, job_requirements: dict) -> GuardCheck:
         """Check if pens are properly configured."""
         try:
             cfg = self.config
-            
+
             pen_count = job_requirements["pen_count"]
             has_multipen = job_requirements["has_multipen"]
-            
+
             # Check if multipen is configured for multi-pen jobs
             if has_multipen:
                 # For now, multipen is not fully configured in Settings
@@ -400,11 +417,11 @@ class PhysicalSetupGuard(Guard):
                         "pens_ready": False,
                     },
                 )
-            
+
             # Single pen validation with enhanced guidance
             if not has_multipen:
                 # Check if AxiDraw device is configured
-                if not hasattr(cfg, 'device') or not cfg.device:
+                if not hasattr(cfg, "device") or not cfg.device:
                     return GuardCheck(
                         "physical_setup",
                         GuardResult.SOFT_FAIL,
@@ -415,7 +432,7 @@ class PhysicalSetupGuard(Guard):
                             "pens_ready": False,
                         },
                     )
-            
+
             return GuardCheck(
                 "physical_setup",
                 GuardResult.PASS,
@@ -427,7 +444,7 @@ class PhysicalSetupGuard(Guard):
                     "guidance": "Check pen position and test pen movement before plotting",
                 },
             )
-            
+
         except Exception as e:
             return GuardCheck(
                 "physical_setup",
@@ -435,14 +452,14 @@ class PhysicalSetupGuard(Guard):
                 f"Pen setup check failed: {str(e)}",
                 {"error": str(e), "pens_ready": False},
             )
-    
+
     def _check_device_connection(self) -> GuardCheck:
         """Check if device is properly connected."""
         try:
             cfg = self.config
-            
+
             # Check if device configuration exists
-            if not hasattr(cfg, 'device') or not cfg.device:
+            if not hasattr(cfg, "device") or not cfg.device:
                 return GuardCheck(
                     "physical_setup",
                     GuardResult.SOFT_FAIL,
@@ -452,7 +469,7 @@ class PhysicalSetupGuard(Guard):
                         "device_configured": False,
                     },
                 )
-            
+
             # For now, assume device is connected if configured
             # In a real implementation, this would check actual device connectivity
             return GuardCheck(
@@ -464,7 +481,7 @@ class PhysicalSetupGuard(Guard):
                     "device_configured": True,
                 },
             )
-            
+
         except Exception as e:
             return GuardCheck(
                 "physical_setup",

@@ -148,7 +148,7 @@ class PlottyProgress:
 class TwoLineProgress:
     """
     Two-line progress indicator with spinner+description on line 1 and progress bar on line 2.
-    
+
     Provides cleaner visual separation between status information and progress metrics,
     allowing more space for descriptions and consistent progress bar width.
     """
@@ -169,7 +169,7 @@ class TwoLineProgress:
         # Line 1: Spinner + Description
         spinner = self.spinner_states[self.spinner_index % len(self.spinner_states)]
         line1 = Text(f"{spinner} {self.description}", style="cyan")
-        
+
         # Line 2: Progress bar + metrics
         if self.total > 0:
             percent = self.current / self.total
@@ -180,7 +180,7 @@ class TwoLineProgress:
             line2 = Text(f"[{bar}] {percent:.0%} ({elapsed:.1f}s)", style="blue")
         else:
             line2 = Text("Initializing...", style="dim")
-        
+
         return Group(line1, line2)
 
     def _update_display(self) -> None:
@@ -214,7 +214,9 @@ class TwoLineProgress:
             with self.live:
                 self._update_display()
 
-                def update(progress: int = 1, description: Optional[str] = None, *args) -> None:
+                def update(
+                    progress: int = 1, description: Optional[str] = None, *args
+                ) -> None:
                     """Update the progress display."""
                     if description:
                         self.description = description
@@ -232,6 +234,7 @@ class TwoLineProgress:
                 # Clear terminal completely for clean results display
                 import subprocess
                 import sys
+
                 try:
                     # Use subprocess to call clear/cls properly
                     if sys.platform == "win32":
