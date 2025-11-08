@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 from plotty.backup import BackupManager, BackupType
-from plotty.plotting import MultiPenPlotter, PenSwapPrompt
+from plotty.plotting import MultiPenPlotter, PenSwapPrompt, is_axidraw_available
 from plotty.paper import PaperSize, PaperConfig
 
 
@@ -113,6 +113,10 @@ class TestPaperSize:
 class TestMultiPenPlotter:
     """Test multi-pen plotter functionality."""
 
+    @pytest.mark.skipif(
+        not is_axidraw_available(),
+        reason="AxiDraw support not available",
+    )
     def test_plotter_creation(self):
         """Test plotter creation."""
         # Mock the driver manager to avoid hardware dependencies
