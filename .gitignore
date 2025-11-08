@@ -1,3 +1,7 @@
+# =============================================================================
+# Python
+# =============================================================================
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -5,6 +9,24 @@ __pycache__/
 
 # C extensions
 *.so
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Package managers
+.python-version
+Pipfile.lock
+__pypackages__/
+
+# =============================================================================
+# Build & Distribution
+# =============================================================================
 
 # Distribution / packaging
 .Python
@@ -31,11 +53,11 @@ MANIFEST
 *.manifest
 *.spec
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+# =============================================================================
+# Development Tools
+# =============================================================================
 
-# Unit test / coverage reports
+# Testing & Coverage
 htmlcov/
 .tox/
 .nox/
@@ -49,107 +71,112 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
-# Translations
-*.mo
-*.pot
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
 
-# Django stuff:
+# Linting & Formatting
+.ruff_cache/
+
+# Documentation
+docs/_build/
+/site
+
+# Jupyter/IPython
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
+
+# =============================================================================
+# Frameworks & Libraries
+# =============================================================================
+
+# Django
 *.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
-# Flask stuff:
+# Flask
 instance/
 .webassets-cache
 
-# Scrapy stuff:
+# Scrapy
 .scrapy
 
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# pipenv
-Pipfile.lock
-
-# PEP 582
-__pypackages__/
-
-# Celery stuff
+# Celery
 celerybeat-schedule
 celerybeat.pid
 
-# SageMath parsed files
+# SageMath
 *.sage.py
 
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+# =============================================================================
+# ploTTY Specific
+# =============================================================================
 
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# ploTTY specific
 # User data directories (created in ~/.local/share/plotty/)
 workspace/
 logs/
 backups/
 temp/
 _temp/
+
+# Test-specific temporary directories
 tests/workspace/
 tests/logs/
 tests/temp/
-*.backup
+
+# Database files
 *.db
 *.sqlite
 *.sqlite3
+
+# Generated reports and artifacts
+*.backup
 *.jsonl
 *.mp4
 *.html
 bandit-report.json
 coverage.xml
-.ruff_cache/
-.pytest_cache/
-.mypy_cache/
-.dmypy.json
-.dmypy.json
+QA_REPORT.md
+
+# =============================================================================
+# Exceptions (files to keep)
+# =============================================================================
+
+# Configuration files
 !config/config.yaml
 !config/vpype-presets.yaml
+!alembic.ini
+
+# Test fixtures
 !tests/fixtures/test_design.svg
-QA_REPORT.md
+
+# Packaging artifacts
 !packaging/
 packaging/*.tar.*
-!alembic.ini
+
+# =============================================================================
+# Legacy/Unused (can be removed in future cleanup)
+# =============================================================================
+
+# Installer logs (rarely used)
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Translations (not used in this project)
+*.mo
+*.pot
+
+# PyBuilder (not used)
+target/
+
+# Spyder project settings (unlikely to be used)
+.spyderproject
+.spyproject
+
+# Rope project settings (unlikely to be used)
+.ropeproject
