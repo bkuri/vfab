@@ -27,7 +27,7 @@ from .system import system_app
 try:
     __version__ = metadata.version("plotty")
 except metadata.PackageNotFoundError:
-    __version__ = "1.2.0"
+    __version__ = "0.9.0"
 
 # Create main app
 app = typer.Typer(no_args_is_help=True)
