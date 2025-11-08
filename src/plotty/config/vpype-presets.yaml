@@ -1,0 +1,56 @@
+presets:
+  default:
+    pipe: "read {src} pagesize {pagesize} crop 0 0 {width_mm:g}mm {height_mm:g}mm linemerge linesort write {dst}"
+    description: "Standard optimization with line merging and sorting"
+  
+  fast:
+    pipe: "read {src} pagesize {pagesize} crop 0 0 {width_mm:g}mm {height_mm:g}mm linemerge linesort write {dst}"
+    description: "Fast optimization for quick plotting"
+  
+  hq:
+    pipe: "read {src} pagesize {pagesize} crop 0 0 {width_mm:g}mm {height_mm:g}mm linemerge linesort linesimplify write {dst}"
+    description: "High quality optimization with line simplification"
+
+# ploTTY optimization configuration
+optimization:
+  levels:
+    fast:
+      description: "Fast optimization for quick plotting"
+      vpype_preset: "fast"
+      digest_default: 1
+    default:
+      description: "Standard optimization balanced for speed and quality"
+      vpype_preset: "default"
+      digest_default: 1
+    hq:
+      description: "High quality optimization for best results"
+      vpype_preset: "hq"
+      digest_default: 2
+  
+  digest_levels:
+    0:
+      description: "No digest generation (slower plotting)"
+      enabled: false
+    1:
+      description: "Standard digest for AxiDraw acceleration"
+      enabled: true
+      compression: "standard"
+    2:
+      description: "High compression digest for maximum speed"
+      enabled: true
+      compression: "high"
+  
+  # Default settings when not specified
+  default_level: "default"
+  default_digest: 1
+  
+  # File type handling
+  file_types:
+    .plob:
+      mode: "plob"
+      auto_pristine: true
+      skip_optimization: true
+    .svg:
+      mode: "normal"
+      auto_pristine: false
+      skip_optimization: false

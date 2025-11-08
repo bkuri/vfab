@@ -12,7 +12,7 @@ import typer
 
 from .add import add_app
 from .check import check_app
-from .info import status_app
+from .info import info_app
 from .interactive import interactive_command
 from .job_commands import optimize_command, plan_command, queue_command, start_command
 from .list import list_app
@@ -35,7 +35,7 @@ app = typer.Typer(no_args_is_help=True)
 # Add sub-apps and commands (alphabetical order)
 app.add_typer(add_app, name="add", help="Add new files")
 app.add_typer(check_app, name="check", help="System and device checking")
-app.add_typer(status_app, name="info", help="Status and monitoring commands")
+app.add_typer(info_app, name="info", help="Information and monitoring commands")
 app.command("interactive", help="Start an interactive plot")(interactive_command)
 app.add_typer(list_app, name="list", help="List and manage resources")
 app.command("optimize", help="Optimize jobs for plotting")(optimize_command)
@@ -60,6 +60,52 @@ def main_callback(
     if version:
         typer.echo(f"ploTTY v{__version__}")
         raise typer.Exit()
+
+    # Initialize ploTTY on first run
+    try:
+        from ..init import is_first_run, initialize_plotty
+
+        if is_first_run():
+            try:
+                from rich.console import Console
+
+                console = Console()
+                console.print(
+                    "🎨 Welcome to ploTTY! Initializing configuration...",
+                    style="bold blue",
+                )
+            except ImportError:
+                print("🎨 Welcome to ploTTY! Initializing configuration...")
+
+            if initialize_plotty():
+                try:
+                    from rich.console import Console
+
+                    console = Console()
+                    console.print(
+                        "✅ Configuration initialized successfully!", style="green"
+                    )
+                    console.print(
+                        "💡 Run 'plotty setup' for interactive configuration",
+                        style="cyan",
+                    )
+                except ImportError:
+                    print("✅ Configuration initialized successfully!")
+                    print("💡 Run 'plotty setup' for interactive configuration")
+            else:
+                try:
+                    from rich.console import Console
+
+                    console = Console()
+                    console.print(
+                        "⚠️  Configuration initialization completed with warnings",
+                        style="yellow",
+                    )
+                except ImportError:
+                    print("⚠️  Configuration initialization completed with warnings")
+    except Exception:
+        # Don't let initialization break CLI functionality
+        pass
 
     # Check for interrupted jobs before any command
     try:

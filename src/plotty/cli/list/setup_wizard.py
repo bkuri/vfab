@@ -158,6 +158,19 @@ def setup() -> None:
                 try:
                     from ...config import save_config, Settings
 
+                    try:
+                        from ...init import get_default_config_path
+                    except ImportError:
+                        # Fallback if init module not available
+                        import platformdirs
+                        from pathlib import Path
+
+                        def get_default_config_path() -> Path:
+                            return (
+                                Path(platformdirs.user_config_dir("plotty"))
+                                / "config.yaml"
+                            )
+
                     # Create updated configuration
                     if cfg is None:
                         cfg = Settings()
@@ -165,11 +178,10 @@ def setup() -> None:
                     # Update workspace path
                     cfg.workspace = str(workspace_path)
 
-                    # Save configuration
-                    save_config(cfg)
-                    show_status(
-                        "✓ Configuration saved to config/config.yaml", "success"
-                    )
+                    # Save configuration to XDG config directory
+                    config_path = get_default_config_path()
+                    save_config(cfg, str(config_path))
+                    show_status(f"✓ Configuration saved to {config_path}", "success")
 
                 except Exception as e:
                     show_status(f"✗ Failed to save configuration: {e}", "error")

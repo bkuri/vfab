@@ -20,7 +20,7 @@ class CameraCfg(BaseModel):
 
 
 class DatabaseCfg(BaseModel):
-    url: str = f"sqlite:///{Path(platformdirs.user_data_dir('plotty')) / 'plotty.db'}"
+    url: str | None = None  # None = use default XDG location
     echo: bool = False
 
 
@@ -191,16 +191,58 @@ class Settings(BaseModel):
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
 
 
+def _ensure_config_initialized() -> None:
+    """Ensure ploTTY configuration is initialized on first run."""
+    try:
+        # Import here to avoid circular imports
+        import importlib
+
+        init_module = importlib.import_module(".init", package="plotty")
+
+        if init_module.is_first_run():
+            init_module.initialize_plotty()
+    except ImportError:
+        # If init module is not available, skip initialization
+        pass
+    except Exception:
+        # Don't let initialization errors break config loading
+        pass
+
+
 def load_config(path: str | None = None) -> Settings:
+    # Handle first-time initialization
+    if path is None and not os.environ.get("PLOTTY_CONFIG"):
+        _ensure_config_initialized()
+
+        # Try to use XDG config path if no custom path specified
+        try:
+            import importlib
+
+            init_module = importlib.import_module(".init", package="plotty")
+            default_config_path = init_module.get_default_config_path()
+            if default_config_path.exists():
+                path = str(default_config_path)
+        except (ImportError, AttributeError):
+            # Fallback to default path
+            pass
+
     p = Path(path or os.environ.get("PLOTTY_CONFIG", "config/config.yaml"))
     data = yaml.safe_load(p.read_text()) if p.exists() else {}
 
-    # Expand workspace path if present
-    if data and "workspace" in data:
-        expanded_path = os.path.expandvars(data["workspace"])
-        data["workspace"] = str(Path(expanded_path).expanduser())
+    settings = Settings(**(data or {}))
 
-    return Settings(**(data or {}))
+    # Ensure workspace directory structure exists
+    try:
+        workspace_path = get_workspace_path(settings)
+        workspace_path.mkdir(parents=True, exist_ok=True)
+        (workspace_path / "jobs").mkdir(exist_ok=True)
+        (workspace_path / "output").mkdir(exist_ok=True)
+        (workspace_path / "logs").mkdir(exist_ok=True)
+    except Exception:
+        # Don't let workspace creation break config loading
+        pass
+
+    return settings
 
 
 def get_config() -> Settings:
@@ -208,13 +250,84 @@ def get_config() -> Settings:
     return load_config()
 
 
+def get_workspace_path(config: Settings | None = None) -> Path:
+    """Get actual workspace path, using XDG default if not configured."""
+    if config is None:
+        config = get_config()
+
+    if config.workspace and config.workspace != str(
+        Path(platformdirs.user_data_dir("plotty")) / "workspace"
+    ):
+        # User has custom workspace
+        return Path(config.workspace)
+    else:
+        # Use XDG default
+        return Path(platformdirs.user_data_dir("plotty")) / "workspace"
+
+
+def get_database_url(config: Settings | None = None) -> str:
+    """Get actual database URL, using XDG default if not configured."""
+    if config is None:
+        config = get_config()
+
+    if (
+        config.database.url
+        and config.database.url
+        != f"sqlite:///{Path(platformdirs.user_data_dir('plotty')) / 'plotty.db'}"
+    ):
+        # User has custom database URL
+        return config.database.url
+    else:
+        # Use XDG default
+        return f"sqlite:///{Path(platformdirs.user_data_dir('plotty')) / 'plotty.db'}"
+
+
+def get_vpype_presets_path(config: Settings | None = None) -> Path:
+    """Get actual vpype presets path, using XDG default if not configured."""
+    if config is None:
+        config = get_config()
+
+    if config.vpype.presets_file and config.vpype.presets_file != "vpype-presets.yaml":
+        # User has custom presets file
+        return Path(config.vpype.presets_file)
+    else:
+        # Use XDG config directory
+        return Path(platformdirs.user_config_dir("plotty")) / "vpype-presets.yaml"
+
+
+def get_log_file_path(config: Settings | None = None) -> Path:
+    """Get actual log file path, using XDG default if not configured."""
+    if config is None:
+        config = get_config()
+
+    if config.logging.log_file and config.logging.log_file != str(
+        Path(platformdirs.user_data_dir("plotty")) / "logs" / "plotty.log"
+    ):
+        # User has custom log file
+        return Path(config.logging.log_file)
+    else:
+        # Use XDG default
+        return Path(platformdirs.user_data_dir("plotty")) / "logs" / "plotty.log"
+
+
 def save_config(config: Settings, path: str | None = None) -> None:
     """Save configuration to YAML file.
 
     Args:
         config: Settings instance to save
-        path: Path to save config file (default: config/config.yaml)
+        path: Path to save config file (default: XDG config directory)
     """
+    if path is None and not os.environ.get("PLOTTY_CONFIG"):
+        # Use XDG config directory by default
+        try:
+            import importlib
+
+            init_module = importlib.import_module(".init", package="plotty")
+            path = str(init_module.get_default_config_path())
+        except (ImportError, AttributeError):
+            # Fallback to platformdirs
+            path = str(Path(platformdirs.user_config_dir("plotty")) / "config.yaml")
+
     p = Path(path or os.environ.get("PLOTTY_CONFIG", "config/config.yaml"))
 
     # Ensure parent directory exists
@@ -231,7 +344,7 @@ def load_vpype_presets(presets_file: str | None = None) -> dict:
     """Load VPype presets from YAML file."""
     if presets_file is None:
         cfg = load_config()
-        presets_file = cfg.vpype.presets_file
+        presets_file = str(get_vpype_presets_path(cfg))
 
     p = Path(presets_file)
     if not p.exists():
