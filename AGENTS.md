@@ -10,11 +10,11 @@
 - **Pre-commit**: `uvx pre-commit install && uvx pre-commit run -a`
 
 ## Performance & QA Testing (v0.8.0+)
-- **Memory Profiling**: `uv run python test_memory_simple.py`
-- **Database Performance**: `uv run python test_database_performance.py`
-- **Cross-Platform Test**: `uv run python test_cross_platform.py`
-- **Load Testing**: `uv run python test_load.py` (add `--quick` for fast test)
-- **Final QA**: `uv run python test_final_qa.py`
+- **Memory Profiling**: `uv run python tests/test_memory_simple.py`
+- **Database Performance**: `uv run python tests/test_database_performance.py`
+- **Cross-Platform Test**: `uv run python tests/test_cross_platform.py`
+- **Load Testing**: `uv run python tests/test_load.py` (add `--quick` for fast test)
+- **Final QA**: `uv run python tests/test_final_qa.py`
 - **Release Validation**: `uv run python scripts/validate_release.py`
 - **Release Automation**: `uv run python scripts/release.py <version>`
 

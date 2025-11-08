@@ -71,7 +71,7 @@ jobs:
         
       - name: Run cross-platform tests
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
-        run: uv run python test_cross_platform.py
+        run: uv run python tests/test_cross_platform.py
 
   build:
     name: Build Package

@@ -133,7 +133,7 @@ plotty start 1
   - Platform-specific path handling and file operations
 - **Release Engineering Automation**
   - Automated release scripts (`scripts/release.py`, `scripts/validate_release.py`)
-  - Comprehensive QA testing framework (`test_final_qa.py`)
+  - Comprehensive QA testing framework (`tests/test_final_qa.py`)
   - Automated changelog generation and release notes
 - **Enhanced Testing Infrastructure**
   - Memory profiling with tracemalloc integration

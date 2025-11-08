@@ -563,7 +563,7 @@ The ploTTY v0.9.0 user experience demonstrates excellent UX fundamentals:
 
 def main():
     """Main UX improvements function."""
-    root_path = Path(__file__).parent
+    root_path = Path(__file__).parent.parent
     output_path = root_path / "UX_IMPROVEMENTS_REPORT.md"
 
     print("🎨 ploTTY v0.9.0 User Experience Improvements")

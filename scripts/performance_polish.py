@@ -546,7 +546,7 @@ The ploTTY v0.9.0 codebase demonstrates excellent performance characteristics:
 
 def main():
     """Main performance polish function."""
-    root_path = Path(__file__).parent
+    root_path = Path(__file__).parent.parent
     output_path = root_path / "PERFORMANCE_POLISH_REPORT.md"
 
     print("🚀 ploTTY v0.9.0 Performance Polish")

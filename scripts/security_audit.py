@@ -298,7 +298,7 @@ class SecurityAudit:
 
 def main():
     """Main security audit function."""
-    root_path = Path(__file__).parent
+    root_path = Path(__file__).parent.parent
     output_path = root_path / "SECURITY_AUDIT_REPORT.md"
 
     print("🔒 ploTTY v0.9.0 Security Auditor")

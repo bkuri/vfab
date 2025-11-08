@@ -494,8 +494,9 @@ def main():
 
     docs = generate_complete_api_docs()
 
-    # Save documentation
-    output_path = Path("docs/api/complete-api-reference.md")
+    # Save documentation (now running from scripts/ directory)
+    root_path = Path(__file__).parent.parent
+    output_path = root_path / "docs/api/complete-api-reference.md"
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     with open(output_path, "w") as f:
