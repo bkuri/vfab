@@ -11,10 +11,17 @@ on:
 jobs:
   test:
     name: Test Suite
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ["3.11", "3.12", "3.13"]
+        exclude:
+          # Reduce matrix size by excluding some combinations
+          - os: macos-latest
+            python-version: "3.11"
+          - os: windows-latest
+            python-version: "3.11"
     
     steps:
       - name: Checkout code
@@ -61,12 +68,18 @@ jobs:
           uv run pytest -q --cov=plotty --cov-report=xml || uv run pytest -q
           
       - name: Upload coverage to Codecov
-        if: matrix.python-version == '3.12'
+        if: matrix.python-version == '3.12' && matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v4
         with:
           file: ./coverage.xml
           flags: unittests
           name: codecov-umbrella
+      
+      - name: Run cross-platform tests
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        run: |
+          . .venv/bin/activate
+          uv run python test_cross_platform.py
 
   build:
     name: Build Package
