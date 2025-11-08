@@ -208,13 +208,15 @@ class PaperManager:
                 # For testing, use the session directly (not as context manager)
                 session = self.session
                 from .models import Paper
+
                 db_papers = session.query(Paper).all()
             else:
                 # Normal case: use session factory as context manager
                 with self.session_factory() as session:
                     from .models import Paper
+
                     db_papers = session.query(Paper).all()
-                    
+
             for paper in db_papers:
                 papers.append(
                     PaperConfig(
@@ -313,9 +315,11 @@ def get_session():
     """Get database session for paper operations."""
     try:
         from .db import _session_factory
+
         if _session_factory is None:
             # Initialize with default database
             from .db import init_database
+
             init_database("sqlite:///./workspace/plotty.db")
         return _session_factory()
     except Exception:

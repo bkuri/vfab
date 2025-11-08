@@ -50,9 +50,6 @@ class TestBackupManager:
         ):
             manager = BackupManager()
 
-            with tempfile.NamedTemporaryFile(suffix=".tar.gz", delete=False) as f:
-                backup_path = Path(f.name)
-
             result_path = None
             try:
                 result_path = manager.create_backup(BackupType.FULL)
@@ -196,11 +193,11 @@ class TestErrorHandling:
     def test_paper_manager_session_error(self):
         """Test paper manager database error handling."""
         manager = PaperManager(session_factory=Mock())
-        
+
         # Mock session factory to raise exception
         manager.session_factory = Mock()
         manager.session_factory.side_effect = Exception("Database connection failed")
-        
+
         # This should handle the exception gracefully
         paper = manager.get_paper_by_name("NonExistent")
         assert paper is None
@@ -279,15 +276,10 @@ class TestConfigurationIntegration:
     def test_backup_config_integration(self):
         """Test backup manager configuration integration."""
         from plotty.backup import BackupConfig
-        
-        config = BackupConfig(
-            backup_directory=Path("/tmp/backup"),
-            retention_days=7
-        )
 
-        with patch(
-            "plotty.backup.get_database_url", return_value="sqlite:///test.db"
-        ):
+        config = BackupConfig(backup_directory=Path("/tmp/backup"), retention_days=7)
+
+        with patch("plotty.backup.get_database_url", return_value="sqlite:///test.db"):
             manager = BackupManager(config=config)
             assert manager.config.backup_directory == Path("/tmp/backup")
             assert manager.config.retention_days == 7
@@ -314,9 +306,6 @@ class TestPerformance:
                 "plotty.backup.get_database_url", return_value=f"sqlite:///{db_path}"
             ):
                 manager = BackupManager()
-
-                with tempfile.NamedTemporaryFile(suffix=".tar.gz", delete=False) as f:
-                    backup_path = Path(f.name)
 
                 result_path = None
                 try:

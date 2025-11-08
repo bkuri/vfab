@@ -651,13 +651,13 @@ def run_integrated_performance_tests(test_env: dict, progress_tracker=None) -> l
 
     try:
         from plotty.db import get_session
-        from plotty.models import Job, Layer, Pen, Paper, JobStatistics
+        from plotty.models import Job, Paper
         import time
 
         with get_session() as session:
             # Test query performance
             start_time = time.time()
-            jobs = session.query(Job).all()
+            session.query(Job).all()
             job_time = time.time() - start_time
 
             start_time = time.time()
@@ -717,7 +717,7 @@ def run_integrated_performance_tests(test_env: dict, progress_tracker=None) -> l
             else:
                 path1 = Path("/home/test")
                 expected_sep = "/"
-            
+
             path_ok = expected_sep in str(path1 / "documents")
 
             # Test special characters (skip on Windows)
@@ -729,9 +729,11 @@ def run_integrated_performance_tests(test_env: dict, progress_tracker=None) -> l
                 special_ok = True  # Skip on Windows
 
         if file_read_ok and dir_ok and path_ok and special_ok:
-            status = f"✓ Passed - Compatible with {platform.system()} {platform.release()}"
+            status = (
+                f"✓ Passed - Compatible with {platform.system()} {platform.release()}"
+            )
         else:
-            status = f"✗ Failed - Platform compatibility issues detected"
+            status = "✗ Failed - Platform compatibility issues detected"
 
         results.append(
             create_test_result(
@@ -756,7 +758,6 @@ def run_integrated_stress_tests(test_env: dict, progress_tracker=None) -> list:
         progress_tracker.advance(test_name)
 
     try:
-        import tempfile
         import subprocess
         import sys
         from pathlib import Path
@@ -764,7 +765,7 @@ def run_integrated_stress_tests(test_env: dict, progress_tracker=None) -> list:
         # Run load test with small dataset
         # Use current working directory (should be project root)
         test_script = Path.cwd() / "tests" / "test_load.py"
-        
+
         if test_script.exists():
             result = subprocess.run(
                 [sys.executable, str(test_script), "--jobs", "10"],

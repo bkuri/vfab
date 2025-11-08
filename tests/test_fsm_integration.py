@@ -83,8 +83,8 @@ class TestJobFSM:
     @pytest.fixture
     def mock_workspace(self):
         """Mock workspace path."""
-        import tempfile
         import uuid
+
         unique_id = str(uuid.uuid4())[:8]
         return Path(f"/tmp/test_workspace_{unique_id}")
 
@@ -174,7 +174,7 @@ class TestJobFSM:
         # Add some transitions
         job_fsm.transition(JobState.QUEUED, "Queued")
         job_fsm.transition(JobState.ARMED, "Armed for plotting")
-        
+
         history = job_fsm.get_transition_history()
         assert len(history) == 2
         assert history[0]["from_state"] == JobState.NEW.value
@@ -291,11 +291,11 @@ class TestFSMIntegration:
         """Create FSM for integration tests."""
         import tempfile
         import uuid
-        
+
         # Use unique workspace to avoid conflicts
         unique_id = str(uuid.uuid4())[:8]
         workspace = Path(tempfile.gettempdir()) / f"test_fsm_{unique_id}"
-        
+
         with (
             patch("plotty.fsm.create_hook_executor"),
             patch("plotty.fsm.create_guard_system"),
@@ -353,11 +353,11 @@ class TestFSMIntegration:
 
     def test_failure_workflow(self, fsm):
         """Test failure workflow."""
-# Progress partway then fail
+        # Progress partway then fail
         fsm.transition(JobState.QUEUED)
         fsm.transition(JobState.ARMED)
         fsm.transition(JobState.PLOTTING)
-    
+
         # Fail
         fsm.transition(JobState.FAILED, "Plotter hardware error")
         assert fsm.current_state == JobState.FAILED

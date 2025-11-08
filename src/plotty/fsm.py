@@ -346,13 +346,18 @@ class JobFSM:
         """Alias for can_transition_to for backward compatibility."""
         return self.can_transition_to(target_state)
 
-    def transition(self, to_state: JobState, reason: str = "", metadata: Optional[Dict[str, Any]] = None) -> bool:
+    def transition(
+        self,
+        to_state: JobState,
+        reason: str = "",
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> bool:
         """Alias for transition_to for backward compatibility."""
         return self.transition_to(to_state, reason, metadata)
 
     def is_terminal_state(self, state: Optional[JobState] = None) -> bool:
         """Check if a state is terminal (no outgoing transitions).
-        
+
         Args:
             state: State to check, defaults to current state
         """
@@ -363,12 +368,14 @@ class JobFSM:
         """Get comprehensive status information about the job."""
         history = self.get_state_history()
         last_transition = history[-1] if history else None
-        
+
         return {
             "job_id": self.job_id,
             "current_state": self.current_state.value,
             "is_terminal": self.is_terminal_state(),
-            "valid_transitions": [state.value for state in self.get_valid_transitions()],
+            "valid_transitions": [
+                state.value for state in self.get_valid_transitions()
+            ],
             "can_pause": self.can_pause(),
             "can_resume": self.can_resume(),
             "state_history": history,
@@ -383,7 +390,9 @@ class JobFSM:
             "job_id": self.job_id,
             "current_state": self.current_state.value,
             "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.created_at.isoformat() if self.created_at else None,  # Use created_at as updated_at
+            "updated_at": (
+                self.created_at.isoformat() if self.created_at else None
+            ),  # Use created_at as updated_at
             "transitions": self.get_state_history(),
             "metadata": {},  # Empty metadata for now
         }

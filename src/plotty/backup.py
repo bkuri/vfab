@@ -183,7 +183,7 @@ class BackupManager:
 
                 # Create archive
                 result = self._create_backup_file(backup_path, temp_path, manifest)
-                
+
                 # If _create_backup_file returns a path (mocked), use that
                 if isinstance(result, Path):
                     backup_path = result
@@ -424,8 +424,6 @@ class BackupManager:
         except Exception as e:
             self.logger.warning(f"Failed to backup workspace: {e}")
 
-
-
     def _extract_archive(self, backup_path: Path, temp_path: Path) -> None:
         """Extract backup archive to temporary directory."""
         mode = self._get_tar_mode_full("r")
@@ -541,7 +539,7 @@ class BackupManager:
         # Basic verification - check if file exists and is readable
         if not backup_path.exists():
             raise ValueError("Backup file was not created")
-    
+
         # Try to open and read the archive
         mode = self._get_tar_mode_full("r")
         try:
@@ -555,10 +553,10 @@ class BackupManager:
                         break
                     except KeyError:
                         continue
-                
+
                 if not manifest_found:
                     raise ValueError("Backup missing manifest.json")
-    
+
         except Exception as e:
             raise ValueError(f"Backup verification failed: {e}")
 
@@ -668,8 +666,7 @@ class BackupManager:
     def _create_manifest(self, backup_type: BackupType) -> BackupManifest:
         """Create a backup manifest."""
         return BackupManifest(
-            backup_type=backup_type,
-            compression=self.config.compression
+            backup_type=backup_type, compression=self.config.compression
         )
 
 
@@ -696,7 +693,7 @@ def get_db_path() -> Path:
             raise ValueError(f"Unsupported database URL format: {db_url}")
     except Exception:
         # Fallback to default
-        return Path(platformdirs.user_data_dir('plotty')) / 'plotty.db'
+        return Path(platformdirs.user_data_dir("plotty")) / "plotty.db"
 
 
 # Global backup manager instance

@@ -9,7 +9,7 @@ try:
     from plotty.drivers import create_manager, is_axidraw_available
 except ImportError:
     create_manager = None
-    
+
     def is_axidraw_available():
         """Check if pyaxidraw is available."""
         return False
@@ -19,6 +19,7 @@ def get_create_manager():
     """Get create_manager function if available."""
     try:
         from plotty.drivers import create_manager
+
         return create_manager
     except ImportError:
         return None
@@ -163,7 +164,7 @@ class TestAxiDrawManager:
         # These should raise RuntimeError when not connected
         with pytest.raises(RuntimeError, match="Not connected to AxiDraw"):
             manager.get_position()
-        
+
         with pytest.raises(RuntimeError, match="Not connected to AxiDraw"):
             manager.get_pen_state()
 
