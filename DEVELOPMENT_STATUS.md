@@ -19,6 +19,8 @@
 | v0.1.4 | `v0.1.4` | - | ✅ Complete | Feature development |
 | v0.2.0 | `v0.2.0` | - | ✅ Complete | Core features |
 | v0.3.0 | `v0.3.0` | - | ✅ Complete | Core implementation |
+| v0.4.0 | `v0.4.0` | Nov 7, 2025 | ✅ Complete | CLI Consistency & Physical Setup Validation |
+| v0.5.0 | `v0.5.0` | Nov 7, 2025 | ✅ Complete | Version Restructure & Test System Enhancement |
 | v0.6.0 | `v0.6.0` | Nov 7, 2025 | ✅ Complete | Test Coverage & CLI Consolidation |
 | v0.7.0 | `v0.7.0` | Nov 7, 2025 | ✅ Complete | Comprehensive Documentation Suite |
 
