@@ -146,6 +146,7 @@ coverage.xml
 !config/config.yaml
 !config/vpype-presets.yaml
 !tests/fixtures/test_design.svg
+QA_REPORT.md
 !packaging/
 packaging/*.tar.*
 !alembic.ini

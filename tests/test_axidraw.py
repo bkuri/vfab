@@ -52,7 +52,7 @@ class TestAxiDrawManager:
         mock_axidraw.AxiDraw.return_value = mock_ad
 
         manager = create_manager()
-        svg_file = Path("test.svg")
+        svg_file = Path("tests/fixtures/test_design.svg")
 
         result = manager.plot_file(svg_file)
 
@@ -74,7 +74,7 @@ class TestAxiDrawManager:
         mock_axidraw.AxiDraw.return_value = mock_ad
 
         manager = create_manager()
-        svg_file = Path("test.svg")
+        svg_file = Path("tests/fixtures/test_design.svg")
 
         result = manager.plot_file(svg_file, preview_only=True)
 
@@ -94,7 +94,7 @@ class TestAxiDrawManager:
         mock_axidraw.AxiDraw.return_value = mock_ad
 
         manager = create_manager()
-        svg_file = Path("test.svg")
+        svg_file = Path("tests/fixtures/test_design.svg")
 
         result = manager.plot_file(svg_file)
 
@@ -181,7 +181,7 @@ class TestAxiDrawManager:
         mock_axidraw.AxiDraw.return_value = mock_ad
 
         manager = create_manager()
-        svg_file = Path("test.svg")
+        svg_file = Path("tests/fixtures/test_design.svg")
 
         # Test with different pen heights
         result = manager.plot_file(svg_file, pen_height_up=60, pen_height_down=30)
