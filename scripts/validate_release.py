@@ -26,10 +26,11 @@ def check_git_status():
     """Check git repository status."""
     print("🔍 Checking git status...")
     
-    # Check if we're on main branch
+    # Check if we're on main or master branch
     result = run_command("git branch --show-current", check=False)
-    if result and result.stdout.strip() != "main":
-        print("⚠️  Not on main branch")
+    branch = result.stdout.strip() if result else ""
+    if branch not in ["main", "master"]:
+        print(f"⚠️  Not on main branch (currently on {branch})")
         return False
     
     # Check if working directory is clean
