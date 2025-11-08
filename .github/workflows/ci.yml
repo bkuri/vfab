@@ -39,15 +39,15 @@ jobs:
       - name: Create virtual environment
         run: uv venv
         
-       - name: Install dependencies
-         run: |
-           uv pip install -e ".[dev,vpype]"
-           # Install pytest-cov separately for coverage
-           uv pip install pytest-cov
-       
-       - name: Install AxiDraw support (Linux/macOS only)
-         if: runner.os != 'Windows'
-         run: bash scripts/install_pyaxidraw.sh
+      - name: Install dependencies
+        run: |
+          uv pip install -e ".[dev,vpype]"
+          # Install pytest-cov separately for coverage
+          uv pip install pytest-cov
+      
+      - name: Install AxiDraw support (Linux/macOS only)
+        if: runner.os != 'Windows'
+        run: bash scripts/install_pyaxidraw.sh
           
       - name: Run database migrations
         run: uv run alembic upgrade head
@@ -68,7 +68,7 @@ jobs:
           file: ./coverage.xml
           flags: unittests
           name: codecov-umbrella
-       
+        
       - name: Run cross-platform tests
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
         run: uv run python test_cross_platform.py
@@ -90,11 +90,11 @@ jobs:
           uv python install 3.12
           uv build --wheel
           
-       - name: Check package
-         run: |
-           uv python install 3.12
-           uv venv
-           uv pip install dist/*.whl
+      - name: Check package
+        run: |
+          uv python install 3.12
+          uv venv
+          uv pip install dist/*.whl
           
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
