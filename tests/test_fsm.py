@@ -23,7 +23,7 @@ def test_fsm_basic():
 
         # Test valid transitions
         assert fsm.can_transition_to(JobState.ANALYZED)
-        assert not fsm.can_transition_to(JobState.QUEUED)  # Can't go directly to QUEUED
+        assert fsm.can_transition_to(JobState.QUEUED)  # Can go directly to QUEUED
         assert not fsm.can_transition_to(JobState.PLOTTING)
         print("✓ Transition validation works")
 

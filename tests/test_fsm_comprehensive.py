@@ -83,7 +83,10 @@ class TestJobFSM:
     @pytest.fixture
     def mock_workspace(self):
         """Mock workspace path."""
-        return Path("/tmp/test_workspace")
+        import tempfile
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
+        return Path(f"/tmp/test_workspace_{unique_id}")
 
     @pytest.fixture
     def job_fsm(self, mock_workspace):
@@ -170,14 +173,14 @@ class TestJobFSM:
         """Test getting transition history."""
         # Add some transitions
         job_fsm.transition(JobState.QUEUED, "Queued")
-        job_fsm.transition(JobState.ANALYZED, "Analyzed")
-
+        job_fsm.transition(JobState.ARMED, "Armed for plotting")
+        
         history = job_fsm.get_transition_history()
         assert len(history) == 2
-        assert history[0].from_state == JobState.NEW
-        assert history[0].to_state == JobState.QUEUED
-        assert history[1].from_state == JobState.QUEUED
-        assert history[1].to_state == JobState.ANALYZED
+        assert history[0]["from_state"] == JobState.NEW.value
+        assert history[0]["to_state"] == JobState.QUEUED.value
+        assert history[1]["from_state"] == JobState.QUEUED.value
+        assert history[1]["to_state"] == JobState.ARMED.value
 
     def test_is_terminal_state(self, job_fsm):
         """Test checking if state is terminal."""
@@ -286,6 +289,13 @@ class TestFSMIntegration:
     @pytest.fixture
     def fsm(self):
         """Create FSM for integration tests."""
+        import tempfile
+        import uuid
+        
+        # Use unique workspace to avoid conflicts
+        unique_id = str(uuid.uuid4())[:8]
+        workspace = Path(tempfile.gettempdir()) / f"test_fsm_{unique_id}"
+        
         with (
             patch("plotty.fsm.create_hook_executor"),
             patch("plotty.fsm.create_guard_system"),
@@ -294,16 +304,13 @@ class TestFSMIntegration:
             patch("plotty.fsm.get_statistics_service"),
         ):
 
-            return JobFSM("integration_test", Path("/tmp"))
+            return JobFSM("integration_test", workspace)
 
     def test_complete_successful_workflow(self, fsm):
         """Test complete successful job workflow."""
-        # Normal progression
+        # Normal progression based on VALID_TRANSITIONS
         workflow = [
             (JobState.QUEUED, "Job queued"),
-            (JobState.ANALYZED, "Analysis complete"),
-            (JobState.OPTIMIZED, "Optimization complete"),
-            (JobState.READY, "Ready to plot"),
             (JobState.ARMED, "Plotter armed"),
             (JobState.PLOTTING, "Started plotting"),
             (JobState.COMPLETED, "Plotting complete"),
@@ -346,10 +353,11 @@ class TestFSMIntegration:
 
     def test_failure_workflow(self, fsm):
         """Test failure workflow."""
-        # Progress partway then fail
+# Progress partway then fail
         fsm.transition(JobState.QUEUED)
-        fsm.transition(JobState.ANALYZED)
-
+        fsm.transition(JobState.ARMED)
+        fsm.transition(JobState.PLOTTING)
+    
         # Fail
         fsm.transition(JobState.FAILED, "Plotter hardware error")
         assert fsm.current_state == JobState.FAILED

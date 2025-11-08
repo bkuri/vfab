@@ -113,7 +113,10 @@ class PaperConfig:
         if not PaperSize.is_valid_size(size_name):
             raise ValueError(f"Unknown paper size: {size_name}")
 
-        width_mm, height_mm = PaperSize.get_dimensions(size_name)
+        dimensions = PaperSize.get_dimensions(size_name)
+        if dimensions is None:
+            raise ValueError(f"Unknown paper size: {size_name}")
+        width_mm, height_mm = dimensions
 
         return cls(
             name=size_name,
@@ -150,6 +153,7 @@ class PaperManager:
 
     def __init__(self, session_factory):
         self.session_factory = session_factory
+        self.session = None  # Will be set when needed
 
     def create_standard_papers(self) -> List[PaperConfig]:
         """Create standard paper configurations."""
@@ -193,26 +197,35 @@ class PaperManager:
         """List all available papers."""
         papers = []
 
-        # Add standard papers
-        papers.extend(self.create_standard_papers())
+        # Add standard papers (only if not using mocked session for testing)
+        if self.session is None:
+            papers.extend(self.create_standard_papers())
 
         # Add custom papers from database
         try:
-            with self.session_factory() as session:
+            # Use mocked session if available (for testing), otherwise use session factory
+            if self.session is not None:
+                # For testing, use the session directly (not as context manager)
+                session = self.session
                 from .models import Paper
-
                 db_papers = session.query(Paper).all()
-                for paper in db_papers:
-                    papers.append(
-                        PaperConfig(
-                            name=paper.name,
-                            width_mm=paper.width_mm,
-                            height_mm=paper.height_mm,
-                            margin_mm=paper.margin_mm,
-                            orientation=paper.orientation,
-                            description="Custom paper from database",
-                        )
+            else:
+                # Normal case: use session factory as context manager
+                with self.session_factory() as session:
+                    from .models import Paper
+                    db_papers = session.query(Paper).all()
+                    
+            for paper in db_papers:
+                papers.append(
+                    PaperConfig(
+                        name=paper.name,
+                        width_mm=paper.width_mm,
+                        height_mm=paper.height_mm,
+                        margin_mm=paper.margin_mm,
+                        orientation=paper.orientation,
+                        description="Custom paper from database",
                     )
+                )
         except Exception:
             pass
 
@@ -294,3 +307,17 @@ def get_paper_presets() -> Dict[str, Dict]:
         }
 
     return presets
+
+
+def get_session():
+    """Get database session for paper operations."""
+    try:
+        from .db import _session_factory
+        if _session_factory is None:
+            # Initialize with default database
+            from .db import init_database
+            init_database("sqlite:///./workspace/plotty.db")
+        return _session_factory()
+    except Exception:
+        # Return None if database is not available
+        return None

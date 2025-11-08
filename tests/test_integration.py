@@ -106,7 +106,7 @@ class TestCLIIntegration:
             timeout=10,
         )
         assert result.returncode == 0
-        assert "0.5.0" in result.stdout
+        assert "1.0.0" in result.stdout
 
 
 class TestDatabaseIntegration:
