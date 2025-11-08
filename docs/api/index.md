@@ -213,7 +213,7 @@ class PlotHandler(FileSystemEventHandler):
 uv run pytest -q
 
 # Run specific test module
-uv run pytest tests/test_fsm.py -q
+uv run pytest tests/test_fsm_unit.py -q
 
 # Run with coverage
 uv run pytest --cov=plotty tests/

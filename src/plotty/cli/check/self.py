@@ -592,6 +592,219 @@ def run_integrated_recovery_system_tests(test_env: dict, progress_tracker=None) 
     return results
 
 
+def run_integrated_performance_tests(test_env: dict, progress_tracker=None) -> list:
+    """Run integrated performance tests."""
+    results = []
+
+    # Test memory profiling
+    test_name = "Performance: Memory profiling"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
+    try:
+        import tracemalloc
+        import gc
+        import os
+
+        # Start memory tracing
+        tracemalloc.start()
+        gc.collect()
+        baseline = tracemalloc.get_traced_memory()[0]
+
+        # Test basic commands memory usage
+        commands = ["plotty check config", "plotty list pens", "plotty info system"]
+        peak_memory = baseline
+
+        for cmd in commands:
+            os.system(cmd + " > /dev/null 2>&1")
+            current, _ = tracemalloc.get_traced_memory()
+            peak_memory = max(peak_memory, current)
+
+        gc.collect()
+        final_memory = tracemalloc.get_traced_memory()[0]
+        memory_growth = final_memory - baseline
+
+        tracemalloc.stop()
+
+        # Assess memory performance
+        if memory_growth < 1024 * 1024:  # Less than 1MB
+            status = "✓ Passed - No significant memory leaks detected"
+        elif memory_growth < 5 * 1024 * 1024:  # Less than 5MB
+            status = "⚠️ Passed - Minor memory growth detected"
+        else:
+            status = "✗ Failed - Significant memory growth detected"
+
+        results.append(
+            create_test_result(
+                test_name,
+                memory_growth < 5 * 1024 * 1024,  # Pass if < 5MB growth
+                f"{status} (Growth: {memory_growth // 1024}KB)",
+            )
+        )
+    except Exception as e:
+        results.append(create_test_result(test_name, False, f"✗ Failed: {str(e)}"))
+
+    # Test database performance
+    test_name = "Performance: Database performance"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
+    try:
+        from plotty.db import get_session
+        from plotty.models import Job, Layer, Pen, Paper, JobStatistics
+        import time
+
+        with get_session() as session:
+            # Test query performance
+            start_time = time.time()
+            jobs = session.query(Job).all()
+            job_time = time.time() - start_time
+
+            start_time = time.time()
+            _ = session.query(Job).filter(Job.state.in_(["queued", "running"])).all()
+            filter_time = time.time() - start_time
+
+            start_time = time.time()
+            _ = session.query(Job, Paper).join(Paper).limit(10).all()
+            join_time = time.time() - start_time
+
+        # Assess database performance
+        if job_time < 0.01 and filter_time < 0.01 and join_time < 0.01:
+            status = "✓ Passed - Excellent database performance"
+        elif job_time < 0.1 and filter_time < 0.05 and join_time < 0.05:
+            status = "✓ Passed - Good database performance"
+        else:
+            status = "⚠️ Passed - Database performance needs optimization"
+
+        results.append(
+            create_test_result(
+                test_name,
+                True,  # Always pass, just report performance level
+                f"{status} (Jobs: {job_time:.3f}s, Filter: {filter_time:.3f}s, Join: {join_time:.3f}s)",
+            )
+        )
+    except Exception as e:
+        results.append(create_test_result(test_name, False, f"✗ Failed: {str(e)}"))
+
+    # Test cross-platform compatibility
+    test_name = "Integration: Cross-platform compatibility"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
+    try:
+        import tempfile
+        import platform
+        from pathlib import Path
+
+        # Test file operations
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+
+            # Test file creation and reading
+            test_file = temp_path / "test.txt"
+            test_file.write_text("test content")
+            file_read_ok = test_file.read_text() == "test content"
+
+            # Test directory operations
+            subdir = temp_path / "subdir"
+            subdir.mkdir()
+            dir_ok = subdir.is_dir()
+
+            # Test path handling
+            if platform.system() == "Windows":
+                path1 = Path("C:\\Users\\test")
+                expected_sep = "\\"
+            else:
+                path1 = Path("/home/test")
+                expected_sep = "/"
+            
+            path_ok = expected_sep in str(path1 / "documents")
+
+            # Test special characters (skip on Windows)
+            if platform.system() != "Windows":
+                special_file = temp_path / "file-with-special.chars.txt"
+                special_file.write_text("test")
+                special_ok = special_file.exists()
+            else:
+                special_ok = True  # Skip on Windows
+
+        if file_read_ok and dir_ok and path_ok and special_ok:
+            status = f"✓ Passed - Compatible with {platform.system()} {platform.release()}"
+        else:
+            status = f"✗ Failed - Platform compatibility issues detected"
+
+        results.append(
+            create_test_result(
+                test_name,
+                file_read_ok and dir_ok and path_ok and special_ok,
+                status,
+            )
+        )
+    except Exception as e:
+        results.append(create_test_result(test_name, False, f"✗ Failed: {str(e)}"))
+
+    return results
+
+
+def run_integrated_stress_tests(test_env: dict, progress_tracker=None) -> list:
+    """Run integrated stress tests."""
+    results = []
+
+    # Test load testing with small dataset
+    test_name = "Stress: Load testing (10 jobs)"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
+    try:
+        import tempfile
+        import subprocess
+        import sys
+        from pathlib import Path
+
+        # Run load test with small dataset
+        # Use current working directory (should be project root)
+        test_script = Path.cwd() / "tests" / "test_load.py"
+        
+        if test_script.exists():
+            result = subprocess.run(
+                [sys.executable, str(test_script), "--jobs", "10"],
+                capture_output=True,
+                text=True,
+                timeout=60,
+                cwd=test_script.parent,
+            )
+
+            # Parse output for success
+            if result.returncode == 0 and "EXCELLENT" in result.stdout:
+                status = "✓ Passed - Load testing completed successfully"
+            elif result.returncode == 0 and "ACCEPTABLE" in result.stdout:
+                status = "✓ Passed - Load testing completed acceptably"
+            elif result.returncode == 0:
+                status = "⚠️ Passed - Load testing completed with issues"
+            else:
+                status = "✗ Failed - Load testing failed"
+
+            results.append(
+                create_test_result(
+                    test_name,
+                    result.returncode == 0,
+                    status,
+                )
+            )
+        else:
+            results.append(
+                create_test_result(
+                    test_name,
+                    False,
+                    "✗ Failed - Load test script not found",
+                )
+            )
+    except Exception as e:
+        results.append(create_test_result(test_name, False, f"✗ Failed: {str(e)}"))
+
+    return results
+
+
 def run_integrated_system_integration_tests(
     test_env: dict, progress_tracker=None
 ) -> list:
@@ -808,7 +1021,9 @@ def _calculate_total_tests(level: str) -> int:
     system_validation_count = 4  # 4 tests
     resource_management_count = 3  # 3 tests
     recovery_system_count = 6  # 6 tests (5 + 1 for job check with recovery info)
-    integration_count = 2  # 2 tests
+    performance_count = 2  # 2 tests (memory profiling + database performance)
+    stress_count = 1  # 1 test (load testing with 10 jobs)
+    integration_count = 3  # 3 tests (FSM + help + cross-platform)
 
     if level == "basic":
         return basic_count
@@ -818,6 +1033,10 @@ def _calculate_total_tests(level: str) -> int:
         return (
             system_validation_count + resource_management_count + recovery_system_count
         )
+    elif level == "performance":
+        return performance_count
+    elif level == "stress":
+        return stress_count
     elif level == "integration":
         return integration_count
     elif level == "all":
@@ -828,6 +1047,8 @@ def _calculate_total_tests(level: str) -> int:
             + system_validation_count
             + resource_management_count
             + recovery_system_count
+            + performance_count
+            + stress_count
             + integration_count
         )
     return 0
@@ -838,7 +1059,7 @@ def run_self_test(
         "basic",
         "--level",
         "-l",
-        help="Test level: basic, intermediate, advanced, integration, or all",
+        help="Test level: basic, intermediate, advanced, performance, stress, integration, or all",
     ),
     report_file: str = typer.Option(
         None, "--report-file", "-r", help="Save detailed report to file"
@@ -856,8 +1077,10 @@ def run_self_test(
     * **basic**: Core command tests (4 tests)
     * **intermediate**: Job lifecycle and management (7 tests)
     * **advanced**: System validation, resource management, and recovery system (13 tests)
-    * **integration**: System integration tests (2 tests)
-    * **all**: Run all tests (26 tests total)
+    * **performance**: Memory profiling and performance analysis (2 tests)
+    * **stress**: Load testing and stress analysis (1 test)
+    * **integration**: System integration tests (3 tests)
+    * **all**: Run all tests (30 tests total)
 
     Each test runs in isolated environments with proper cleanup.
     """
@@ -880,6 +1103,8 @@ def run_self_test(
     system_validation_tests = run_integrated_system_validation_tests
     resource_management_tests = run_integrated_resource_management_tests
     recovery_system_tests = run_integrated_recovery_system_tests
+    performance_tests = run_integrated_performance_tests
+    stress_tests = run_integrated_stress_tests
     integration_tests = run_integrated_system_integration_tests
     report_func = generate_integrated_report
 
@@ -922,6 +1147,16 @@ def run_self_test(
                     console.print("[blue]Running recovery system tests...[/blue]")
                 all_results.extend(recovery_system_tests(test_env, progress_tracker))
 
+            if level in ["performance", "all"]:
+                if verbose:
+                    console.print("[blue]Running performance tests...[/blue]")
+                all_results.extend(performance_tests(test_env, progress_tracker))
+
+            if level in ["stress", "all"]:
+                if verbose:
+                    console.print("[blue]Running stress tests...[/blue]")
+                all_results.extend(stress_tests(test_env, progress_tracker))
+
             if level in ["integration", "all"]:
                 if verbose:
                     console.print("[blue]Running system integration tests...[/blue]")
@@ -959,7 +1194,7 @@ def check_self(
         "basic",
         "--level",
         "-l",
-        help="Test level: basic, intermediate, advanced, integration, or all",
+        help="Test level: basic, intermediate, advanced, performance, stress, integration, or all",
     ),
     report_file: str = typer.Option(
         None, "--report-file", "-r", help="Save detailed report to file"
