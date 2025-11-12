@@ -1,43 +1,83 @@
 # ploTTY User Guide
 
-**Purpose:** Comprehensive guide for users wanting to master ploTTY for pen plotting productivity.
+**Purpose:** Master pen plotting productivity with ploTTY - from your first plot to professional studio management.
 
 ---
 
 ## Table of Contents
 
-1. [Getting Started](#1-getting-started)
-2. [Your First Plot](#2-your-first-plot)
-3. [Working with Multi-Pen Designs](#3-working-with-multi-pen-designs)
-4. [Creative Tool Integration](#4-creative-tool-integration)
-5. [Batch Production Workflow](#5-batch-production-workflow)
-6. [Advanced Optimization](#6-advanced-optimization)
-7. [Studio Management](#7-studio-management)
-8. [Real-World Examples](#8-real-world-examples)
-9. [Tips and Best Practices](#9-tips-and-best-practices)
+🚀 [Quick Start](#quick-start) - 5-minute setup for beginners
+
+**🌱 Beginner Path** (Learn the basics)
+1. [Getting Started](#1-getting-started) - Installation & first setup
+2. [Your First Plot](#2-your-first-plot) - Complete walkthrough
+3. [Common Tasks](#3-common-tasks) - Everyday plotting needs
+
+**🎨 Creative Path** (Express yourself)
+4. [Multi-Pen Artwork](#4-multi-pen-artwork) - Colorful designs
+5. [Creative Tool Integration](#5-creative-tool-integration) - vsketch, vpype, and more
+6. [Artistic Workflows](#6-artistic-workflows) - From sketch to final piece
+
+**⚡ Power User Path** (Professional productivity)
+7. [Batch Production](#7-batch-production) - Efficient workflows
+8. [Advanced Optimization](#8-advanced-optimization) - Fine-tune performance
+9. [Studio Management](#9-studio-management) - Professional operations
+
+**📚 Reference**
+10. [Real-World Examples](#10-real-world-examples) - Industry workflows
+11. [Troubleshooting](#11-troubleshooting) - Quick fixes
+12. [Best Practices](#12-best-practices) - Pro tips
 
 ---
+
+## 🚀 Quick Start
+
+**New to ploTTY? Get plotting in 5 minutes!**
+
+```bash
+# 1. Install ploTTY
+git clone https://github.com/your-org/plotty.git
+cd plotty
+uv pip install -e ".[dev,vpype,axidraw]"
+uv run alembic upgrade head
+
+# 2. Quick setup
+uv run plotty setup  # Accept defaults for now
+
+# 3. Add your first design
+uv run plotty add your_design.svg --paper a4
+
+# 4. Plot it!
+uv run plotty plot your_design
+```
+
+That's it! 🎉 You're plotting. For detailed setup, see [Getting Started](#1-getting-started).
+
+---
+
+# 🌱 Beginner Path
 
 ## 1. Getting Started
 
 ### 1.1 What is ploTTY?
 
-ploTTY is a headless-first pen plotter manager that helps you:
-- **Queue and optimize** SVG files for plotting
-- **Manage multiple pens** automatically
-- **Track plotting time** accurately
-- **Record sessions** for documentation
-- **Recover from crashes** gracefully
+ploTTY is your **pen plotting productivity assistant** that helps you:
+- 📋 **Queue jobs** - Line up multiple designs
+- ⚡ **Optimize automatically** - Faster plotting, better results  
+- 🖊️ **Manage pens** - Switch between colors/sizes seamlessly
+- ⏱️ **Track time** - Know exactly how long each job takes
+- 📹 **Record sessions** - Document your creative process
+- 🔄 **Recover gracefully** - Pick up where you left off after crashes
 
 ### 1.2 System Requirements
 
-**Minimum:**
+**Minimum Setup:**
 - Python 3.11+
 - 2GB RAM
 - 100MB disk space
 - USB port (for AxiDraw)
 
-**Recommended:**
+**Recommended Setup:**
 - 4GB RAM
 - 1GB disk space
 - IP camera for recording
@@ -46,189 +86,487 @@ ploTTY is a headless-first pen plotter manager that helps you:
 ### 1.3 Installation
 
 ```bash
-# Install uv (package manager)
+# Step 1: Install uv (modern Python package manager)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Clone ploTTY
+# Step 2: Clone ploTTY
 git clone https://github.com/your-org/plotty.git
 cd plotty
 
-# Install (without hardware support)
-uv pip install -e ".[dev,vpype]"
-
-# Install with AxiDraw support
+# Step 3: Install with hardware support
 uv pip install -e ".[dev,vpype,axidraw]"
 
-# Initialize database
+# Step 4: Initialize database
 uv run alembic upgrade head
 ```
+
+> **💡 Tip:** Run `uv run plotty --version` to verify installation.
 
 ### 1.4 First-Time Setup
 
 ```bash
-# Run interactive setup wizard
+# Run the interactive setup wizard
 uv run plotty setup
 ```
 
-**Setup prompts:**
+**Setup walkthrough:**
 ```
 🔧 ploTTY Setup Wizard
 ======================
 
 Device Configuration:
-  AxiDraw port [/dev/ttyUSB0]: 
-  Device model [1]: 
-  Pen up position [60]: 
-  Pen down position [40]: 
+  AxiDraw port [/dev/ttyUSB0]: [Press Enter for default]
+  Device model [1]: [Press Enter for AxiDraw v3]
+  Pen up position [60]: [Press Enter]
+  Pen down position [40]: [Press Enter]
 
 Paper Settings:
-  Default paper size [A4]: 
-  Default margin [10mm]: 
-  Default orientation [portrait]: 
+  Default paper size [A4]: [Press Enter]
+  Default margin [10mm]: [Press Enter]
+  Default orientation [portrait]: [Press Enter]
 
 Camera Setup (optional):
-  Camera URL [http://localhost:8881/stream.mjpeg]: 
-  Enable recording [y]: 
+  Camera URL [http://localhost:8881/stream.mjpeg]: [Press Enter to skip]
+  Enable recording [y]: n [Press Enter to skip for now]
 
 ✅ Configuration saved to config/config.yaml
+🎉 Ready to plot!
 ```
 
----
+> **🎯 Goal:** Accept all defaults for your first setup. You can customize later.
 
 ## 2. Your First Plot
 
-### 2.1 Preparing Your Design
+Let's walk through your complete first plotting experience.
 
-**SVG Requirements:**
-- Vector paths only (no bitmaps)
-- Reasonable complexity (<10,000 points)
-- Layers named meaningfully (optional)
+### 2.1 Prepare Your Design
 
-**Example SVG structure:**
+**Your SVG should be:**
+- ✅ Vector paths only (no images/bitmaps)
+- ✅ Reasonable complexity (<10,000 points for starters)
+- ✅ Properly sized for your paper
+
+**Quick test SVG** (save as `test.svg`):
 ```xml
-<svg>
-  <!-- Single layer design -->
-  <path d="M10,10 L100,100" stroke="black" stroke-width="0.5"/>
-  
-  <!-- Multi-layer design -->
-  <g inkscape:label="outline">
-    <path d="M10,10 L100,100" stroke="black" stroke-width="0.5"/>
-  </g>
-  <g inkscape:label="fill">
-    <path d="M20,20 L90,90" stroke="red" stroke-width="0.3"/>
-  </g>
+<svg width="200mm" height="150mm" viewBox="0 0 200 150">
+  <!-- Simple test pattern -->
+  <rect x="10" y="10" width="180" height="130" 
+        fill="none" stroke="black" stroke-width="0.5"/>
+  <circle cx="100" cy="75" r="30" 
+          fill="none" stroke="black" stroke-width="0.5"/>
+  <text x="100" y="75" text-anchor="middle" 
+        font-family="Arial" font-size="12" fill="black">
+    My First Plot!
+  </text>
 </svg>
 ```
 
-### 2.2 Adding Your First Job
+### 2.2 Add Your First Job
 
 ```bash
-# Add a simple design
-uv run plotty add my_first_drawing.svg --paper a4
+# Add the test design
+uv run plotty add test.svg --paper a4
 
-# Add with custom name
-uv run plotty add complex_art.svg --name "Client Logo" --paper a3
+# Add with a friendly name
+uv run plotty add test.svg --name "My First Plot" --paper a4
 ```
 
-**Output:**
+**What you'll see:**
 ```
-✅ Added job: my_first_drawing
+✅ Added job: test
 📊 Analysis results:
-  - Dimensions: 150mm × 100mm
-  - Points: 1,247
-  - Estimated time: 8 minutes
+  - Dimensions: 200mm × 150mm
+  - Points: 47
+  - Estimated time: 2 minutes
   - Layers detected: 1
 ```
 
-### 2.3 Planning the Job
+> **💡 Success Tip:** If you get an error, check that your SVG file exists and is valid.
+
+### 2.3 Plan the Job
+
+Planning optimizes your design for faster plotting.
 
 ```bash
-# Interactive planning (recommended for first time)
-uv run plotty plan my_first_drawing --interactive
-
-# Quick planning with defaults
-uv run plotty plan my_first_drawing
+# Interactive planning (perfect for beginners)
+uv run plotty plan test --interactive
 ```
 
-**Interactive planning shows:**
+**Interactive walkthrough:**
 ```
 🎨 Layer Analysis
 ==================
 Detected 1 layer:
-  🔵 Layer 1: "default" (1,247 points) - BLACK
+  🔵 Layer 1: "default" (47 points) - BLACK
 
 📝 Optimization Options
 ========================
-1. Fast (default) - Quick optimization
-2. High Quality - Better path optimization
-3. Custom - Enter your vpype pipeline
+1. Fast (default) - Quick optimization, great for simple designs
+2. High Quality - Better path optimization, takes longer
+3. Custom - Enter your own vpype commands
 
-Choose optimization [1]: 1
+Choose optimization [1]: [Press Enter for Fast]
 
 ⏱️ Time Estimation
 ==================
-Pre-optimization: 8.2 minutes
-Post-optimization: 6.1 minutes (25% faster)
+Pre-optimization: 2.1 minutes
+Post-optimization: 1.8 minutes (14% faster)
 
 ✅ Job planned successfully
 ```
 
-### 2.4 Plotting
+### 2.4 Plot It!
+
+Make sure your AxiDraw is connected and has paper loaded, then:
 
 ```bash
 # Start plotting
-uv run plotty plot my_first_drawing
+uv run plotty plot test
 ```
 
-**Real-time progress:**
+**Real-time progress display:**
 ```
-🖊️ Plotting: my_first_drawing
-===============================
+🖊️ Plotting: test
+==================
 Progress: ████████████████████ 67%
-Time remaining: 2m 15s
+Time remaining: 0m 45s
 Current layer: default (1/1)
 Pen: Black 0.5mm
 Speed: 25% (medium)
 
 Controls:
   [Space] Pause/Resume
-  [A] Abort
+  [A] Abort  
   [S] Skip to next layer
 ```
 
-### 2.5 Viewing Results
+> **🎯 First Plot Success!** Press Space to pause if needed, or just let it finish.
+
+### 2.5 Check Your Results
 
 ```bash
-# Job information
-uv run plotty info job my_first_drawing
+# See job details
+uv run plotty info job test
 
-# View generated report
-# Open: workspace/jobs/my_first_drawing/report.html
+# View the generated report
+# Open: workspace/jobs/test/report.html in your browser
 ```
+
+**Report includes:**
+- 📊 Plot time statistics
+- 🖼️ Camera recording (if enabled)
+- 📈 Performance metrics
+- ✅ Success confirmation
 
 ---
 
-## 3. Working with Multi-Pen Designs
+## 3. Common Tasks
 
-### 3.1 Understanding Multi-Pen Detection
+Master the everyday operations you'll use frequently.
 
-ploTTY automatically detects multi-pen requirements from:
-- **SVG layers** (Inkscape, Illustrator)
-- **AxiDraw layer control syntax** (`%layer_name` comments)
+### 3.1 Job Management
 
-**Example multi-layer SVG:**
+**View what's queued:**
+```bash
+# List all jobs
+uv run plotty list jobs
+
+# See current queue
+uv run plotty list queue
+
+# Check job status
+uv run plotty info job test
+```
+
+**Remove jobs:**
+```bash
+# Remove specific job
+uv run plotty remove job test
+
+# Clear completed jobs
+uv run plotty queue cleanup --state completed
+```
+
+### 3.2 Quick Plotting Workflow
+
+**Your daily plotting routine:**
+```bash
+# 1. Add new design
+uv run plotty add new_design.svg --name "Today's Art" --paper a4
+
+# 2. Plan it (interactive is best)
+uv run plotty plan new_design --interactive
+
+# 3. Plot it
+uv run plotty plot new_design
+
+# 4. Check results
+uv run plotty info job new_design
+```
+
+### 3.3 Paper and Pen Basics
+
+**Check available paper:**
+```bash
+uv run plotty list paper
+```
+
+**Add custom paper size:**
+```bash
+uv run plotty add paper \
+  --name "Square" \
+  --width 150 \
+  --height 150 \
+  --margin 10
+```
+
+**Basic pen management:**
+```bash
+# List pens
+uv run plotty list pens
+
+# Add a new pen
+uv run plotty add pen \
+  --name "Fine Black" \
+  --width 0.3 \
+  --color "#000000"
+```
+
+### 3.4 Status and Health Checks
+
+**Quick system check:**
+```bash
+# Is everything ready?
+uv run plotty check ready
+
+# Detailed status
+uv run plotty status
+
+# Test device movement
+uv run plotty check device --test-move
+```
+
+**Common status outputs:**
+```
+✅ Device: Connected (/dev/ttyUSB0)
+✅ Database: Healthy
+✅ Queue: 2 jobs pending
+⚠️  Camera: Not configured (optional)
+```
+
+### 3.5 Time Estimation
+
+**Know how long jobs will take:**
+```bash
+# Quick estimate
+uv run plotty estimate job_name
+
+# Detailed breakdown
+uv run plotty estimate job_name --detailed
+
+# Compare before/after optimization
+uv run plotty estimate job_name --stage pre
+uv run plotty estimate job_name --stage post
+```
+
+**Sample output:**
+```
+⏱️ Time Estimation: complex_design
+==================================
+Pre-optimization: 12.4 minutes
+Post-optimization: 8.7 minutes (30% faster)
+
+Time saved: 3.7 minutes - worth the wait!
+```
+
+> **🎯 Beginner Goal:** Get comfortable with this workflow. Once it feels natural, you're ready for the [Creative Path](#-creative-path).
+
+---
+
+# 🎨 Creative Path
+
+## 4. Multi-Pen Artwork
+
+Create colorful, multi-layered designs with automatic pen management.
+
+### 4.1 Understanding Multi-Pen Detection
+
+ploTTY automatically detects when your design needs multiple pens from:
+
+**SVG Layers** (Inkscape, Illustrator, etc.):
 ```xml
 <svg>
   <g inkscape:label="outline">
-    <path d="..." stroke="black" stroke-width="0.5"/>
+    <path d="M10,10 L100,100" stroke="black" stroke-width="0.5"/>
   </g>
   <g inkscape:label="shading">
-    <path d="..." stroke="gray" stroke-width="0.3"/>
+    <path d="M20,20 L90,90" stroke="gray" stroke-width="0.3"/>
   </g>
   <g inkscape:label="highlights">
-    <path d="..." stroke="white" stroke-width="0.2"/>
+    <path d="M30,30 L80,80" stroke="white" stroke-width="0.2"/>
   </g>
 </svg>
+```
+
+**AxiDraw Layer Comments**:
+```svg
+<!-- %layer: outline -->
+<path d="M10,10 L100,100" stroke="black" stroke-width="0.5"/>
+
+<!-- %layer: shading -->
+<path d="M20,20 L90,90" stroke="gray" stroke-width="0.3"/>
+```
+
+### 4.2 Setting Up Your Pen Collection
+
+**View current pens:**
+```bash
+uv run plotty list pens
+```
+
+**Add pens interactively:**
+```bash
+uv run plotty setup pen
+```
+
+**Add specific pens:**
+```bash
+# Fine detail pen
+uv run plotty add pen \
+  --name "Fine Black" \
+  --width 0.3 \
+  --color "#000000" \
+  --speed-cap 50
+
+# Medium workhorse pen
+uv run plotty add pen \
+  --name "Medium Black" \
+  --width 0.7 \
+  --color "#000000" \
+  --speed-cap 80
+
+# Color pens
+uv run plotty add pen \
+  --name "Fine Red" \
+  --width 0.3 \
+  --color "#FF0000" \
+  --speed-cap 50
+
+uv run plotty add pen \
+  --name "Medium Blue" \
+  --width 0.5 \
+  --color "#0000FF" \
+  --speed-cap 70
+```
+
+**Your pen database:**
+```
+📊 Available Pens
+================
+1. Fine Black (0.3mm) - #000000
+2. Medium Black (0.7mm) - #000000  
+3. Fine Red (0.3mm) - #FF0000
+4. Medium Blue (0.5mm) - #0000FF
+```
+
+### 4.3 Planning Multi-Pen Artwork
+
+**Add your colorful design:**
+```bash
+uv run plotty add colorful_art.svg --paper a4 --name "Rainbow Design"
+```
+
+**Interactive pen mapping:**
+```bash
+uv run plotty plan colorful_art --interactive
+```
+
+**Pen mapping walkthrough:**
+```
+🎨 Multi-Pen Layer Detection
+============================
+Detected 3 layers:
+  🔵 Layer 1: "outline" (523 points) - BLACK
+  🟢 Layer 2: "fill" (1,247 points) - GRAY  
+  🟡 Layer 3: "highlights" (89 points) - WHITE
+
+Available pens:
+  [1] Fine Black 0.3mm
+  [2] Medium Black 0.7mm
+  [3] Fine Red 0.3mm
+  [4] Medium Blue 0.5mm
+
+Map layers to pens (e.g. "1,2,3"): 2,1,3
+
+🔄 Pen Change Optimization
+=========================
+Original pen changes: 6
+Optimized pen changes: 2 (67% reduction)
+Time saved: ~4 minutes
+
+✅ Pen mapping saved
+```
+
+> **💡 Pro Tip:** Map similar colors together (e.g., all dark colors with the same pen) to minimize pen changes.
+
+### 4.4 Plotting Multi-Pen Artwork
+
+**Start your colorful plot:**
+```bash
+uv run plotty plot colorful_art
+```
+
+**During plotting - pen change prompts:**
+```
+🖊️ Plotting: colorful_art
+==============================
+Layer 1/3: outline (Pen: Medium Black)
+██████████████████████████████ 100%
+
+🔄 Pen Change Required
+======================
+Next layer: "fill" (requires Fine Red pen)
+Please change pen now...
+
+[Enter] Continue | [S] Skip layer | [A] Abort
+```
+
+**Pen change tips:**
+- 🖊️ **Gentle swaps** - Don't force pens into the holder
+- 📏 **Check alignment** - Make sure the new pen is centered
+- ⏱️ **Quick changes** - Practice makes this faster
+- 📝 **Take notes** - Remember which pen numbers are which colors
+
+### 4.5 Multi-Pen Best Practices
+
+**Design for efficient pen changes:**
+```xml
+<!-- Good: Group similar colors together -->
+<g inkscape:label="dark_elements">
+  <path stroke="black" .../>
+  <path stroke="darkgray" .../>
+</g>
+<g inkscape:label="light_elements">
+  <path stroke="white" .../>
+  <path stroke="lightgray" .../>
+</g>
+```
+
+**Pen optimization strategies:**
+- **Color grouping** - Plot all dark colors, then all light colors
+- **Pen priority** - Use your most reliable pen for the largest areas
+- **Test first** - Do a quick test plot with just the outlines
+
+**Advanced pen mapping:**
+```bash
+# Plan with custom pen order
+uv run plotty plan artwork --pen-order 2,1,4,3
+
+# Optimize for minimum pen changes
+uv run plotty plan artwork --optimize-pens
+
+# Preview pen changes without plotting
+uv run plotty plan artwork --dry-run --show-pen-changes
 ```
 
 ### 3.2 Setting Up Multiple Pens
@@ -316,15 +654,15 @@ Please change pen now...
 [Enter] Continue | [S] Skip layer | [A] Abort
 ```
 
----
+## 5. Creative Tool Integration
 
-## 4. Creative Tool Integration
+Connect ploTTY with your favorite creative tools for seamless workflows.
 
-### 4.1 vsketch Integration with vpype-plotty
+### 5.1 vsketch + vpype-plotty (Recommended)
 
-**Installation:**
+**Setup vsketch integration:**
 ```bash
-# Install vpype-plotty for vsketch integration
+# Install vpype-plotty plugin for vsketch
 pipx inject vsketch vpype-plotty
 ```
 
@@ -337,32 +675,34 @@ class MyDesign(vsketch.SketchClass):
         vsk.size("a4", landscape=False)
         vsk.scale("cm")
         
-        # Your creative code here
+        # Your creative code
         for i in range(10):
             vsk.circle(i * 2, i * 2, radius=1)
     
     def finalize(self, vsk: vsketch.Vsketch) -> None:
-        # Standard optimization
+        # Optimize in vsketch
         vsk.vpype("linemerge linesimplify reloop linesort")
         
-        # Add to ploTTY queue
+        # Send to ploTTY queue
         vsk.vpype("plotty-add --name my_design --preset hq --queue")
 
 if __name__ == "__main__":
     MyDesign().display()
 ```
 
-**Advanced vsketch integration:**
+**Advanced vsketch with parameters:**
 ```python
-class AdvancedDesign(vsketch.SketchClass):
+class GenerativeArt(vsketch.SketchClass):
     # Interactive parameters
-    complexity = vsketch.Param(50)
-    density = vsketch.Param(10)
+    complexity = vsketch.Param(50, min=10, max=200, step=10)
+    density = vsketch.Param(10, min=1, max=50)
+    style = vsketch.Param("geometric", choices=["geometric", "organic", "mixed"])
     
     def draw(self, vsk: vsketch.Vsketch) -> None:
         vsk.size("a4")
         vsk.scale("cm")
         
+        # Generate based on parameters
         for i in range(self.complexity):
             with vsk.pushMatrix():
                 vsk.rotate(i * 0.1)
@@ -370,54 +710,77 @@ class AdvancedDesign(vsketch.SketchClass):
                     vsk.randomGaussian() * self.density * 0.1,
                     vsk.randomGaussian() * self.density * 0.1
                 )
-                vsk.circle(0, 0, radius=0.5)
+                
+                if self.style == "geometric":
+                    vsk.rect(0, 0, 0.5, 0.5)
+                elif self.style == "organic":
+                    vsk.circle(0, 0, radius=0.3)
+                else:
+                    vsk.polygon([(0, 0), (0.5, 0.2), (0.3, 0.5)])
     
     def finalize(self, vsk: vsketch.Vsketch) -> None:
         vsk.vpype("linemerge linesimplify reloop linesort")
         
-        # Dynamic job naming based on parameters
-        job_name = f"design_c{self.complexity}_d{self.density}"
+        # Dynamic naming based on parameters
+        job_name = f"{self.style}_c{self.complexity}_d{self.density}"
         vsk.vpype(f"plotty-add --name '{job_name}' --preset hq --queue")
+
+if __name__ == "__main__":
+    GenerativeArt().display()
 ```
 
-### 4.2 Direct vpype Integration
+### 5.2 Direct vpype Integration
 
-**For non-vsketch workflows:**
+**For existing SVG files:**
 ```bash
-# Add existing SVG to ploTTY
-vpype read design.svg plotty-add --name existing_art --preset fast
+# Add existing design to ploTTY
+vpype read my_art.svg plotty-add --name "My Art" --preset fast
 
-# Create generative art and queue
-vpype rand --seed 123 plotty-add --name random_art --paper A3 --queue
+# Create generative art and queue directly
+vpype rand --seed 123 plotty-add --name "Random Art 123" --paper A3 --queue
 
-# Batch processing
+# Process and optimize in one step
+vpype read design.svg linemerge linesimplify \
+    plotty-add --name "Optimized Design" --preset none
+```
+
+**Batch generation with vpype:**
+```bash
+# Create a series of variations
 for seed in {1..10}; do
-    vpype rand --seed $seed plotty-add --name "batch_$seed" --queue
+    vpype rand --seed $seed \
+        plotty-add --name "Variation $seed" --preset fast --queue
+done
+
+# Geometric patterns
+for i in {1..5}; do
+    vpype rect --grid 4x$i --spacing 20mm \
+        plotty-add --name "Grid $i" --queue
 done
 ```
 
-### 4.3 Multi-Pen Design Integration
+### 5.3 Multi-Pen vsketch Integration
 
-**vsketch multi-pen example:**
+**Create multi-layer designs programmatically:**
 ```python
-class MultiPenArt(vsketch.SketchClass):
+class MultiLayerArt(vsketch.SketchClass):
     def draw(self, vsk: vsketch.Vsketch) -> None:
         vsk.size("a4")
         vsk.scale("cm")
         
-        # Layer 1: Black outlines
+        # Layer 1: Black outlines (stroke 1)
         vsk.stroke(1)
         vsk.penWidth("0.3mm", 1)
         for i in range(5):
             vsk.rect(i * 3, i * 2, 2, 2)
         
-        # Layer 2: Red details
+        # Layer 2: Red details (stroke 2)
         vsk.stroke(2)
         vsk.penWidth("0.2mm", 2)
         for i in range(5):
             vsk.circle(i * 3 + 1, i * 2 + 1, radius=0.5)
         
-        # Layer 3: Blue accents
+        # Layer 3: Blue accents (stroke 3)
         vsk.stroke(3)
         vsk.penWidth("0.5mm", 3)
         for i in range(5):
@@ -425,244 +788,386 @@ class MultiPenArt(vsketch.SketchClass):
     
     def finalize(self, vsk: vsketch.Vsketch) -> None:
         vsk.vpype("linemerge linesimplify reloop linesort")
-        vsk.vpype("plotty-add --name multipen_art --preset hq --queue")
+        vsk.vpype("plotty-add --name multi_pen_art --preset hq --queue")
 ```
 
-### 4.4 Batch Processing with vpype-plotty
-
-**Generate multiple variants:**
-```python
-# batch_generator.py
-import subprocess
-import json
-
-def generate_batch(base_name, seed_range):
-    """Generate multiple designs and queue them."""
-    job_ids = []
-    
-    for seed in seed_range:
-        print(f"Generating design with seed {seed}...")
-        
-        # Generate using vsketch
-        cmd = [
-            "vsk", "run", "generative_design.py",
-            "--set", f"seed={seed}",
-            "--save-only"
-        ]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        
-        if result.returncode == 0:
-            # Queue with ploTTY
-            job_name = f"{base_name}_seed_{seed}"
-            cmd = [
-                "vpype", "read", f"output/{base_name}_{seed}.svg",
-                "plotty-add", "--name", job_name, "--preset", "fast", "--queue"
-            ]
-            result = subprocess.run(cmd, capture_output=True, text=True)
-            
-            if result.returncode == 0:
-                job_id = result.stdout.strip()
-                job_ids.append(job_id)
-                print(f"✅ Queued job {job_id}")
-    
-    # Save job list
-    with open(f"{base_name}_jobs.json", "w") as f:
-        json.dump(job_ids, f, indent=2)
-    
-    return job_ids
-
-# Usage
-jobs = generate_batch("experiment", range(1, 21))
-print(f"Generated {len(jobs)} jobs")
-```
-
-### 4.5 Integration with Other Creative Tools
+### 5.4 Integration with Design Software
 
 **Inkscape workflow:**
 ```bash
-# Design in Inkscape, export to SVG
-inkscape --export-type=svg design.svg
+# Design in Inkscape, then export
+# 1. Create your design in Inkscape
+# 2. File > Save As... > SVG
+# 3. Use meaningful layer names
 
 # Add to ploTTY queue
-vpype read design.svg plotty-add --name inkscape_art --preset hq
+vpype read inkscape_design.svg plotty-add --name "Inkscape Art" --preset hq
 ```
 
-**Illustrator workflow:**
+**Adobe Illustrator workflow:**
 ```bash
-# Export from Illustrator as SVG
-# File > Export > Export As... > SVG
+# Export from Illustrator
+# 1. File > Export > Export As...
+# 2. Choose SVG format
+# 3. Use "Save Artboards" if you have multiple designs
 
-# Process with vpype and queue
-vpype read illustrator_art.svg plotty-add --name vector_design --queue
+# Process with ploTTY
+vpype read illustrator_art.svg plotty-add --name "Illustrator Design" --queue
 ```
 
 **Processing/p5.js workflow:**
 ```javascript
 // Processing sketch that exports SVG
 void setup() {
-  size(400, 400);
+  size(400, 400, SVG, "processing_art.svg");  // Direct SVG output
+  background(255);
+  
+  // Your creative code
+  for (int i = 0; i < 10; i++) {
+    circle(random(width), random(height), random(10, 50));
+  }
+  
+  exit();  // Saves the file and exits
 }
 
+// Or interactive export
 void draw() {
-  background(255);
-  // Your creative code
-  circle(mouseX, mouseY, 50);
-  
-  // Export SVG on keypress
-  if (keyPressed) {
-    save("processing_art.svg");
+  if (keyPressed && key == 's') {
+    save("processing_sketch.svg");
   }
 }
 ```
 
 ```bash
-# Convert and queue
-vpype read processing_art.svg plotty-add --name processing_sketch --preset default
+# Queue Processing art
+vpype read processing_art.svg plotty-add --name "Processing Sketch" --preset default
 ```
 
-### 4.6 Best Practices for Creative Integration
+### 5.5 Creative Project Organization
 
-**File Organization:**
+**Recommended project structure:**
 ```bash
-# Recommended project structure
-my_project/
-├── sketches/           # vsketch .py files
-├── output/            # Generated SVGs
-├── ploppy_jobs/       # ploTTY workspace
-└── batch_scripts/      # Automation scripts
+my_creative_project/
+├── sketches/              # vsketch .py files
+│   ├── generative_art.py
+│   └── multi_pen_design.py
+├── output/               # Generated SVGs
+│   ├── art_001.svg
+│   └── art_002.svg
+├── ploppy_workspace/     # ploTTY job data
+├── scripts/             # Automation scripts
+│   └── batch_generate.py
+└── assets/              # Reference materials
+    └── inspiration.jpg
 ```
 
-**Parameter Management:**
+**Professional naming conventions:**
 ```python
-# Use meaningful parameter names
-class ProfessionalDesign(vsketch.SketchClass):
+class ClientProject(vsketch.SketchClass):
     client_name = vsketch.Param("Acme Corp")
-    project_type = vsketch.Param("logo")
-    quality_level = vsketch.Param("hq")
+    project_type = vsketch.Param("logo", choices=["logo", "pattern", "illustration"])
+    version = vsketch.Param("v1")
     
     def finalize(self, vsk: vsketch.Vsketch) -> None:
         vsk.vpype("linemerge linesimplify reloop linesort")
         
         # Professional job naming
-        job_name = f"{self.client_name}_{self.project_type}_{self.quality_level}"
-        vsk.vpype(f"plotty-add --name '{job_name}' --preset {self.quality_level} --queue")
+        job_name = f"{self.client_name}_{self.project_type}_{self.version}"
+        vsk.vpype(f"plotty-add --name '{job_name}' --preset hq --queue")
 ```
 
-**Quality Control:**
-```python
-# Add quality checks before queuing
-def finalize(self, vsk: vsketch.Vsketch) -> None:
-    vsk.vpype("linemerge linesimplify reloop linesort")
-    
-    # Check complexity before queuing
-    if vsk.document.get_total_length() > 50000:  # mm
-        print("⚠️  Warning: Very long plot time expected")
-        print("Consider reducing complexity or using hq preset")
-    
-    # Queue with appropriate preset based on complexity
-    if vsk.document.get_total_length() > 20000:
-        preset = "hq"
-    elif vsk.document.get_total_length() > 10000:
-        preset = "default"
-    else:
-        preset = "fast"
-    
-    vsk.vpype(f"plotty-add --name complex_design --preset {preset} --queue")
-```
+### 5.6 ⚠️ Critical: Optimization Control
 
-### 4.7 ⚠️ Optimization Control
+**Understanding optimization prevents double-processing and ensures best results.**
 
-**Critical**: Understanding optimization handling prevents double-processing and ensures optimal performance.
+#### **The Optimization Rule**
+- **vsketch optimizes** → ploTTY should skip (`--preset none`)
+- **ploTTY optimizes** → vsketch should skip optimization
+- **Never both** → Avoids double-processing and quality loss
 
-#### **Optimization Workflow**
+#### **Correct Workflows**
 
-**vsketch → vpype-plotty → ploTTY (Recommended):**
+**Workflow 1: vsketch optimizes (Recommended)**
 ```python
 def finalize(self, vsk: vsketch.Vsketch) -> None:
-    # Step 1: vsketch optimizes
+    # vsketch does the optimization
     vsk.vpype("linemerge linesimplify reloop linesort")
     
-    # Step 2: Skip ploTTY optimization (already done)
+    # ploTTY skips optimization (already done)
     vsk.vpype("plotty-add --name my_design --preset none --queue")
 ```
 
-**Raw SVG → vpype → ploTTY:**
+**Workflow 2: ploTTY optimizes**
+```python
+def finalize(self, vsk: vsketch.Vsketch) -> None:
+    # vsketch skips optimization
+    # vsk.vpype("linemerge linesimplify reloop linesort")  # Commented out
+    
+    # ploTTY handles optimization
+    vsk.vpype("plotty-add --name my_design --preset hq --queue")
+```
+
+**Workflow 3: vpype optimizes, ploTTY skips**
 ```bash
-# Option 1: vpype optimizes, ploTTY skips
+# vpype optimizes, ploTTY skips
 vpype read design.svg linemerge linesimplify \
     plotty-add --name optimized --preset none
-
-# Option 2: ploTTY optimizes
-vpype read design.svg plotty-add --name raw --preset hq
 ```
 
-#### **Optimization Control Matrix**
+#### **Quick Reference**
 
-| Source | vpype Command | ploTTY Preset | Result |
-|---------|---------------|----------------|---------|
-| vsketch optimized | `--preset none` | Skip | No double optimization |
-| Raw SVG | vpype optimizes | `--preset none` | Single optimization |
-| Raw SVG | none | `--preset hq/fast/default` | ploTTY optimization |
-| Pre-optimized SVG | none | `--preset none` | No optimization |
+| Tool Doing Optimization | ploTTY Command | When to Use |
+|------------------------|----------------|-------------|
+| vsketch | `--preset none` | Most vsketch workflows |
+| vpype | `--preset none` | When vpype processes first |
+| ploTTY | `--preset hq/fast/default` | Raw SVG files |
+| None | `--preset none` | Pre-optimized files |
 
-#### **Best Practice Guidelines**
-
-**1. Use `--preset none` when:**
-- vsketch already optimized the design
-- vpype already processed the file
-- File is pre-optimized by other tools
-
-**2. Use ploTTY presets when:**
-- Working with raw SVG files
-- Want consistent production quality
-- Prefer ploTTY's optimization pipeline
-
-**3. Match optimization levels:**
-```python
-# Consistent optimization across tools
-def get_optimization_level(complexity):
-    if complexity > 20000:  # mm of lines
-        return "hq"
-    elif complexity > 10000:
-        return "default"
-    else:
-        return "fast"
-
-# Use same logic in both vsketch and vpype workflows
-```
+> **🚨 Golden Rule:** Only one tool should optimize. Choose your favorite and stick with it consistently.
 
 ---
 
-## 5. Batch Production Workflow
+## 6. Artistic Workflows
 
-### 4.1 Organizing Batch Jobs
+Professional workflows from concept to final piece.
 
-```bash
-# Create project directory
-mkdir client_project
-cd client_project
+### 6.1 Concept Development Workflow
 
-# Add all designs
-uv run plotty add logo.svg --paper a4
-uv run plotty add business_card.svg --paper a4
-uv run plotty add letterhead.svg --paper a4
+**Step 1: Sketch and test**
+```python
+# quick_sketch.py - Fast iteration
+import vsketch
+
+class QuickSketch(vsketch.SketchClass):
+    def draw(self, vsk: vsketch.Vsketch) -> None:
+        vsk.size("a5")  # Smaller for quick tests
+        vsk.scale("cm")
+        
+        # Rapid prototyping code
+        for i in range(20):
+            vsk.circle(
+                vsk.random(0, 10), 
+                vsk.random(0, 15), 
+                radius=vsk.random(0.1, 1.0)
+            )
+    
+    def finalize(self, vsk: vsketch.Vsketch) -> None:
+        # Quick optimization for testing
+        vsk.vpype("linemerge linesort")
+        vsk.vpype("plotty-add --name 'quick_test' --preset fast --queue")
 ```
 
-### 4.2 Batch Planning
+**Step 2: Refine and scale**
+```python
+# refined_art.py - Production ready
+class RefinedArt(vsketch.SketchClass):
+    def draw(self, vsk: vsketch.Vsketch) -> None:
+        vsk.size("a3")  # Final size
+        vsk.scale("cm")
+        
+        # Polished, intentional design
+        for i in range(50):
+            with vsk.pushMatrix():
+                angle = (i / 50) * 2 * 3.14159
+                radius = 5 + i * 0.1
+                vsk.translate(
+                    10 + radius * math.cos(angle),
+                    10 + radius * math.sin(angle)
+                )
+                vsk.circle(0, 0, radius=0.2)
+    
+    def finalize(self, vsk: vsketch.Vsketch) -> None:
+        # Production optimization
+        vsk.vpype("linemerge linesimplify reloop linesort")
+        vsk.vpype("plotty-add --name 'refined_piece' --preset hq --queue")
+```
 
+### 6.2 Multi-Revision Workflow
+
+**Version control your art:**
 ```bash
-# Plan all jobs with fast optimization
+# Create version series
+for version in {1..5}; do
+    vsk run my_art.py --set complexity=$version \
+        --save-only --output "art_v${version}.svg"
+    
+    vpype read "art_v${version}.svg" \
+        plotty-add --name "Art Series v${version}" --queue
+done
+
+# Plot all versions
+uv run plotty plot-all
+```
+
+**Compare versions:**
+```bash
+# Estimate time for each version
+for job in art_series_*; do
+    echo "=== $job ==="
+    uv run plotty estimate "$job" --detailed
+done
+```
+
+### 6.3 Client Presentation Workflow
+
+**Professional client deliverables:**
+```python
+class ClientPresentation(vsketch.SketchClass):
+    client_name = vsketch.Param("Acme Corp")
+    project_code = vsketch.Param("LOGO-2025")
+    
+    def draw(self, vsk: vsketch.Vsketch) -> None:
+        vsk.size("a4")
+        vsk.scale("cm")
+        
+        # Professional logo design
+        self.draw_logo(vsk)
+        self.add_text_info(vsk)
+    
+    def draw_logo(self, vsk: vsketch.Vsketch) -> None:
+        # Your logo design code
+        pass
+    
+    def add_text_info(self, vsk: vsketch.Vsketch) -> None:
+        # Add project metadata as text
+        vsk.text(f"{self.client_name} - {self.project_code}", 
+                1, 1, size=0.3)
+    
+    def finalize(self, vsk: vsketch.Vsketch) -> None:
+        vsk.vpype("linemerge linesimplify reloop linesort")
+        
+        # Professional naming
+        job_name = f"{self.client_name}_{self.project_code}_final"
+        vsk.vpype(f"plotty-add --name '{job_name}' --preset hq --queue")
+```
+
+### 6.4 Limited Edition Workflow
+
+**Numbered editions with documentation:**
+```bash
+# Create limited edition series
+edition_size=10
+artwork_name="Geometric Harmony"
+
+for edition in $(seq 1 $edition_size); do
+    # Generate with unique seed for each edition
+    vsk run limited_edition.py --set seed=$((edition * 123)) \
+        --set edition_number=$edition \
+        --save-only
+    
+    # Queue with edition naming
+    job_name="${artwork_name} - Edition ${edition}/${edition_size}"
+    vpype read output.svg \
+        plotty-add --name "$job_name" --preset hq --queue
+done
+
+# Plot with documentation
+uv run plotty plot-all --document-each
+```
+
+### 6.5 Exhibition Preparation Workflow
+
+**Gallery-ready artwork:**
+```bash
+# Prepare multiple pieces for exhibition
+exhibition_pieces=("piece1" "piece2" "piece3" "piece4")
+
+for piece in "${exhibition_pieces[@]}"; do
+    # Generate at exhibition size
+    vsk run "${piece}.py" --set size=a2 --save-only
+    
+    # Add to queue with exhibition naming
+    vpype read "${piece}.svg" \
+        plotty-add --name "Exhibition: ${piece}" \
+                   --paper a2 --preset hq --queue
+    
+    # Create test print first
+    vpype read "${piece}.svg" \
+        plotty-add --name "Test: ${piece}" \
+                   --paper a4 --preset fast --queue
+done
+
+# Plot test versions first
+uv run plotty plot "Test:*"
+
+# After approval, plot full size
+uv run plotty plot "Exhibition:*"
+```
+
+> **🎯 Creative Goal:** Develop workflows that match your artistic process. Use these as templates and adapt them to your unique style.
+
+---
+
+# ⚡ Power User Path
+
+## 7. Batch Production
+
+Professional workflows for high-volume plotting operations.
+
+### 7.1 Project Organization
+
+**Create structured project directories:**
+```bash
+# Professional project setup
+mkdir -p client_acme/{designs,output,documentation}
+cd client_acme
+
+# Add all client designs
+uv run plotty add designs/logo.svg --name "Acme Logo" --paper a4
+uv run plotty add designs/business_card.svg --name "Acme Business Card" --paper a4
+uv run plotty add designs/letterhead.svg --name "Acme Letterhead" --paper a4
+```
+
+**Batch import from directory:**
+```bash
+# Import all SVGs from a directory
+for file in designs/*.svg; do
+    basename=$(basename "$file" .svg)
+    uv run plotty add "$file" --name "Acme: $basename" --paper a4
+done
+```
+
+### 7.2 Intelligent Batch Planning
+
+**Plan all jobs with optimization:**
+```bash
+# Fast batch planning (good for simple designs)
 uv run plotty plan-all --preset fast
 
-# Plan with pen optimization
-uv run plotty plan-all --optimize-pens
+# High-quality batch planning (complex designs)
+uv run plotty plan-all --preset hq
 
-# Plan specific jobs
-uv run plotty plan logo business_card --preset hq
+# Smart pen optimization across all jobs
+uv run plotty plan-all --optimize-pens --global-pen-order
 ```
 
-### 4.3 Batch Plotting
+**Selective batch planning:**
+```bash
+# Plan specific jobs with custom settings
+uv run plotty plan "Acme Logo" "Acme Business Card" --preset hq
 
+# Plan by pattern matching
+uv run plotty plan "Acme:*" --preset fast
+
+# Plan jobs added today
+uv run plotty plan --added-today --preset default
+```
+
+**Advanced batch planning options:**
+```bash
+# Plan with time constraints
+uv run plotty plan-all --max-time-per-job 30m --preset fast
+
+# Plan with pen change minimization
+uv run plotty plan-all --minimize-pen-changes --pen-priority 2,1,3
+
+# Dry run to see planning results
+uv run plotty plan-all --dry-run --show-estimates
+```
+
+### 7.3 Automated Batch Plotting
+
+**Standard batch execution:**
 ```bash
 # Plot all planned jobs
 uv run plotty plot-all
@@ -670,97 +1175,767 @@ uv run plotty plot-all
 # Plot with safety preset (slower but more reliable)
 uv run plotty plot-all --preset safe
 
-# Monitor progress
-uv run plotty list queue --watch
+# Plot with automatic camera recording
+uv run plotty plot-all --record-all
 ```
 
-### 4.4 Queue Management
-
+**Advanced batch plotting:**
 ```bash
-# View current queue
-uv run plotty list queue
+# Plot with time limits
+uv run plotty plot-all --max-total-time 4h
 
+# Plot with automatic pen change prompts
+uv run plotty plot-all --auto-pen-change
+
+# Plot with progress monitoring
+uv run plotty plot-all --monitor --notify-on-complete
+```
+
+**Conditional batch plotting:**
+```bash
+# Only plot jobs under 15 minutes
+uv run plotty plot-all --max-job-time 15m
+
+# Plot high-priority jobs first
+uv run plotty plot-all --priority-order
+
+# Plot with automatic retry on failure
+uv run plotty plot-all --retry-failed --max-retries 2
+```
+
+### 7.4 Queue Management and Monitoring
+
+**Real-time queue monitoring:**
+```bash
+# Watch queue progress
+uv run plotty list queue --watch
+
+# Detailed queue status
+uv run plotty list queue --detailed --show-estimates
+
+# Export queue status for reporting
+uv run plotty list queue --json > queue_status_$(date +%Y%m%d).json
+```
+
+**Automated queue cleanup:**
+```bash
 # Remove completed jobs
 uv run plotty queue cleanup --state completed
 
 # Remove old jobs (older than 7 days)
 uv run plotty queue cleanup --older-than 7d
 
-# Export queue status
-uv run plotty list queue --json > queue_status.json
+# Remove failed jobs
+uv run plotty queue cleanup --state failed
+
+# Comprehensive cleanup
+uv run plotty queue cleanup --completed --failed --older-than 3d
 ```
 
----
-
-## 5. Advanced Optimization
-
-### 5.1 Understanding vpype Presets
-
-ploTTY includes optimization presets:
-
-```yaml
-# Fast preset (default)
-fast: "read {src} pagesize {pagesize} crop 0 0 {width_mm}mm {height_mm}mm linemerge linesort write {dst}"
-
-# High quality preset  
-hq: "read {src} pagesize {pagesize} crop 0 0 {width_mm}mm {height_mm}mm linemerge linesort linesimplify write {dst}"
-```
-
-### 5.2 Custom Optimization
-
+**Queue organization:**
 ```bash
-# Use custom vpype pipeline
+# Group jobs by project
+uv run plotty queue group --by-project "Acme"
+
+# Reorder queue by priority
+uv run plotty queue reorder --by-time-estimate
+
+# Pause specific jobs
+uv run plotty queue pause "Acme:*"
+
+# Resume paused jobs
+uv run plotty queue resume "Acme:*"
+```
+
+### 7.5 Production Reporting
+
+**Generate production reports:**
+```bash
+# Daily production summary
+uv run plotty stats production --date today --export > daily_report.json
+
+# Client-specific reports
+uv run plotty stats jobs --client "Acme" --last 30 --export > acme_report.json
+
+# Performance analytics
+uv run plotty stats performance --pen-usage --time-analysis --export > performance.json
+```
+
+**Automated reporting script:**
+```bash
+#!/bin/bash
+# production_report.sh - Daily production reporting
+
+DATE=$(date +%Y-%m-%d)
+REPORT_DIR="reports/$DATE"
+mkdir -p "$REPORT_DIR"
+
+# Generate comprehensive report
+{
+    echo "# Production Report - $DATE"
+    echo ""
+    echo "## Queue Status"
+    uv run plotty list queue --detailed
+    echo ""
+    echo "## Today's Performance"
+    uv run plotty stats summary --today
+    echo ""
+    echo "## Pen Usage"
+    uv run plotty stats pens --last 7
+    echo ""
+    echo "## Failed Jobs"
+    uv run plotty list jobs --state failed --today
+} > "$REPORT_DIR/production_report.md"
+
+# Export machine-readable data
+uv run plotty stats production --date today --json > "$REPORT_DIR/production_data.json"
+
+echo "Report generated: $REPORT_DIR/production_report.md"
+```
+
+### 7.6 Advanced Batch Automation
+
+**Intelligent batch processing:**
+```python
+# smart_batch.py - Intelligent batch processing
+import subprocess
+import json
+import time
+
+def smart_batch_process(project_name, max_total_time_hours=4):
+    """Process batch with intelligent optimization."""
+    
+    # Add all project files
+    subprocess.run([
+        "uv", "run", "plotty", "add", f"{project_name}/*.svg",
+        "--name", f"{project_name}_batch", "--paper", "a4"
+    ])
+    
+    # Plan with time constraints
+    result = subprocess.run([
+        "uv", "run", "plotty", "plan-all", 
+        "--preset", "fast",
+        "--max-time-per-job", "30m"
+    ], capture_output=True, text=True)
+    
+    # Check total estimated time
+    if "Total estimated time" in result.stdout:
+        # Parse total time and adjust if needed
+        total_time = parse_time_from_output(result.stdout)
+        if total_time > max_total_time_hours * 3600:
+            print("⚠️ Batch too long, splitting into smaller groups")
+            split_batch_processing(project_name)
+        else:
+            # Start batch plotting
+            subprocess.run([
+                "uv", "run", "plotty", "plot-all",
+                "--monitor", "--notify-on-complete"
+            ])
+
+def split_batch_processing(project_name):
+    """Split large batch into manageable chunks."""
+    # Implementation for splitting large batches
+    pass
+
+if __name__ == "__main__":
+    smart_batch_process("client_acme")
+```
+
+> **🎯 Power User Goal:** Build automated workflows that minimize manual intervention while maximizing quality and efficiency.
+
+## 8. Advanced Optimization
+
+Fine-tune every aspect of plotting performance and quality.
+
+### 8.1 Understanding Optimization Presets
+
+ploTTY includes three optimization levels:
+
+**Fast Preset** (Quick processing):
+```yaml
+fast: "read {src} pagesize {pagesize} crop 0 0 {width_mm}mm {height_mm}mm linemerge linesort write {dst}"
+```
+- ✅ Quick processing
+- ✅ Good for simple designs
+- ⚠️ Less path optimization
+
+**Default Preset** (Balanced):
+```yaml
+default: "read {src} pagesize {pagesize} crop 0 0 {width_mm}mm {height_mm}mm linemerge linesort linesimplify write {dst}"
+```
+- ✅ Balanced speed/quality
+- ✅ Good for most designs
+- ✅ Reasonable optimization
+
+**High Quality Preset** (Maximum optimization):
+```yaml
+hq: "read {src} pagesize {pagesize} crop 0 0 {width_mm}mm {height_mm}mm linemerge linesort linesimplify reloop write {dst}"
+```
+- ✅ Best path optimization
+- ✅ Minimal pen lifts
+- ⏰ Longer processing time
+
+### 8.2 Custom Optimization Pipelines
+
+**Create your own optimization:**
+```bash
+# Custom pipeline for specific needs
 uv run plotty plan job --custom "read {src} linemerge linesort write {dst}"
 
-# Compare presets
-uv run plotty plan job --preset fast --dry-run
-uv run plotty plan job --preset hq --dry-run
+# Advanced custom pipeline
+uv run plotty plan job --custom "read {src} linemerge linesimplify reloop linesort write {dst}"
+
+# Minimal optimization (for already optimized files)
+uv run plotty plan job --custom "read {src} write {dst}"
 ```
 
-### 5.3 Time Estimation
-
+**Custom optimization examples:**
 ```bash
-# Detailed time breakdown
-uv run plotty estimate job --detailed
+# For geometric designs (focus on line merging)
+uv run plotty plan geometric_design \
+  --custom "read {src} linemerge --tolerance 0.1mm linesort write {dst}"
+
+# For organic designs (focus on line simplification)
+uv run plotty plan organic_art \
+  --custom "read {src} linesimplify --tolerance 0.05mm linesort write {dst}"
+
+# For text-heavy designs (preserve detail)
+uv run plotty plan typography \
+  --custom "read {src} linemerge --tolerance 0.01mm linesort write {dst}"
+```
+
+### 8.3 Optimization Comparison and Testing
+
+**Compare different presets:**
+```bash
+# Test all presets on the same job
+uv run plotty plan test_job --preset fast --dry-run --save-as fast_test
+uv run plotty plan test_job --preset default --dry-run --save-as default_test
+uv run plotty plan test_job --preset hq --dry-run --save-as hq_test
+
+# Compare results
+uv run plotty compare fast_test default_test hq_test --show-time-estimates
+```
+
+**Detailed time analysis:**
+```bash
+# Comprehensive time breakdown
+uv run plotty estimate job --detailed --show-optimization-steps
 
 # Compare pre/post optimization
-uv run plotty estimate job --stage pre
-uv run plotty estimate job --stage post
+uv run plotty estimate job --stage pre --save pre_estimate
+uv run plotty estimate job --stage post --save post_estimate
+uv run plotty compare pre_estimate post_estimate --show-improvement
 ```
 
-**Estimation output:**
+**Sample detailed output:**
 ```
-⏱️ Time Estimation: job
-=======================
-Pre-optimization:
-  - Drawing time: 8.2 minutes
-  - Pen changes: 0
-  - Total: 8.2 minutes
+⏱️ Detailed Time Estimation: complex_art
+=========================================
+Pre-optimization Analysis:
+  - Total path length: 15,234mm
+  - Pen lifts: 47
+  - Direction changes: 234
+  - Estimated drawing time: 12.4 minutes
+  - Pen change time: 0 minutes
+  - Total time: 12.4 minutes
 
-Post-optimization:
-  - Drawing time: 6.1 minutes  
-  - Pen changes: 0
-  - Total: 6.1 minutes
+Post-optimization Analysis:
+  - Total path length: 12,891mm (15% reduction)
+  - Pen lifts: 23 (51% reduction)
+  - Direction changes: 156 (33% reduction)
+  - Estimated drawing time: 8.7 minutes
+  - Pen change time: 0 minutes
+  - Total time: 8.7 minutes
 
-Improvement: 25% faster (2.1 minutes saved)
+Optimization Summary:
+  - Time saved: 3.7 minutes (30% faster)
+  - Path efficiency: 15% improvement
+  - Pen lift reduction: 51% fewer lifts
+  - Processing time: 45 seconds
 ```
 
----
+### 8.4 Advanced Pen Optimization
 
-## 6. Studio Management
-
-### 6.1 Device Management
-
+**Global pen optimization across jobs:**
 ```bash
-# Check device status
-uv run plotty check ready
+# Optimize pen changes across entire queue
+uv run plotty optimize-pens --global --queue-wide
 
-# Test device movement
-uv run plotty check device --test-move
+# Custom pen change priority
+uv run plotty optimize-pens --pen-order 2,1,3,4 --minimize-distance
 
-# Update device configuration
-uv run plotty config device --port /dev/ttyUSB1
+# Pen optimization with time constraints
+uv run plotty optimize-pens --max-pen-change-time 30s --prefer-fewer-changes
 ```
+
+**Pen optimization strategies:**
+```bash
+# Strategy 1: Minimize total pen changes
+uv run plotty plan-all --optimize-pens --strategy min-changes
+
+# Strategy 2: Minimize pen change time
+uv run plotty plan-all --optimize-pens --strategy min-time
+
+# Strategy 3: Optimize for pen wear
+uv run plotty plan-all --optimize-pens --strategy balance-wear
+
+# Strategy 4: Prioritize speed over pen changes
+uv run plotty plan-all --optimize-pens --strategy speed-first
+```
+
+### 8.5 Performance Tuning
+
+**Device-specific optimization:**
+```bash
+# AxiDraw v3 optimization
+uv run plotty config device --model v3 --optimize-for v3
+
+# Custom speed profiles
+uv run plotty add speed-profile \
+  --name "precision" \
+  --speed 15 \
+  --acceleration 50 \
+  --pen-up-delay 50
+
+# Use custom speed profile
+uv run plotty plan job --speed-profile precision
+```
+
+**Paper-specific optimization:**
+```bash
+# Optimization for different paper types
+uv run plotty add paper-profile \
+  --name "watercolor_paper" \
+  --type "rough" \
+  --pen-pressure "light" \
+  --speed-reduction 20
+
+uv run plotty plan job --paper-profile watercolor_paper
+```
+
+**Environmental optimization:**
+```bash
+# Humidity-aware optimization
+uv run plotty plan job --humidity high --adjust-speed
+
+# Temperature compensation
+uv run plotty plan job --temperature cold --compensate
+```
+
+### 8.6 Quality vs Speed Trade-offs
+
+**Automated quality selection:**
+```bash
+# Let ploTTY choose optimal preset
+uv run plotty plan job --auto-preset --target-time 10m
+
+# Quality-based selection
+uv run plotty plan job --quality-threshold 95 --auto-preset
+
+# Speed-based selection
+uv run plotty plan job --speed-priority --max-time 5m
+```
+
+**Manual quality tuning:**
+```bash
+# Custom quality settings
+uv run plotty plan job \
+  --line-merge-tolerance 0.05mm \
+  --line-simplify-tolerance 0.02mm \
+  --min-path-length 1mm
+
+# Progressive refinement
+uv run plotty plan job --progressive-refinement --iterations 3
+```
+
+### 8.7 Optimization Profiling
+
+**Profile optimization performance:**
+```bash
+# Profile optimization process
+uv run plotty profile job --show-steps --timing
+
+# Compare optimization algorithms
+uv run plotty profile job --compare-algorithms fast,hq,custom
+
+# Optimization bottleneck analysis
+uv run plotty profile job --find-bottlenecks
+```
+
+**Sample profiling output:**
+```
+🔍 Optimization Profile: detailed_art
+=====================================
+Step 1: File loading - 0.2s
+Step 2: Path parsing - 0.8s
+Step 3: Line merging - 2.1s (bottleneck)
+Step 4: Line simplification - 1.5s
+Step 5: Path sorting - 0.9s
+Step 6: Relooping - 1.2s
+Step 7: File writing - 0.3s
+
+Total optimization time: 7.0s
+Recommendation: Use larger merge tolerance for faster processing
+```
+
+### 8.8 Optimization Automation
+
+**Smart optimization selection:**
+```python
+# auto_optimizer.py - Intelligent optimization selection
+import subprocess
+import json
+
+def auto_optimize(job_name, target_time=None, quality_priority=False):
+    """Automatically select best optimization based on job characteristics."""
+    
+    # Get job analysis
+    result = subprocess.run([
+        "uv", "run", "plotty", "info", "job", job_name, "--json"
+    ], capture_output=True, text=True)
+    
+    job_data = json.loads(result.stdout)
+    
+    # Analyze job characteristics
+    complexity = job_data.get('complexity_score', 0)
+    path_length = job_data.get('total_path_length', 0)
+    layer_count = job_data.get('layer_count', 1)
+    
+    # Select optimization strategy
+    if quality_priority:
+        preset = "hq"
+    elif target_time:
+        preset = select_preset_for_target_time(complexity, target_time)
+    elif complexity > 1000:
+        preset = "hq"
+    elif complexity > 100:
+        preset = "default"
+    else:
+        preset = "fast"
+    
+    # Apply optimization
+    subprocess.run([
+        "uv", "run", "plotty", "plan", job_name, "--preset", preset
+    ])
+    
+    return preset
+
+def select_preset_for_target_time(complexity, target_time_minutes):
+    """Select preset to meet target time."""
+    if target_time_minutes < 5:
+        return "fast"
+    elif target_time_minutes < 15:
+        return "default"
+    else:
+        return "hq"
+
+if __name__ == "__main__":
+    preset = auto_optimize("my_job", target_time=10)
+    print(f"Selected preset: {preset}")
+```
+
+> **🎯 Optimization Goal:** Find the perfect balance between processing time, plotting time, and output quality for your specific workflow.
+
+## 9. Studio Management
+
+Professional studio operations and resource management.
+
+### 9.1 Device Management
+
+**Device health monitoring:**
+```bash
+# Comprehensive device check
+uv run plotty check ready --detailed
+
+# Test device movement patterns
+uv run plotty check device --test-move --pattern full-range
+
+# Device calibration
+uv run plotty calibrate device --auto-calibrate
+
+# Device performance test
+uv run plotty benchmark device --duration 5m
+```
+
+**Multi-device management:**
+```bash
+# List all connected devices
+uv run plotty list devices
+
+# Switch between devices
+uv run plotty config device --active axidraw_v3_1
+
+# Device-specific settings
+uv run plotty config device --name axidraw_v3_1 \
+  --speed-profile precision \
+  --pen-up-delay 60 \
+  --pen-down-delay 40
+```
+
+**Device maintenance tracking:**
+```bash
+# Log maintenance
+uv run plotty maintenance log --type cleaning --device axidraw_v3_1
+
+# Schedule maintenance reminders
+uv run plotty maintenance schedule --interval 100h --type cleaning
+
+# View maintenance history
+uv run plotty maintenance history --device axidraw_v3_1 --last 90d
+```
+
+### 9.2 Pen and Paper Inventory
+
+**Comprehensive pen management:**
+```bash
+# List all pens with detailed info
+uv run plotty list pens --detailed --show-usage
+
+# Add new pen with full specifications
+uv run plotty add pen \
+  --name "Ultra Fine Black" \
+  --width 0.2 \
+  --color "#000000" \
+  --type "technical" \
+  --brand "Sakura" \
+  --model "Pigma Micron 003" \
+  --speed-cap 40 \
+  --pressure "light" \
+  --cost 3.50
+
+# Update pen usage tracking
+uv run plotty update pen 1 --log-usage --hours-used 2.5
+
+# Pen inventory management
+uv run plotty inventory pens --check-stock --reorder-threshold 3
+```
+
+**Advanced paper management:**
+```bash
+# List paper with inventory tracking
+uv run plotty list paper --show-stock --show-cost
+
+# Add custom paper with full details
+uv run plotty add paper \
+  --name "Arches Watercolor" \
+  --width 210 \
+  --height 297 \
+  --margin 15 \
+  --type "watercolor" \
+  --weight 300 \
+  --texture "rough" \
+  --cost-per-sheet 5.25 \
+  --stock-count 25
+
+# Paper usage tracking
+uv run plotty update paper "Arches Watercolor" --consume 1
+
+# Cost analysis by paper type
+uv run plotty analyze paper --cost-per-job --last 30
+```
+
+**Resource optimization:**
+```bash
+# Optimize pen usage across jobs
+uv run plotty optimize pens --minimize-wear --balance-usage
+
+# Suggest paper sizes for jobs
+uv run plotty suggest paper --job complex_art --optimize-waste
+
+# Resource cost analysis
+uv run plotty analyze costs --by-project --include-materials
+```
+
+### 9.3 Performance Monitoring and Analytics
+
+**Real-time performance monitoring:**
+```bash
+# Live performance dashboard
+uv run plotty monitor --live --refresh 5s
+
+# Performance alerts setup
+uv run plotty alerts set --metric success-rate --threshold 95 --below
+
+# Automated performance reports
+uv run plotty report performance --daily --email studio@example.com
+```
+
+**Comprehensive analytics:**
+```bash
+# Studio-wide statistics
+uv run plotty stats summary --last 30 --detailed
+
+# Job performance analytics
+uv run plotty stats jobs --by-complexity --by-paper-type --by-pen
+
+# Device performance tracking
+uv run plotty stats device --uptime --error-rate --maintenance-schedule
+
+# Resource utilization analysis
+uv run plotty stats resources --pen-usage --paper-consumption --cost-analysis
+```
+
+**Sample comprehensive analytics output:**
+```
+📊 Studio Performance Dashboard (Last 30 Days)
+=============================================
+Overall Performance:
+  - Jobs completed: 127 (98.4% success rate)
+  - Total plotting time: 45h 23m
+  - Average job time: 21.4 minutes
+  - Device uptime: 99.2%
+
+Resource Utilization:
+  - Most used pen: Fine Black (42% of jobs)
+  - Most popular paper: A4 (68% of jobs)
+  - Material cost per job: $2.34
+  - Pen change frequency: 1.8 per job
+
+Quality Metrics:
+  - Average optimization improvement: 28%
+  - Customer satisfaction: 4.7/5.0
+  - Replot rate: 1.6%
+  - Error rate: 1.6%
+
+Financial Summary:
+  - Revenue: $3,847.50
+  - Material costs: $297.18
+  - Device depreciation: $156.00
+  - Net profit: $3,394.32
+```
+
+### 9.4 Workflow Automation
+
+**Automated studio workflows:**
+```bash
+# Morning startup routine
+uv run plotty workflow morning-startup \
+  --device-check \
+  --inventory-check \
+  --queue-review \
+  --schedule-optimization
+
+# End-of-day shutdown
+uv run plotty workflow end-of-day \
+  --backup-data \
+  --generate-reports \
+  --schedule-maintenance \
+  --cleanup-temp
+
+# Weekly maintenance
+uv run plotty workflow weekly-maintenance \
+  --device-calibration \
+  --inventory-audit \
+  --performance-review \
+  --backup-verification
+```
+
+**Intelligent automation:**
+```python
+# studio_automation.py - Smart studio management
+import subprocess
+import json
+from datetime import datetime, timedelta
+
+class StudioManager:
+    def __init__(self):
+        self.load_configuration()
+    
+    def morning_routine(self):
+        """Automated morning startup sequence."""
+        print("🌅 Starting morning studio routine...")
+        
+        # Check device health
+        device_status = self.check_device_health()
+        if not device_status['ready']:
+            self.handle_device_issues(device_status)
+        
+        # Check inventory levels
+        inventory_status = self.check_inventory()
+        if inventory_status['needs_reorder']:
+            self.generate_reorder_list(inventory_status)
+        
+        # Review and optimize today's queue
+        self.optimize_todays_queue()
+        
+        # Generate morning report
+        self.generate_morning_report()
+    
+    def check_device_health(self):
+        """Comprehensive device health check."""
+        result = subprocess.run([
+            "uv", "run", "plotty", "check", "ready", "--json"
+        ], capture_output=True, text=True)
+        
+        return json.loads(result.stdout)
+    
+    def optimize_todays_queue(self):
+        """Optimize queue for today's production."""
+        # Get today's jobs
+        result = subprocess.run([
+            "uv", "run", "plotty", "list", "queue", "--today", "--json"
+        ], capture_output=True, text=True)
+        
+        jobs = json.loads(result.stdout)
+        
+        # Optimize for minimal pen changes and time
+        subprocess.run([
+            "uv", "run", "plotty", "optimize-pens", 
+            "--global", "--strategy", "min-time"
+        ])
+        
+        print(f"✅ Optimized {len(jobs)} jobs for today")
+    
+    def generate_morning_report(self):
+        """Generate comprehensive morning report."""
+        report_data = {
+            'timestamp': datetime.now().isoformat(),
+            'device_status': self.check_device_health(),
+            'inventory_status': self.check_inventory(),
+            'queue_status': self.get_queue_status(),
+            'yesterday_performance': self.get_yesterday_stats()
+        }
+        
+        # Save report
+        filename = f"reports/morning_report_{datetime.now().strftime('%Y%m%d')}.json"
+        with open(filename, 'w') as f:
+            json.dump(report_data, f, indent=2)
+        
+        print(f"📊 Morning report saved: {filename}")
+
+if __name__ == "__main__":
+    studio = StudioManager()
+    studio.morning_routine()
+```
+
+### 9.5 Quality Assurance
+
+**Automated quality checks:**
+```bash
+# Pre-plot quality validation
+uv run plotty validate job --check-paths --check-complexity --check-time
+
+# Post-plot quality assessment
+uv run plotty assess job --compare-with-expected --quality-score
+
+# Batch quality validation
+uv run plotty validate-all --strict-mode --fail-on-warnings
+```
+
+**Quality tracking:**
+```bash
+# Quality metrics over time
+uv run plotty quality trends --last 90 --by-complexity
+
+# Quality by pen/paper combinations
+uv run plotty quality matrix --pens-vs-paper
+
+# Customer quality feedback tracking
+uv run plotty quality feedback --by-client --by-project
+```
+
+> **🎯 Studio Management Goal:** Create a self-monitoring, self-optimizing studio that requires minimal manual intervention while maintaining maximum quality and efficiency.
 
 ### 6.2 Pen and Paper Inventory
 
@@ -815,167 +1990,449 @@ Medium Blue: 3 jobs (6%)
 
 ---
 
-## 7. Real-World Examples
+# 📚 Reference
 
-### 7.1 Graphic Design Studio
+## 10. Real-World Examples
 
-**Scenario:** Studio producing client logos and business cards
+Learn from professionals using ploTTY in production environments.
+
+### 10.1 Graphic Design Studio Workflow
+
+**Scenario:** Commercial studio handling client logos and business cards
 
 ```bash
+#!/bin/bash
+# studio_workflow.sh - Daily studio routine
+
 # Morning setup
-uv run plotty check ready
+echo "🌅 Morning studio setup..."
+uv run plotty check ready --detailed
 uv run plotty status
+uv run plotty inventory check --alert-low
 
-# Process client batch
+# Process today's client batch
+echo "📋 Processing client designs..."
 for file in client_*.svg; do
-    uv run plotty add "$file" --paper a4 --name "Client $(basename "$file" .svg)"
+    client_name=$(basename "$file" .svg | sed 's/client_//')
+    uv run plotty add "$file" \
+        --name "Client: $client_name" \
+        --paper a4 \
+        --priority normal
 done
 
-# Optimize for production
-uv run plotty plan-all --preset hq --optimize-pens
+# Optimize for production efficiency
+echo "⚡ Optimizing production queue..."
+uv run plotty plan-all --preset hq --optimize-pens --global-pen-order
 
-# Production run
-uv run plotty plot-all --preset safe
+# Production run with quality monitoring
+echo "🖊️ Starting production run..."
+uv run plotty plot-all --preset safe --record-all --monitor
 
-# End of day report
-uv run plotty stats summary --export > daily_report.json
+# End of day reporting
+echo "📊 Generating daily report..."
+uv run plotty stats summary --today --export > "reports/daily_$(date +%Y%m%d).json"
+uv run plotty inventory usage --log-consumption
+
+echo "✅ Studio workflow complete!"
 ```
 
-### 7.2 Artist Workflow
-
-**Scenario:** Artist creating multi-color art prints
-
+**Client delivery automation:**
 ```bash
-# Add new artwork
-uv run plotty add artwork_v2.svg --paper a3 --name "Abstract Series v2"
-
-# Careful planning with custom pen mapping
-uv run plotty plan artwork_v2 --interactive
-
-# Test plot (small section)
-uv run plotty record-test artwork_v2 --seconds 30
-
-# Review test results
-uv run plotty compare-test artwork_v2
-
-# Full production plot
-uv run plotty plot artwork_v2 --preset hq
-
-# Document session
-uv run plotty info job artwork_v2 --show-media
+# Prepare client delivery package
+uv run plotty package client_acme \
+  --include-reports \
+  --include-photos \
+  --generate-invoice \
+  --email-client
 ```
 
-### 7.3 Educational Workshop
+### 10.2 Artist Studio Workflow
 
-**Scenario:** Workshop with multiple participants
+**Scenario:** Professional artist creating limited edition prints
 
 ```bash
-# Setup demo files
-for participant in alice bob charlie; do
-    uv run plotty add "${participant}_design.svg" --paper a4
+#!/bin/bash
+# artist_workflow.sh - Art production workflow
+
+artwork_name="Geometric Harmony v3"
+edition_size=10
+
+echo "🎨 Creating limited edition: $artwork_name"
+
+# Step 1: Generate master design
+echo "✏️ Generating master design..."
+vsk run "$artwork_name.py" --set edition=master --save-only
+
+# Step 2: Create test print
+echo "🖨️ Creating test print..."
+uv run plotty add "${artwork_name}_master.svg" \
+    --name "Test: $artwork_name" \
+    --paper a4 --preset fast
+
+uv run plotty plot "Test:*" --preview --record
+
+# Step 3: Review and approve test
+echo "📋 Review test print before continuing..."
+read -p "Press Enter to continue with full edition, Ctrl+C to cancel..."
+
+# Step 4: Generate edition series
+echo "📚 Generating edition series ($edition_size prints)..."
+for edition in $(seq 1 $edition_size); do
+    # Generate unique variant
+    vsk run "$artwork_name.py" \
+        --set edition=$edition \
+        --set seed=$((edition * 42)) \
+        --save-only
+    
+    # Queue with edition naming
+    job_name="${artwork_name} - Edition ${edition}/${edition_size}"
+    uv run plotty add "${artwork_name}_edition${edition}.svg" \
+        --name "$job_name" \
+        --paper a3 --preset hq \
+        --priority high
 done
 
-# Quick batch planning
-uv run plotty plan-all --preset fast
+# Step 5: Plot edition with documentation
+echo "🖊️ Plotting limited edition..."
+uv run plotty plot-all --record-all --document-each --numbered
 
-# Demonstrate plotting
-uv run plotty plot alice_design --preview
+# Step 6: Generate certificate of authenticity
+echo "📜 Generating certificates..."
+uv run plotty generate certificates \
+  --artwork "$artwork_name" \
+  --edition-size $edition_size \
+  --artist "Your Name" \
+  --date "$(date +%Y-%m-%d)"
 
-# Let participants plot their work
-uv run plotty plot bob_design
-uv run plotty plot charlie_design
-
-# Workshop summary
-uv run plotty stats jobs --workshop
+echo "✅ Limited edition complete!"
 ```
 
----
+### 10.3 Educational Workshop Workflow
 
-## 8. Tips and Best Practices
-
-### 8.1 File Organization
-
-```
-projects/
-├── active/
-│   ├── client_a/
-│   │   ├── logo.svg
-│   │   └── business_card.svg
-│   └── personal/
-│       └── artwork.svg
-├── archive/
-│   ├── 2025-10/
-│   └── 2025-11/
-└── templates/
-    ├── test_pattern.svg
-    └── calibration.svg
-```
-
-### 8.2 Naming Conventions
-
-**Good practices:**
-```bash
-# Descriptive names
-uv run plotty add "client_logo_final_v2.svg" --name "Client Logo v2"
-uv run plotty add "test_pattern_2025-11-07.svg" --name "Daily Test"
-
-# Consistent dating
-uv run plotty add "workshop_alice_20251107.svg" --name "Workshop: Alice"
-```
-
-### 8.3 Quality Assurance
+**Scenario:** University workshop with 20 participants
 
 ```bash
-# Always test new designs
-uv run plotty record-test new_design --seconds 60
+#!/bin/bash
+# workshop_workflow.sh - Educational workshop management
 
-# Verify optimization results
-uv run plotty estimate new_design --stage pre
-uv run plotty estimate new_design --stage post
+workshop_name="Generative Art 101"
+participants=("alice" "bob" "charlie" "diana" "eve")
 
-# Check pen mapping
-uv run plotty info job new_design --show-layers
+echo "🎓 Setting up $workshop_name workshop..."
 
-# Test plot settings
-uv run plotty plot new_design --preview --dry-run
+# Step 1: Setup demo files
+echo "📋 Preparing demo files..."
+uv run plotty add demo_pattern.svg --name "Demo: Basic Pattern" --paper a4
+uv run plotty add demo_complex.svg --name "Demo: Advanced Technique" --paper a4
+
+# Step 2: Add participant designs
+echo "👥 Adding participant designs..."
+for participant in "${participants[@]}"; do
+    if [[ -f "${participant}_design.svg" ]]; then
+        uv run plotty add "${participant}_design.svg" \
+            --name "Workshop: $participant" \
+            --paper a4 --priority normal
+    fi
+done
+
+# Step 3: Quick batch planning for demo
+echo "⚡ Planning demo files..."
+uv run plotty plan "Demo:*" --preset fast
+
+# Step 4: Demonstrate plotting
+echo "🖊️ Live demonstration..."
+echo "Plotting basic pattern..."
+uv run plotty plot "Demo: Basic Pattern" --preview --explain-steps
+
+echo "Plotting advanced technique..."
+uv run plotty plot "Demo: Advanced Technique" --preview --explain-steps
+
+# Step 5: Participant plotting session
+echo "👥 Participant plotting session..."
+for participant in "${participants[@]}"; do
+    echo "Plotting $participant's design..."
+    uv run plotty plot "Workshop: $participant" --record
+done
+
+# Step 6: Generate workshop report
+echo "📊 Generating workshop report..."
+uv run plotty report workshop \
+  --name "$workshop_name" \
+  --participants "${#participants[@]}" \
+  --include-photos \
+  --include-statistics \
+  --export "workshop_report_$(date +%Y%m%d).pdf"
+
+echo "✅ Workshop complete!"
 ```
 
-### 8.4 Maintenance
+### 10.4 Production Facility Workflow
 
-```bash
-# Daily checks
-uv run plotty check ready
-uv run plotty status
+**Scenario:** High-volume production facility with multiple devices
 
-# Weekly cleanup
-uv run plotty queue cleanup --state completed
-uv run plotty queue cleanup --older-than 7d
+```python
+# production_facility.py - Industrial-scale production
+import subprocess
+import json
+import time
+from datetime import datetime
 
-# Monthly review
-uv run plotty stats summary --last 30
-uv run plotty list pens --check-usage
-uv run plotty list paper --check-usage
+class ProductionFacility:
+    def __init__(self):
+        self.devices = self.load_devices()
+        self.queue = self.load_queue()
+    
+    def shift_start(self):
+        """Automated shift start routine."""
+        print("🏭 Starting production shift...")
+        
+        # Check all devices
+        for device in self.devices:
+            status = self.check_device(device['id'])
+            if not status['ready']:
+                self.handle_device_issue(device, status)
+        
+        # Load today's production schedule
+        self.load_production_schedule()
+        
+        # Optimize across all devices
+        self.optimize_global_queue()
+        
+        # Start production on all devices
+        self.start_parallel_production()
+    
+    def optimize_global_queue(self):
+        """Optimize queue across multiple devices."""
+        print("⚡ Optimizing global production queue...")
+        
+        # Get all pending jobs
+        jobs = self.get_all_pending_jobs()
+        
+        # Sort by priority and device compatibility
+        optimized_jobs = self.sort_jobs_by_efficiency(jobs)
+        
+        # Distribute across devices
+        for i, job in enumerate(optimized_jobs):
+            device = self.devices[i % len(self.devices)]
+            self.assign_job_to_device(job, device)
+    
+    def monitor_production(self):
+        """Real-time production monitoring."""
+        while True:
+            # Check all devices
+            for device in self.devices:
+                status = self.get_device_status(device['id'])
+                
+                if status['idle'] and self.has_pending_jobs():
+                    self.assign_next_job(device)
+                
+                if status['error']:
+                    self.handle_production_error(device, status)
+            
+            # Generate status report every 10 minutes
+            if time.time() % 600 < 60:
+                self.generate_status_report()
+            
+            time.sleep(30)  # Check every 30 seconds
+    
+    def generate_status_report(self):
+        """Generate comprehensive production report."""
+        report = {
+            'timestamp': datetime.now().isoformat(),
+            'devices': [self.get_device_status(d['id']) for d in self.devices],
+            'queue': self.get_queue_status(),
+            'production_today': self.get_today_production_stats(),
+            'efficiency_metrics': self.calculate_efficiency_metrics()
+        }
+        
+        # Save and optionally send report
+        filename = f"production_status_{datetime.now().strftime('%Y%m%d_%H%M')}.json"
+        with open(filename, 'w') as f:
+            json.dump(report, f, indent=2)
+
+if __name__ == "__main__":
+    facility = ProductionFacility()
+    facility.shift_start()
+    facility.monitor_production()
 ```
 
-### 8.5 Troubleshooting Quick Tips
+## 11. Troubleshooting
+
+Quick solutions to common issues.
+
+### 11.1 Device Issues
+
+| Symptom | Diagnosis | Solution |
+|---------|-----------|----------|
+| Device not found | `uv run plotty check device` | Check USB connection, try different port |
+| Jerky movement | `uv run plotty check servo` | Adjust pen up/down positions |
+| No movement | `uv run plotty check power` | Verify power supply connection |
+| Random errors | `uv run plotty check cables` | Check all cable connections |
+
+### 11.2 Quality Issues
+
+| Problem | Test | Fix |
+|---------|------|-----|
+| Lines too light | `uv run plotty test pen-pressure` | Increase pen down position |
+| Lines skipping | `uv run plotty check pen-alignment` | Clean/replace pen tip |
+| Poor accuracy | `uv run plotty calibrate device` | Run device calibration |
+| Ink bleeding | `uv run plotty test paper-compatibility` | Use appropriate paper/pen combo |
+
+### 11.3 Performance Issues
 
 | Issue | Check | Solution |
 |-------|-------|----------|
-| Device not found | `plotty check device` | Check USB connection |
-| Poor line quality | `plotty check servo` | Adjust pen heights |
-| Slow plotting | `plotty stats performance` | Use fast preset |
-| Camera not working | `plotty check camera` | Verify IP feed URL |
-| Job stuck | `plotty recovery list` | Resume or abort |
+| Slow plotting | `uv run plotty stats performance` | Use fast preset or reduce complexity |
+| Long optimization | `uv run plotty profile job` | Reduce optimization tolerance |
+| Memory errors | `uv run plotty check system-resources` | Close other applications, add RAM |
+| Queue stuck | `uv run plotty recovery list` | Use recovery commands or restart |
+
+### 11.4 Software Issues
+
+| Error | Command | Resolution |
+|-------|---------|------------|
+| Database locked | `uv run plotty check database` | Restart ploTTY service |
+| Config corrupted | `uv run plotty config validate` | Restore from backup or re-run setup |
+| Job files missing | `uv run plotty verify job` | Re-add job from original SVG |
+| Camera not working | `uv run plotty check camera` | Verify URL and network connection |
+
+## 12. Best Practices
+
+Professional tips for optimal ploTTY usage.
+
+### 12.1 File Organization
+
+**Recommended directory structure:**
+```
+ploddy_studio/
+├── active_projects/          # Current work
+│   ├── client_a/
+│   │   ├── designs/
+│   │   ├── proofs/
+│   │   └── final/
+│   └── personal_art/
+├── archive/                   # Completed projects
+│   ├── 2025-10/
+│   └── 2025-11/
+├── templates/                 # Reusable assets
+│   ├── test_patterns/
+│   ├── calibration/
+│   └── borders/
+├── resources/                # Studio resources
+│   ├── pens/
+│   ├── paper/
+│   └── documentation/
+└── reports/                  # Generated reports
+    ├── daily/
+    ├── weekly/
+    └── client/
+```
+
+### 12.2 Naming Conventions
+
+**Consistent naming patterns:**
+```bash
+# Client work
+uv run plotty add logo.svg --name "Client_Acme_Logo_v3_Final"
+uv run plotty add business_card.svg --name "Client_Acme_BusinessCard_v2"
+
+# Personal art
+uv run plotty add abstract.svg --name "Art_Abstract_2025-11-07"
+uv run plotty add geometric.svg --name "Art_Geometric_Series1_Edition3"
+
+# Test prints
+uv run plotty add test.svg --name "Test_Daily_2025-11-07"
+uv run plotty add calibration.svg --name "Calibration_Monthly_2025-11"
+```
+
+### 12.3 Quality Assurance
+
+**Pre-plot checklist:**
+```bash
+# Always run these before important plots
+uv run plotty check ready
+uv run plotty validate job --strict-mode
+uv run plotty estimate job --detailed
+uv run plotty preview job --show-paths
+```
+
+**Post-plot verification:**
+```bash
+# Verify plot quality
+uv run plotty assess job --quality-score
+uv run plotty compare job --with-expected
+uv run plotty document job --photo-notes
+```
+
+### 12.4 Maintenance Schedule
+
+**Daily:**
+```bash
+uv run plotty check ready
+uv run plotty status --brief
+uv run plotty queue cleanup --state completed
+```
+
+**Weekly:**
+```bash
+uv run plotty maintenance device --clean
+uv run plotty inventory check --update-stock
+uv run plotty stats summary --last 7
+uv run plotty backup data
+```
+
+**Monthly:**
+```bash
+uv run plotty calibrate device --full
+uv run plotty maintenance schedule --review
+uv run plotty stats performance --last 30
+uv run plotty archive old-jobs --older-than 90d
+```
+
+### 12.5 Professional Workflow Tips
+
+**Efficiency tips:**
+- 🎯 **Batch similar jobs** - Group by paper size, pen requirements, or complexity
+- ⚡ **Use presets consistently** - Develop standard presets for different job types
+- 📊 **Monitor performance metrics** - Track trends to optimize over time
+- 🔄 **Automate repetitive tasks** - Create scripts for common workflows
+
+**Quality tips:**
+- ✅ **Always test new designs** - Use small test plots before full production
+- 📏 **Calibrate regularly** - Keep devices in optimal condition
+- 🖊️ **Track pen performance** - Replace pens before quality degrades
+- 📹 **Document important jobs** - Use camera recording for client work
+
+**Business tips:**
+- 💰 **Track material costs** - Use ploTTY's cost tracking features
+- ⏱️ **Monitor time efficiency** - Use stats to improve pricing estimates
+- 📋 **Maintain client records** - Use consistent naming and documentation
+- 📊 **Generate regular reports** - Use analytics for business insights
 
 ---
 
 ## Getting Help
 
+**Quick help:**
 - **Command help**: `plotty --help` or `plotty <command> --help`
-- **API documentation**: See `docs/api/` directory
-- **Community**: GitHub Discussions
-- **Issues**: GitHub Issues (include `plotty info system` output)
+- **System info**: `plotty info system` (include with bug reports)
+- **Version check**: `plotty --version`
+
+**Documentation:**
+- **API documentation**: `docs/api/` directory
+- **Installation guide**: `docs/installation.md`
+- **Troubleshooting**: `docs/troubleshooting/`
+
+**Community:**
+- **GitHub Discussions**: Community questions and discussions
+- **GitHub Issues**: Bug reports and feature requests
+- **Discord/Slack**: Real-time community chat (if available)
+
+**Professional support:**
+- **Enterprise support**: Contact for studio licensing and support
+- **Consulting**: Custom workflow optimization and training
+- **Development**: Custom feature development and integration
 
 ---
 
-**This guide covers the essential ploTTY workflows for users at all levels. Start with the basics and gradually explore advanced features as you become comfortable with the system.**
+**🎯 Your ploTTY Journey:** Start with the [Beginner Path](#-beginner-path) to master the basics, progress through the [Creative Path](#-creative-path) to develop your artistic style, and advance to the [Power User Path](#-power-user-path) for professional studio management. Each path builds on the previous one, creating a complete mastery of pen plotting productivity.

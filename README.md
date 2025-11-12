@@ -5,6 +5,8 @@ and per-session recording (IP feed v1; native v4l2 later).
 
 ## 📚 Documentation
 
+- **[Quickstart Guide](docs/quickstart.md)** - 🚀 Get your first plot running in 5 minutes!
+- **[Cheat Sheets](docs/cheat-sheets/)** - ⭐ Quick reference for common tasks
 - **[Installation Guide](docs/installation.md)** - Multi-platform setup instructions
 - **[User Guide](docs/user-guide.md)** - Complete usage documentation  
 - **[vpype-plotty Integration Guide](docs/vpype-plotty.md)** - Bridge creative tools with ploTTY production
