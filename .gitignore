@@ -159,6 +159,9 @@ QA_REPORT.md
 !packaging/
 packaging/*.tar.*
 
+# Working documents (keep local, don't commit)
+PLLOTTY_MONITORING_PRD.md
+
 # =============================================================================
 # Legacy/Unused (can be removed in future cleanup)
 # =============================================================================
