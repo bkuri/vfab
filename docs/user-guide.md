@@ -9,11 +9,12 @@
 1. [Getting Started](#1-getting-started)
 2. [Your First Plot](#2-your-first-plot)
 3. [Working with Multi-Pen Designs](#3-working-with-multi-pen-designs)
-4. [Batch Production Workflow](#4-batch-production-workflow)
-5. [Advanced Optimization](#5-advanced-optimization)
-6. [Studio Management](#6-studio-management)
-7. [Real-World Examples](#7-real-world-examples)
-8. [Tips and Best Practices](#8-tips-and-best-practices)
+4. [Creative Tool Integration](#4-creative-tool-integration)
+5. [Batch Production Workflow](#5-batch-production-workflow)
+6. [Advanced Optimization](#6-advanced-optimization)
+7. [Studio Management](#7-studio-management)
+8. [Real-World Examples](#8-real-world-examples)
+9. [Tips and Best Practices](#9-tips-and-best-practices)
 
 ---
 
@@ -317,7 +318,322 @@ Please change pen now...
 
 ---
 
-## 4. Batch Production Workflow
+## 4. Creative Tool Integration
+
+### 4.1 vsketch Integration with vpype-plotty
+
+**Installation:**
+```bash
+# Install vpype-plotty for vsketch integration
+pipx inject vsketch vpype-plotty
+```
+
+**Basic vsketch workflow:**
+```python
+import vsketch
+
+class MyDesign(vsketch.SketchClass):
+    def draw(self, vsk: vsketch.Vsketch) -> None:
+        vsk.size("a4", landscape=False)
+        vsk.scale("cm")
+        
+        # Your creative code here
+        for i in range(10):
+            vsk.circle(i * 2, i * 2, radius=1)
+    
+    def finalize(self, vsk: vsketch.Vsketch) -> None:
+        # Standard optimization
+        vsk.vpype("linemerge linesimplify reloop linesort")
+        
+        # Add to ploTTY queue
+        vsk.vpype("plotty-add --name my_design --preset hq --queue")
+
+if __name__ == "__main__":
+    MyDesign().display()
+```
+
+**Advanced vsketch integration:**
+```python
+class AdvancedDesign(vsketch.SketchClass):
+    # Interactive parameters
+    complexity = vsketch.Param(50)
+    density = vsketch.Param(10)
+    
+    def draw(self, vsk: vsketch.Vsketch) -> None:
+        vsk.size("a4")
+        vsk.scale("cm")
+        
+        for i in range(self.complexity):
+            with vsk.pushMatrix():
+                vsk.rotate(i * 0.1)
+                vsk.translate(
+                    vsk.randomGaussian() * self.density * 0.1,
+                    vsk.randomGaussian() * self.density * 0.1
+                )
+                vsk.circle(0, 0, radius=0.5)
+    
+    def finalize(self, vsk: vsketch.Vsketch) -> None:
+        vsk.vpype("linemerge linesimplify reloop linesort")
+        
+        # Dynamic job naming based on parameters
+        job_name = f"design_c{self.complexity}_d{self.density}"
+        vsk.vpype(f"plotty-add --name '{job_name}' --preset hq --queue")
+```
+
+### 4.2 Direct vpype Integration
+
+**For non-vsketch workflows:**
+```bash
+# Add existing SVG to ploTTY
+vpype read design.svg plotty-add --name existing_art --preset fast
+
+# Create generative art and queue
+vpype rand --seed 123 plotty-add --name random_art --paper A3 --queue
+
+# Batch processing
+for seed in {1..10}; do
+    vpype rand --seed $seed plotty-add --name "batch_$seed" --queue
+done
+```
+
+### 4.3 Multi-Pen Design Integration
+
+**vsketch multi-pen example:**
+```python
+class MultiPenArt(vsketch.SketchClass):
+    def draw(self, vsk: vsketch.Vsketch) -> None:
+        vsk.size("a4")
+        vsk.scale("cm")
+        
+        # Layer 1: Black outlines
+        vsk.stroke(1)
+        vsk.penWidth("0.3mm", 1)
+        for i in range(5):
+            vsk.rect(i * 3, i * 2, 2, 2)
+        
+        # Layer 2: Red details
+        vsk.stroke(2)
+        vsk.penWidth("0.2mm", 2)
+        for i in range(5):
+            vsk.circle(i * 3 + 1, i * 2 + 1, radius=0.5)
+        
+        # Layer 3: Blue accents
+        vsk.stroke(3)
+        vsk.penWidth("0.5mm", 3)
+        for i in range(5):
+            vsk.line(i * 3, i * 2, i * 3 + 2, i * 2 + 2)
+    
+    def finalize(self, vsk: vsketch.Vsketch) -> None:
+        vsk.vpype("linemerge linesimplify reloop linesort")
+        vsk.vpype("plotty-add --name multipen_art --preset hq --queue")
+```
+
+### 4.4 Batch Processing with vpype-plotty
+
+**Generate multiple variants:**
+```python
+# batch_generator.py
+import subprocess
+import json
+
+def generate_batch(base_name, seed_range):
+    """Generate multiple designs and queue them."""
+    job_ids = []
+    
+    for seed in seed_range:
+        print(f"Generating design with seed {seed}...")
+        
+        # Generate using vsketch
+        cmd = [
+            "vsk", "run", "generative_design.py",
+            "--set", f"seed={seed}",
+            "--save-only"
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        if result.returncode == 0:
+            # Queue with ploTTY
+            job_name = f"{base_name}_seed_{seed}"
+            cmd = [
+                "vpype", "read", f"output/{base_name}_{seed}.svg",
+                "plotty-add", "--name", job_name, "--preset", "fast", "--queue"
+            ]
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                job_id = result.stdout.strip()
+                job_ids.append(job_id)
+                print(f"✅ Queued job {job_id}")
+    
+    # Save job list
+    with open(f"{base_name}_jobs.json", "w") as f:
+        json.dump(job_ids, f, indent=2)
+    
+    return job_ids
+
+# Usage
+jobs = generate_batch("experiment", range(1, 21))
+print(f"Generated {len(jobs)} jobs")
+```
+
+### 4.5 Integration with Other Creative Tools
+
+**Inkscape workflow:**
+```bash
+# Design in Inkscape, export to SVG
+inkscape --export-type=svg design.svg
+
+# Add to ploTTY queue
+vpype read design.svg plotty-add --name inkscape_art --preset hq
+```
+
+**Illustrator workflow:**
+```bash
+# Export from Illustrator as SVG
+# File > Export > Export As... > SVG
+
+# Process with vpype and queue
+vpype read illustrator_art.svg plotty-add --name vector_design --queue
+```
+
+**Processing/p5.js workflow:**
+```javascript
+// Processing sketch that exports SVG
+void setup() {
+  size(400, 400);
+}
+
+void draw() {
+  background(255);
+  // Your creative code
+  circle(mouseX, mouseY, 50);
+  
+  // Export SVG on keypress
+  if (keyPressed) {
+    save("processing_art.svg");
+  }
+}
+```
+
+```bash
+# Convert and queue
+vpype read processing_art.svg plotty-add --name processing_sketch --preset default
+```
+
+### 4.6 Best Practices for Creative Integration
+
+**File Organization:**
+```bash
+# Recommended project structure
+my_project/
+├── sketches/           # vsketch .py files
+├── output/            # Generated SVGs
+├── ploppy_jobs/       # ploTTY workspace
+└── batch_scripts/      # Automation scripts
+```
+
+**Parameter Management:**
+```python
+# Use meaningful parameter names
+class ProfessionalDesign(vsketch.SketchClass):
+    client_name = vsketch.Param("Acme Corp")
+    project_type = vsketch.Param("logo")
+    quality_level = vsketch.Param("hq")
+    
+    def finalize(self, vsk: vsketch.Vsketch) -> None:
+        vsk.vpype("linemerge linesimplify reloop linesort")
+        
+        # Professional job naming
+        job_name = f"{self.client_name}_{self.project_type}_{self.quality_level}"
+        vsk.vpype(f"plotty-add --name '{job_name}' --preset {self.quality_level} --queue")
+```
+
+**Quality Control:**
+```python
+# Add quality checks before queuing
+def finalize(self, vsk: vsketch.Vsketch) -> None:
+    vsk.vpype("linemerge linesimplify reloop linesort")
+    
+    # Check complexity before queuing
+    if vsk.document.get_total_length() > 50000:  # mm
+        print("⚠️  Warning: Very long plot time expected")
+        print("Consider reducing complexity or using hq preset")
+    
+    # Queue with appropriate preset based on complexity
+    if vsk.document.get_total_length() > 20000:
+        preset = "hq"
+    elif vsk.document.get_total_length() > 10000:
+        preset = "default"
+    else:
+        preset = "fast"
+    
+    vsk.vpype(f"plotty-add --name complex_design --preset {preset} --queue")
+```
+
+### 4.7 ⚠️ Optimization Control
+
+**Critical**: Understanding optimization handling prevents double-processing and ensures optimal performance.
+
+#### **Optimization Workflow**
+
+**vsketch → vpype-plotty → ploTTY (Recommended):**
+```python
+def finalize(self, vsk: vsketch.Vsketch) -> None:
+    # Step 1: vsketch optimizes
+    vsk.vpype("linemerge linesimplify reloop linesort")
+    
+    # Step 2: Skip ploTTY optimization (already done)
+    vsk.vpype("plotty-add --name my_design --preset none --queue")
+```
+
+**Raw SVG → vpype → ploTTY:**
+```bash
+# Option 1: vpype optimizes, ploTTY skips
+vpype read design.svg linemerge linesimplify \
+    plotty-add --name optimized --preset none
+
+# Option 2: ploTTY optimizes
+vpype read design.svg plotty-add --name raw --preset hq
+```
+
+#### **Optimization Control Matrix**
+
+| Source | vpype Command | ploTTY Preset | Result |
+|---------|---------------|----------------|---------|
+| vsketch optimized | `--preset none` | Skip | No double optimization |
+| Raw SVG | vpype optimizes | `--preset none` | Single optimization |
+| Raw SVG | none | `--preset hq/fast/default` | ploTTY optimization |
+| Pre-optimized SVG | none | `--preset none` | No optimization |
+
+#### **Best Practice Guidelines**
+
+**1. Use `--preset none` when:**
+- vsketch already optimized the design
+- vpype already processed the file
+- File is pre-optimized by other tools
+
+**2. Use ploTTY presets when:**
+- Working with raw SVG files
+- Want consistent production quality
+- Prefer ploTTY's optimization pipeline
+
+**3. Match optimization levels:**
+```python
+# Consistent optimization across tools
+def get_optimization_level(complexity):
+    if complexity > 20000:  # mm of lines
+        return "hq"
+    elif complexity > 10000:
+        return "default"
+    else:
+        return "fast"
+
+# Use same logic in both vsketch and vpype workflows
+```
+
+---
+
+## 5. Batch Production Workflow
 
 ### 4.1 Organizing Batch Jobs
 

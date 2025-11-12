@@ -11,6 +11,7 @@ Welcome to the ploTTY documentation hub.
 ## 🔧 Developer Documentation
 
 - **[API Reference](api/)** - Complete API documentation and integration examples
+- **[vpype-plotty Integration Guide](vpype-plotty.md)** - Bridge creative tools with ploTTY production
 - **[Troubleshooting](troubleshooting/)** - Common issues and solutions
 
 ## 📚 Archived Documentation

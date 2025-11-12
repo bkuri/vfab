@@ -599,6 +599,48 @@ plotty database migrate
 plotty check database
 ```
 
+### 8.4 vpype-plotty Integration (Optional)
+
+For seamless integration with creative tools like vsketch:
+
+```bash
+# Install vpype-plotty for vsketch integration
+pipx inject vsketch vpype-plotty
+
+# Or install for vpype standalone
+pipx inject vpype vpype-plotty
+
+# Verify installation
+vpype --help | grep plotty
+```
+
+**Benefits of vpype-plotty:**
+- **One-click workflow**: From vsketch creation to ploTTY queue
+- **Batch processing**: Generate and queue multiple designs
+- **Parameter passing**: Creative parameters preserved in ploTTY jobs
+- **Multi-pen support**: Interactive pen mapping for complex designs
+- **Optimization control**: Prevent double-processing with smart preset handling
+
+**Quick start with vpype-plotty:**
+```python
+# In your vsketch finalize() method
+def finalize(self, vsk: vsketch.Vsketch) -> None:
+    vsk.vpype("linemerge linesimplify reloop linesort")
+    # Use --preset none to skip ploTTY optimization (already done)
+    vsk.vpype("plotty-add --name my_design --preset none --queue")
+```
+
+**Optimization Control:**
+```python
+# Let ploTTY handle optimization
+vsk.vpype("plotty-add --name raw_design --preset hq --queue")
+
+# Skip ploTTY optimization (vsketch already optimized)
+vsk.vpype("plotty-add --name optimized_design --preset none --queue")
+```
+
+For complete vpype-plotty documentation, see: **[vpype-plotty Integration Guide](vpype-plotty.md)**
+
 ---
 
 ## 9. Verification and Testing

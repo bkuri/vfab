@@ -5,6 +5,23 @@ All notable changes to ploTTY will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2025-11-12
+
+### 📚 Documentation
+- Added comprehensive vpype-plotty integration guide
+- Enhanced user guide with creative tool integration section  
+- Added optimization control documentation for vpype-plotty workflows
+- Improved documentation cross-references and structure
+- Added installation instructions for vpype-plotty plugin
+
+### 🌐 Ecosystem
+- Documented integration bridge between vsketch/vpype and ploTTY
+- Provided complete workflow examples for creative-to-production pipelines
+- Established optimization control best practices
+- Created foundation for creative tool ecosystem expansion
+
+---
+
 ## [1.0.0] - 2025-11-07
 
 ### 🎉 **PRODUCTION RELEASE** - Enterprise-Grade Plotter Management

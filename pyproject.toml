@@ -10,7 +10,7 @@ plotty = ["config/*.yaml"]
 
 [project]
 name = "plotty"
-version = "1.0.0"
+version = "1.0.1"
 description = "ploTTY: FSM plotter manager (headless-first) with vpype + per-session recording"
 readme = "README.md"
 license = "MIT"
