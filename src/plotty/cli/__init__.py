@@ -14,7 +14,7 @@ from .add import add_app
 from .check import check_app
 from .info import info_app
 from .interactive import interactive_command
-from .job_commands import optimize_command, plan_command, queue_command, start_command
+from .commands import optimize_command, plan_command, queue_command, start_command
 from .list import list_app
 from .list.setup_wizard import setup
 from .remove import remove_app
@@ -22,6 +22,15 @@ from .restart import restart_command
 from .resume import resume_command
 from .stats import stats_app
 from .system import system_app
+
+try:
+    from .daemon import daemon_command
+except ImportError:
+    daemon_command = None
+try:
+    from .monitor import monitor_command
+except ImportError:
+    monitor_command = None
 
 # Get version
 try:
@@ -35,9 +44,13 @@ app = typer.Typer(no_args_is_help=True)
 # Add sub-apps and commands (alphabetical order)
 app.add_typer(add_app, name="add", help="Add new files")
 app.add_typer(check_app, name="check", help="System and device checking")
+if daemon_command:
+    app.command("daemon", help="Run ploTTY as a persistent daemon")(daemon_command)
 app.add_typer(info_app, name="info", help="Information and monitoring commands")
 app.command("interactive", help="Start an interactive plot")(interactive_command)
 app.add_typer(list_app, name="list", help="List and manage resources")
+if monitor_command:
+    app.command("monitor", help="Real-time WebSocket monitoring")(monitor_command)
 app.command("optimize", help="Optimize jobs for plotting")(optimize_command)
 app.command("plan", help="Plan a job for plotting")(plan_command)
 app.command("queue", help="Queue a job for plotting")(queue_command)

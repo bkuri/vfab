@@ -12,6 +12,7 @@ import json
 from typing import Dict, Any, List, Optional
 from pathlib import Path
 import logging
+import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,7 @@ class HookExecutor:
         self.job_id = job_id
         self.workspace = workspace
         self.job_dir = workspace / "jobs" / job_id
+        self.websocket_manager = None  # Will be injected by daemon
 
     def _substitute_variables(self, template: str, context: Dict[str, Any]) -> str:
         """Substitute variables in hook templates.
@@ -358,7 +360,77 @@ class HookExecutor:
                     f"Hook execution failed: {hook_type} - {hook_target} - {result.get('error', 'Unknown error')}"
                 )
 
+        # Also broadcast to WebSocket clients if available
+        try:
+            websocket_result = self._execute_websocket_broadcast(context)
+            if websocket_result["success"]:
+                logger.debug("WebSocket broadcast successful")
+        except Exception as e:
+            logger.warning(f"WebSocket broadcast failed: {e}")
+
         return results
+
+    def _execute_websocket_broadcast(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute WebSocket broadcast hook.
+
+        Args:
+            context: Event context to broadcast
+
+        Returns:
+            Execution result
+        """
+        if self.websocket_manager is None:
+            return {
+                "type": "websocket",
+                "error": "WebSocket manager not available",
+                "success": False,
+            }
+
+        try:
+            # Import here to avoid circular imports
+            from .websocket.schemas import JobStateChangeMessage, Channel
+
+            # Create appropriate message based on context
+            if "from_state" in context and "to_state" in context:
+                # Job state change event
+                message = JobStateChangeMessage(
+                    job_id=context.get("job_id", self.job_id),
+                    from_state=context.get("from_state"),
+                    to_state=context.get("to_state"),
+                    reason=context.get("reason", ""),
+                    metadata=context.get("metadata", {}),
+                )
+                channel = Channel.JOBS
+            else:
+                # Generic event - send to system channel
+                from .websocket.schemas import SystemAlertMessage
+
+                message = SystemAlertMessage(
+                    severity="info",
+                    title="Hook Event",
+                    message=f"Hook executed: {context.get('event', 'unknown')}",
+                    source="hooks",
+                    metadata=context,
+                )
+                channel = Channel.SYSTEM
+
+            # Broadcast asynchronously
+            asyncio.create_task(self.websocket_manager.broadcast(message, channel))
+
+            return {
+                "type": "websocket",
+                "message_type": message.type.value,
+                "channel": channel.value,
+                "success": True,
+            }
+
+        except Exception as e:
+            logger.error(f"WebSocket broadcast failed: {e}")
+            return {
+                "type": "websocket",
+                "error": str(e),
+                "success": False,
+            }
 
     def get_context(
         self, state: str, metadata: Optional[Dict[str, Any]] = None

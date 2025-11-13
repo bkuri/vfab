@@ -19,6 +19,12 @@ logging:
   level: "INFO"
   # file: (default: XDG data directory logs/plotty.log)
 
+websocket:
+  enabled: true
+  host: "localhost"
+  port: 8765
+  authenticate: false
+
 hooks:
   NEW:
     - command: "notify-send 'ploTTY: Job {job_id} created - starting analysis'"

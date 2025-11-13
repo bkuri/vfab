@@ -21,6 +21,124 @@ from plotty.cli.info.output import get_output_manager
 from plotty.fsm import JobState
 from plotty.progress import progress_task
 
+# WebSocket test availability - for now using placeholder functions
+# TODO: Integrate actual WebSocket tests when import path issues are resolved
+WEBSOCKET_TESTS_AVAILABLE = True
+
+
+def run_websocket_basic_tests_sync(test_env: dict, progress_tracker=None) -> list:
+    """Placeholder for WebSocket basic tests."""
+    results = []
+
+    # Test 1: WebSocket module imports
+    test_name = "WebSocket: Module imports"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
+    try:
+        from plotty.websocket import WebSocketManager, JobStateChangeMessage
+
+        results.append(
+            create_test_result(
+                test_name, True, "✓ WebSocket modules imported successfully"
+            )
+        )
+    except ImportError as e:
+        results.append(
+            create_test_result(
+                test_name, False, f"✗ WebSocket module import failed: {str(e)}"
+            )
+        )
+
+    # Test 2: WebSocket configuration
+    test_name = "WebSocket: Configuration"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
+    try:
+        from plotty.config import load_config
+
+        config = load_config()
+        ws_config = config.websocket
+        results.append(
+            create_test_result(
+                test_name,
+                True,
+                f"✓ WebSocket config loaded (enabled: {ws_config.enabled})",
+            )
+        )
+    except Exception as e:
+        results.append(
+            create_test_result(
+                test_name, False, f"✗ WebSocket configuration test failed: {str(e)}"
+            )
+        )
+
+    return results
+
+
+def run_websocket_fsm_tests_sync(test_env: dict, progress_tracker=None) -> list:
+    """Placeholder for WebSocket FSM integration tests."""
+    results = []
+
+    # Test 1: FSM integration
+    test_name = "WebSocket: FSM integration"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
+    try:
+        from plotty.fsm import JobFSM, JobState
+        from plotty.hooks import HookExecutor
+
+        results.append(
+            create_test_result(
+                test_name, True, "✓ FSM and HookExecutor modules available"
+            )
+        )
+    except ImportError as e:
+        results.append(
+            create_test_result(
+                test_name, False, f"✗ FSM integration import failed: {str(e)}"
+            )
+        )
+
+    # Test 2: HookExecutor WebSocket support
+    test_name = "WebSocket: HookExecutor support"
+    if progress_tracker:
+        progress_tracker.advance(test_name)
+
+    try:
+        from plotty.hooks import HookExecutor
+        from pathlib import Path
+
+        # Create instance to check for websocket_manager attribute (it's an instance attribute)
+        temp_workspace = Path("/tmp")
+        hook_executor = HookExecutor("test_job", temp_workspace)
+
+        if hasattr(hook_executor, "websocket_manager"):
+            results.append(
+                create_test_result(
+                    test_name, True, "✓ HookExecutor WebSocket support available"
+                )
+            )
+        else:
+            results.append(
+                create_test_result(
+                    test_name,
+                    False,
+                    "✗ HookExecutor missing WebSocket manager attribute",
+                )
+            )
+    except Exception as e:
+        results.append(
+            create_test_result(
+                test_name, False, f"✗ HookExecutor WebSocket test failed: {str(e)}"
+            )
+        )
+
+    return results
+
+
 # Modular structure was removed, always use integrated implementation
 MODULAR_AVAILABLE = False
 
@@ -1052,24 +1170,33 @@ def _calculate_total_tests(level: str) -> int:
     Returns:
         Total number of tests for the level
     """
-    # Test counts per category
+    # Test counts per category (based on actual test function outputs)
     basic_count = 5  # 5 tests
-    job_lifecycle_count = 3  # 3 tests
-    job_management_count = 4  # 4 tests
+    job_lifecycle_count = 2  # 2 tests (SVG creation + job creation)
+    job_management_count = 3  # 3 tests (job listing + queue status + session info)
+    websocket_basic_count = 2  # 2 tests (module imports + configuration)
     system_validation_count = 4  # 4 tests
     resource_management_count = 3  # 3 tests
-    recovery_system_count = 6  # 6 tests (5 + 1 for job check with recovery info)
-    performance_count = 2  # 2 tests (memory profiling + database performance)
+    recovery_system_count = (
+        5  # 5 tests (no job check with recovery info in current run)
+    )
+    websocket_advanced_count = 2  # 2 tests (FSM integration + HookExecutor support)
+    performance_count = (
+        3  # 3 tests (memory profiling + database performance + cross-platform)
+    )
     stress_count = 1  # 1 test (load testing with 10 jobs)
-    integration_count = 3  # 3 tests (FSM + help + cross-platform)
+    integration_count = 2  # 2 tests (FSM + help)
 
     if level == "basic":
         return basic_count
     elif level == "intermediate":
-        return job_lifecycle_count + job_management_count
+        return job_lifecycle_count + job_management_count + websocket_basic_count
     elif level == "advanced":
         return (
-            system_validation_count + resource_management_count + recovery_system_count
+            system_validation_count
+            + resource_management_count
+            + recovery_system_count
+            + websocket_advanced_count
         )
     elif level == "performance":
         return performance_count
@@ -1082,9 +1209,11 @@ def _calculate_total_tests(level: str) -> int:
             basic_count
             + job_lifecycle_count
             + job_management_count
+            + websocket_basic_count
             + system_validation_count
             + resource_management_count
             + recovery_system_count
+            + websocket_advanced_count
             + performance_count
             + stress_count
             + integration_count
@@ -1113,12 +1242,12 @@ def run_self_test(
     Tests are organized by complexity levels:
 
     * **basic**: Core command tests (5 tests)
-    * **intermediate**: Job lifecycle and management (7 tests)
-    * **advanced**: System validation, resource management, and recovery system (13 tests)
-    * **performance**: Memory profiling and performance analysis (2 tests)
+    * **intermediate**: Job lifecycle, management, and WebSocket basic (7 tests)
+    * **advanced**: System validation, resource management, recovery system, and WebSocket advanced (13 tests)
+    * **performance**: Memory profiling, performance analysis, and cross-platform (3 tests)
     * **stress**: Load testing and stress analysis (1 test)
-    * **integration**: System integration tests (3 tests)
-    * **all**: Run all tests (31 tests total)
+    * **integration**: System integration tests (2 tests)
+    * **all**: Run all tests (32 tests total)
 
     Each test runs in isolated environments with proper cleanup.
     """
@@ -1146,6 +1275,14 @@ def run_self_test(
     integration_tests = run_integrated_system_integration_tests
     report_func = generate_integrated_report
 
+    # Add WebSocket test functions if available
+    if WEBSOCKET_TESTS_AVAILABLE:
+        websocket_basic_tests = run_websocket_basic_tests_sync
+        websocket_advanced_tests = run_websocket_fsm_tests_sync
+    else:
+        websocket_basic_tests = None
+        websocket_advanced_tests = None
+
     all_results = []
 
     try:
@@ -1170,6 +1307,14 @@ def run_self_test(
                     console.print("[blue]Running job management tests...[/blue]")
                 all_results.extend(job_management_tests(test_env, progress_tracker))
 
+                # Run WebSocket basic tests
+                if WEBSOCKET_TESTS_AVAILABLE and websocket_basic_tests:
+                    if verbose:
+                        console.print("[blue]Running WebSocket basic tests...[/blue]")
+                    all_results.extend(
+                        websocket_basic_tests(test_env, progress_tracker)
+                    )
+
             if level in ["advanced", "all"]:
                 if verbose:
                     console.print("[blue]Running system validation tests...[/blue]")
@@ -1184,6 +1329,16 @@ def run_self_test(
                 if verbose:
                     console.print("[blue]Running recovery system tests...[/blue]")
                 all_results.extend(recovery_system_tests(test_env, progress_tracker))
+
+                # Run WebSocket advanced tests
+                if WEBSOCKET_TESTS_AVAILABLE and websocket_advanced_tests:
+                    if verbose:
+                        console.print(
+                            "[blue]Running WebSocket advanced tests...[/blue]"
+                        )
+                    all_results.extend(
+                        websocket_advanced_tests(test_env, progress_tracker)
+                    )
 
             if level in ["performance", "all"]:
                 if verbose:

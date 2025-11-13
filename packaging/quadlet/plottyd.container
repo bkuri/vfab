@@ -7,7 +7,7 @@ Network=host
 Volume=%h/.local/share/plotty:/var/lib/plotty:Z
 Volume=%h/.config/plotty:/etc/plotty:Z
 Environment=PLOTTY_CONFIG=/etc/plotty/config.yaml
-Exec=plottyd
+Exec=plotty daemon --foreground
 
 [Install]
 WantedBy=default.target

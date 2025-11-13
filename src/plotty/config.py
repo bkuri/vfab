@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 from pathlib import Path
+from typing import Optional, List
 import os
 import yaml
 import platformdirs
@@ -157,6 +158,19 @@ class PhysicalSetupCfg(BaseModel):
     timeout_seconds: int = 30
 
 
+class WebSocketCfg(BaseModel):
+    """Configuration for WebSocket monitoring server."""
+
+    enabled: bool = False
+    host: str = "localhost"
+    port: int = 8765
+    max_connections: int = 100
+    heartbeat_interval: int = 30
+    authentication: bool = False
+    api_key: Optional[str] = None
+    channels: List[str] = Field(default_factory=lambda: ["jobs", "devices", "system"])
+
+
 class LoggingSettings(BaseModel):
     enabled: bool = True
     level: str = "INFO"
@@ -189,6 +203,7 @@ class Settings(BaseModel):
     recovery: RecoveryCfg = Field(default_factory=RecoveryCfg)
     physical_setup: PhysicalSetupCfg = Field(default_factory=PhysicalSetupCfg)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
+    websocket: WebSocketCfg = Field(default_factory=WebSocketCfg)
 
 
 def _ensure_config_initialized() -> None:
