@@ -5,6 +5,48 @@ All notable changes to ploTTY will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2025-11-12
+
+### 📚 **DOCUMENTATION MILESTONE** - WebSocket Monitoring & User Experience
+
+### 🖥️ Complete WebSocket Monitoring Documentation
+- **WebSocket Monitoring Guide**: Comprehensive `docs/api/websocket-monitoring.md` with architecture overview
+- **Message Schemas**: Complete documentation of jobs, system, and device channel messages
+- **Client Implementation Examples**: JavaScript, Python, and CLI client examples with production patterns
+- **Security & Deployment**: Authentication, CORS, and production deployment considerations
+- **Integration Examples**: Real-time dashboards, alert systems, and automation workflows
+
+### 🔧 Enhanced Daemon Reference & Management
+- **Daemon Reference Guide**: Complete `docs/api/daemon-reference.md` with command syntax and options
+- **Production Deployment**: systemd, OpenRC, and container deployment examples
+- **Performance Tuning**: Resource management, connection limits, and optimization settings
+- **Troubleshooting Section**: Common daemon issues and recovery procedures
+
+### 📖 Updated User Guide with Monitoring Workflows
+- **Real-Time Monitoring Section**: New section 10 in user guide with complete monitoring workflows
+- **WebSocket Client Setup**: Step-by-step dashboard creation and Python client implementation
+- **Alert System Integration**: Email, Slack, and custom alert system examples
+- **Production Monitoring Patterns**: Multi-client monitoring and performance tracking
+- **Best Practices Guidelines**: Reliable connections, message filtering, and data persistence
+
+### 🎯 Improved Documentation Structure
+- **Documentation Summary Updated**: Added WebSocket monitoring and daemon management sections
+- **API Reference Enhanced**: Updated CLI reference with monitoring commands
+- **Configuration Schema Expanded**: Added WebSocket configuration documentation
+- **Cheat Sheet Integration**: Real-time monitoring cheat sheet with practical examples
+
+### 🚀 Enhanced User Experience
+- **Simplified Commands**: Updated all documentation to use `plotty` instead of `uv run plotty`
+- **Cleaner Examples**: Streamlined command examples throughout all documentation
+- **Better Discoverability**: Improved documentation organization and cross-references
+- **Production-Ready Examples**: Real-world monitoring setups and integration patterns
+
+### 📊 Documentation Coverage Improvements
+- **WebSocket System**: 100% coverage of monitoring functionality
+- **Daemon Management**: Complete deployment and management reference
+- **Integration Patterns**: Comprehensive examples for different use cases
+- **API Documentation**: Updated to reflect new monitoring capabilities
+
 ## [1.1.0] - 2025-11-12
 
 ### 🚀 **MONITORING MILESTONE** - Real-Time WebSocket System

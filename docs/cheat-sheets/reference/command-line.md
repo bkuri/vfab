@@ -37,6 +37,8 @@
 | `plotty check ready` | System check | `plotty check ready --detailed` |
 | `plotty list queue` | Current queue | `plotty list queue --watch` |
 | `plotty estimate <job>` | Time estimate | `plotty estimate my_art --detailed` |
+| `plotty daemon` | Start daemon | `plotty daemon --host 0.0.0.0 --port 8766` |
+| `plotty monitor` | Real-time monitor | `plotty monitor --channels jobs,system --follow` |
 
 ---
 

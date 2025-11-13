@@ -24,9 +24,10 @@
 9. [Studio Management](#9-studio-management) - Professional operations
 
 **📚 Reference**
-10. [Real-World Examples](#10-real-world-examples) - Industry workflows
-11. [Troubleshooting](#11-troubleshooting) - Quick fixes
-12. [Best Practices](#12-best-practices) - Pro tips
+10. [Real-Time Monitoring](#10-real-time-monitoring) - WebSocket dashboard & alerts
+11. [Real-World Examples](#11-real-world-examples) - Industry workflows
+12. [Troubleshooting](#12-troubleshooting) - Quick fixes
+13. [Best Practices](#13-best-practices) - Pro tips
 
 ---
 
@@ -42,13 +43,13 @@ uv pip install -e ".[dev,vpype,axidraw]"
 uv run alembic upgrade head
 
 # 2. Quick setup
-uv run plotty setup  # Accept defaults for now
+plotty setup  # Accept defaults for now
 
 # 3. Add your first design
-uv run plotty add your_design.svg --paper a4
+plotty add your_design.svg --paper a4
 
 # 4. Plot it!
-uv run plotty plot your_design
+plotty plot your_design
 ```
 
 That's it! 🎉 You're plotting. For detailed setup, see [Getting Started](#1-getting-started).
@@ -100,13 +101,13 @@ uv pip install -e ".[dev,vpype,axidraw]"
 uv run alembic upgrade head
 ```
 
-> **💡 Tip:** Run `uv run plotty --version` to verify installation.
+> **💡 Tip:** Run `plotty --version` to verify installation.
 
 ### 1.4 First-Time Setup
 
 ```bash
 # Run the interactive setup wizard
-uv run plotty setup
+plotty setup
 ```
 
 **Setup walkthrough:**
@@ -165,10 +166,10 @@ Let's walk through your complete first plotting experience.
 
 ```bash
 # Add the test design
-uv run plotty add test.svg --paper a4
+plotty add test.svg --paper a4
 
 # Add with a friendly name
-uv run plotty add test.svg --name "My First Plot" --paper a4
+plotty add test.svg --name "My First Plot" --paper a4
 ```
 
 **What you'll see:**
@@ -189,7 +190,7 @@ Planning optimizes your design for faster plotting.
 
 ```bash
 # Interactive planning (perfect for beginners)
-uv run plotty plan test --interactive
+plotty plan test --interactive
 ```
 
 **Interactive walkthrough:**
@@ -221,7 +222,7 @@ Make sure your AxiDraw is connected and has paper loaded, then:
 
 ```bash
 # Start plotting
-uv run plotty plot test
+plotty plot test
 ```
 
 **Real-time progress display:**
@@ -246,7 +247,7 @@ Controls:
 
 ```bash
 # See job details
-uv run plotty info job test
+plotty info job test
 
 # View the generated report
 # Open: workspace/jobs/test/report.html in your browser
@@ -269,22 +270,22 @@ Master the everyday operations you'll use frequently.
 **View what's queued:**
 ```bash
 # List all jobs
-uv run plotty list jobs
+plotty list jobs
 
 # See current queue
-uv run plotty list queue
+plotty list queue
 
 # Check job status
-uv run plotty info job test
+plotty info job test
 ```
 
 **Remove jobs:**
 ```bash
 # Remove specific job
-uv run plotty remove job test
+plotty remove job test
 
 # Clear completed jobs
-uv run plotty queue cleanup --state completed
+plotty queue cleanup --state completed
 ```
 
 ### 3.2 Quick Plotting Workflow
@@ -292,28 +293,28 @@ uv run plotty queue cleanup --state completed
 **Your daily plotting routine:**
 ```bash
 # 1. Add new design
-uv run plotty add new_design.svg --name "Today's Art" --paper a4
+plotty add new_design.svg --name "Today's Art" --paper a4
 
 # 2. Plan it (interactive is best)
-uv run plotty plan new_design --interactive
+plotty plan new_design --interactive
 
 # 3. Plot it
-uv run plotty plot new_design
+plotty plot new_design
 
 # 4. Check results
-uv run plotty info job new_design
+plotty info job new_design
 ```
 
 ### 3.3 Paper and Pen Basics
 
 **Check available paper:**
 ```bash
-uv run plotty list paper
+plotty list paper
 ```
 
 **Add custom paper size:**
 ```bash
-uv run plotty add paper \
+plotty add paper \
   --name "Square" \
   --width 150 \
   --height 150 \
@@ -323,10 +324,10 @@ uv run plotty add paper \
 **Basic pen management:**
 ```bash
 # List pens
-uv run plotty list pens
+plotty list pens
 
 # Add a new pen
-uv run plotty add pen \
+plotty add pen \
   --name "Fine Black" \
   --width 0.3 \
   --color "#000000"
@@ -337,13 +338,13 @@ uv run plotty add pen \
 **Quick system check:**
 ```bash
 # Is everything ready?
-uv run plotty check ready
+plotty check ready
 
 # Detailed status
-uv run plotty status
+plotty status
 
 # Test device movement
-uv run plotty check device --test-move
+plotty check device --test-move
 ```
 
 **Common status outputs:**
@@ -359,14 +360,14 @@ uv run plotty check device --test-move
 **Know how long jobs will take:**
 ```bash
 # Quick estimate
-uv run plotty estimate job_name
+plotty estimate job_name
 
 # Detailed breakdown
-uv run plotty estimate job_name --detailed
+plotty estimate job_name --detailed
 
 # Compare before/after optimization
-uv run plotty estimate job_name --stage pre
-uv run plotty estimate job_name --stage post
+plotty estimate job_name --stage pre
+plotty estimate job_name --stage post
 ```
 
 **Sample output:**
@@ -421,38 +422,38 @@ ploTTY automatically detects when your design needs multiple pens from:
 
 **View current pens:**
 ```bash
-uv run plotty list pens
+plotty list pens
 ```
 
 **Add pens interactively:**
 ```bash
-uv run plotty setup pen
+plotty setup pen
 ```
 
 **Add specific pens:**
 ```bash
 # Fine detail pen
-uv run plotty add pen \
+plotty add pen \
   --name "Fine Black" \
   --width 0.3 \
   --color "#000000" \
   --speed-cap 50
 
 # Medium workhorse pen
-uv run plotty add pen \
+plotty add pen \
   --name "Medium Black" \
   --width 0.7 \
   --color "#000000" \
   --speed-cap 80
 
 # Color pens
-uv run plotty add pen \
+plotty add pen \
   --name "Fine Red" \
   --width 0.3 \
   --color "#FF0000" \
   --speed-cap 50
 
-uv run plotty add pen \
+plotty add pen \
   --name "Medium Blue" \
   --width 0.5 \
   --color "#0000FF" \
@@ -473,12 +474,12 @@ uv run plotty add pen \
 
 **Add your colorful design:**
 ```bash
-uv run plotty add colorful_art.svg --paper a4 --name "Rainbow Design"
+plotty add colorful_art.svg --paper a4 --name "Rainbow Design"
 ```
 
 **Interactive pen mapping:**
 ```bash
-uv run plotty plan colorful_art --interactive
+plotty plan colorful_art --interactive
 ```
 
 **Pen mapping walkthrough:**
@@ -513,7 +514,7 @@ Time saved: ~4 minutes
 
 **Start your colorful plot:**
 ```bash
-uv run plotty plot colorful_art
+plotty plot colorful_art
 ```
 
 **During plotting - pen change prompts:**
@@ -560,26 +561,26 @@ Please change pen now...
 **Advanced pen mapping:**
 ```bash
 # Plan with custom pen order
-uv run plotty plan artwork --pen-order 2,1,4,3
+plotty plan artwork --pen-order 2,1,4,3
 
 # Optimize for minimum pen changes
-uv run plotty plan artwork --optimize-pens
+plotty plan artwork --optimize-pens
 
 # Preview pen changes without plotting
-uv run plotty plan artwork --dry-run --show-pen-changes
+plotty plan artwork --dry-run --show-pen-changes
 ```
 
 ### 3.2 Setting Up Multiple Pens
 
 ```bash
 # View current pens
-uv run plotty list pens
+plotty list pens
 
 # Add pens interactively
-uv run plotty setup pen
+plotty setup pen
 
 # Add specific pen
-uv run plotty add pen \
+plotty add pen \
   --name "Fine Black" \
   --width 0.3 \
   --color "#000000" \
@@ -600,10 +601,10 @@ uv run plotty add pen \
 
 ```bash
 # Add multi-pen design
-uv run plotty add colorful_design.svg --paper a4
+plotty add colorful_design.svg --paper a4
 
 # Plan with interactive pen mapping
-uv run plotty plan colorful_design --interactive
+plotty plan colorful_design --interactive
 ```
 
 **Interactive pen mapping:**
@@ -636,7 +637,7 @@ Time saved: ~4 minutes
 
 ```bash
 # Plot with pen change prompts
-uv run plotty plot colorful_design
+plotty plot colorful_design
 ```
 
 **During plotting:**
@@ -996,7 +997,7 @@ for version in {1..5}; do
 done
 
 # Plot all versions
-uv run plotty plot-all
+plotty plot-all
 ```
 
 **Compare versions:**
@@ -1004,7 +1005,7 @@ uv run plotty plot-all
 # Estimate time for each version
 for job in art_series_*; do
     echo "=== $job ==="
-    uv run plotty estimate "$job" --detailed
+    plotty estimate "$job" --detailed
 done
 ```
 
@@ -1062,7 +1063,7 @@ for edition in $(seq 1 $edition_size); do
 done
 
 # Plot with documentation
-uv run plotty plot-all --document-each
+plotty plot-all --document-each
 ```
 
 ### 6.5 Exhibition Preparation Workflow
@@ -1088,10 +1089,10 @@ for piece in "${exhibition_pieces[@]}"; do
 done
 
 # Plot test versions first
-uv run plotty plot "Test:*"
+plotty plot "Test:*"
 
 # After approval, plot full size
-uv run plotty plot "Exhibition:*"
+plotty plot "Exhibition:*"
 ```
 
 > **🎯 Creative Goal:** Develop workflows that match your artistic process. Use these as templates and adapt them to your unique style.
@@ -1113,9 +1114,9 @@ mkdir -p client_acme/{designs,output,documentation}
 cd client_acme
 
 # Add all client designs
-uv run plotty add designs/logo.svg --name "Acme Logo" --paper a4
-uv run plotty add designs/business_card.svg --name "Acme Business Card" --paper a4
-uv run plotty add designs/letterhead.svg --name "Acme Letterhead" --paper a4
+plotty add designs/logo.svg --name "Acme Logo" --paper a4
+plotty add designs/business_card.svg --name "Acme Business Card" --paper a4
+plotty add designs/letterhead.svg --name "Acme Letterhead" --paper a4
 ```
 
 **Batch import from directory:**
@@ -1123,7 +1124,7 @@ uv run plotty add designs/letterhead.svg --name "Acme Letterhead" --paper a4
 # Import all SVGs from a directory
 for file in designs/*.svg; do
     basename=$(basename "$file" .svg)
-    uv run plotty add "$file" --name "Acme: $basename" --paper a4
+    plotty add "$file" --name "Acme: $basename" --paper a4
 done
 ```
 
@@ -1132,37 +1133,37 @@ done
 **Plan all jobs with optimization:**
 ```bash
 # Fast batch planning (good for simple designs)
-uv run plotty plan-all --preset fast
+plotty plan-all --preset fast
 
 # High-quality batch planning (complex designs)
-uv run plotty plan-all --preset hq
+plotty plan-all --preset hq
 
 # Smart pen optimization across all jobs
-uv run plotty plan-all --optimize-pens --global-pen-order
+plotty plan-all --optimize-pens --global-pen-order
 ```
 
 **Selective batch planning:**
 ```bash
 # Plan specific jobs with custom settings
-uv run plotty plan "Acme Logo" "Acme Business Card" --preset hq
+plotty plan "Acme Logo" "Acme Business Card" --preset hq
 
 # Plan by pattern matching
-uv run plotty plan "Acme:*" --preset fast
+plotty plan "Acme:*" --preset fast
 
 # Plan jobs added today
-uv run plotty plan --added-today --preset default
+plotty plan --added-today --preset default
 ```
 
 **Advanced batch planning options:**
 ```bash
 # Plan with time constraints
-uv run plotty plan-all --max-time-per-job 30m --preset fast
+plotty plan-all --max-time-per-job 30m --preset fast
 
 # Plan with pen change minimization
-uv run plotty plan-all --minimize-pen-changes --pen-priority 2,1,3
+plotty plan-all --minimize-pen-changes --pen-priority 2,1,3
 
 # Dry run to see planning results
-uv run plotty plan-all --dry-run --show-estimates
+plotty plan-all --dry-run --show-estimates
 ```
 
 ### 7.3 Automated Batch Plotting
@@ -1170,37 +1171,37 @@ uv run plotty plan-all --dry-run --show-estimates
 **Standard batch execution:**
 ```bash
 # Plot all planned jobs
-uv run plotty plot-all
+plotty plot-all
 
 # Plot with safety preset (slower but more reliable)
-uv run plotty plot-all --preset safe
+plotty plot-all --preset safe
 
 # Plot with automatic camera recording
-uv run plotty plot-all --record-all
+plotty plot-all --record-all
 ```
 
 **Advanced batch plotting:**
 ```bash
 # Plot with time limits
-uv run plotty plot-all --max-total-time 4h
+plotty plot-all --max-total-time 4h
 
 # Plot with automatic pen change prompts
-uv run plotty plot-all --auto-pen-change
+plotty plot-all --auto-pen-change
 
 # Plot with progress monitoring
-uv run plotty plot-all --monitor --notify-on-complete
+plotty plot-all --monitor --notify-on-complete
 ```
 
 **Conditional batch plotting:**
 ```bash
 # Only plot jobs under 15 minutes
-uv run plotty plot-all --max-job-time 15m
+plotty plot-all --max-job-time 15m
 
 # Plot high-priority jobs first
-uv run plotty plot-all --priority-order
+plotty plot-all --priority-order
 
 # Plot with automatic retry on failure
-uv run plotty plot-all --retry-failed --max-retries 2
+plotty plot-all --retry-failed --max-retries 2
 ```
 
 ### 7.4 Queue Management and Monitoring
@@ -1208,43 +1209,43 @@ uv run plotty plot-all --retry-failed --max-retries 2
 **Real-time queue monitoring:**
 ```bash
 # Watch queue progress
-uv run plotty list queue --watch
+plotty list queue --watch
 
 # Detailed queue status
-uv run plotty list queue --detailed --show-estimates
+plotty list queue --detailed --show-estimates
 
 # Export queue status for reporting
-uv run plotty list queue --json > queue_status_$(date +%Y%m%d).json
+plotty list queue --json > queue_status_$(date +%Y%m%d).json
 ```
 
 **Automated queue cleanup:**
 ```bash
 # Remove completed jobs
-uv run plotty queue cleanup --state completed
+plotty queue cleanup --state completed
 
 # Remove old jobs (older than 7 days)
-uv run plotty queue cleanup --older-than 7d
+plotty queue cleanup --older-than 7d
 
 # Remove failed jobs
-uv run plotty queue cleanup --state failed
+plotty queue cleanup --state failed
 
 # Comprehensive cleanup
-uv run plotty queue cleanup --completed --failed --older-than 3d
+plotty queue cleanup --completed --failed --older-than 3d
 ```
 
 **Queue organization:**
 ```bash
 # Group jobs by project
-uv run plotty queue group --by-project "Acme"
+plotty queue group --by-project "Acme"
 
 # Reorder queue by priority
-uv run plotty queue reorder --by-time-estimate
+plotty queue reorder --by-time-estimate
 
 # Pause specific jobs
-uv run plotty queue pause "Acme:*"
+plotty queue pause "Acme:*"
 
 # Resume paused jobs
-uv run plotty queue resume "Acme:*"
+plotty queue resume "Acme:*"
 ```
 
 ### 7.5 Production Reporting
@@ -1252,13 +1253,13 @@ uv run plotty queue resume "Acme:*"
 **Generate production reports:**
 ```bash
 # Daily production summary
-uv run plotty stats production --date today --export > daily_report.json
+plotty stats production --date today --export > daily_report.json
 
 # Client-specific reports
-uv run plotty stats jobs --client "Acme" --last 30 --export > acme_report.json
+plotty stats jobs --client "Acme" --last 30 --export > acme_report.json
 
 # Performance analytics
-uv run plotty stats performance --pen-usage --time-analysis --export > performance.json
+plotty stats performance --pen-usage --time-analysis --export > performance.json
 ```
 
 **Automated reporting script:**
@@ -1275,20 +1276,20 @@ mkdir -p "$REPORT_DIR"
     echo "# Production Report - $DATE"
     echo ""
     echo "## Queue Status"
-    uv run plotty list queue --detailed
+    plotty list queue --detailed
     echo ""
     echo "## Today's Performance"
-    uv run plotty stats summary --today
+    plotty stats summary --today
     echo ""
     echo "## Pen Usage"
-    uv run plotty stats pens --last 7
+    plotty stats pens --last 7
     echo ""
     echo "## Failed Jobs"
-    uv run plotty list jobs --state failed --today
+    plotty list jobs --state failed --today
 } > "$REPORT_DIR/production_report.md"
 
 # Export machine-readable data
-uv run plotty stats production --date today --json > "$REPORT_DIR/production_data.json"
+plotty stats production --date today --json > "$REPORT_DIR/production_data.json"
 
 echo "Report generated: $REPORT_DIR/production_report.md"
 ```
@@ -1380,27 +1381,27 @@ hq: "read {src} pagesize {pagesize} crop 0 0 {width_mm}mm {height_mm}mm linemerg
 **Create your own optimization:**
 ```bash
 # Custom pipeline for specific needs
-uv run plotty plan job --custom "read {src} linemerge linesort write {dst}"
+plotty plan job --custom "read {src} linemerge linesort write {dst}"
 
 # Advanced custom pipeline
-uv run plotty plan job --custom "read {src} linemerge linesimplify reloop linesort write {dst}"
+plotty plan job --custom "read {src} linemerge linesimplify reloop linesort write {dst}"
 
 # Minimal optimization (for already optimized files)
-uv run plotty plan job --custom "read {src} write {dst}"
+plotty plan job --custom "read {src} write {dst}"
 ```
 
 **Custom optimization examples:**
 ```bash
 # For geometric designs (focus on line merging)
-uv run plotty plan geometric_design \
+plotty plan geometric_design \
   --custom "read {src} linemerge --tolerance 0.1mm linesort write {dst}"
 
 # For organic designs (focus on line simplification)
-uv run plotty plan organic_art \
+plotty plan organic_art \
   --custom "read {src} linesimplify --tolerance 0.05mm linesort write {dst}"
 
 # For text-heavy designs (preserve detail)
-uv run plotty plan typography \
+plotty plan typography \
   --custom "read {src} linemerge --tolerance 0.01mm linesort write {dst}"
 ```
 
@@ -1409,23 +1410,23 @@ uv run plotty plan typography \
 **Compare different presets:**
 ```bash
 # Test all presets on the same job
-uv run plotty plan test_job --preset fast --dry-run --save-as fast_test
-uv run plotty plan test_job --preset default --dry-run --save-as default_test
-uv run plotty plan test_job --preset hq --dry-run --save-as hq_test
+plotty plan test_job --preset fast --dry-run --save-as fast_test
+plotty plan test_job --preset default --dry-run --save-as default_test
+plotty plan test_job --preset hq --dry-run --save-as hq_test
 
 # Compare results
-uv run plotty compare fast_test default_test hq_test --show-time-estimates
+plotty compare fast_test default_test hq_test --show-time-estimates
 ```
 
 **Detailed time analysis:**
 ```bash
 # Comprehensive time breakdown
-uv run plotty estimate job --detailed --show-optimization-steps
+plotty estimate job --detailed --show-optimization-steps
 
 # Compare pre/post optimization
-uv run plotty estimate job --stage pre --save pre_estimate
-uv run plotty estimate job --stage post --save post_estimate
-uv run plotty compare pre_estimate post_estimate --show-improvement
+plotty estimate job --stage pre --save pre_estimate
+plotty estimate job --stage post --save post_estimate
+plotty compare pre_estimate post_estimate --show-improvement
 ```
 
 **Sample detailed output:**
@@ -1460,28 +1461,28 @@ Optimization Summary:
 **Global pen optimization across jobs:**
 ```bash
 # Optimize pen changes across entire queue
-uv run plotty optimize-pens --global --queue-wide
+plotty optimize-pens --global --queue-wide
 
 # Custom pen change priority
-uv run plotty optimize-pens --pen-order 2,1,3,4 --minimize-distance
+plotty optimize-pens --pen-order 2,1,3,4 --minimize-distance
 
 # Pen optimization with time constraints
-uv run plotty optimize-pens --max-pen-change-time 30s --prefer-fewer-changes
+plotty optimize-pens --max-pen-change-time 30s --prefer-fewer-changes
 ```
 
 **Pen optimization strategies:**
 ```bash
 # Strategy 1: Minimize total pen changes
-uv run plotty plan-all --optimize-pens --strategy min-changes
+plotty plan-all --optimize-pens --strategy min-changes
 
 # Strategy 2: Minimize pen change time
-uv run plotty plan-all --optimize-pens --strategy min-time
+plotty plan-all --optimize-pens --strategy min-time
 
 # Strategy 3: Optimize for pen wear
-uv run plotty plan-all --optimize-pens --strategy balance-wear
+plotty plan-all --optimize-pens --strategy balance-wear
 
 # Strategy 4: Prioritize speed over pen changes
-uv run plotty plan-all --optimize-pens --strategy speed-first
+plotty plan-all --optimize-pens --strategy speed-first
 ```
 
 ### 8.5 Performance Tuning
@@ -1489,38 +1490,38 @@ uv run plotty plan-all --optimize-pens --strategy speed-first
 **Device-specific optimization:**
 ```bash
 # AxiDraw v3 optimization
-uv run plotty config device --model v3 --optimize-for v3
+plotty config device --model v3 --optimize-for v3
 
 # Custom speed profiles
-uv run plotty add speed-profile \
+plotty add speed-profile \
   --name "precision" \
   --speed 15 \
   --acceleration 50 \
   --pen-up-delay 50
 
 # Use custom speed profile
-uv run plotty plan job --speed-profile precision
+plotty plan job --speed-profile precision
 ```
 
 **Paper-specific optimization:**
 ```bash
 # Optimization for different paper types
-uv run plotty add paper-profile \
+plotty add paper-profile \
   --name "watercolor_paper" \
   --type "rough" \
   --pen-pressure "light" \
   --speed-reduction 20
 
-uv run plotty plan job --paper-profile watercolor_paper
+plotty plan job --paper-profile watercolor_paper
 ```
 
 **Environmental optimization:**
 ```bash
 # Humidity-aware optimization
-uv run plotty plan job --humidity high --adjust-speed
+plotty plan job --humidity high --adjust-speed
 
 # Temperature compensation
-uv run plotty plan job --temperature cold --compensate
+plotty plan job --temperature cold --compensate
 ```
 
 ### 8.6 Quality vs Speed Trade-offs
@@ -1528,25 +1529,25 @@ uv run plotty plan job --temperature cold --compensate
 **Automated quality selection:**
 ```bash
 # Let ploTTY choose optimal preset
-uv run plotty plan job --auto-preset --target-time 10m
+plotty plan job --auto-preset --target-time 10m
 
 # Quality-based selection
-uv run plotty plan job --quality-threshold 95 --auto-preset
+plotty plan job --quality-threshold 95 --auto-preset
 
 # Speed-based selection
-uv run plotty plan job --speed-priority --max-time 5m
+plotty plan job --speed-priority --max-time 5m
 ```
 
 **Manual quality tuning:**
 ```bash
 # Custom quality settings
-uv run plotty plan job \
+plotty plan job \
   --line-merge-tolerance 0.05mm \
   --line-simplify-tolerance 0.02mm \
   --min-path-length 1mm
 
 # Progressive refinement
-uv run plotty plan job --progressive-refinement --iterations 3
+plotty plan job --progressive-refinement --iterations 3
 ```
 
 ### 8.7 Optimization Profiling
@@ -1554,13 +1555,13 @@ uv run plotty plan job --progressive-refinement --iterations 3
 **Profile optimization performance:**
 ```bash
 # Profile optimization process
-uv run plotty profile job --show-steps --timing
+plotty profile job --show-steps --timing
 
 # Compare optimization algorithms
-uv run plotty profile job --compare-algorithms fast,hq,custom
+plotty profile job --compare-algorithms fast,hq,custom
 
 # Optimization bottleneck analysis
-uv run plotty profile job --find-bottlenecks
+plotty profile job --find-bottlenecks
 ```
 
 **Sample profiling output:**
@@ -1646,28 +1647,28 @@ Professional studio operations and resource management.
 **Device health monitoring:**
 ```bash
 # Comprehensive device check
-uv run plotty check ready --detailed
+plotty check ready --detailed
 
 # Test device movement patterns
-uv run plotty check device --test-move --pattern full-range
+plotty check device --test-move --pattern full-range
 
 # Device calibration
-uv run plotty calibrate device --auto-calibrate
+plotty calibrate device --auto-calibrate
 
 # Device performance test
-uv run plotty benchmark device --duration 5m
+plotty benchmark device --duration 5m
 ```
 
 **Multi-device management:**
 ```bash
 # List all connected devices
-uv run plotty list devices
+plotty list devices
 
 # Switch between devices
-uv run plotty config device --active axidraw_v3_1
+plotty config device --active axidraw_v3_1
 
 # Device-specific settings
-uv run plotty config device --name axidraw_v3_1 \
+plotty config device --name axidraw_v3_1 \
   --speed-profile precision \
   --pen-up-delay 60 \
   --pen-down-delay 40
@@ -1676,13 +1677,13 @@ uv run plotty config device --name axidraw_v3_1 \
 **Device maintenance tracking:**
 ```bash
 # Log maintenance
-uv run plotty maintenance log --type cleaning --device axidraw_v3_1
+plotty maintenance log --type cleaning --device axidraw_v3_1
 
 # Schedule maintenance reminders
-uv run plotty maintenance schedule --interval 100h --type cleaning
+plotty maintenance schedule --interval 100h --type cleaning
 
 # View maintenance history
-uv run plotty maintenance history --device axidraw_v3_1 --last 90d
+plotty maintenance history --device axidraw_v3_1 --last 90d
 ```
 
 ### 9.2 Pen and Paper Inventory
@@ -1690,10 +1691,10 @@ uv run plotty maintenance history --device axidraw_v3_1 --last 90d
 **Comprehensive pen management:**
 ```bash
 # List all pens with detailed info
-uv run plotty list pens --detailed --show-usage
+plotty list pens --detailed --show-usage
 
 # Add new pen with full specifications
-uv run plotty add pen \
+plotty add pen \
   --name "Ultra Fine Black" \
   --width 0.2 \
   --color "#000000" \
@@ -1705,19 +1706,19 @@ uv run plotty add pen \
   --cost 3.50
 
 # Update pen usage tracking
-uv run plotty update pen 1 --log-usage --hours-used 2.5
+plotty update pen 1 --log-usage --hours-used 2.5
 
 # Pen inventory management
-uv run plotty inventory pens --check-stock --reorder-threshold 3
+plotty inventory pens --check-stock --reorder-threshold 3
 ```
 
 **Advanced paper management:**
 ```bash
 # List paper with inventory tracking
-uv run plotty list paper --show-stock --show-cost
+plotty list paper --show-stock --show-cost
 
 # Add custom paper with full details
-uv run plotty add paper \
+plotty add paper \
   --name "Arches Watercolor" \
   --width 210 \
   --height 297 \
@@ -1729,22 +1730,22 @@ uv run plotty add paper \
   --stock-count 25
 
 # Paper usage tracking
-uv run plotty update paper "Arches Watercolor" --consume 1
+plotty update paper "Arches Watercolor" --consume 1
 
 # Cost analysis by paper type
-uv run plotty analyze paper --cost-per-job --last 30
+plotty analyze paper --cost-per-job --last 30
 ```
 
 **Resource optimization:**
 ```bash
 # Optimize pen usage across jobs
-uv run plotty optimize pens --minimize-wear --balance-usage
+plotty optimize pens --minimize-wear --balance-usage
 
 # Suggest paper sizes for jobs
-uv run plotty suggest paper --job complex_art --optimize-waste
+plotty suggest paper --job complex_art --optimize-waste
 
 # Resource cost analysis
-uv run plotty analyze costs --by-project --include-materials
+plotty analyze costs --by-project --include-materials
 ```
 
 ### 9.3 Performance Monitoring and Analytics
@@ -1752,28 +1753,28 @@ uv run plotty analyze costs --by-project --include-materials
 **Real-time performance monitoring:**
 ```bash
 # Live performance dashboard
-uv run plotty monitor --live --refresh 5s
+plotty monitor --live --refresh 5s
 
 # Performance alerts setup
-uv run plotty alerts set --metric success-rate --threshold 95 --below
+plotty alerts set --metric success-rate --threshold 95 --below
 
 # Automated performance reports
-uv run plotty report performance --daily --email studio@example.com
+plotty report performance --daily --email studio@example.com
 ```
 
 **Comprehensive analytics:**
 ```bash
 # Studio-wide statistics
-uv run plotty stats summary --last 30 --detailed
+plotty stats summary --last 30 --detailed
 
 # Job performance analytics
-uv run plotty stats jobs --by-complexity --by-paper-type --by-pen
+plotty stats jobs --by-complexity --by-paper-type --by-pen
 
 # Device performance tracking
-uv run plotty stats device --uptime --error-rate --maintenance-schedule
+plotty stats device --uptime --error-rate --maintenance-schedule
 
 # Resource utilization analysis
-uv run plotty stats resources --pen-usage --paper-consumption --cost-analysis
+plotty stats resources --pen-usage --paper-consumption --cost-analysis
 ```
 
 **Sample comprehensive analytics output:**
@@ -1810,21 +1811,21 @@ Financial Summary:
 **Automated studio workflows:**
 ```bash
 # Morning startup routine
-uv run plotty workflow morning-startup \
+plotty workflow morning-startup \
   --device-check \
   --inventory-check \
   --queue-review \
   --schedule-optimization
 
 # End-of-day shutdown
-uv run plotty workflow end-of-day \
+plotty workflow end-of-day \
   --backup-data \
   --generate-reports \
   --schedule-maintenance \
   --cleanup-temp
 
 # Weekly maintenance
-uv run plotty workflow weekly-maintenance \
+plotty workflow weekly-maintenance \
   --device-calibration \
   --inventory-audit \
   --performance-review \
@@ -1914,25 +1915,25 @@ if __name__ == "__main__":
 **Automated quality checks:**
 ```bash
 # Pre-plot quality validation
-uv run plotty validate job --check-paths --check-complexity --check-time
+plotty validate job --check-paths --check-complexity --check-time
 
 # Post-plot quality assessment
-uv run plotty assess job --compare-with-expected --quality-score
+plotty assess job --compare-with-expected --quality-score
 
 # Batch quality validation
-uv run plotty validate-all --strict-mode --fail-on-warnings
+plotty validate-all --strict-mode --fail-on-warnings
 ```
 
 **Quality tracking:**
 ```bash
 # Quality metrics over time
-uv run plotty quality trends --last 90 --by-complexity
+plotty quality trends --last 90 --by-complexity
 
 # Quality by pen/paper combinations
-uv run plotty quality matrix --pens-vs-paper
+plotty quality matrix --pens-vs-paper
 
 # Customer quality feedback tracking
-uv run plotty quality feedback --by-client --by-project
+plotty quality feedback --by-client --by-project
 ```
 
 > **🎯 Studio Management Goal:** Create a self-monitoring, self-optimizing studio that requires minimal manual intervention while maintaining maximum quality and efficiency.
@@ -1941,18 +1942,18 @@ uv run plotty quality feedback --by-client --by-project
 
 ```bash
 # List all resources
-uv run plotty list pens
-uv run plotty list paper
+plotty list pens
+plotty list paper
 
 # Add new paper size
-uv run plotty add paper \
+plotty add paper \
   --name "Custom Large" \
   --width 300 \
   --height 200 \
   --margin 15
 
 # Update pen information
-uv run plotty update pen 1 \
+plotty update pen 1 \
   --speed-cap 60 \
   --pressure "light"
 ```
@@ -1961,13 +1962,13 @@ uv run plotty update pen 1 \
 
 ```bash
 # Quick statistics overview
-uv run plotty stats summary
+plotty stats summary
 
 # Detailed job analytics
-uv run plotty stats jobs --last 30
+plotty stats jobs --last 30
 
 # Performance metrics
-uv run plotty stats performance --pen-usage
+plotty stats performance --pen-usage
 ```
 
 **Statistics output:**
@@ -1990,9 +1991,521 @@ Medium Blue: 3 jobs (6%)
 
 ---
 
+## 10. Real-Time Monitoring
+
+Monitor your ploTTY studio in real-time with WebSocket connections for live dashboards, alerts, and automation.
+
+### 10.1 WebSocket Monitoring Basics
+
+ploTTY includes a built-in WebSocket server that provides real-time updates about jobs, system status, and device activity.
+
+**Start the monitoring daemon:**
+```bash
+# Start in background
+plotty daemon --start
+
+# Start with custom settings
+plotty daemon --start --port 8765 --host 0.0.0.0
+
+# Check daemon status
+plotty daemon --status
+```
+
+**Basic monitoring with CLI:**
+```bash
+# Simple terminal monitoring
+plotty monitor
+
+# Monitor specific channels
+plotty monitor --channels jobs,system
+
+# Monitor with filtering
+plotty monitor --filter "job.status:plotting"
+```
+
+### 10.2 Web Dashboard Setup
+
+Create a real-time web dashboard for visual monitoring.
+
+**HTML dashboard example:**
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ploTTY Monitor</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { padding: 10px; margin: 5px 0; border-radius: 5px; }
+        .plotting { background: #e3f2fd; }
+        .completed { background: #e8f5e8; }
+        .error { background: #ffebee; }
+        .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🖊️ ploTTY Studio Monitor</h1>
+    <div id="status">Connecting...</div>
+    <div id="jobs"></div>
+    <div id="metrics" class="metrics"></div>
+
+    <script>
+        const ws = new WebSocket('ws://localhost:8765');
+        
+        ws.onopen = () => {
+            document.getElementById('status').innerHTML = '🟢 Connected to ploTTY';
+        };
+        
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            updateDisplay(data);
+        };
+        
+        function updateDisplay(data) {
+            if (data.type === 'job_update') {
+                updateJobDisplay(data.payload);
+            } else if (data.type === 'system_status') {
+                updateSystemDisplay(data.payload);
+            }
+        }
+        
+        function updateJobDisplay(job) {
+            const jobsDiv = document.getElementById('jobs');
+            const jobDiv = document.createElement('div');
+            jobDiv.className = `status ${job.status}`;
+            jobDiv.innerHTML = `
+                <strong>${job.name}</strong> - ${job.status}
+                <br>Progress: ${job.progress || 0}%
+                ${job.estimated_time_remaining ? `<br>ETA: ${job.estimated_time_remaining}` : ''}
+            `;
+            jobsDiv.appendChild(jobDiv);
+        }
+    </script>
+</body>
+</html>
+```
+
+### 10.3 Python Monitoring Client
+
+Create custom Python monitoring scripts for automation and alerts.
+
+**Basic Python client:**
+```python
+# monitor.py - Python WebSocket client
+import asyncio
+import websockets
+import json
+from datetime import datetime
+
+class PlottyMonitor:
+    def __init__(self, uri="ws://localhost:8765"):
+        self.uri = uri
+        self.callbacks = {
+            'job_update': self.on_job_update,
+            'system_status': self.on_system_status,
+            'device_status': self.on_device_status
+        }
+    
+    async def connect(self):
+        """Connect to ploTTY WebSocket server."""
+        self.websocket = await websockets.connect(self.uri)
+        print(f"🔗 Connected to ploTTY at {self.uri}")
+        
+        # Start listening
+        await self.listen()
+    
+    async def listen(self):
+        """Listen for WebSocket messages."""
+        try:
+            async for message in self.websocket:
+                data = json.loads(message)
+                await self.handle_message(data)
+        except websockets.exceptions.ConnectionClosed:
+            print("❌ Connection to ploTTY lost")
+        except Exception as e:
+            print(f"❌ Error: {e}")
+    
+    async def handle_message(self, data):
+        """Handle incoming WebSocket messages."""
+        message_type = data.get('type')
+        payload = data.get('payload')
+        timestamp = data.get('timestamp')
+        
+        if message_type in self.callbacks:
+            await self.callbacks[message_type](payload, timestamp)
+        else:
+            print(f"📨 Unknown message type: {message_type}")
+    
+    async def on_job_update(self, job, timestamp):
+        """Handle job status updates."""
+        status_emoji = {
+            'pending': '⏳',
+            'planning': '📋',
+            'planned': '✅',
+            'plotting': '🖊️',
+            'completed': '🎉',
+            'failed': '❌'
+        }
+        
+        emoji = status_emoji.get(job.get('status'), '❓')
+        print(f"{emoji} Job {job.get('name')}: {job.get('status')}")
+        
+        if job.get('status') == 'plotting':
+            progress = job.get('progress', 0)
+            eta = job.get('estimated_time_remaining', 'Unknown')
+            print(f"   Progress: {progress}% | ETA: {eta}")
+        
+        # Custom alerts
+        if job.get('status') == 'failed':
+            await self.send_alert(f"Job {job.get('name')} failed!")
+        elif job.get('status') == 'completed':
+            await self.send_alert(f"Job {job.get('name')} completed successfully!")
+    
+    async def on_system_status(self, status, timestamp):
+        """Handle system status updates."""
+        print(f"🖥️ System: Device {status.get('device_status')}, Queue: {status.get('queue_size')} jobs")
+    
+    async def on_device_status(self, device, timestamp):
+        """Handle device status updates."""
+        print(f"🔌 Device: {device.get('name')} - {device.get('status')}")
+    
+    async def send_alert(self, message):
+        """Send alert (customize for your needs)."""
+        print(f"🚨 ALERT: {message}")
+        # Add email, Slack, or other notification methods here
+
+async def main():
+    monitor = PlottyMonitor()
+    await monitor.connect()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+### 10.4 Alert System Integration
+
+Set up automated alerts for important events.
+
+**Email alerts example:**
+```python
+# alerts.py - Alert system integration
+import smtplib
+import asyncio
+from email.mime.text import MIMEText
+from monitor import PlottyMonitor
+
+class AlertSystem(PlottyMonitor):
+    def __init__(self, email_config=None):
+        super().__init__()
+        self.email_config = email_config or {}
+        self.alert_rules = {
+            'job_failed': self.alert_job_failed,
+            'job_completed': self.alert_job_completed,
+            'device_disconnected': self.alert_device_disconnected,
+            'queue_full': self.alert_queue_full
+        }
+    
+    async def alert_job_failed(self, job, timestamp):
+        """Send alert when job fails."""
+        message = f"""
+        ploTTY Job Failed Alert
+        
+        Job: {job.get('name')}
+        Status: {job.get('status')}
+        Error: {job.get('error_message', 'Unknown error')}
+        Time: {timestamp}
+        
+        Check ploTTY for details.
+        """
+        await self.send_email("ploTTY Job Failed", message)
+    
+    async def alert_job_completed(self, job, timestamp):
+        """Send notification when job completes."""
+        if job.get('estimated_time') and job.get('actual_time'):
+            time_diff = job['actual_time'] - job['estimated_time']
+            if abs(time_diff) > 300:  # 5 minute difference
+                message = f"""
+                ploTTY Job Time Anomaly
+                
+                Job: {job.get('name')}
+                Estimated: {job.get('estimated_time')}s
+                Actual: {job.get('actual_time')}s
+                Difference: {time_diff}s
+                
+                Review optimization settings.
+                """
+                await self.send_email("ploTTY Time Anomaly", message)
+    
+    async def send_email(self, subject, message):
+        """Send email alert."""
+        if not self.email_config:
+            print(f"📧 Email alert: {subject}")
+            return
+        
+        try:
+            msg = MIMEText(message)
+            msg['Subject'] = f"[ploTTY] {subject}"
+            msg['From'] = self.email_config['from']
+            msg['To'] = self.email_config['to']
+            
+            with smtplib.SMTP(self.email_config['smtp_server'], self.email_config['smtp_port']) as server:
+                server.starttls()
+                server.login(self.email_config['username'], self.email_config['password'])
+                server.send_message(msg)
+            
+            print(f"📧 Email sent: {subject}")
+        except Exception as e:
+            print(f"❌ Failed to send email: {e}")
+
+# Usage example
+async def main():
+    email_config = {
+        'smtp_server': 'smtp.gmail.com',
+        'smtp_port': 587,
+        'username': 'your-email@gmail.com',
+        'password': 'your-app-password',
+        'from': 'your-email@gmail.com',
+        'to': 'alerts@your-studio.com'
+    }
+    
+    alert_system = AlertSystem(email_config)
+    await alert_system.connect()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+### 10.5 Production Monitoring Patterns
+
+Professional monitoring setups for studio environments.
+
+**Multi-client monitoring:**
+```python
+# production_monitor.py - Production monitoring setup
+import asyncio
+import json
+import logging
+from datetime import datetime, timedelta
+from monitor import PlottyMonitor
+
+class ProductionMonitor(PlottyMonitor):
+    def __init__(self):
+        super().__init__()
+        self.metrics = {
+            'jobs_completed': 0,
+            'jobs_failed': 0,
+            'total_plotting_time': 0,
+            'shift_start': datetime.now()
+        }
+        self.performance_log = []
+    
+    async def on_job_update(self, job, timestamp):
+        """Track job performance metrics."""
+        await super().on_job_update(job, timestamp)
+        
+        if job.get('status') == 'completed':
+            self.metrics['jobs_completed'] += 1
+            if job.get('actual_time'):
+                self.metrics['total_plotting_time'] += job['actual_time']
+            
+            # Log performance data
+            self.performance_log.append({
+                'job_name': job.get('name'),
+                'completion_time': timestamp,
+                'actual_time': job.get('actual_time'),
+                'estimated_time': job.get('estimated_time'),
+                'accuracy': job.get('actual_time') / job.get('estimated_time') if job.get('estimated_time') else None
+            })
+            
+            # Check for performance issues
+            await self.check_performance_issues(job)
+        
+        elif job.get('status') == 'failed':
+            self.metrics['jobs_failed'] += 1
+            await self.log_failure(job)
+    
+    async def check_performance_issues(self, job):
+        """Check for performance anomalies."""
+        if not job.get('estimated_time') or not job.get('actual_time'):
+            return
+        
+        accuracy = job['actual_time'] / job['estimated_time']
+        
+        # Job took significantly longer than estimated
+        if accuracy > 1.5:  # 50% longer than estimated
+            await self.send_alert(f"Job {job.get('name')} took {accuracy:.1f}x longer than estimated")
+        
+        # Job was much faster than estimated (might indicate quality issues)
+        elif accuracy < 0.5:  # 50% faster than estimated
+            await self.send_alert(f"Job {job.get('name')} was unusually fast - check quality")
+    
+    async def generate_shift_report(self):
+        """Generate end-of-shift performance report."""
+        shift_duration = datetime.now() - self.metrics['shift_start']
+        avg_job_time = self.metrics['total_plotting_time'] / max(self.metrics['jobs_completed'], 1)
+        
+        report = f"""
+        ploTTY Shift Report
+        ===================
+        Shift Duration: {shift_duration}
+        Jobs Completed: {self.metrics['jobs_completed']}
+        Jobs Failed: {self.metrics['jobs_failed']}
+        Success Rate: {self.metrics['jobs_completed'] / (self.metrics['jobs_completed'] + self.metrics['jobs_failed']) * 100:.1f}%
+        Average Job Time: {avg_job_time:.1f}s
+        Total Plotting Time: {self.metrics['total_plotting_time']}s
+        
+        Performance Summary:
+        """
+        
+        # Add performance analysis
+        if self.performance_log:
+            accuracies = [p['accuracy'] for p in self.performance_log if p['accuracy']]
+            if accuracies:
+                avg_accuracy = sum(accuracies) / len(accuracies)
+                report += f"\nAverage Estimation Accuracy: {avg_accuracy:.2f}"
+        
+        print(report)
+        await self.send_email("ploTTY Shift Report", report)
+
+# Schedule monitoring
+async def run_production_monitoring():
+    """Run production monitoring with scheduled reports."""
+    monitor = ProductionMonitor()
+    
+    # Start monitoring in background
+    monitoring_task = asyncio.create_task(monitor.connect())
+    
+    # Schedule shift reports (every 8 hours)
+    while True:
+        await asyncio.sleep(8 * 3600)  # 8 hours
+        await monitor.generate_shift_report()
+
+if __name__ == "__main__":
+    asyncio.run(run_production_monitoring())
+```
+
+### 10.6 Integration with External Systems
+
+Connect ploTTY monitoring to your existing infrastructure.
+
+**Slack integration:**
+```python
+# slack_monitor.py - Slack integration
+import asyncio
+import json
+import requests
+from monitor import PlottyMonitor
+
+class SlackMonitor(PlottyMonitor):
+    def __init__(self, webhook_url):
+        super().__init__()
+        self.webhook_url = webhook_url
+    
+    async def send_slack_message(self, message, color="good"):
+        """Send message to Slack channel."""
+        payload = {
+            "attachments": [{
+                "color": color,
+                "text": message,
+                "ts": datetime.now().timestamp()
+            }]
+        }
+        
+        try:
+            response = requests.post(self.webhook_url, json=payload)
+            response.raise_for_status()
+        except Exception as e:
+            print(f"❌ Failed to send Slack message: {e}")
+    
+    async def on_job_update(self, job, timestamp):
+        """Send job updates to Slack."""
+        await super().on_job_update(job, timestamp)
+        
+        status_colors = {
+            'completed': 'good',
+            'failed': 'danger',
+            'plotting': 'warning'
+        }
+        
+        if job.get('status') in status_colors:
+            emoji = {"completed": "✅", "failed": "❌", "plotting": "🖊️"}.get(job.get('status'), "📋")
+            message = f"{emoji} ploTTY Job `{job.get('name')}`: {job.get('status')}"
+            
+            if job.get('status') == 'plotting' and job.get('progress'):
+                message += f" ({job.get('progress')}% complete)"
+            
+            await self.send_slack_message(message, status_colors[job.get('status')])
+
+# Usage
+async def main():
+    webhook_url = "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+    monitor = SlackMonitor(webhook_url)
+    await monitor.connect()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+### 10.7 Monitoring Best Practices
+
+**Production monitoring guidelines:**
+
+1. **Reliable Connections**
+   ```python
+   # Implement reconnection logic
+   async def connect_with_retry(self, max_retries=5):
+       for attempt in range(max_retries):
+           try:
+               await self.connect()
+               break
+           except Exception as e:
+               if attempt == max_retries - 1:
+                   raise
+               await asyncio.sleep(2 ** attempt)  # Exponential backoff
+   ```
+
+2. **Message Filtering**
+   ```python
+   # Filter messages to reduce noise
+   def should_process_message(self, data):
+       # Only process job updates for specific jobs
+       if data.get('type') == 'job_update':
+           job_name = data.get('payload', {}).get('name', '')
+           return job_name.startswith('production_')
+       return True
+   ```
+
+3. **Rate Limiting**
+   ```python
+   # Prevent alert fatigue
+   class RateLimiter:
+       def __init__(self, max_alerts_per_hour=10):
+           self.max_alerts = max_alerts_per_hour
+           self.alerts_sent = []
+       
+       async def can_send_alert(self):
+           now = datetime.now()
+           hour_ago = now - timedelta(hours=1)
+           recent_alerts = [a for a in self.alerts_sent if a > hour_ago]
+           return len(recent_alerts) < self.max_alerts
+   ```
+
+4. **Data Persistence**
+   ```python
+   # Save monitoring data for analysis
+   async def save_metrics(self, data):
+       filename = f"metrics/metrics_{datetime.now().strftime('%Y%m%d')}.json"
+       with open(filename, 'a') as f:
+           json.dump(data, f)
+           f.write('\n')
+   ```
+
+> **🎯 Monitoring Goal:** Create a comprehensive monitoring system that keeps you informed without overwhelming you with alerts. Focus on actionable insights and proactive problem detection.
+
+---
+
 # 📚 Reference
 
-## 10. Real-World Examples
+## 11. Real-World Examples
 
 Learn from professionals using ploTTY in production environments.
 
@@ -2006,15 +2519,15 @@ Learn from professionals using ploTTY in production environments.
 
 # Morning setup
 echo "🌅 Morning studio setup..."
-uv run plotty check ready --detailed
-uv run plotty status
-uv run plotty inventory check --alert-low
+plotty check ready --detailed
+plotty status
+plotty inventory check --alert-low
 
 # Process today's client batch
 echo "📋 Processing client designs..."
 for file in client_*.svg; do
     client_name=$(basename "$file" .svg | sed 's/client_//')
-    uv run plotty add "$file" \
+    plotty add "$file" \
         --name "Client: $client_name" \
         --paper a4 \
         --priority normal
@@ -2022,16 +2535,16 @@ done
 
 # Optimize for production efficiency
 echo "⚡ Optimizing production queue..."
-uv run plotty plan-all --preset hq --optimize-pens --global-pen-order
+plotty plan-all --preset hq --optimize-pens --global-pen-order
 
 # Production run with quality monitoring
 echo "🖊️ Starting production run..."
-uv run plotty plot-all --preset safe --record-all --monitor
+plotty plot-all --preset safe --record-all --monitor
 
 # End of day reporting
 echo "📊 Generating daily report..."
-uv run plotty stats summary --today --export > "reports/daily_$(date +%Y%m%d).json"
-uv run plotty inventory usage --log-consumption
+plotty stats summary --today --export > "reports/daily_$(date +%Y%m%d).json"
+plotty inventory usage --log-consumption
 
 echo "✅ Studio workflow complete!"
 ```
@@ -2039,7 +2552,7 @@ echo "✅ Studio workflow complete!"
 **Client delivery automation:**
 ```bash
 # Prepare client delivery package
-uv run plotty package client_acme \
+plotty package client_acme \
   --include-reports \
   --include-photos \
   --generate-invoice \
@@ -2065,11 +2578,11 @@ vsk run "$artwork_name.py" --set edition=master --save-only
 
 # Step 2: Create test print
 echo "🖨️ Creating test print..."
-uv run plotty add "${artwork_name}_master.svg" \
+plotty add "${artwork_name}_master.svg" \
     --name "Test: $artwork_name" \
     --paper a4 --preset fast
 
-uv run plotty plot "Test:*" --preview --record
+plotty plot "Test:*" --preview --record
 
 # Step 3: Review and approve test
 echo "📋 Review test print before continuing..."
@@ -2086,7 +2599,7 @@ for edition in $(seq 1 $edition_size); do
     
     # Queue with edition naming
     job_name="${artwork_name} - Edition ${edition}/${edition_size}"
-    uv run plotty add "${artwork_name}_edition${edition}.svg" \
+    plotty add "${artwork_name}_edition${edition}.svg" \
         --name "$job_name" \
         --paper a3 --preset hq \
         --priority high
@@ -2094,11 +2607,11 @@ done
 
 # Step 5: Plot edition with documentation
 echo "🖊️ Plotting limited edition..."
-uv run plotty plot-all --record-all --document-each --numbered
+plotty plot-all --record-all --document-each --numbered
 
 # Step 6: Generate certificate of authenticity
 echo "📜 Generating certificates..."
-uv run plotty generate certificates \
+plotty generate certificates \
   --artwork "$artwork_name" \
   --edition-size $edition_size \
   --artist "Your Name" \
@@ -2122,14 +2635,14 @@ echo "🎓 Setting up $workshop_name workshop..."
 
 # Step 1: Setup demo files
 echo "📋 Preparing demo files..."
-uv run plotty add demo_pattern.svg --name "Demo: Basic Pattern" --paper a4
-uv run plotty add demo_complex.svg --name "Demo: Advanced Technique" --paper a4
+plotty add demo_pattern.svg --name "Demo: Basic Pattern" --paper a4
+plotty add demo_complex.svg --name "Demo: Advanced Technique" --paper a4
 
 # Step 2: Add participant designs
 echo "👥 Adding participant designs..."
 for participant in "${participants[@]}"; do
     if [[ -f "${participant}_design.svg" ]]; then
-        uv run plotty add "${participant}_design.svg" \
+        plotty add "${participant}_design.svg" \
             --name "Workshop: $participant" \
             --paper a4 --priority normal
     fi
@@ -2137,26 +2650,26 @@ done
 
 # Step 3: Quick batch planning for demo
 echo "⚡ Planning demo files..."
-uv run plotty plan "Demo:*" --preset fast
+plotty plan "Demo:*" --preset fast
 
 # Step 4: Demonstrate plotting
 echo "🖊️ Live demonstration..."
 echo "Plotting basic pattern..."
-uv run plotty plot "Demo: Basic Pattern" --preview --explain-steps
+plotty plot "Demo: Basic Pattern" --preview --explain-steps
 
 echo "Plotting advanced technique..."
-uv run plotty plot "Demo: Advanced Technique" --preview --explain-steps
+plotty plot "Demo: Advanced Technique" --preview --explain-steps
 
 # Step 5: Participant plotting session
 echo "👥 Participant plotting session..."
 for participant in "${participants[@]}"; do
     echo "Plotting $participant's design..."
-    uv run plotty plot "Workshop: $participant" --record
+    plotty plot "Workshop: $participant" --record
 done
 
 # Step 6: Generate workshop report
 echo "📊 Generating workshop report..."
-uv run plotty report workshop \
+plotty report workshop \
   --name "$workshop_name" \
   --participants "${#participants[@]}" \
   --include-photos \
@@ -2256,140 +2769,20 @@ if __name__ == "__main__":
     facility.monitor_production()
 ```
 
-## 11. Troubleshooting
+## 12. Troubleshooting
 
-Quick solutions to common issues.
+### 12.1 Device Issues
+### 12.2 Quality Issues
+### 12.3 Performance Issues
+### 12.4 Software Issues
 
-### 11.1 Device Issues
+## 13. Best Practices
 
-| Symptom | Diagnosis | Solution |
-|---------|-----------|----------|
-| Device not found | `uv run plotty check device` | Check USB connection, try different port |
-| Jerky movement | `uv run plotty check servo` | Adjust pen up/down positions |
-| No movement | `uv run plotty check power` | Verify power supply connection |
-| Random errors | `uv run plotty check cables` | Check all cable connections |
-
-### 11.2 Quality Issues
-
-| Problem | Test | Fix |
-|---------|------|-----|
-| Lines too light | `uv run plotty test pen-pressure` | Increase pen down position |
-| Lines skipping | `uv run plotty check pen-alignment` | Clean/replace pen tip |
-| Poor accuracy | `uv run plotty calibrate device` | Run device calibration |
-| Ink bleeding | `uv run plotty test paper-compatibility` | Use appropriate paper/pen combo |
-
-### 11.3 Performance Issues
-
-| Issue | Check | Solution |
-|-------|-------|----------|
-| Slow plotting | `uv run plotty stats performance` | Use fast preset or reduce complexity |
-| Long optimization | `uv run plotty profile job` | Reduce optimization tolerance |
-| Memory errors | `uv run plotty check system-resources` | Close other applications, add RAM |
-| Queue stuck | `uv run plotty recovery list` | Use recovery commands or restart |
-
-### 11.4 Software Issues
-
-| Error | Command | Resolution |
-|-------|---------|------------|
-| Database locked | `uv run plotty check database` | Restart ploTTY service |
-| Config corrupted | `uv run plotty config validate` | Restore from backup or re-run setup |
-| Job files missing | `uv run plotty verify job` | Re-add job from original SVG |
-| Camera not working | `uv run plotty check camera` | Verify URL and network connection |
-
-## 12. Best Practices
-
-Professional tips for optimal ploTTY usage.
-
-### 12.1 File Organization
-
-**Recommended directory structure:**
-```
-ploddy_studio/
-├── active_projects/          # Current work
-│   ├── client_a/
-│   │   ├── designs/
-│   │   ├── proofs/
-│   │   └── final/
-│   └── personal_art/
-├── archive/                   # Completed projects
-│   ├── 2025-10/
-│   └── 2025-11/
-├── templates/                 # Reusable assets
-│   ├── test_patterns/
-│   ├── calibration/
-│   └── borders/
-├── resources/                # Studio resources
-│   ├── pens/
-│   ├── paper/
-│   └── documentation/
-└── reports/                  # Generated reports
-    ├── daily/
-    ├── weekly/
-    └── client/
-```
-
-### 12.2 Naming Conventions
-
-**Consistent naming patterns:**
-```bash
-# Client work
-uv run plotty add logo.svg --name "Client_Acme_Logo_v3_Final"
-uv run plotty add business_card.svg --name "Client_Acme_BusinessCard_v2"
-
-# Personal art
-uv run plotty add abstract.svg --name "Art_Abstract_2025-11-07"
-uv run plotty add geometric.svg --name "Art_Geometric_Series1_Edition3"
-
-# Test prints
-uv run plotty add test.svg --name "Test_Daily_2025-11-07"
-uv run plotty add calibration.svg --name "Calibration_Monthly_2025-11"
-```
-
-### 12.3 Quality Assurance
-
-**Pre-plot checklist:**
-```bash
-# Always run these before important plots
-uv run plotty check ready
-uv run plotty validate job --strict-mode
-uv run plotty estimate job --detailed
-uv run plotty preview job --show-paths
-```
-
-**Post-plot verification:**
-```bash
-# Verify plot quality
-uv run plotty assess job --quality-score
-uv run plotty compare job --with-expected
-uv run plotty document job --photo-notes
-```
-
-### 12.4 Maintenance Schedule
-
-**Daily:**
-```bash
-uv run plotty check ready
-uv run plotty status --brief
-uv run plotty queue cleanup --state completed
-```
-
-**Weekly:**
-```bash
-uv run plotty maintenance device --clean
-uv run plotty inventory check --update-stock
-uv run plotty stats summary --last 7
-uv run plotty backup data
-```
-
-**Monthly:**
-```bash
-uv run plotty calibrate device --full
-uv run plotty maintenance schedule --review
-uv run plotty stats performance --last 30
-uv run plotty archive old-jobs --older-than 90d
-```
-
-### 12.5 Professional Workflow Tips
+### 13.1 File Organization
+### 13.2 Naming Conventions
+### 13.3 Quality Assurance
+### 13.4 Maintenance Schedule
+### 13.5 Professional Workflow Tips
 
 **Efficiency tips:**
 - 🎯 **Batch similar jobs** - Group by paper size, pen requirements, or complexity

@@ -31,7 +31,7 @@ pip install plotty[vpype]
 
 **Verify Installation:**
 ```bash
-uv run plotty --version
+plotty --version
 # Should show: ploTTY 1.0.1
 ```
 
@@ -42,13 +42,13 @@ uv run plotty --version
 ### Option A: Use Example Design
 ```bash
 # Create test design
-uv run plotty add demo --src https://example.com/simple-design.svg --name my_first_plot
+plotty add demo --src https://example.com/simple-design.svg --name my_first_plot
 ```
 
 ### Option B: Use Your Own SVG
 ```bash
 # Add your design
-uv run plotty add my_design.svg --name my_first_plot --paper a4
+plotty add my_design.svg --name my_first_plot --paper a4
 ```
 
 **Expected Output:**
@@ -68,7 +68,7 @@ uv run plotty add my_design.svg --name my_first_plot --paper a4
 ### Start Plotting
 ```bash
 # Start the plot
-uv run plotty plot my_first_plot
+plotty plot my_first_plot
 ```
 
 **Real-time Progress:**
@@ -100,7 +100,7 @@ Controls:
 ### View Results
 ```bash
 # Job information
-uv run plotty info job my_first_plot
+plotty info job my_first_plot
 
 # View generated report
 # Open: workspace/jobs/my_first_plot/report.html
@@ -114,18 +114,48 @@ uv run plotty info job my_first_plot
 
 ---
 
+## 📡 Real-Time Monitoring (Optional, 2 minutes)
+
+### Start WebSocket Monitoring
+```bash
+# Terminal 1: Start daemon with WebSocket server
+plotty daemon --log-level info
+
+# Terminal 2: Monitor real-time activity  
+plotty monitor --follow
+```
+
+### What You'll See
+```bash
+🔌 Connected to ploTTY WebSocket
+============================================================
+[19:30:15] 📋 Job my_first_plot: QUEUED → RUNNING
+[19:30:22] 📊 Job my_first_plot: 25.0% complete
+[19:30:45] 📊 Job my_first_plot: 67.0% complete  
+[19:31:08] 📋 Job my_first_plot: RUNNING → COMPLETED
+```
+
+### Web Dashboard (Optional)
+```bash
+# Open HTML dashboard in browser
+open docs/examples/web-dashboard.html
+# Or create your own using WebSocket API
+```
+
+---
+
 ## 🔄 What's Next? (1.5 minutes)
 
 ### Immediate Next Steps
 ```bash
 # Try multi-pen design
-uv run plotty add colorful_design.svg --name rainbow_test
+plotty add colorful_design.svg --name rainbow_test
 
 # Plan multiple jobs
-uv run plotty add "*.svg" --name batch_test
+plotty add "*.svg" --name batch_test
 
 # Explore all commands
-uv run plotty --help
+plotty --help
 ```
 
 ### Learning Paths
@@ -149,19 +179,19 @@ uv run plotty --help
 ### Quick Fixes
 ```bash
 # Check system readiness
-uv run plotty check ready
+plotty check ready
 
 # Test AxiDraw connection
-uv run plotty check servo
+plotty check servo
 
 # View all jobs
-uv run plotty list jobs
+plotty list jobs
 ```
 
 ### Common Issues
 | Problem | Quick Solution |
 |---------|----------------|
-| "Device not found" | `uv run plotty check ready` |
+| "Device not found" | `plotty check ready` |
 | "Permission denied" | `sudo usermod -a -G dialout $USER` |
 | "SVG too complex" | Use `--preset hq` for better optimization |
 

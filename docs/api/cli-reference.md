@@ -468,6 +468,82 @@ Run setup wizard.
 plotty setup
 ```
 
+### 11. Monitoring Commands (`plotty daemon`, `plotty monitor`)
+
+Real-time monitoring and daemon management commands.
+
+#### `plotty daemon`
+Start the ploTTY daemon process with WebSocket server.
+
+```bash
+plotty daemon [OPTIONS]
+```
+
+**Options:**
+- `--host, -h`: WebSocket server bind address (default: localhost)
+- `--port, -p`: WebSocket server port (default: 8766)
+- `--workspace, -w`: Working directory for jobs and data
+- `--log-level, -l`: Logging verbosity (debug, info, warning, error)
+- `--config, -c`: Path to configuration file
+- `--daemonize, -d`: Run as background daemon process
+- `--pid-file`: Path to PID file for process management
+- `--user, -u`: Run as specified user (requires root)
+- `--group, -g`: Run as specified group (requires root)
+
+**Examples:**
+```bash
+# Development daemon
+plotty daemon --log-level debug
+
+# Production daemon
+sudo plotty daemon --host 0.0.0.0 --port 8766 --daemonize --user plotty
+
+# Custom workspace
+plotty daemon --workspace /mnt/storage/plotty-workspace
+```
+
+#### `plotty monitor`
+Connect to WebSocket server for real-time monitoring.
+
+```bash
+plotty monitor [OPTIONS]
+```
+
+**Options:**
+- `--host, -h`: WebSocket server host (default: localhost)
+- `--port, -p`: WebSocket server port (default: 8766)
+- `--channels, -c`: Channels to subscribe to (jobs, system, device)
+- `--job-id`: Filter messages for specific job ID
+- `--level, -l`: Message level filter (debug, info, warning, error)
+- `--format, -f`: Output format (json, pretty)
+- `--follow, -F`: Continuous monitoring (don't exit)
+- `--api-key`: API key for authentication
+- `--timeout`: Connection timeout in seconds (default: 30)
+
+**Examples:**
+```bash
+# Monitor all channels
+plotty monitor --follow
+
+# Monitor specific job
+plotty monitor --job-id my_design_001 --follow
+
+# Monitor with JSON output
+plotty monitor --format json --channels jobs,system --follow
+
+# Production monitoring with authentication
+plotty monitor --api-key your-secret-key --host monitor.example.com --follow
+```
+
+**Channel Subscription:**
+- `jobs`: Job state changes and progress updates
+- `system`: System status and alerts
+- `device`: Device status and hardware events
+
+**Output Formats:**
+- `pretty`: Human-readable formatted output (default)
+- `json`: Raw JSON messages for programmatic use
+
 ## Common Options Pattern
 
 Many ploTTY commands follow these patterns:

@@ -32,7 +32,7 @@ plotty recovery list
 1. **Check USB cable** - Unplug and reconnect firmly
 2. **Try different USB port** - Use port directly on computer (not hub)
 3. **Check power** - Green light solid on AxiDraw?
-4. **Restart ploTTY** - `uv run plotty restart`
+4. **Restart ploTTY** - `plotty restart`
 
 **Diagnostic commands:**
 ```bash
@@ -345,7 +345,7 @@ plotty logs --tail 100 > recent_logs.txt
 ```
 
 **What to include in support request:**
-1. **System info** - `uv run plotty info system`
+1. **System info** - `plotty info system`
 2. **Exact error** - Copy full error message
 3. **What you tried** - List troubleshooting steps
 4. **When it happens** - Every time or intermittent?

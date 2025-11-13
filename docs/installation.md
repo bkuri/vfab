@@ -431,7 +431,7 @@ uv pip install plotty[vpype]
 uv pip install plotty[dev,vpype,axidraw]
 
 # Run ploTTY
-uv run plotty --help
+plotty --help
 ```
 
 ### 6.2 Using venv

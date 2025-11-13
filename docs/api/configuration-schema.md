@@ -18,6 +18,7 @@ class Settings(BaseModel):
     hooks: HooksCfg = Field(default_factory=HooksCfg)
     recovery: RecoveryCfg = Field(default_factory=RecoveryCfg)
     physical_setup: PhysicalSetupCfg = Field(default_factory=PhysicalSetupCfg)
+    websocket: WebSocketCfg = Field(default_factory=WebSocketCfg)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
 ```
 
@@ -286,7 +287,70 @@ physical_setup:
   timeout_seconds: 60
 ```
 
-### 10. Logging Configuration (`LoggingSettings`)
+### 10. WebSocket Configuration (`WebSocketCfg`)
+
+Real-time monitoring and WebSocket server settings.
+
+```python
+class WebSocketCfg(BaseModel):
+    enabled: bool = True                           # Enable WebSocket server
+    host: str = "localhost"                        # Server bind address
+    port: int = 8766                               # Server port
+    authenticate: bool = False                        # Require API key authentication
+    api_key: str | None = None                       # API key for authentication
+    max_connections: int = 100                       # Maximum concurrent connections
+    heartbeat_interval: int = 30                      # Heartbeat interval (seconds)
+    channels: List[str] = ["jobs", "system", "device"]  # Available channels
+    allowed_origins: List[str] = ["*"]              # CORS allowed origins
+    message_rate_limit: int = 100                     # Messages per minute per client
+    connection_timeout: int = 300                      # Connection timeout (seconds)
+    compression: bool = True                           # Enable message compression
+```
+
+**YAML Example:**
+```yaml
+websocket:
+  enabled: true
+  host: "localhost"
+  port: 8766
+  authenticate: false
+  api_key: null
+  max_connections: 100
+  heartbeat_interval: 30
+  channels:
+    - "jobs"
+    - "system"
+    - "device"
+  allowed_origins:
+    - "*"
+  message_rate_limit: 100
+  connection_timeout: 300
+  compression: true
+```
+
+**Production Configuration:**
+```yaml
+websocket:
+  enabled: true
+  host: "0.0.0.0"
+  port: 8766
+  authenticate: true
+  api_key: "your-secret-api-key-here"
+  max_connections: 50
+  heartbeat_interval: 60
+  channels:
+    - "jobs"
+    - "system"
+    - "device"
+  allowed_origins:
+    - "https://your-domain.com"
+    - "https://monitor.your-domain.com"
+  message_rate_limit: 60
+  connection_timeout: 600
+  compression: true
+```
+
+### 11. Logging Configuration (`LoggingSettings`)
 
 Comprehensive logging settings.
 
