@@ -275,10 +275,12 @@ def plan_command(
             raise typer.BadParameter(f"Source SVG not found for job {job_id}")
 
         # Plan the job using plan_layers function
+        from ..config import get_vpype_presets_path
+
         result = plan_layers(
             src_svg=src_svg,
             preset=cfg.vpype.preset,
-            presets_file=cfg.vpype.presets_file,
+            presets_file=str(get_vpype_presets_path(cfg)),
             pen_map=None,  # Will use default pen mapping
             out_dir=job_dir,
             interactive=interactive,

@@ -487,10 +487,12 @@ class JobFSM:
                 pass
 
             # Use enhanced multi-pen planning
+            from .config import get_vpype_presets_path
+
             result = plan_layers(
                 self.job_dir / "src.svg",
                 self.config.vpype.preset,
-                self.config.vpype.presets_file,
+                str(get_vpype_presets_path(self.config)),
                 pen_map or {},
                 self.job_dir,
                 available_pens,
@@ -683,10 +685,12 @@ class JobFSM:
             vpype_preset = preset_config.vpype_preset
 
             # Use plan_layers for optimization
+            from .config import get_vpype_presets_path
+
             result = plan_layers(
                 src_svg=src_svg,
                 preset=vpype_preset,
-                presets_file=config.vpype.presets_file,
+                presets_file=str(get_vpype_presets_path(config)),
                 pen_map=None,  # Will use default pen mapping
                 out_dir=self.job_dir,
                 interactive=False,

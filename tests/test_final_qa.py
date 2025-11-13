@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 
-def run_command(cmd: str, check: bool = True) -> subprocess.CompletedProcess:
+def run_command(cmd: str, check: bool = True) -> subprocess.CompletedProcess | None:
     """Run a command and return result."""
     print(f"🔧 Running: {cmd}")
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
@@ -90,25 +90,50 @@ def test_job_lifecycle():
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
 
-        # Create test SVG
-        test_svg = temp_path / "test.svg"
-        test_svg.write_text(
-            """<?xml version="1.0" encoding="UTF-8"?>
+        # Set up XDG_CONFIG_HOME with fixtures directory
+        fixtures_dir = Path(__file__).parent / "fixtures"
+        config_dir = temp_path / "config"
+        config_dir.mkdir()
+
+        # Copy vpype-presets.yaml to the test config directory
+        import shutil
+
+        shutil.copy(
+            fixtures_dir / "vpype-presets.yaml", config_dir / "vpype-presets.yaml"
+        )
+
+        # Set environment variable for this test
+        old_xdg_config = os.environ.get("XDG_CONFIG_HOME")
+        os.environ["XDG_CONFIG_HOME"] = str(temp_path)
+
+        try:
+            # Create test SVG
+            test_svg = temp_path / "test.svg"
+            test_svg.write_text(
+                """<?xml version="1.0" encoding="UTF-8"?>
 <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
   <rect x="10" y="10" width="80" height="80" fill="none" stroke="black" stroke-width="1"/>
   <circle cx="50" cy="50" r="20" fill="none" stroke="black" stroke-width="1"/>
 </svg>"""
-        )
+            )
 
-        tests = [
-            (f'plotty add job qa-test "{test_svg}" --apply', "Job creation"),
-            ("plotty list jobs", "Job listing"),
-            ("plotty info job qa-test", "Job information"),
-            ("plotty check job qa-test", "Job validation"),
-            ("plotty remove job qa-test", "Job removal"),
-        ]
+            tests = [
+                (f'plotty add job qa-test "{test_svg}" --apply', "Job creation"),
+                ("plotty list jobs", "Job listing"),
+                ("plotty info job qa-test", "Job information"),
+                ("plotty check job qa-test", "Job validation"),
+                ("plotty remove job qa-test", "Job removal"),
+            ]
 
-        return run_test_suite("Job Lifecycle Tests", tests)
+            result = run_test_suite("Job Lifecycle Tests", tests)
+        finally:
+            # Restore original XDG_CONFIG_HOME
+            if old_xdg_config is not None:
+                os.environ["XDG_CONFIG_HOME"] = old_xdg_config
+            elif "XDG_CONFIG_HOME" in os.environ:
+                del os.environ["XDG_CONFIG_HOME"]
+
+        return result
 
 
 def test_performance_suites():
@@ -198,7 +223,7 @@ def generate_qa_report(results: Dict[str, bool]) -> str:
 ## Executive Summary
 
 - **Overall Success Rate**: {success_rate:.1f}% ({passed}/{total} test suites passed)
-- **Test Date**: {time.strftime('%Y-%m-%d %H:%M:%S')}
+- **Test Date**: {time.strftime("%Y-%m-%d %H:%M:%S")}
 - **Platform**: {os.name}
 - **Python Version**: {sys.version.split()[0]}
 
@@ -303,7 +328,7 @@ def main():
     total_duration = time.time() - start_time
 
     # Generate and display results
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("📊 FINAL QA RESULTS")
     print("=" * 60)
 

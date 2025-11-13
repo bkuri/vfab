@@ -9,6 +9,7 @@ validation, resource management, and system integration tests.
 from __future__ import annotations
 
 
+import os
 import tempfile
 import time
 from pathlib import Path
@@ -181,12 +182,32 @@ def create_integrated_test_environment() -> dict:
     """Create integrated test environment when modular imports fail."""
     temp_dir = Path(tempfile.mkdtemp(prefix="plotty_self_test_"))
 
+    # Set up XDG_CONFIG_HOME with fixtures directory
+    fixtures_dir = (
+        Path(__file__).parent.parent.parent.parent.parent / "tests" / "fixtures"
+    )
+    # Create the proper plotty config directory structure
+    plotty_config_dir = temp_dir / "plotty"
+    plotty_config_dir.mkdir()
+
+    # Copy vpype-presets.yaml to the test config directory if it exists
+    vpype_presets_source = fixtures_dir / "vpype-presets.yaml"
+    if vpype_presets_source.exists():
+        import shutil
+
+        shutil.copy(vpype_presets_source, plotty_config_dir / "vpype-presets.yaml")
+
+    # Set environment variable for this test
+    old_xdg_config = os.environ.get("XDG_CONFIG_HOME")
+    os.environ["XDG_CONFIG_HOME"] = str(temp_dir)
+
     return {
         "temp_dir": temp_dir,
         "test_svg": str(temp_dir / "test.svg"),
         "test_job_id": None,
         "original_cwd": Path.cwd(),
         "console": Console(),
+        "old_xdg_config": old_xdg_config,
     }
 
 
@@ -1378,6 +1399,13 @@ def run_self_test(
         # Cleanup
         if "temp_dir" in test_env:
             import shutil
+
+            # Restore original XDG_CONFIG_HOME
+            if "old_xdg_config" in test_env:
+                if test_env["old_xdg_config"] is not None:
+                    os.environ["XDG_CONFIG_HOME"] = test_env["old_xdg_config"]
+                elif "XDG_CONFIG_HOME" in os.environ:
+                    del os.environ["XDG_CONFIG_HOME"]
 
             shutil.rmtree(test_env["temp_dir"], ignore_errors=True)
 
