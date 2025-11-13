@@ -5,6 +5,39 @@ All notable changes to ploTTY will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-11-12
+
+### 🚀 **MONITORING MILESTONE** - Real-Time WebSocket System
+
+### 📡 New WebSocket Monitoring Infrastructure
+- **Real-Time WebSocket Server**: FastAPI-based server with authentication and channel subscriptions
+- **Job State Broadcasting**: Live FSM state change notifications to connected clients
+- **Message Schema System**: Comprehensive Pydantic models for type-safe WebSocket communication
+- **Channel-Based Routing**: Jobs, system, and device channels for organized message distribution
+
+### 🔧 Enhanced Daemon & CLI Integration  
+- **WebSocket Manager Injection**: Full integration with daemon process for real-time monitoring
+- **HookExecutor Integration**: Automatic broadcasting of job state transitions via hooks
+- **Monitor Command**: New `plotty monitor` command for WebSocket client connections
+- **Package Reorganization**: Consolidated WebSocket functionality in dedicated `websocket/` package
+
+### 🧪 Comprehensive Testing Integration
+- **WebSocket Self-Tests**: 4 new tests integrated into `plotty check self` command
+  - **Basic Level**: Module imports and configuration validation
+  - **Advanced Level**: FSM integration and HookExecutor WebSocket support
+- **Real-Time Test Environment**: Async test framework with temporary WebSocket servers
+- **Enhanced Test Coverage**: Complete validation of WebSocket functionality in self-test suite
+
+### ⚙️ Configuration & Deployment
+- **WebSocket Configuration**: Complete YAML configuration with authentication, ports, and channels
+- **Service Integration**: Updated systemd and quadlet service configurations
+- **Backward Compatibility**: All existing features remain fully functional
+
+### 📊 Enhanced Self-Test System
+- **Updated Test Counts**: 32 total tests (up from 31) with WebSocket validation
+- **Progress Tracking**: WebSocket tests properly integrated into progress display
+- **Comprehensive Reporting**: WebSocket results in both Rich terminal and markdown formats
+
 ## [1.0.2] - 2025-11-12
 
 ### 🎯 **DOCUMENTATION MILESTONE** - Complete Cheat Sheet System
