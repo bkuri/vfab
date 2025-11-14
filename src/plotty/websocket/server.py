@@ -267,7 +267,7 @@ def create_websocket_app(manager: WebSocketManager) -> FastAPI:
     app = FastAPI(
         title="ploTTY WebSocket API",
         description="Real-time monitoring API for ploTTY plotting system",
-        version="1.0.0",
+        version="1.1.3",
     )
 
     @app.get("/", response_class=HTMLResponse)
