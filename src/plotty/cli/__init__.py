@@ -36,7 +36,7 @@ except ImportError:
 try:
     __version__ = metadata.version("plotty")
 except metadata.PackageNotFoundError:
-    __version__ = "1.1.5"
+    __version__ = "1.1.7"
 
 # Create main app
 app = typer.Typer(no_args_is_help=True)

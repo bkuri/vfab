@@ -37,23 +37,27 @@ def get_current_version() -> str:
 
 
 def update_version(new_version: str) -> None:
-    """Update version in pyproject.toml."""
+    """Update version using the centralized version management system."""
     print(f"📝 Updating version to {new_version}")
 
-    # Read current pyproject.toml
-    with open("pyproject.toml", "r") as f:
-        content = f.read()
+    # Update central source (pre-commit hook will sync the rest)
+    with open("src/plotty/__init__.py", "w") as f:
+        f.write(f'__all__ = ["__version__"]\n__version__ = "{new_version}"\n')
 
-    # Replace version line
-    lines = content.split("\n")
-    for i, line in enumerate(lines):
-        if line.startswith("version = "):
-            lines[i] = f'version = "{new_version}"'
-            break
+    # Run version sync to update all locations
+    import subprocess
 
-    # Write back
-    with open("pyproject.toml", "w") as f:
-        f.write("\n".join(lines))
+    try:
+        result = subprocess.run(
+            ["python", "scripts/update_versions.py"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        print("✅ All version locations updated successfully")
+    except subprocess.CalledProcessError as e:
+        print(f"⚠️  Version sync had issues: {e}")
+        print("   Continuing with release...")
 
 
 def generate_changelog() -> str:
@@ -180,7 +184,7 @@ def build_package() -> bool:
 
 
 def create_release_tag(version: str) -> None:
-    """Create and push git tag."""
+    """Create and push git tag, then update PKGBUILD hash."""
     print(f"🏷️  Creating release tag v{version}")
 
     # Create tag
@@ -188,6 +192,26 @@ def create_release_tag(version: str) -> None:
 
     # Push tag
     run_command(f"git push origin v{version}")
+
+    # Update PKGBUILD hash now that tag exists
+    print("📦 Updating PKGBUILD hash for new tag...")
+    try:
+        result = run_command("python scripts/update_versions.py", check=False)
+        if result.returncode == 0:
+            print("✅ PKGBUILD hash updated successfully")
+
+            # Commit the hash update
+            run_command("git add packaging/PKGBUILD")
+            run_command(f"git commit -m 'Update PKGBUILD hash for v{version}'")
+            run_command("git push origin main")
+            print("✅ PKGBUILD hash update committed and pushed")
+        else:
+            print("⚠️  PKGBUILD hash update failed, but release continues")
+    except Exception as e:
+        print(f"⚠️  PKGBUILD hash update failed: {e}")
+        print(
+            "   You can manually update it later with: python scripts/update_versions.py"
+        )
 
 
 def generate_release_notes(version: str, changelog: str) -> str:
@@ -280,7 +304,7 @@ def main():
         print("❌ Tests failed - aborting release")
         sys.exit(1)
 
-    # Update version
+    # Update version (this will sync all locations via pre-commit hook)
     update_version(new_version)
 
     # Generate changelog
@@ -297,14 +321,14 @@ def main():
         print("❌ Build failed - aborting release")
         sys.exit(1)
 
-    # Commit version change
-    run_command("git add pyproject.toml CHANGELOG_RELEASE.md")
+    # Commit version change (pre-commit hook already synced versions)
+    run_command("git add .")
     run_command(f"git commit -m 'Release v{new_version}'")
 
     # Push changes
     run_command("git push origin main")
 
-    # Create tag
+    # Create tag and update PKGBUILD hash
     create_release_tag(new_version)
 
     # Generate release notes
