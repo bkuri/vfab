@@ -293,11 +293,14 @@ def main():
 
     print(f"🎯 Releasing version: {new_version}")
 
-    # Confirm
-    confirm = input(f"❓ Continue with release v{new_version}? (y/N): ").strip().lower()
-    if confirm != "y":
-        print("❌ Release cancelled")
-        sys.exit(0)
+    # Confirm (only if not provided via command line)
+    if len(sys.argv) <= 1:
+        confirm = (
+            input(f"❓ Continue with release v{new_version}? (y/N): ").strip().lower()
+        )
+        if confirm != "y":
+            print("❌ Release cancelled")
+            sys.exit(0)
 
     # Run tests
     if not run_tests():
