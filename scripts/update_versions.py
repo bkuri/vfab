@@ -3,11 +3,9 @@
 
 import hashlib
 import urllib.request
-import tomllib
 import re
 import sys
 import subprocess
-from pathlib import Path
 
 
 def get_source_version():
@@ -79,13 +77,13 @@ def update_pkgbuild(version):
 
     # Try updpkgsums first (preferred method)
     try:
-        result = subprocess.run(
+        subprocess.run(
             ["updpkgsums", "packaging/PKGBUILD"],
             capture_output=True,
             text=True,
             check=True,
         )
-        print(f"✅ PKGBUILD updated with updpkgsums")
+        print("✅ PKGBUILD updated with updpkgsums")
         return True
     except subprocess.CalledProcessError as e:
         print(f"⚠️  updpkgsums failed: {e}")
@@ -115,11 +113,11 @@ def update_pkgbuild_manual(version):
         with open("packaging/PKGBUILD", "w") as f:
             f.write(content)
 
-        print(f"✅ PKGBUILD hash updated manually")
+        print("✅ PKGBUILD hash updated manually")
         return True
-    except Exception as e:
-        print(f"⚠️  Tag v{version} not found yet - updating version only")
-        print(f"   Hash will be updated when tag is created")
+    except Exception:
+        print("⚠️  Tag v{version} not found yet - updating version only")
+        print("   Hash will be updated when tag is created")
         return True  # Still successful, just no hash update
 
 

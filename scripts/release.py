@@ -48,7 +48,7 @@ def update_version(new_version: str) -> None:
     import subprocess
 
     try:
-        result = subprocess.run(
+        subprocess.run(
             ["python", "scripts/update_versions.py"],
             capture_output=True,
             text=True,

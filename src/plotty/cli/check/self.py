@@ -37,7 +37,7 @@ def run_websocket_basic_tests_sync(test_env: dict, progress_tracker=None) -> lis
         progress_tracker.advance(test_name)
 
     try:
-        from plotty.websocket import WebSocketManager, JobStateChangeMessage
+        from plotty.websocket import WebSocketManager
 
         results.append(
             create_test_result(
@@ -88,7 +88,7 @@ def run_websocket_fsm_tests_sync(test_env: dict, progress_tracker=None) -> list:
         progress_tracker.advance(test_name)
 
     try:
-        from plotty.fsm import JobFSM, JobState
+        from plotty.fsm import JobFSM
         from plotty.hooks import HookExecutor
 
         results.append(

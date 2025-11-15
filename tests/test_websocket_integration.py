@@ -16,15 +16,12 @@ import sys
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-import pytest
 import websockets
 from plotty.config import load_config
 from plotty.websocket.server import WebSocketManager, create_websocket_app
 from plotty.websocket.schemas import (
     JobStateChangeMessage,
-    JobProgressMessage,
     Channel,
-    MessageType,
 )
 
 
@@ -41,7 +38,8 @@ class WebSocketTestEnvironment:
         # Create temporary config
         self.temp_dir = Path(tempfile.mkdtemp())
         config_file = self.temp_dir / "config.yaml"
-        config_file.write_text(f"""
+        config_file.write_text(
+            f"""
 workspace: {self.temp_dir}/workspace
 database: {{ url: "sqlite:///{self.temp_dir}/test.db" }}
 websocket:
@@ -49,7 +47,8 @@ websocket:
   host: localhost
   port: {port}
   authenticate: false
-""")
+"""
+        )
 
         # Load config and create WebSocket manager
         config = load_config(str(config_file))

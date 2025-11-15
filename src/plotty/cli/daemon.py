@@ -70,7 +70,7 @@ class PlottyDaemon:
         try:
             # Start server
             self.server_task = asyncio.create_task(server.serve())
-            logger.info(f"ploTTY daemon started successfully")
+            logger.info("ploTTY daemon started successfully")
             logger.info(f"WebSocket endpoint: ws://{server_host}:{server_port}/ws")
             logger.info(f"Status page: http://{server_host}:{server_port}/")
 

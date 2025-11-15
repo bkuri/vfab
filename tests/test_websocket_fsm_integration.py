@@ -15,12 +15,10 @@ import sys
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-import pytest
 from plotty.fsm import JobFSM, JobState
 from plotty.hooks import HookExecutor
 from plotty.config import load_config
 from plotty.websocket.server import WebSocketManager, create_websocket_app
-from plotty.websocket.schemas import JobStateChangeMessage, Channel
 import websockets
 import json
 
@@ -43,7 +41,8 @@ class WebSocketFSMTestEnvironment:
         workspace.mkdir()
 
         config_file = self.temp_dir / "config.yaml"
-        config_file.write_text(f"""
+        config_file.write_text(
+            f"""
 workspace: {workspace}
 database: {{ url: "sqlite:///{workspace}/test.db" }}
 websocket:
@@ -59,7 +58,8 @@ hooks:
     - command: "echo 'Job {{job_id}} ready'"
   QUEUED:
     - command: "echo 'Job {{job_id}} queued'"
-""")
+"""
+        )
 
         # Load config
         config = load_config(str(config_file))
