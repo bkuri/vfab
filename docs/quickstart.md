@@ -1,19 +1,19 @@
-# ploTTY Quickstart Guide
+# vfab Quickstart Guide
 
 **Get your first plot running in 5 minutes!**
 
 ---
 
-## 🚀 1. Install ploTTY (30 seconds)
+## 🚀 1. Install vfab (30 seconds)
 
 ### Option A: Quick Install (Recommended)
 ```bash
 # Install uv (package manager)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Clone and install ploTTY
-git clone https://github.com/your-org/plotty.git
-cd plotty
+# Clone and install vfab
+git clone https://github.com/your-org/vfab.git
+cd vfab
 uv pip install -e ".[vpype]"
 
 # Initialize database
@@ -23,16 +23,16 @@ uv run alembic upgrade head
 ### Option B: System Package Manager
 ```bash
 # Arch Linux
-sudo pacman -S plotty
+sudo pacman -S vfab
 
 # pip (if you must)
-pip install plotty[vpype]
+pip install vfab[vpype]
 ```
 
 **Verify Installation:**
 ```bash
-plotty --version
-# Should show: ploTTY 1.0.1
+vfab --version
+# Should show: vfab 1.0.1
 ```
 
 ---
@@ -42,13 +42,13 @@ plotty --version
 ### Option A: Use Example Design
 ```bash
 # Create test design
-plotty add demo --src https://example.com/simple-design.svg --name my_first_plot
+vfab add demo --src https://example.com/simple-design.svg --name my_first_plot
 ```
 
 ### Option B: Use Your Own SVG
 ```bash
 # Add your design
-plotty add my_design.svg --name my_first_plot --paper a4
+vfab add my_design.svg --name my_first_plot --paper a4
 ```
 
 **Expected Output:**
@@ -68,7 +68,7 @@ plotty add my_design.svg --name my_first_plot --paper a4
 ### Start Plotting
 ```bash
 # Start the plot
-plotty plot my_first_plot
+vfab plot my_first_plot
 ```
 
 **Real-time Progress:**
@@ -88,7 +88,7 @@ Controls:
 ```
 
 ### What's Happening?
-1. **ploTTY analyzes** your SVG for optimal plotting path
+1. **vfab analyzes** your SVG for optimal plotting path
 2. **AxiDraw moves** the pen following optimized routes
 3. **Progress tracking** shows real-time completion
 4. **Automatic recording** captures the process (if camera enabled)
@@ -100,7 +100,7 @@ Controls:
 ### View Results
 ```bash
 # Job information
-plotty info job my_first_plot
+vfab info job my_first_plot
 
 # View generated report
 # Open: workspace/jobs/my_first_plot/report.html
@@ -119,15 +119,15 @@ plotty info job my_first_plot
 ### Start WebSocket Monitoring
 ```bash
 # Terminal 1: Start daemon with WebSocket server
-plotty daemon --log-level info
+vfab daemon --log-level info
 
 # Terminal 2: Monitor real-time activity  
-plotty monitor --follow
+vfab monitor --follow
 ```
 
 ### What You'll See
 ```bash
-🔌 Connected to ploTTY WebSocket
+🔌 Connected to vfab WebSocket
 ============================================================
 [19:30:15] 📋 Job my_first_plot: QUEUED → RUNNING
 [19:30:22] 📊 Job my_first_plot: 25.0% complete
@@ -149,19 +149,19 @@ open docs/examples/web-dashboard.html
 ### Immediate Next Steps
 ```bash
 # Try multi-pen design
-plotty add colorful_design.svg --name rainbow_test
+vfab add colorful_design.svg --name rainbow_test
 
 # Plan multiple jobs
-plotty add "*.svg" --name batch_test
+vfab add "*.svg" --name batch_test
 
 # Explore all commands
-plotty --help
+vfab --help
 ```
 
 ### Learning Paths
 
 **🎨 Creative Integration (5 minutes)**
-- Want to create generative art? → [vsketch Integration Guide](vpype-plotty.md)
+- Want to create generative art? → [vsketch Integration Guide](vpype-vfab.md)
 - Use Processing/p5.js? → [Creative Tool Integration](user-guide.md#4-creative-tool-integration)
 
 **⚙️ Advanced Features (10 minutes)**
@@ -179,40 +179,40 @@ plotty --help
 ### Quick Fixes
 ```bash
 # Check system readiness
-plotty check ready
+vfab check ready
 
 # Test AxiDraw connection
-plotty check servo
+vfab check servo
 
 # View all jobs
-plotty list jobs
+vfab list jobs
 ```
 
 ### Common Issues
 | Problem | Quick Solution |
 |---------|----------------|
-| "Device not found" | `plotty check ready` |
+| "Device not found" | `vfab check ready` |
 | "Permission denied" | `sudo usermod -a -G dialout $USER` |
 | "SVG too complex" | Use `--preset hq` for better optimization |
 
 ### Get More Help
 - **📚 Full Documentation**: [User Guide](user-guide.md)
-- **🎨 Creative Integration**: [vpype-plotty Guide](vpype-plotty.md)
+- **🎨 Creative Integration**: [vpype-vfab Guide](vpype-vfab.md)
 - **🐛 Troubleshooting**: [Troubleshooting Guide](troubleshooting/)
-- **💬 Community**: [GitHub Discussions](https://github.com/your-org/plotty/discussions)
+- **💬 Community**: [GitHub Discussions](https://github.com/your-org/vfab/discussions)
 
 ---
 
 ## 🎯 You Did It!
 
 **In 5 minutes you:**
-✅ Installed ploTTY  
+✅ Installed vfab  
 ✅ Added your first design  
 ✅ Started your first plot  
 ✅ Learned the basics
 
 **Ready for more?**
-- 🎨 [Creative workflows](vpype-plotty.md) - vsketch, vpype integration
+- 🎨 [Creative workflows](vpype-vfab.md) - vsketch, vpype integration
 - 📊 [Production features](user-guide.md) - Batch jobs, multi-pen
 - ⚙️ [Advanced configuration](api/configuration-schema.md) - Custom optimization
 
@@ -220,4 +220,4 @@ plotty list jobs
 
 ---
 
-*This quickstart covers the essential ploTTY workflow. For comprehensive features, advanced workflows, and detailed configuration, see the full [User Guide](user-guide.md).*
+*This quickstart covers the essential vfab workflow. For comprehensive features, advanced workflows, and detailed configuration, see the full [User Guide](user-guide.md).*

@@ -9,7 +9,7 @@
 **If plotter is going crazy:**
 ```bash
 # IMMEDIATELY STOP
-plotty abort
+vfab abort
 
 # Or press Ctrl+C twice
 # Then physically unplug USB if needed
@@ -18,8 +18,8 @@ plotty abort
 **Once stopped:**
 ```bash
 # Check what happened
-plotty status
-plotty recovery list
+vfab status
+vfab recovery list
 ```
 
 ---
@@ -32,29 +32,29 @@ plotty recovery list
 1. **Check USB cable** - Unplug and reconnect firmly
 2. **Try different USB port** - Use port directly on computer (not hub)
 3. **Check power** - Green light solid on AxiDraw?
-4. **Restart ploTTY** - `plotty restart`
+4. **Restart vfab** - `vfab restart`
 
 **Diagnostic commands:**
 ```bash
 # Check device detection
-plotty check device
+vfab check device
 
 # List available ports
-plotty list ports
+vfab list ports
 
 # Test specific port
-plotty check device --port /dev/ttyUSB1
+vfab check device --port /dev/ttyUSB1
 ```
 
 **If still not found:**
 ```bash
 # Try auto-detection
-plotty config device --auto-detect
+vfab config device --auto-detect
 
 # Manual port specification
-plotty config device --port /dev/ttyUSB0  # Linux
-plotty config device --port COM3          # Windows
-plotty config device --port /dev/cu.usbmodem1411  # Mac
+vfab config device --port /dev/ttyUSB0  # Linux
+vfab config device --port COM3          # Windows
+vfab config device --port /dev/cu.usbmodem1411  # Mac
 ```
 
 ---
@@ -71,13 +71,13 @@ plotty config device --port /dev/cu.usbmodem1411  # Mac
 **Pen position adjustment:**
 ```bash
 # Lower pen by 5 units (try more if still light)
-plotty config device --pen-down 35
+vfab config device --pen-down 35
 
 # Test pen movement
-plotty check servo
+vfab check servo
 
 # Test with simple pattern
-plotty test pattern --basic
+vfab test pattern --basic
 ```
 
 **Pen position guide:**
@@ -95,10 +95,10 @@ plotty test pattern --basic
 
 ```bash
 # Raise pen by 5 units
-plotty config device --pen-down 45
+vfab config device --pen-down 45
 
 # Increase plotting speed
-plotty config device --speed 30
+vfab config device --speed 30
 ```
 
 ### Pen skipping or jagged lines
@@ -111,10 +111,10 @@ plotty config device --speed 30
 
 ```bash
 # Reduce speed for better control
-plotty config device --speed 15
+vfab config device --speed 15
 
 # Test with slower speed
-plotty test pattern --slow
+vfab test pattern --slow
 ```
 
 ---
@@ -126,27 +126,27 @@ plotty test pattern --slow
 **Quick fixes:**
 1. **Check design size** - Is it larger than paper?
 2. **Verify paper position** - Aligned with plotter origin?
-3. **Check paper size settings** - Correct in ploTTY?
+3. **Check paper size settings** - Correct in vfab?
 
 **Diagnostic commands:**
 ```bash
 # Check design vs paper size
-plotty add design.svg --dry-run
+vfab add design.svg --dry-run
 
 # Verify paper configuration
-plotty list paper
+vfab list paper
 
 # Test plot boundaries
-plotty test pattern --boundary
+vfab test pattern --boundary
 ```
 
 **Paper size verification:**
 ```bash
 # Add correct paper size
-plotty add paper --name "A4" --width 210 --height 297
+vfab add paper --name "A4" --width 210 --height 297
 
 # Use specific paper for job
-plotty add design.svg --paper a4
+vfab add design.svg --paper a4
 ```
 
 ### Paper moves during plotting
@@ -158,10 +158,10 @@ plotty add design.svg --paper a4
 
 ```bash
 # Reduce speed for less vibration
-plotty config device --speed 20
+vfab config device --speed 20
 
 # Test with reduced speed
-plotty test pattern --slow
+vfab test pattern --slow
 ```
 
 ---
@@ -178,43 +178,43 @@ plotty test pattern --slow
 **Diagnostic commands:**
 ```bash
 # Check system resources
-plotty check system
+vfab check system
 
 # Profile job performance
-plotty profile job
+vfab profile job
 
 # Check design complexity
-plotty info job my_job --show-complexity
+vfab info job my_job --show-complexity
 ```
 
 **Performance optimization:**
 ```bash
 # Use fast optimization
-plotty plan job --preset fast
+vfab plan job --preset fast
 
 # Simplify design
-plotty plan job --simplify --tolerance 0.1
+vfab plan job --simplify --tolerance 0.1
 
 # Check what's taking time
-plotty profile job --show-steps
+vfab profile job --show-steps
 ```
 
 ### Database errors or locked
 
 **Quick fixes:**
-1. **Restart ploTTY** - Often clears locks
+1. **Restart vfab** - Often clears locks
 2. **Check disk space** - Full disk causes issues
 3. **Verify permissions** - Can write to workspace?
 
 ```bash
 # Check database status
-plotty check database
+vfab check database
 
-# Restart ploTTY service
-plotty restart
+# Restart vfab service
+vfab restart
 
 # Check disk space
-plotty check system --disk-space
+vfab check system --disk-space
 ```
 
 ### Memory errors
@@ -226,13 +226,13 @@ plotty check system --disk-space
 
 ```bash
 # Check memory usage
-plotty check system --memory
+vfab check system --memory
 
 # Simplify complex design
-plotty plan job --reduce-complexity
+vfab plan job --reduce-complexity
 
 # Process in sections
-plotty split job --parts 4
+vfab split job --parts 4
 ```
 
 ---
@@ -244,17 +244,17 @@ plotty split job --parts 4
 **Quick fixes:**
 1. **Check URL** - Correct camera URL?
 2. **Test camera** - Opens in browser?
-3. **Check network** - Same network as ploTTY?
+3. **Check network** - Same network as vfab?
 
 ```bash
 # Test camera connection
-plotty check camera
+vfab check camera
 
 # Test specific URL
-plotty check camera --url http://192.168.1.100:8881/stream.mjpeg
+vfab check camera --url http://192.168.1.100:8881/stream.mjpeg
 
 # Update camera URL
-plotty config camera --url http://your-camera-url/stream.mjpeg
+vfab config camera --url http://your-camera-url/stream.mjpeg
 ```
 
 ### Recording not saving
@@ -266,13 +266,13 @@ plotty config camera --url http://your-camera-url/stream.mjpeg
 
 ```bash
 # Test recording manually
-plotty record test --seconds 10
+vfab record test --seconds 10
 
 # Check output directory
-plotty check workspace --write-permissions
+vfab check workspace --write-permissions
 
 # Clean up old recordings
-plotty cleanup recordings --older-than 7d
+vfab cleanup recordings --older-than 7d
 ```
 
 ---
@@ -288,35 +288,35 @@ plotty cleanup recordings --older-than 7d
 
 ```bash
 # Check job status
-plotty info job stuck_job
+vfab info job stuck_job
 
 # Resume if paused
-plotty resume stuck_job
+vfab resume stuck_job
 
 # Restart if needed
-plotty restart stuck_job
+vfab restart stuck_job
 
 # Last resort: remove and re-add
-plotty remove job stuck_job
-plotty add design.svg --name "restart_job"
+vfab remove job stuck_job
+vfab add design.svg --name "restart_job"
 ```
 
 ### Queue not updating
 
 **Quick fixes:**
-1. **Check ploTTY status** - Is it running?
+1. **Check vfab status** - Is it running?
 2. **Restart queue** - Clear queue state
 3. **Verify database** - Not corrupted?
 
 ```bash
-# Check ploTTY status
-plotty status
+# Check vfab status
+vfab status
 
 # Restart queue system
-plotty restart queue
+vfab restart queue
 
 # Check database integrity
-plotty check database --verify
+vfab check database --verify
 ```
 
 ---
@@ -334,10 +334,10 @@ plotty check database --verify
 **Before asking for help:**
 ```bash
 # Gather system information
-plotty info system > system_info.txt
+vfab info system > system_info.txt
 
 # Get recent logs
-plotty logs --tail 100 > recent_logs.txt
+vfab logs --tail 100 > recent_logs.txt
 
 # Note what you were doing
 # Note exact error messages
@@ -345,7 +345,7 @@ plotty logs --tail 100 > recent_logs.txt
 ```
 
 **What to include in support request:**
-1. **System info** - `plotty info system`
+1. **System info** - `vfab info system`
 2. **Exact error** - Copy full error message
 3. **What you tried** - List troubleshooting steps
 4. **When it happens** - Every time or intermittent?
@@ -362,7 +362,7 @@ Problem?
 ├─ Runs off paper → Check design size → Verify paper position
 ├─ Very slow → Check system resources → Simplify design
 ├─ Job stuck → Check status → Resume → Restart
-└─ Other error → Check logs → Restart ploTTY → Get help
+└─ Other error → Check logs → Restart vfab → Get help
 ```
 
 ---
@@ -379,13 +379,13 @@ Problem?
 **Daily maintenance:**
 ```bash
 # Quick health check
-plotty check ready
+vfab check ready
 
 # Clean up old jobs
-plotty queue cleanup --completed
+vfab queue cleanup --completed
 
 # Check system resources
-plotty check system
+vfab check system
 ```
 
 ---

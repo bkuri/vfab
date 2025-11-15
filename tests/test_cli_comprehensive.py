@@ -1,4 +1,4 @@
-"""Comprehensive CLI tests for ploTTY.
+"""Comprehensive CLI tests for vfab.
 
 This test file consolidates and replaces the three duplicate CLI test files:
 - test_cli.py (96 tests, many broken mocks)
@@ -21,7 +21,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 from typer.testing import CliRunner
 
-from plotty.cli import app
+from vfab.cli import app
 
 
 @pytest.fixture
@@ -70,7 +70,7 @@ class TestBasicCLI:
         """Test CLI help command."""
         result = runner.invoke(app, ["--help"])
         assert result.exit_code == 0
-        assert "ploTTY" in result.stdout
+        assert "vfab" in result.stdout
         assert "plotter management" in result.stdout.lower()
 
     def test_cli_version(self, runner):
@@ -135,8 +135,8 @@ class TestAddCommand:
     def test_add_job_dry_run(self, runner, temp_svg):
         """Test adding a job in dry-run mode."""
         with (
-            patch("plotty.config.load_config") as mock_config,
-            patch("plotty.fsm.create_fsm") as mock_fsm,
+            patch("vfab.config.load_config") as mock_config,
+            patch("vfab.fsm.create_fsm") as mock_fsm,
         ):
 
             # Mock config
@@ -164,8 +164,8 @@ class TestAddCommand:
     def test_add_job_with_apply(self, runner, temp_svg, temp_workspace):
         """Test adding a job with --apply flag."""
         with (
-            patch("plotty.config.load_config") as mock_config,
-            patch("plotty.fsm.create_fsm") as mock_fsm,
+            patch("vfab.config.load_config") as mock_config,
+            patch("vfab.fsm.create_fsm") as mock_fsm,
         ):
 
             # Mock config to use temp workspace
@@ -209,8 +209,8 @@ class TestListCommand:
     def test_list_jobs_with_workspace(self, runner, temp_workspace):
         """Test listing jobs with actual workspace."""
         with (
-            patch("plotty.config.load_config") as mock_config,
-            patch("plotty.config.get_config") as mock_get_config,
+            patch("vfab.config.load_config") as mock_config,
+            patch("vfab.config.get_config") as mock_get_config,
         ):
             mock_cfg = Mock()
             mock_cfg.workspace = str(temp_workspace)
@@ -253,7 +253,7 @@ class TestRemoveCommand:
 
     def test_remove_job_dry_run(self, runner, temp_workspace):
         """Test removing a job in dry-run mode."""
-        with patch("plotty.config.load_config") as mock_config:
+        with patch("vfab.config.load_config") as mock_config:
             mock_cfg = Mock()
             mock_cfg.workspace = str(temp_workspace)
             mock_config.return_value = mock_cfg
@@ -443,8 +443,8 @@ class TestDryRunApplyPatterns:
     def test_add_job_dry_run_context(self, runner, temp_svg):
         """Test that add job properly uses DryRunContext."""
         with (
-            patch("plotty.config.load_config") as mock_config,
-            patch("plotty.cli.add.DryRunContext") as mock_dry_run,
+            patch("vfab.config.load_config") as mock_config,
+            patch("vfab.cli.add.DryRunContext") as mock_dry_run,
         ):
 
             mock_cfg = Mock()
@@ -468,8 +468,8 @@ class TestDryRunApplyPatterns:
     def test_remove_pen_dry_run_context(self, runner, temp_workspace):
         """Test that remove pen properly uses DryRunContext."""
         with (
-            patch("plotty.config.load_config") as mock_config,
-            patch("plotty.cli.common.DryRunContext") as mock_dry_run,
+            patch("vfab.config.load_config") as mock_config,
+            patch("vfab.cli.common.DryRunContext") as mock_dry_run,
         ):
 
             mock_cfg = Mock()
@@ -526,7 +526,7 @@ class TestConfigIntegration:
 
     def test_config_loading_error_handling(self, runner):
         """Test that CLI handles config loading gracefully."""
-        with patch("plotty.config.load_config") as mock_config:
+        with patch("vfab.config.load_config") as mock_config:
             mock_config.side_effect = Exception("Config error")
 
             result = runner.invoke(app, ["add", "job", "test", "dummy.svg"])
@@ -601,7 +601,7 @@ class TestFileHandling:
 
     def test_add_svg_file_basic(self, runner, temp_svg):
         """Test adding SVG file with minimal mocking."""
-        with patch("plotty.config.load_config") as mock_config:
+        with patch("vfab.config.load_config") as mock_config:
             mock_cfg = Mock()
             mock_cfg.workspace = "/tmp/nonexistent"
             mock_config.return_value = mock_cfg
@@ -687,9 +687,9 @@ class TestIntegrationScenarios:
     def test_add_then_list_workflow(self, runner, temp_svg, temp_workspace):
         """Test adding a job then listing jobs."""
         with (
-            patch("plotty.config.load_config") as mock_add_config,
-            patch("plotty.config.load_config") as mock_list_config,
-            patch("plotty.fsm.create_fsm") as mock_fsm,
+            patch("vfab.config.load_config") as mock_add_config,
+            patch("vfab.config.load_config") as mock_list_config,
+            patch("vfab.fsm.create_fsm") as mock_fsm,
         ):
 
             # Mock both add and list to use same workspace

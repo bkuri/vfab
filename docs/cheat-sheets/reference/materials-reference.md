@@ -540,17 +540,17 @@ would_recommend: true/false
 ### **Add Custom Material**
 ```bash
 # Add new material to database
-plotty material add custom_material.yaml
+vfab material add custom_material.yaml
 
 # Test material with standard patterns
-plotty material test custom_material --all-tests
+vfab material test custom_material --all-tests
 
 # Compare materials
-plotty material compare material1 material2
+vfab material compare material1 material2
 
 # List all materials
-plotty material list
-plotty material list --category paper
+vfab material list
+vfab material list --category paper
 ```
 
 ### **Material Properties Database**

@@ -1,11 +1,11 @@
 # Command Line Reference Cheat Sheet
 
-**All commands at a glance** - Quick lookup for any ploTTY command.
+**All commands at a glance** - Quick lookup for any vfab command.
 
 ---
 
 ## 🧭 Quick Navigation
-- **New to ploTTY?** [Daily Quick Start](../beginner/daily-quickstart.md)
+- **New to vfab?** [Daily Quick Start](../beginner/daily-quickstart.md)
 - **Need command examples?** [Common Commands](../beginner/common-commands.md)
 - **Configuration options?** [Configuration Reference](configuration.md)
 - **Optimization presets?** [Optimization Presets](optimization-presets.md)
@@ -17,28 +17,28 @@
 ### Job Management
 | Command | Purpose | Example |
 |---------|---------|---------|
-| `plotty add <file>` | Add new job | `plotty add design.svg` |
-| `plotty list jobs` | List all jobs | `plotty list jobs --state completed` |
-| `plotty info job <name>` | Job details | `plotty info job my_art` |
-| `plotty remove job <name>` | Remove job | `plotty remove job old_job` |
+| `vfab add <file>` | Add new job | `vfab add design.svg` |
+| `vfab list jobs` | List all jobs | `vfab list jobs --state completed` |
+| `vfab info job <name>` | Job details | `vfab info job my_art` |
+| `vfab remove job <name>` | Remove job | `vfab remove job old_job` |
 
 ### Planning & Plotting
 | Command | Purpose | Example |
 |---------|---------|---------|
-| `plotty plan <job>` | Plan job | `plotty plan my_art --interactive` |
-| `plotty plan-all` | Plan all jobs | `plotty plan-all --preset fast` |
-| `plotty plot <job>` | Plot job | `plotty plot my_art --record` |
-| `plotty plot-all` | Plot all jobs | `plotty plot-all --monitor` |
+| `vfab plan <job>` | Plan job | `vfab plan my_art --interactive` |
+| `vfab plan-all` | Plan all jobs | `vfab plan-all --preset fast` |
+| `vfab plot <job>` | Plot job | `vfab plot my_art --record` |
+| `vfab plot-all` | Plot all jobs | `vfab plot-all --monitor` |
 
 ### Status & Information
 | Command | Purpose | Example |
 |---------|---------|---------|
-| `plotty status` | Current status | `plotty status --verbose` |
-| `plotty check ready` | System check | `plotty check ready --detailed` |
-| `plotty list queue` | Current queue | `plotty list queue --watch` |
-| `plotty estimate <job>` | Time estimate | `plotty estimate my_art --detailed` |
-| `plotty daemon` | Start daemon | `plotty daemon --host 0.0.0.0 --port 8766` |
-| `plotty monitor` | Real-time monitor | `plotty monitor --channels jobs,system --follow` |
+| `vfab status` | Current status | `vfab status --verbose` |
+| `vfab check ready` | System check | `vfab check ready --detailed` |
+| `vfab list queue` | Current queue | `vfab list queue --watch` |
+| `vfab estimate <job>` | Time estimate | `vfab estimate my_art --detailed` |
+| `vfab daemon` | Start daemon | `vfab daemon --host 0.0.0.0 --port 8766` |
+| `vfab monitor` | Real-time monitor | `vfab monitor --channels jobs,system --follow` |
 
 ---
 
@@ -47,18 +47,18 @@
 ### Pen Management
 | Command | Purpose | Example |
 |---------|---------|---------|
-| `plotty list pens` | List all pens | `plotty list pens --show-usage` |
-| `plotty add pen` | Add new pen | `plotty add pen --name "Fine Black" --width 0.3` |
-| `plotty update pen <id>` | Update pen | `plotty update pen 1 --speed-cap 60` |
-| `plotty remove pen <id>` | Remove pen | `plotty remove pen 5` |
+| `vfab list pens` | List all pens | `vfab list pens --show-usage` |
+| `vfab add pen` | Add new pen | `vfab add pen --name "Fine Black" --width 0.3` |
+| `vfab update pen <id>` | Update pen | `vfab update pen 1 --speed-cap 60` |
+| `vfab remove pen <id>` | Remove pen | `vfab remove pen 5` |
 
 ### Paper Management
 | Command | Purpose | Example |
 |---------|---------|---------|
-| `plotty list paper` | List paper types | `plotty list paper --show-stock` |
-| `plotty add paper` | Add paper size | `plotty add paper --name "A4" --width 210 --height 297` |
-| `plotty update paper <name>` | Update paper | `plotty update paper "A4" --stock-count 50` |
-| `plotty remove paper <name>` | Remove paper | `plotty remove paper "Old Size"` |
+| `vfab list paper` | List paper types | `vfab list paper --show-stock` |
+| `vfab add paper` | Add paper size | `vfab add paper --name "A4" --width 210 --height 297` |
+| `vfab update paper <name>` | Update paper | `vfab update paper "A4" --stock-count 50` |
+| `vfab remove paper <name>` | Remove paper | `vfab remove paper "Old Size"` |
 
 ---
 
@@ -67,17 +67,17 @@
 ### Device Configuration
 | Command | Purpose | Example |
 |---------|---------|---------|
-| `plotty config show` | Show config | `plotty config show --device` |
-| `plotty config device` | Device settings | `plotty config device --port /dev/ttyUSB0` |
-| `plotty setup` | Interactive setup | `plotty setup --device-only` |
-| `plotty check device` | Test device | `plotty check device --test-move` |
+| `vfab config show` | Show config | `vfab config show --device` |
+| `vfab config device` | Device settings | `vfab config device --port /dev/ttyUSB0` |
+| `vfab setup` | Interactive setup | `vfab setup --device-only` |
+| `vfab check device` | Test device | `vfab check device --test-move` |
 
 ### General Configuration
 | Command | Purpose | Example |
 |---------|---------|---------|
-| `plotty config validate` | Validate config | `plotty config validate --strict` |
-| `plotty config reset` | Reset config | `plotty config reset --device-only` |
-| `plotty info system` | System info | `plotty info system --detailed` |
+| `vfab config validate` | Validate config | `vfab config validate --strict` |
+| `vfab config reset` | Reset config | `vfab config reset --device-only` |
+| `vfab info system` | System info | `vfab info system --detailed` |
 
 ---
 
@@ -86,17 +86,17 @@
 ### Basic Statistics
 | Command | Purpose | Example |
 |---------|---------|---------|
-| `plotty stats summary` | Summary stats | `plotty stats summary --last 30` |
-| `plotty stats jobs` | Job statistics | `plotty stats jobs --by-client` |
-| `plotty stats performance` | Performance | `plotty stats performance --pen-usage` |
-| `plotty stats pens` | Pen usage | `plotty stats pens --last 90` |
+| `vfab stats summary` | Summary stats | `vfab stats summary --last 30` |
+| `vfab stats jobs` | Job statistics | `vfab stats jobs --by-client` |
+| `vfab stats performance` | Performance | `vfab stats performance --pen-usage` |
+| `vfab stats pens` | Pen usage | `vfab stats pens --last 90` |
 
 ### Advanced Analytics
 | Command | Purpose | Example |
 |---------|---------|---------|
-| `plotty analyze queue` | Queue analysis | `plotty analyze queue --efficiency` |
-| `plotty analyze pens` | Pen analysis | `plotty analyze pens --wear-patterns` |
-| `plotty analyze production` | Production analysis | `plotty analyze production --cost-analysis` |
+| `vfab analyze queue` | Queue analysis | `vfab analyze queue --efficiency` |
+| `vfab analyze pens` | Pen analysis | `vfab analyze pens --wear-patterns` |
+| `vfab analyze production` | Production analysis | `vfab analyze production --cost-analysis` |
 
 ---
 
@@ -105,18 +105,18 @@
 ### Recovery Commands
 | Command | Purpose | Example |
 |---------|---------|---------|
-| `plotty recovery list` | List recovery options | `plotty recovery list --all` |
-| `plotty resume <job>` | Resume job | `plotty resume interrupted_job` |
-| `plotty restart <job>` | Restart job | `plotty restart failed_job` |
-| `plotty abort <job>` | Abort job | `plotty abort stuck_job` |
+| `vfab recovery list` | List recovery options | `vfab recovery list --all` |
+| `vfab resume <job>` | Resume job | `vfab resume interrupted_job` |
+| `vfab restart <job>` | Restart job | `vfab restart failed_job` |
+| `vfab abort <job>` | Abort job | `vfab abort stuck_job` |
 
 ### Diagnostic Commands
 | Command | Purpose | Example |
 |---------|---------|---------|
-| `plotty check database` | Database check | `plotty check database --verify` |
-| `plotty check camera` | Camera check | `plotty check camera --test-url` |
-| `plotty logs` | View logs | `plotty logs --tail 100` |
-| `plotty test pattern` | Test pattern | `plotty test pattern --basic` |
+| `vfab check database` | Database check | `vfab check database --verify` |
+| `vfab check camera` | Camera check | `vfab check camera --test-url` |
+| `vfab logs` | View logs | `vfab logs --tail 100` |
+| `vfab test pattern` | Test pattern | `vfab test pattern --basic` |
 
 ---
 
@@ -125,16 +125,16 @@
 ### Queue Management
 | Command | Purpose | Example |
 |---------|---------|---------|
-| `plotty queue cleanup` | Clean queue | `plotty queue cleanup --completed --older-than 7d` |
-| `plotty queue optimize` | Optimize queue | `plotty queue optimize --global-pen-order` |
-| `plotty queue backup` | Backup queue | `plotty queue backup --file queue_backup.json` |
+| `vfab queue cleanup` | Clean queue | `vfab queue cleanup --completed --older-than 7d` |
+| `vfab queue optimize` | Optimize queue | `vfab queue optimize --global-pen-order` |
+| `vfab queue backup` | Backup queue | `vfab queue backup --file queue_backup.json` |
 
 ### System Maintenance
 | Command | Purpose | Example |
 |---------|---------|---------|
-| `plotty restart` | Restart ploTTY | `plotty restart --queue-only` |
-| `plotty backup data` | Backup data | `plotty backup data --full` |
-| `plotty cleanup workspace` | Clean workspace | `plotty cleanup workspace --older-than 30d` |
+| `vfab restart` | Restart vfab | `vfab restart --queue-only` |
+| `vfab backup data` | Backup data | `vfab backup data --full` |
+| `vfab cleanup workspace` | Clean workspace | `vfab cleanup workspace --older-than 30d` |
 
 ---
 
@@ -206,16 +206,16 @@
 ### Preset Selection Guide
 ```bash
 # Simple designs - use fast
-plotty plan simple_design --preset fast
+vfab plan simple_design --preset fast
 
 # Complex art - use hq
-plotty plan complex_art --preset hq
+vfab plan complex_art --preset hq
 
 # Already optimized - use none
-plotty plan optimized_design --preset none
+vfab plan optimized_design --preset none
 
-# Let ploTTY decide
-plotty plan design --auto-preset --target-time 10m
+# Let vfab decide
+vfab plan design --auto-preset --target-time 10m
 ```
 
 ---
@@ -233,13 +233,13 @@ plotty plan design --auto-preset --target-time 10m
 ### Multi-Pen Workflow
 ```bash
 # Interactive pen mapping
-plotty plan multi_pen_art --interactive
+vfab plan multi_pen_art --interactive
 
 # Custom pen mapping
-plotty plan art --pen-mapping "3,1,4,2"
+vfab plan art --pen-mapping "3,1,4,2"
 
 # Global pen optimization
-plotty plan-all --optimize-pens --global-pen-order
+vfab plan-all --optimize-pens --global-pen-order
 ```
 
 ---
@@ -249,9 +249,9 @@ plotty plan-all --optimize-pens --global-pen-order
 ### Camera Commands
 | Command | Purpose | Example |
 |---------|---------|---------|
-| `plotty check camera` | Test camera | `plotty check camera --test-stream` |
-| `plotty config camera` | Camera settings | `plotty config camera --url http://...` |
-| `plotty record <name>` | Manual recording | `plotty record test --seconds 30` |
+| `vfab check camera` | Test camera | `vfab check camera --test-stream` |
+| `vfab config camera` | Camera settings | `vfab config camera --url http://...` |
+| `vfab record <name>` | Manual recording | `vfab record test --seconds 30` |
 
 ### Recording Flags
 | Flag | Purpose | Example |
@@ -285,24 +285,24 @@ plotty plan-all --optimize-pens --global-pen-order
 ### Critical Commands
 | Command | Purpose | When to Use |
 |---------|---------|-------------|
-| `plotty abort` | Immediate stop | Plotter going crazy |
-| `plotty emergency-stop` | Hardware stop | Software not responding |
-| `plotty reset device` | Reset device | Device unresponsive |
-| `plotty restart` | Full restart | System hung |
+| `vfab abort` | Immediate stop | Plotter going crazy |
+| `vfab emergency-stop` | Hardware stop | Software not responding |
+| `vfab reset device` | Reset device | Device unresponsive |
+| `vfab restart` | Full restart | System hung |
 
 ### Recovery Sequence
 ```bash
 # 1. Immediate stop
-plotty abort
+vfab abort
 
 # 2. Check status
-plotty status
+vfab status
 
 # 3. List recovery options
-plotty recovery list
+vfab recovery list
 
 # 4. Apply recovery
-plotty resume <job>  # or restart, or remove
+vfab resume <job>  # or restart, or remove
 ```
 
 ---
@@ -312,27 +312,27 @@ plotty resume <job>  # or restart, or remove
 ### Command Shortcuts
 ```bash
 # Common aliases to add to .bashrc/.zshrc
-alias pp='plotty plot'
-alias pa='plotty add'
-alias pl='plotty list'
-alias ps='plotty status'
-alias pr='plotty resume'
-alias pk='plotty plan'
+alias pp='vfab plot'
+alias pa='vfab add'
+alias pl='vfab list'
+alias ps='vfab status'
+alias pr='vfab resume'
+alias pk='vfab plan'
 ```
 
 ### Useful Combinations
 ```bash
 # Add and plan in one step
-plotty add design.svg --name "Art" && plotty plan Art
+vfab add design.svg --name "Art" && vfab plan Art
 
 # Quick status check
-plotty status && plotty list queue
+vfab status && vfab list queue
 
 # Clean and report
-plotty queue cleanup --completed && plotty stats summary --today
+vfab queue cleanup --completed && vfab stats summary --today
 
 # Batch operations
-for file in *.svg; do plotty add "$file"; done && plotty plan-all
+for file in *.svg; do vfab add "$file"; done && vfab plan-all
 ```
 
 ### Time-Saving Patterns
@@ -341,13 +341,13 @@ for file in *.svg; do plotty add "$file"; done && plotty plan-all
 project_setup() {
     mkdir -p "$1"/{designs,output,docs}
     cd "$1"
-    echo "Project $1 ready for ploTTY work"
+    echo "Project $1 ready for vfab work"
 }
 
 # Quick batch add
 batch_add() {
     for file in "$1"/*.svg; do
-        plotty add "$file" --name "Batch: $(basename "$file" .svg)"
+        vfab add "$file" --name "Batch: $(basename "$file" .svg)"
     done
 }
 ```
@@ -359,19 +359,19 @@ batch_add() {
 ### Help Commands
 | Command | Purpose |
 |---------|---------|
-| `plotty --help` | Main help |
-| `plotty <command> --help` | Command-specific help |
-| `plotty info system` | System information |
-| `plotty version` | Version information |
+| `vfab --help` | Main help |
+| `vfab <command> --help` | Command-specific help |
+| `vfab info system` | System information |
+| `vfab version` | Version information |
 
 ### Common Help Topics
 ```bash
 # Get help for specific areas
-plotty add --help          # Job addition
-plotty plan --help         # Planning options
-plotty plot --help         # Plotting options
-plotty config --help       # Configuration
-plotty stats --help        # Statistics
+vfab add --help          # Job addition
+vfab plan --help         # Planning options
+vfab plot --help         # Plotting options
+vfab config --help       # Configuration
+vfab stats --help        # Statistics
 ```
 
 ---

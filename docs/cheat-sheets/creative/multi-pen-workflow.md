@@ -5,7 +5,7 @@
 ---
 
 ## 🧭 Quick Navigation
-- **New to ploTTY?** [First Plot Checklist](../beginner/first-plot-checklist.md)
+- **New to vfab?** [First Plot Checklist](../beginner/first-plot-checklist.md)
 - **Want to generate designs?** [vsketch Integration](vsketch-integration.md)
 - **Need to optimize for multi-pen?** [Design Optimization](design-optimization.md)
 - **Making many copies?** [Batch Production](../power-user/batch-production.md)
@@ -14,7 +14,7 @@
 
 ## 🎨 Understanding Multi-Pen Detection
 
-ploTTY automatically detects multi-pen needs from:
+vfab automatically detects multi-pen needs from:
 
 ### SVG Layers (Recommended)
 ```xml
@@ -47,38 +47,38 @@ ploTTY automatically detects multi-pen needs from:
 ### Quick Pen Setup
 ```bash
 # List current pens
-plotty list pens
+vfab list pens
 
 # Add essential pens
-plotty add pen --name "Fine Black" --width 0.3 --color "#000000"
-plotty add pen --name "Medium Black" --width 0.7 --color "#000000"
-plotty add pen --name "Fine Red" --width 0.3 --color "#FF0000"
-plotty add pen --name "Medium Blue" --width 0.5 --color "#0000FF"
+vfab add pen --name "Fine Black" --width 0.3 --color "#000000"
+vfab add pen --name "Medium Black" --width 0.7 --color "#000000"
+vfab add pen --name "Fine Red" --width 0.3 --color "#FF0000"
+vfab add pen --name "Medium Blue" --width 0.5 --color "#0000FF"
 ```
 
 ### Professional Pen Collection
 ```bash
 # Fine detail pens
-plotty add pen --name "Ultra Fine Black" --width 0.2 --color "#000000" --speed-cap 40
-plotty add pen --name "Fine Black" --width 0.3 --color "#000000" --speed-cap 50
-plotty add pen --name "Fine Red" --width 0.3 --color "#FF0000" --speed-cap 50
+vfab add pen --name "Ultra Fine Black" --width 0.2 --color "#000000" --speed-cap 40
+vfab add pen --name "Fine Black" --width 0.3 --color "#000000" --speed-cap 50
+vfab add pen --name "Fine Red" --width 0.3 --color "#FF0000" --speed-cap 50
 
 # Medium workhorse pens
-plotty add pen --name "Medium Black" --width 0.7 --color "#000000" --speed-cap 80
-plotty add pen --name "Medium Blue" --width 0.5 --color "#0000FF" --speed-cap 70
+vfab add pen --name "Medium Black" --width 0.7 --color "#000000" --speed-cap 80
+vfab add pen --name "Medium Blue" --width 0.5 --color "#0000FF" --speed-cap 70
 
 # Specialty pens
-plotty add pen --name "Gold" --width 0.5 --color "#FFD700" --speed-cap 60
-plotty add pen --name "Silver" --width 0.5 --color "#C0C0C0" --speed-cap 60
+vfab add pen --name "Gold" --width 0.5 --color "#FFD700" --speed-cap 60
+vfab add pen --name "Silver" --width 0.5 --color "#C0C0C0" --speed-cap 60
 ```
 
 ### View Pen Usage
 ```bash
 # See all pens with usage stats
-plotty list pens --show-usage
+vfab list pens --show-usage
 
 # Check pen performance
-plotty stats pens --last 30
+vfab stats pens --last 30
 ```
 
 ---
@@ -88,16 +88,16 @@ plotty stats pens --last 30
 ### Step 1: Add Multi-Pen Design
 ```bash
 # Add with automatic detection
-plotty add colorful_design.svg --name "Rainbow Art" --paper a4
+vfab add colorful_design.svg --name "Rainbow Art" --paper a4
 
 # Add with custom name
-plotty add multi_layer_art.svg --name "Client Logo - Multi-Color"
+vfab add multi_layer_art.svg --name "Client Logo - Multi-Color"
 ```
 
 ### Step 2: Interactive Pen Mapping
 ```bash
 # Plan with interactive pen mapping
-plotty plan colorful_art --interactive
+vfab plan colorful_art --interactive
 ```
 
 **Interactive mapping example:**
@@ -130,7 +130,7 @@ Time saved: ~4 minutes
 ### Step 3: Plot with Pen Changes
 ```bash
 # Start multi-pen plotting
-plotty plot colorful_art
+vfab plot colorful_art
 ```
 
 **During plotting:**
@@ -155,39 +155,39 @@ Please change pen now...
 ### Optimize Pen Changes
 ```bash
 # Global pen optimization across all jobs
-plotty plan-all --optimize-pens --global-pen-order
+vfab plan-all --optimize-pens --global-pen-order
 
 # Custom pen change priority
-plotty plan colorful_art --pen-order 3,2,4,1
+vfab plan colorful_art --pen-order 3,2,4,1
 
 # Minimize pen changes
-plotty plan colorful_art --minimize-pen-changes
+vfab plan colorful_art --minimize-pen-changes
 ```
 
 ### Smart Pen Mapping Strategies
 ```bash
 # Strategy 1: Group by color darkness
-plotty plan artwork --group-by-darkness
+vfab plan artwork --group-by-darkness
 
 # Strategy 2: Minimize pen change time
-plotty plan artwork --optimize-pen-time
+vfab plan artwork --optimize-pen-time
 
 # Strategy 3: Balance pen wear
-plotty plan artwork --balance-pen-wear
+vfab plan artwork --balance-pen-wear
 ```
 
 ### Batch Multi-Pen Processing
 ```bash
 # Add multiple multi-pen designs
 for file in multi_pen_*.svg; do
-    plotty add "$file" --name "Multi: $(basename "$file" .svg)"
+    vfab add "$file" --name "Multi: $(basename "$file" .svg)"
 done
 
 # Optimize all for minimal pen changes
-plotty plan-all --optimize-pens --global-optimization
+vfab plan-all --optimize-pens --global-optimization
 
 # Plot all with pen change prompts
-plotty plot-all --auto-pen-change
+vfab plot-all --auto-pen-change
 ```
 
 ---
@@ -275,28 +275,28 @@ plotty plot-all --auto-pen-change
 **Pen change prompts not appearing:**
 ```bash
 # Check if multi-pen was detected
-plotty info job my_job --show-layers
+vfab info job my_job --show-layers
 
 # Force multi-pen mode
-plotty plan my_job --force-multi-pen
+vfab plan my_job --force-multi-pen
 ```
 
 **Wrong pen mapping:**
 ```bash
 # Re-plan with different mapping
-plotty plan my_job --interactive --remap-pens
+vfab plan my_job --interactive --remap-pens
 
 # Check current pen mapping
-plotty info job my_job --show-pen-mapping
+vfab info job my_job --show-pen-mapping
 ```
 
 **Too many pen changes:**
 ```bash
 # Optimize pen changes
-plotty plan my_job --optimize-pens --aggressive
+vfab plan my_job --optimize-pens --aggressive
 
 # Check pen change optimization
-plotty estimate my_job --show-pen-changes
+vfab estimate my_job --show-pen-changes
 ```
 
 ### Pen Quality Issues
@@ -304,21 +304,21 @@ plotty estimate my_job --show-pen-changes
 **Inconsistent line quality between pens:**
 ```bash
 # Check pen-specific settings
-plotty list pens --show-settings
+vfab list pens --show-settings
 
 # Adjust pen speed caps
-plotty update pen 1 --speed-cap 40  # Slower for fine pens
-plotty update pen 3 --speed-cap 80  # Faster for medium pens
+vfab update pen 1 --speed-cap 40  # Slower for fine pens
+vfab update pen 3 --speed-cap 80  # Faster for medium pens
 ```
 
 **Pen-specific optimization:**
 ```bash
 # Plan with pen-specific settings
-plotty plan my_job --pen-specific-optimization
+vfab plan my_job --pen-specific-optimization
 
 # Test pen performance
-plotty test pen --pen-id 1 --pattern detailed
-plotty test pen --pen-id 3 --pattern fast
+vfab test pen --pen-id 1 --pattern detailed
+vfab test pen --pen-id 3 --pattern fast
 ```
 
 ---
@@ -328,13 +328,13 @@ plotty test pen --pen-id 3 --pattern fast
 ### Track Multi-Pen Performance
 ```bash
 # Pen usage statistics
-plotty stats pens --last 30 --by-job-type
+vfab stats pens --last 30 --by-job-type
 
 # Multi-pen job analysis
-plotty stats jobs --multi-pen-only --last 30
+vfab stats jobs --multi-pen-only --last 30
 
 # Pen change efficiency
-plotty stats performance --pen-change-analysis
+vfab stats performance --pen-change-analysis
 ```
 
 ### Sample Analytics Output
@@ -371,18 +371,18 @@ artwork="Rainbow Geometry"
 
 for i in $(seq 1 $edition_size); do
     # Generate with consistent seed for reproducibility
-    plotty add "${artwork}_edition${i}.svg" \
+    vfab add "${artwork}_edition${i}.svg" \
         --name "${artwork} - Edition ${i}/${edition_size}" \
         --paper a3
     
     # Use same pen mapping for all editions
-    plotty plan "${artwork}_edition${i}" \
+    vfab plan "${artwork}_edition${i}" \
         --pen-mapping "3,2,4,1" \
         --save-mapping
 done
 
 # Plot all editions with consistent pen changes
-plotty plot-all --preserve-pen-order
+vfab plot-all --preserve-pen-order
 ```
 
 ### Client Multi-Pen Projects
@@ -392,14 +392,14 @@ client_name="Acme Corp"
 project_name="Brand Colors"
 
 # Add client designs with color standards
-plotty add logo.svg --name "${client_name} - Logo" --paper a4
-plotty add business_card.svg --name "${client_name} - Business Card" --paper a4
+vfab add logo.svg --name "${client_name} - Logo" --paper a4
+vfab add business_card.svg --name "${client_name} - Business Card" --paper a4
 
 # Use client-specific pen mapping
-plotty plan-all --pen-mapping "2,4,3" --client-standards
+vfab plan-all --pen-mapping "2,4,3" --client-standards
 
 # Plot with quality documentation
-plotty plot-all --document-pen-changes --quality-check
+vfab plot-all --document-pen-changes --quality-check
 ```
 
 ---
@@ -431,21 +431,21 @@ plotty plot-all --document-pen-changes --quality-check
 ### Pen Mapping Shortcuts
 ```bash
 # Quick pen mapping for common setups
-plotty plan job --preset "dark_to_light"    # Black → Gray → White
-plotty plan job --preset "warm_to_cool"     # Red → Blue → Green
-plotty plan job --preset "fine_to_medium"    # 0.3mm → 0.7mm
+vfab plan job --preset "dark_to_light"    # Black → Gray → White
+vfab plan job --preset "warm_to_cool"     # Red → Blue → Green
+vfab plan job --preset "fine_to_medium"    # 0.3mm → 0.7mm
 ```
 
 ### Emergency Multi-Pen Commands
 ```bash
 # Skip pen change for problematic layer
-plotty plot job --skip-pen-change
+vfab plot job --skip-pen-change
 
 # Force single-pen mode
-plotty plan job --force-single-pen --pen-id 2
+vfab plan job --force-single-pen --pen-id 2
 
 # Reset pen mapping
-plotty plan job --reset-pen-mapping
+vfab plan job --reset-pen-mapping
 ```
 
 ---

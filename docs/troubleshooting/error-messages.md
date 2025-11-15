@@ -1,6 +1,6 @@
 # Error Message Reference
 
-This document provides a comprehensive reference for error messages encountered in ploTTY, their causes, and specific solutions.
+This document provides a comprehensive reference for error messages encountered in vfab, their causes, and specific solutions.
 
 ## Quick Error Lookup
 
@@ -42,7 +42,7 @@ This document provides a comprehensive reference for error messages encountered 
 ```bash
 # Example error:
 [red]Error:[/red] Config invalid
-[yellow]💡 Suggestion:[/yellow] Run 'plotty setup' to create a valid configuration
+[yellow]💡 Suggestion:[/yellow] Run 'vfab setup' to create a valid configuration
 [dim]Technical details:[/dim] YAML parsing error: line 5, column 3: mapping values are not allowed here
 
 # Common causes:
@@ -52,20 +52,20 @@ This document provides a comprehensive reference for error messages encountered 
 
 # Solutions:
 1. Validate YAML syntax:
-   python -c "import yaml; yaml.safe_load(open('~/.config/plotty/config.yaml'))"
+   python -c "import yaml; yaml.safe_load(open('~/.config/vfab/config.yaml'))"
 
 2. Recreate configuration:
-   plotty setup
+   vfab setup
 
 3. Check configuration schema:
-   plotty info system
+   vfab info system
 ```
 
 #### `ValidationError: Invalid value`
 ```bash
 # Example error:
 [red]Error:[/red] Invalid value: "A5" is not a valid paper size
-[yellow]💡 Suggestion:[/yellow] Use 'plotty list paper' to see available paper sizes
+[yellow]💡 Suggestion:[/yellow] Use 'vfab list paper' to see available paper sizes
 
 # Common validation errors:
 - Invalid paper sizes
@@ -74,11 +74,11 @@ This document provides a comprehensive reference for error messages encountered 
 
 # Solutions:
 1. Check available options:
-   plotty list paper
-   plotty list pens
+   vfab list paper
+   vfab list pens
 
 2. Use correct values:
-   plotty add job test file.svg --paper A4
+   vfab add job test file.svg --paper A4
 ```
 
 ### Device Errors
@@ -97,7 +97,7 @@ This document provides a comprehensive reference for error messages encountered 
    ls -la /dev/ttyUSB* /dev/ttyACM*
 
 3. Test device detection:
-   plotty check servo
+   vfab check servo
 
 # Solutions:
 1. Install AxiDraw support:
@@ -108,7 +108,7 @@ This document provides a comprehensive reference for error messages encountered 
    # Logout and login again
 
 3. Specify device explicitly:
-   plotty add job test file.svg --device /dev/ttyUSB0
+   vfab add job test file.svg --device /dev/ttyUSB0
 ```
 
 ### Job Management Errors
@@ -117,20 +117,20 @@ This document provides a comprehensive reference for error messages encountered 
 ```bash
 # Example error:
 [red]Error:[/red] Job job_123 is stuck in PLOTTING state
-[yellow]💡 Suggestion:[/yellow] Use 'plotty restart job_123' to check job status
+[yellow]💡 Suggestion:[/yellow] Use 'vfab restart job_123' to check job status
 
 # Recovery procedures:
 1. Check job status:
-   plotty info job job_123
+   vfab info job job_123
 
 2. Resume interrupted jobs:
-   plotty resume
+   vfab resume
 
 3. Force restart:
-   plotty restart job_123
+   vfab restart job_123
 
 4. Check for crashes:
-   cat ~/.local/share/plotty/workspace/jobs/job_123/journal.jsonl | grep emergency_shutdown
+   cat ~/.local/share/vfab/workspace/jobs/job_123/journal.jsonl | grep emergency_shutdown
 ```
 
 ### File System Errors
@@ -154,7 +154,7 @@ This document provides a comprehensive reference for error messages encountered 
    file /path/to/file.svg
 
 3. Use absolute paths:
-   plotty add job test /full/path/to/file.svg
+   vfab add job test /full/path/to/file.svg
 ```
 
 #### `PermissionError: Permission denied`
@@ -165,13 +165,13 @@ This document provides a comprehensive reference for error messages encountered 
 
 # Solutions:
 1. Check permissions:
-   ls -la ~/.local/share/plotty/
+   ls -la ~/.local/share/vfab/
 
 2. Fix permissions:
-   chmod -R u+rw ~/.local/share/plotty/
+   chmod -R u+rw ~/.local/share/vfab/
 
 3. Check ownership:
-   chown -R $USER:$USER ~/.local/share/plotty/
+   chown -R $USER:$USER ~/.local/share/vfab/
 ```
 
 ### Database Errors
@@ -184,17 +184,17 @@ This document provides a comprehensive reference for error messages encountered 
 
 # For database locks:
 1. Check for running processes:
-   ps aux | grep plotty
+   ps aux | grep vfab
 
 2. Wait for completion:
-   plotty info queue
+   vfab info queue
 
 3. Force unlock (last resort):
-   rm ~/.local/share/plotty/plotty.db-journal
+   rm ~/.local/share/vfab/vfab.db-journal
 
 4. Reinitialize database:
-   rm ~/.local/share/plotty/plotty.db
-   plotty setup
+   rm ~/.local/share/vfab/vfab.db
+   vfab setup
 ```
 
 ### State Machine Errors
@@ -203,18 +203,18 @@ This document provides a comprehensive reference for error messages encountered 
 ```bash
 # Example error:
 [red]Error:[/red] Cannot transition from COMPLETED to PLOTTING
-[yellow]💡 Suggestion:[/yellow] Use 'plotty status queue' to see available job IDs
+[yellow]💡 Suggestion:[/yellow] Use 'vfab status queue' to see available job IDs
 
 # Valid state transitions:
 NEW → ANALYZED → OPTIMIZED → READY → QUEUED → ARMED → PLOTTING → (PAUSED) → COMPLETED | ABORTED | FAILED
 
 # Solutions:
 1. Check current state:
-   plotty info job <job_id>
+   vfab info job <job_id>
 
 2. Use valid transitions:
-   plotty restart <job_id>  # Reset to NEW
-   plotty resume <job_id>   # Resume from PAUSED
+   vfab restart <job_id>  # Reset to NEW
+   vfab resume <job_id>   # Resume from PAUSED
 ```
 
 ## Error Categories and Handling
@@ -227,7 +227,7 @@ NEW → ANALYZED → OPTIMIZED → READY → QUEUED → ARMED → PLOTTING → (
 ### 2. System Configuration Errors  
 - **Symptoms**: Config file issues, missing dependencies
 - **Category**: `config` or `dependency`
-- **Handling**: Run `plotty setup`, install missing packages
+- **Handling**: Run `vfab setup`, install missing packages
 
 ### 3. Hardware/Device Errors
 - **Symptoms**: Device not found, connection failures
@@ -250,13 +250,13 @@ For detailed error information, use debug mode:
 
 ```bash
 # Enable debug logging
-plotty --debug <command>
+vfab --debug <command>
 
 # Example with debug:
-plotty --debug add job test file.svg
+vfab --debug add job test file.svg
 
 # Check debug logs
-tail -f ~/.local/share/plotty/logs/plotty.log | grep DEBUG
+tail -f ~/.local/share/vfab/logs/vfab.log | grep DEBUG
 ```
 
 ## Getting Help
@@ -265,17 +265,17 @@ When encountering errors not covered here:
 
 1. **Check the logs**:
    ```bash
-   tail -50 ~/.local/share/plotty/logs/plotty.log
+   tail -50 ~/.local/share/vfab/logs/vfab.log
    ```
 
 2. **Run system check**:
    ```bash
-   plotty check self --verbose
+   vfab check self --verbose
    ```
 
 3. **Get system information**:
    ```bash
-   plotty info system --json
+   vfab info system --json
    ```
 
 4. **Report issues**:

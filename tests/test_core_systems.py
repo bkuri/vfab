@@ -6,9 +6,9 @@ import sqlite3
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from plotty.backup import BackupManager, BackupType
-from plotty.plotting import MultiPenPlotter, PenSwapPrompt, is_axidraw_available
-from plotty.paper import PaperSize, PaperConfig
+from vfab.backup import BackupManager, BackupType
+from vfab.plotting import MultiPenPlotter, PenSwapPrompt, is_axidraw_available
+from vfab.paper import PaperSize, PaperConfig
 
 
 class TestBackupManager:
@@ -26,7 +26,7 @@ class TestBackupManager:
     @pytest.fixture
     def backup_manager(self, temp_db):
         """Create backup manager with temporary database."""
-        with patch("plotty.backup.get_db_path", return_value=temp_db):
+        with patch("vfab.backup.get_db_path", return_value=temp_db):
             return BackupManager()
 
     def test_backup_creation(self, backup_manager):
@@ -41,7 +41,7 @@ class TestBackupManager:
         """Test backup manifest creation."""
         manifest = backup_manager._create_manifest(BackupType.FULL)
         assert manifest.version == "1.0"
-        assert manifest.created_by == "ploTTY"
+        assert manifest.created_by == "vfab"
         assert manifest.backup_type == BackupType.FULL
 
 
@@ -120,14 +120,14 @@ class TestMultiPenPlotter:
     def test_plotter_creation(self):
         """Test plotter creation."""
         # Mock the driver manager to avoid hardware dependencies
-        with patch("plotty.plotting.create_manager") as mock_manager:
+        with patch("vfab.plotting.create_manager") as mock_manager:
             mock_manager.return_value = Mock()
             plotter = MultiPenPlotter()
             assert plotter is not None
 
     def test_layer_detection(self):
         """Test SVG layer detection."""
-        from plotty.multipen import detect_svg_layers
+        from vfab.multipen import detect_svg_layers
 
         # Test with temporary SVG file
         with tempfile.NamedTemporaryFile(mode="w", suffix=".svg", delete=False) as f:
@@ -155,7 +155,7 @@ class TestErrorHandling:
 
     def test_backup_manager_error_handling(self):
         """Test backup manager error handling."""
-        with patch("plotty.backup.get_db_path", return_value=Path("/nonexistent/path")):
+        with patch("vfab.backup.get_db_path", return_value=Path("/nonexistent/path")):
             backup_manager = BackupManager()
 
             # Should handle missing database gracefully

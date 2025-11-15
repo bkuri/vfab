@@ -6,12 +6,12 @@ build-backend = "setuptools.build_meta"
 where = ["src"]
 
 [tool.setuptools.package-data]
-plotty = ["config/*.yaml"]
+vfab = ["config/*.yaml"]
 
 [project]
-name = "plotty"
-version = "1.2.2"
-description = "ploTTY: FSM plotter manager (headless-first) with vpype + per-session recording"
+name = "vfab"
+version = "0.9.0"
+description = "vfab: FSM plotter manager (headless-first) with vpype + per-session recording"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.13"
@@ -40,7 +40,7 @@ axidraw = ["axicli @ https://cdn.evilmadscientist.com/dl/ad/public/AxiDraw_API.z
 dev = ["pytest>=8.3.2", "pre-commit>=3.8.0", "ruff>=0.6.8", "black>=24.10.0"]
 
 [project.scripts]
-plotty = "plotty.cli:main"
+vfab = "vfab.cli:main"
 
 [dependency-groups]
 dev = ["pytest>=8.3.2", "pre-commit>=3.8.0", "ruff>=0.6.8", "black>=24.10.0"]

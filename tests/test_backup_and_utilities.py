@@ -7,9 +7,9 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 from datetime import datetime
 
-from plotty.backup import BackupManager, BackupType
-from plotty.paper import PaperManager
-from plotty.utils import PlottyError, create_error, validate_file_exists
+from vfab.backup import BackupManager, BackupType
+from vfab.paper import PaperManager
+from vfab.utils import PlottyError, create_error, validate_file_exists
 
 
 class TestBackupManager:
@@ -38,7 +38,7 @@ class TestBackupManager:
     def test_backup_manager_init(self, temp_db):
         """Test BackupManager initialization."""
         with patch(
-            "plotty.backup.get_database_url", return_value=f"sqlite:///{temp_db}"
+            "vfab.backup.get_database_url", return_value=f"sqlite:///{temp_db}"
         ):
             manager = BackupManager()
             assert manager is not None
@@ -46,7 +46,7 @@ class TestBackupManager:
     def test_create_backup_full(self, temp_db):
         """Test creating a full backup."""
         with patch(
-            "plotty.backup.get_database_url", return_value=f"sqlite:///{temp_db}"
+            "vfab.backup.get_database_url", return_value=f"sqlite:///{temp_db}"
         ):
             manager = BackupManager()
 
@@ -61,7 +61,7 @@ class TestBackupManager:
     def test_create_backup_config(self, temp_db):
         """Test creating a config backup."""
         with patch(
-            "plotty.backup.get_database_url", return_value=f"sqlite:///{temp_db}"
+            "vfab.backup.get_database_url", return_value=f"sqlite:///{temp_db}"
         ):
             manager = BackupManager()
 
@@ -76,7 +76,7 @@ class TestBackupManager:
     def test_restore_backup(self, temp_db):
         """Test restoring a backup."""
         with patch(
-            "plotty.backup.get_database_url", return_value=f"sqlite:///{temp_db}"
+            "vfab.backup.get_database_url", return_value=f"sqlite:///{temp_db}"
         ):
             manager = BackupManager()
 
@@ -99,7 +99,7 @@ class TestPaperManager:
 
     def test_paper_manager_init(self):
         """Test PaperManager initialization."""
-        with patch("plotty.paper.get_session") as mock_session:
+        with patch("vfab.paper.get_session") as mock_session:
             mock_session.return_value.__enter__.return_value = Mock()
 
             manager = PaperManager(session_factory=Mock())
@@ -116,7 +116,7 @@ class TestPaperManager:
 class TestUtils:
     """Test utility functions."""
 
-    def test_plotty_error_creation(self):
+    def test_vfab_error_creation(self):
         """Test PlottyError creation."""
         error = PlottyError(
             message="Test error",
@@ -129,7 +129,7 @@ class TestUtils:
         assert "Try again" in str(error)
         assert "Details" in str(error)
 
-    def test_plotty_error_minimal(self):
+    def test_vfab_error_minimal(self):
         """Test PlottyError with minimal parameters."""
         error = PlottyError(message="Simple error")
 
@@ -178,7 +178,7 @@ class TestErrorHandling:
     def test_backup_manager_nonexistent_db(self):
         """Test backup manager with nonexistent database."""
         with patch(
-            "plotty.backup.get_database_url", return_value="sqlite:///nonexistent.db"
+            "vfab.backup.get_database_url", return_value="sqlite:///nonexistent.db"
         ):
             manager = BackupManager()
 
@@ -254,7 +254,7 @@ class TestDateTimeOperations:
 
     def test_backup_timestamp_format(self):
         """Test backup timestamp formatting."""
-        with patch("plotty.backup.get_database_url", return_value="sqlite:///test.db"):
+        with patch("vfab.backup.get_database_url", return_value="sqlite:///test.db"):
             manager = BackupManager()
 
             # Test timestamp generation
@@ -275,11 +275,11 @@ class TestConfigurationIntegration:
 
     def test_backup_config_integration(self):
         """Test backup manager configuration integration."""
-        from plotty.backup import BackupConfig
+        from vfab.backup import BackupConfig
 
         config = BackupConfig(backup_directory=Path("/tmp/backup"), retention_days=7)
 
-        with patch("plotty.backup.get_database_url", return_value="sqlite:///test.db"):
+        with patch("vfab.backup.get_database_url", return_value="sqlite:///test.db"):
             manager = BackupManager(config=config)
             assert manager.config.backup_directory == Path("/tmp/backup")
             assert manager.config.retention_days == 7
@@ -303,7 +303,7 @@ class TestPerformance:
 
         try:
             with patch(
-                "plotty.backup.get_database_url", return_value=f"sqlite:///{db_path}"
+                "vfab.backup.get_database_url", return_value=f"sqlite:///{db_path}"
             ):
                 manager = BackupManager()
 

@@ -1,0 +1,207 @@
+#compdef vfab
+# Zsh completion for vfab
+_vfab() {
+    local context state line
+    
+    _arguments -C \
+        '(-h --help)'{-h,--help}'[Show help]' \
+        '--version[Show version and exit]' \
+        '1: :->command'
+    
+    case $state in
+        command)
+            local -a commands
+            commands=(
+                'interactive:Start an interactive plot'
+                'optimize:Optimize jobs for plotting'
+                'plan:Plan a job for plotting'
+                'queue:Queue a job for plotting'
+                'resume:Resume interrupted plotting jobs'
+                'restart:Restart job from beginning'
+                'setup:Run setup wizard'
+                'start:Start plotting a job'
+                'plot:Plot a job'
+                'add:Add new files'
+                'check:System and device checking'
+                'info:Status and monitoring commands'
+                'list:List and manage resources'
+                'remove:Remove resources'
+                'stats:Statistics and analytics'
+                'system:System management commands'
+            )
+            _describe "vfab commands"' commands
+            ;;
+    esac
+    
+    # Handle subcommands
+    case $words[2] in
+        add)
+            _vfab_add
+            ;;
+        check)
+            _vfab_check
+            ;;
+        info)
+            _vfab_info
+            ;;
+        list)
+            _vfab_list
+            ;;
+        remove)
+            _vfab_remove
+            ;;
+        stats)
+            _vfab_stats
+            ;;
+        system)
+            _vfab_system
+            ;;
+        start|plot)
+            _vfab_plot
+            ;;
+        optimize)
+            _vfab_optimize
+            ;;
+        plan)
+            _vfab_plan
+            ;;
+        interactive)
+            _vfab_interactive
+            ;;
+        resume)
+            _vfab_resume
+            ;;
+        restart)
+            _vfab_restart
+            ;;
+    esac
+}
+
+_vfab_add() {
+    local -a subcommands
+    subcommands=(
+        'job:Add a new job'
+        'jobs:Add multiple jobs using pattern'
+        'pen:Add a new pen configuration'
+        'paper:Add a new paper configuration'
+    )
+    _describe "vfab add commands"' subcommands
+}
+
+_vfab_check() {
+    local -a subcommands
+    subcommands=(
+        'camera:Test camera connectivity'
+        'config:Check configuration'
+        'job:Check job status and guards'
+        'ready:Check overall system readiness'
+        'self:Run comprehensive self-tests'
+        'servo:Test servo motor operation'
+        'timing:Test device timing'
+    )
+    _describe "vfab check commands"' subcommands
+}
+
+_vfab_info() {
+    local -a subcommands
+    subcommands=(
+        'system:Show overall system status'
+        'tldr:Quick overview of system and queue'
+        'job:Show detailed information about a specific job'
+        'reset:Reset the current session'
+        'session:Show current session information'
+        'queue:Show job queue status'
+    )
+    _describe "vfab info commands"' subcommands
+    _arguments \
+        '--json[Export as JSON]' \
+        '--csv[Export as CSV]'
+}
+
+_vfab_list() {
+    local -a subcommands
+    subcommands=(
+        'pens:List available pen configurations'
+        'papers:List available paper configurations'
+        'presets:List available plot presets'
+        'jobs:List all jobs in workspace'
+        'guards:List available guards'
+    )
+    _describe "vfab list commands"' subcommands
+}
+
+_vfab_remove() {
+    local -a subcommands
+    subcommands=(
+        'pen:Remove a pen configuration'
+        'paper:Remove a paper configuration'
+        'job:Remove a job'
+        'jobs:Remove multiple jobs with filtering'
+    )
+    _describe "vfab remove commands"' subcommands
+}
+
+_vfab_stats() {
+    local -a subcommands
+    subcommands=(
+        'summary:Show overall statistics summary'
+        'jobs:Show job-related statistics'
+        'performance:Show performance metrics and trends'
+    )
+    _describe "vfab stats commands"' subcommands
+    _arguments \
+        '--json[Export as JSON]' \
+        '--csv[Export as CSV]'
+}
+
+_vfab_system() {
+    local -a subcommands
+    subcommands=(
+        'export:Export and backup operations'
+        'import:Import and restore operations'
+        'logs:Log management commands'
+        'stats:Statistics and analytics'
+    )
+    _describe "vfab system commands"' subcommands
+}
+
+_vfab_plot() {
+    _arguments \
+        '(-p --preset)'{-p,--preset}'[Plot preset]:preset:(fast safe preview detail draft)' \
+        '--port[Device port]:port:' \
+        '--model[Device model]:model:(1)' \
+        '--apply[Start plotting]' \
+        '--dry-run[Preview plotting without moving pen]'
+}
+
+_vfab_optimize() {
+    _arguments \
+        '(-p --preset)'{-p,--preset}'[Optimization preset]:preset:(fast default hq)' \
+        '(-d --digest)'{-d,--digest}'[Digest level]:level:(0 1 2)' \
+        '--apply[Actually perform optimization]'
+}
+
+_vfab_plan() {
+    _arguments \
+        '(-p --pen)'{-p,--pen}'[Default pen specification]:pen:' \
+        '(-i --interactive)'{-i,--interactive}'[Interactive layer planning]'
+}
+
+_vfab_interactive() {
+    _arguments \
+        '--port[Device port]:port:' \
+        '--model[Device model]:model:(1)' \
+        '--units[Coordinate units]:units:(inches millimeters centimeters)'
+}
+
+_vfab_resume() {
+    _arguments \
+        '--apply[Apply resume changes]'
+}
+
+_vfab_restart() {
+    _arguments \
+        '--apply[Apply restart changes]' \
+        '--now[Move job to front of queue]' \
+        '--json[Output in JSON format]'
+}

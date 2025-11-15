@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-API stability verification for ploTTY v0.9.0.
+API stability verification for vfab v0.9.0.
 
 This script analyzes the public API structure and identifies what should be
 considered stable public API vs internal implementation details.
@@ -54,7 +54,7 @@ def analyze_module_public_api(module_path: Path) -> Dict[str, List[str]]:
 
 def analyze_cli_api() -> Dict[str, List[str]]:
     """Analyze CLI command structure."""
-    cli_path = Path("src/plotty/cli")
+    cli_path = Path("src/vfab/cli")
     cli_api = {"commands": [], "subcommands": []}
 
     if not cli_path.exists():
@@ -79,7 +79,7 @@ def analyze_cli_api() -> Dict[str, List[str]]:
 
 def analyze_config_api() -> Dict[str, List[str]]:
     """Analyze configuration API."""
-    config_path = Path("src/plotty/config.py")
+    config_path = Path("src/vfab/config.py")
 
     if not config_path.exists():
         return {}
@@ -104,7 +104,7 @@ def analyze_config_api() -> Dict[str, List[str]]:
 
 def generate_api_stability_report() -> str:
     """Generate comprehensive API stability report."""
-    print("🔍 Analyzing ploTTY API structure...")
+    print("🔍 Analyzing vfab API structure...")
 
     # Analyze core modules
     core_modules = [
@@ -121,7 +121,7 @@ def generate_api_stability_report() -> str:
     api_analysis = {}
 
     for module in core_modules:
-        module_path = Path(f"src/plotty/{module}")
+        module_path = Path(f"src/vfab/{module}")
         if module_path.exists():
             api_analysis[module] = analyze_module_public_api(module_path)
 
@@ -132,11 +132,11 @@ def generate_api_stability_report() -> str:
     config_api = analyze_config_api()
 
     # Generate report
-    report = """# ploTTY v0.9.0 API Stability Report
+    report = """# vfab v0.9.0 API Stability Report
 
 ## Executive Summary
 
-This report analyzes the current ploTTY API structure to identify stable public APIs
+This report analyzes the current vfab API structure to identify stable public APIs
 that should be maintained for v1.0.0 compatibility.
 
 ## Core Module APIs
@@ -171,7 +171,7 @@ that should be maintained for v1.0.0 compatibility.
     report += "## CLI API\n\n"
     report += "### Main Commands\n\n"
     for cmd in cli_api["commands"]:
-        report += f"- `plotty {cmd}`\n"
+        report += f"- `vfab {cmd}`\n"
 
     report += "\n### Command Subcommands\n\n"
     for subcommand in cli_api["subcommands"]:
@@ -192,7 +192,7 @@ that should be maintained for v1.0.0 compatibility.
 ### 🟢 STABLE APIs (Safe for v1.0.0)
 
 **CLI Commands:**
-- All top-level `plotty` commands and their basic options
+- All top-level `vfab` commands and their basic options
 - Core workflow commands: `add`, `list`, `info`, `check`, `remove`, `stats`
 
 **Configuration:**
@@ -262,7 +262,7 @@ that should be maintained for v1.0.0 compatibility.
 
 def main():
     """Main API stability analysis."""
-    print("🔍 ploTTY v0.9.0 API Stability Analysis")
+    print("🔍 vfab v0.9.0 API Stability Analysis")
     print("=" * 50)
 
     report = generate_api_stability_report()

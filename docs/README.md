@@ -1,6 +1,6 @@
-# ploTTY Documentation
+# vfab Documentation
 
-Welcome to the ploTTY documentation hub.
+Welcome to the vfab documentation hub.
 
 ## 📖 User Documentation
 
@@ -8,12 +8,12 @@ Welcome to the ploTTY documentation hub.
 - **[Installation Guide](installation.md)** - Multi-platform setup instructions
 - **[User Guide](user-guide.md)** - Complete usage documentation  
 - **[Cheat Sheets](cheat-sheets/)** - Quick reference for common tasks ⭐
-- **[Logging Guide](logging.md)** - Understanding ploTTY logs and monitoring
+- **[Logging Guide](logging.md)** - Understanding vfab logs and monitoring
 
 ## 🔧 Developer Documentation
 
 - **[API Reference](api/)** - Complete API documentation and integration examples
-- **[vpype-plotty Integration Guide](vpype-plotty.md)** - Bridge creative tools with ploTTY production
+- **[vpype-vfab Integration Guide](vpype-vfab.md)** - Bridge creative tools with vfab production
 - **[Troubleshooting](troubleshooting/)** - Common issues and solutions
 
 ## 📚 Archived Documentation
@@ -22,4 +22,4 @@ Historical development status, reports, and old documentation are available in [
 
 ---
 
-**ploTTY** - Headless-first FSM plotter manager with enterprise-grade performance and reliability.
+**vfab** - Headless-first FSM plotter manager with enterprise-grade performance and reliability.

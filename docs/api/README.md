@@ -1,6 +1,6 @@
-# ploTTY API Documentation
+# vfab API Documentation
 
-Welcome to the comprehensive API documentation for ploTTY, a powerful plotter management system. This documentation covers all aspects of the ploTTY API including CLI commands, database models, configuration, and programmatic interfaces.
+Welcome to the comprehensive API documentation for vfab, a powerful plotter management system. This documentation covers all aspects of the vfab API including CLI commands, database models, configuration, and programmatic interfaces.
 
 ## Table of Contents
 
@@ -14,7 +14,7 @@ Welcome to the comprehensive API documentation for ploTTY, a powerful plotter ma
 
 ## Overview
 
-ploTTY is a Python-based plotter management system that provides:
+vfab is a Python-based plotter management system that provides:
 
 - **Command Line Interface**: Complete CLI for job management, device control, and system administration
 - **Database Backend**: SQLAlchemy-based models for pens, papers, jobs, and statistics
@@ -28,28 +28,28 @@ The system is designed around a clear separation of concerns with well-defined A
 ## Quick Start
 
 ```bash
-# Install ploTTY
+# Install vfab
 uv pip install -e ".[dev,vpype]"
 
 # Add a new job
-plotty add job my_design design.svg --preset hq --apply
+vfab add job my_design design.svg --preset hq --apply
 
 # List jobs
-plotty list jobs
+vfab list jobs
 
 # Start plotting
-plotty plot my_design --preset safe --apply
+vfab plot my_design --preset safe --apply
 
 # Check system status
-plotty info system
+vfab info system
 ```
 
 ## Architecture
 
-ploTTY follows a modular architecture:
+vfab follows a modular architecture:
 
 ```
-ploTTY/
+vfab/
 ├── CLI Layer          # Typer-based command interface
 ├── Core Logic         # FSM, planning, estimation
 ├── Database Layer     # SQLAlchemy models and migrations

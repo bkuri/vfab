@@ -8,8 +8,8 @@
 mkdir batch_art_project
 cd batch_art_project
 
-# Set up ploTTY workspace
-plotty init
+# Set up vfab workspace
+vfab init
 
 # Create generation script
 touch generate_batch.py
@@ -366,19 +366,19 @@ python generate_batch.py --count $BATCH_SIZE --output "$OUTPUT_DIR/raw"
 echo "Step 2: Assessing quality..."
 python quality_filter.py --input "$OUTPUT_DIR/raw" --output "$OUTPUT_DIR/curated" --threshold $QUALITY_THRESHOLD
 
-# 3. Add to ploTTY queue
-echo "Step 3: Adding curated artworks to ploTTY queue..."
+# 3. Add to vfab queue
+echo "Step 3: Adding curated artworks to vfab queue..."
 for svg in "$OUTPUT_DIR/curated"/*.svg; do
-    plotty add "$svg"
+    vfab add "$svg"
 done
 
 # 4. Generate report
 echo "Step 4: Generating batch report..."
-plotty list > "$OUTPUT_DIR/queue_status.txt"
+vfab list > "$OUTPUT_DIR/queue_status.txt"
 
 echo "Batch pipeline complete!"
 echo "Queue status:"
-plotty list
+vfab list
 ```
 
 ### **Parallel Generation**
@@ -438,7 +438,7 @@ if __name__ == "__main__":
     generator.generate_batch(100, "parallel_output")
 ```
 
-## **Integration with ploTTY**
+## **Integration with vfab**
 
 ### **Automatic Queue Management**
 ```python
@@ -452,15 +452,15 @@ class AutoQueueManager:
         self.max_queue_size = max_queue_size
     
     def get_queue_size(self):
-        """Get current ploTTY queue size"""
-        result = subprocess.run(['plotty', 'list'], capture_output=True, text=True)
+        """Get current vfab queue size"""
+        result = subprocess.run(['vfab', 'list'], capture_output=True, text=True)
         lines = result.stdout.strip().split('\n')
         return len(lines) - 1 if lines else 0  # Subtract header
     
     def add_to_queue(self, svg_file):
         """Add file to queue if space available"""
         if self.get_queue_size() < self.max_queue_size:
-            subprocess.run(['plotty', 'add', svg_file])
+            subprocess.run(['vfab', 'add', svg_file])
             return True
         return False
     
@@ -538,4 +538,4 @@ class ThemedGenerator:
 - **Monitor quality**: Use automated curation to maintain standards
 - **Version control**: Keep generation scripts and metadata
 - **Parallel processing**: Use multiple cores for faster generation
-- **Queue management**: Don't overwhelm ploTTY with too many jobs at once
+- **Queue management**: Don't overwhelm vfab with too many jobs at once

@@ -1,8 +1,8 @@
-# ploTTY v0.9.0 Complete API Documentation
+# vfab v0.9.0 Complete API Documentation
 
 ## Overview
 
-This is the comprehensive API documentation for ploTTY v0.9.0, covering all stable public APIs for v1.0.0 compatibility.
+This is the comprehensive API documentation for vfab v0.9.0, covering all stable public APIs for v1.0.0 compatibility.
 
 ## Table of Contents
 
@@ -18,7 +18,7 @@ This is the comprehensive API documentation for ploTTY v0.9.0, covering all stab
 
 ## Overview
 
-ploTTY uses a hierarchical configuration system based on Pydantic models. All configuration is stored in YAML format and validated at runtime.
+vfab uses a hierarchical configuration system based on Pydantic models. All configuration is stored in YAML format and validated at runtime.
 
 ## Configuration Classes
 
@@ -27,7 +27,7 @@ ploTTY uses a hierarchical configuration system based on Pydantic models. All co
 Configuration class for camera settings.
 
 ```python
-from plotty.config import CameraCfg
+from vfab.config import CameraCfg
 
 # Access configuration
 config = get_config()
@@ -39,7 +39,7 @@ setting = config.cameracfg
 Configuration class for database settings.
 
 ```python
-from plotty.config import DatabaseCfg
+from vfab.config import DatabaseCfg
 
 # Access configuration
 config = get_config()
@@ -51,7 +51,7 @@ setting = config.databasecfg
 Configuration class for device settings.
 
 ```python
-from plotty.config import DeviceCfg
+from vfab.config import DeviceCfg
 
 # Access configuration
 config = get_config()
@@ -63,7 +63,7 @@ setting = config.devicecfg
 Configuration class for optimizationlevel settings.
 
 ```python
-from plotty.config import OptimizationLevelCfg
+from vfab.config import OptimizationLevelCfg
 
 # Access configuration
 config = get_config()
@@ -75,7 +75,7 @@ setting = config.optimizationlevelcfg
 Configuration class for digestlevel settings.
 
 ```python
-from plotty.config import DigestLevelCfg
+from vfab.config import DigestLevelCfg
 
 # Access configuration
 config = get_config()
@@ -87,7 +87,7 @@ setting = config.digestlevelcfg
 Configuration class for filetype settings.
 
 ```python
-from plotty.config import FileTypeCfg
+from vfab.config import FileTypeCfg
 
 # Access configuration
 config = get_config()
@@ -99,7 +99,7 @@ setting = config.filetypecfg
 Configuration class for optimization settings.
 
 ```python
-from plotty.config import OptimizationCfg
+from vfab.config import OptimizationCfg
 
 # Access configuration
 config = get_config()
@@ -111,7 +111,7 @@ setting = config.optimizationcfg
 Configuration class for vpype settings.
 
 ```python
-from plotty.config import VpypeCfg
+from vfab.config import VpypeCfg
 
 # Access configuration
 config = get_config()
@@ -123,7 +123,7 @@ setting = config.vpypecfg
 Configuration class for paper settings.
 
 ```python
-from plotty.config import PaperCfg
+from vfab.config import PaperCfg
 
 # Access configuration
 config = get_config()
@@ -135,7 +135,7 @@ setting = config.papercfg
 Configuration class for hooks settings.
 
 ```python
-from plotty.config import HooksCfg
+from vfab.config import HooksCfg
 
 # Access configuration
 config = get_config()
@@ -147,7 +147,7 @@ setting = config.hookscfg
 Configuration class for recovery settings.
 
 ```python
-from plotty.config import RecoveryCfg
+from vfab.config import RecoveryCfg
 
 # Access configuration
 config = get_config()
@@ -159,7 +159,7 @@ setting = config.recoverycfg
 Configuration class for physicalsetup settings.
 
 ```python
-from plotty.config import PhysicalSetupCfg
+from vfab.config import PhysicalSetupCfg
 
 # Access configuration
 config = get_config()
@@ -171,7 +171,7 @@ setting = config.physicalsetupcfg
 Configuration class for loggingsettings settings.
 
 ```python
-from plotty.config import LoggingSettings
+from vfab.config import LoggingSettings
 
 # Access configuration
 config = get_config()
@@ -183,7 +183,7 @@ setting = config.loggingsettings
 Configuration class for settings settings.
 
 ```python
-from plotty.config import Settings
+from vfab.config import Settings
 
 # Access configuration
 config = get_config()
@@ -197,7 +197,7 @@ setting = config.settings
 
 ## Overview
 
-ploTTY uses SQLAlchemy models for database persistence. All models are defined in `plotty.models` and support full SQLAlchemy operations.
+vfab uses SQLAlchemy models for database persistence. All models are defined in `vfab.models` and support full SQLAlchemy operations.
 
 ## Model Classes
 
@@ -206,7 +206,7 @@ ploTTY uses SQLAlchemy models for database persistence. All models are defined i
 Plotter device configuration and status.
 
 ```python
-from plotty.models import Device
+from vfab.models import Device
 
 # Query model
 with get_session() as session:
@@ -218,7 +218,7 @@ with get_session() as session:
 Pen tool configuration and settings.
 
 ```python
-from plotty.models import Pen
+from vfab.models import Pen
 
 # Query model
 with get_session() as session:
@@ -230,7 +230,7 @@ with get_session() as session:
 Paper size and margin definitions.
 
 ```python
-from plotty.models import Paper
+from vfab.models import Paper
 
 # Query model
 with get_session() as session:
@@ -242,7 +242,7 @@ with get_session() as session:
 Plotting job metadata and state.
 
 ```python
-from plotty.models import Job
+from vfab.models import Job
 
 # Query model
 with get_session() as session:
@@ -254,7 +254,7 @@ with get_session() as session:
 Multi-pen layer configuration.
 
 ```python
-from plotty.models import Layer
+from vfab.models import Layer
 
 # Query model
 with get_session() as session:
@@ -266,7 +266,7 @@ with get_session() as session:
 Statistics collection settings.
 
 ```python
-from plotty.models import StatisticsConfig
+from vfab.models import StatisticsConfig
 
 # Query model
 with get_session() as session:
@@ -278,7 +278,7 @@ with get_session() as session:
 Job execution statistics.
 
 ```python
-from plotty.models import JobStatistics
+from vfab.models import JobStatistics
 
 # Query model
 with get_session() as session:
@@ -290,7 +290,7 @@ with get_session() as session:
 Layer-specific statistics.
 
 ```python
-from plotty.models import LayerStatistics
+from vfab.models import LayerStatistics
 
 # Query model
 with get_session() as session:
@@ -302,7 +302,7 @@ with get_session() as session:
 System-wide statistics.
 
 ```python
-from plotty.models import SystemStatistics
+from vfab.models import SystemStatistics
 
 # Query model
 with get_session() as session:
@@ -314,7 +314,7 @@ with get_session() as session:
 Performance measurement data.
 
 ```python
-from plotty.models import PerformanceMetrics
+from vfab.models import PerformanceMetrics
 
 # Query model
 with get_session() as session:
@@ -328,7 +328,7 @@ with get_session() as session:
 
 ## Overview
 
-The ploTTY FSM (Finite State Machine) manages job lifecycle with well-defined states and transitions. All FSM operations are validated and logged.
+The vfab FSM (Finite State Machine) manages job lifecycle with well-defined states and transitions. All FSM operations are validated and logged.
 
 ## Job States
 
@@ -375,7 +375,7 @@ Job paused during execution.
 ## FSM Operations
 
 ```python
-from plotty.fsm import JobFSM, JobState, create_fsm
+from vfab.fsm import JobFSM, JobState, create_fsm
 
 # Create FSM instance
 fsm = create_fsm(job_id="example", workspace=Path("/workspace"))
@@ -413,12 +413,12 @@ success = fsm.arm_job()
 
 ## Overview
 
-ploTTY provides various utility functions for common operations, file handling, and system interactions.
+vfab provides various utility functions for common operations, file handling, and system interactions.
 
 ## Core Utilities
 
 ```python
-from plotty.utils import (
+from vfab.utils import (
     format_duration,
     format_bytes,
     safe_filename,
@@ -468,16 +468,16 @@ info = get_system_info()
 
 ## Overview
 
-This section provides practical examples for integrating ploTTY into various workflows and applications.
+This section provides practical examples for integrating vfab into various workflows and applications.
 
 ## Basic Job Management
 
 ```python
-from plotty.fsm import create_fsm
-from plotty.config import get_config
+from vfab.fsm import create_fsm
+from vfab.config import get_config
 from pathlib import Path
 
-# Initialize ploTTY
+# Initialize vfab
 config = get_config()
 workspace = Path(config.workspace)
 
@@ -500,8 +500,8 @@ if fsm.transition_to("ANALYZED", "Starting analysis"):
 ## Custom Guard Implementation
 
 ```python
-from plotty.guards.base import BaseGuard
-from plotty.guards.manager import GuardSystem
+from vfab.guards.base import BaseGuard
+from vfab.guards.manager import GuardSystem
 
 class CustomSetupGuard(BaseGuard):
     def check(self, context: dict) -> Tuple[bool, str]:
@@ -521,8 +521,8 @@ guards.register_guard("custom_setup", CustomSetupGuard())
 ## Statistics Collection
 
 ```python
-from plotty.stats import StatisticsService
-from plotty.models import JobStatistics
+from vfab.stats import StatisticsService
+from vfab.models import JobStatistics
 
 # Create statistics service
 stats = StatisticsService()
@@ -545,7 +545,7 @@ system_stats = stats.get_system_statistics()
 ## Configuration Management
 
 ```python
-from plotty.config import load_config, save_config, Settings
+from vfab.config import load_config, save_config, Settings
 
 # Load configuration
 config = load_config()
@@ -568,8 +568,8 @@ custom_settings = Settings(
 ## Database Operations
 
 ```python
-from plotty.db import get_session
-from plotty.models import Job, Pen, Paper
+from vfab.db import get_session
+from vfab.models import Job, Pen, Paper
 
 # Query jobs
 with get_session() as session:
@@ -599,8 +599,8 @@ with get_session() as session:
 ## Error Handling and Recovery
 
 ```python
-from plotty.recovery import detect_interrupted_jobs, CrashRecovery
-from plotty.fsm import JobState
+from vfab.recovery import detect_interrupted_jobs, CrashRecovery
+from vfab.fsm import JobState
 
 # Detect interrupted jobs
 workspace = Path("/workspace")
@@ -624,7 +624,7 @@ except Exception as e:
 
 ## API Stability Guarantee
 
-For ploTTY v1.0.0, the following APIs are guaranteed to remain stable:
+For vfab v1.0.0, the following APIs are guaranteed to remain stable:
 
 ### ✅ Guaranteed Stable
 - All configuration classes and their public attributes
@@ -647,7 +647,7 @@ For ploTTY v1.0.0, the following APIs are guaranteed to remain stable:
 
 ## Versioning Policy
 
-ploTTY follows Semantic Versioning (SemVer):
+vfab follows Semantic Versioning (SemVer):
 - **Major (X.0.0)**: Breaking changes to stable APIs
 - **Minor (X.Y.0)**: New features, backward compatible
 - **Patch (X.Y.Z)**: Bug fixes, backward compatible
@@ -655,7 +655,7 @@ ploTTY follows Semantic Versioning (SemVer):
 ## Support
 
 For API questions and support:
-- 📖 [Documentation](https://plotty.ai/docs)
-- 🐛 [Issue Tracker](https://github.com/your-repo/plotty/issues)
-- 💬 [Discussions](https://github.com/your-repo/plotty/discussions)
+- 📖 [Documentation](https://vfab.ai/docs)
+- 🐛 [Issue Tracker](https://github.com/your-repo/vfab/issues)
+- 💬 [Discussions](https://github.com/your-repo/vfab/discussions)
 

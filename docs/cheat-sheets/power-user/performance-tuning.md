@@ -5,22 +5,22 @@
 ### **Benchmark Your Setup**
 ```bash
 # Run comprehensive performance benchmark
-plotty benchmark --full
+vfab benchmark --full
 
 # Test plotting speed with sample design
-plotty add --benchmark --sample complex_test.svg
+vfab add --benchmark --sample complex_test.svg
 
 # Analyze system resources
-plotty system stats --detailed
+vfab system stats --detailed
 ```
 
 ### **Identify Bottlenecks**
 ```bash
 # Check CPU usage during plotting
-top -p $(pgrep plottyd)
+top -p $(pgrep vfabd)
 
 # Monitor memory usage
-plotty system memory --watch
+vfab system memory --watch
 
 # Analyze I/O performance
 iostat -x 1 10  # During plotting operation
@@ -29,7 +29,7 @@ iostat -x 1 10  # During plotting operation
 sensors | grep -E "(Core|temp)"
 ```
 
-## **ploTTY Configuration Optimization**
+## **vfab Configuration Optimization**
 
 ### **Performance-Focused Config**
 ```yaml
@@ -67,11 +67,11 @@ database:
 ### **Apply Performance Config**
 ```bash
 # Test performance config
-plotty --config config/performance.yaml check system.svg
+vfab --config config/performance.yaml check system.svg
 
 # Benchmark difference
-plotty benchmark --config config/performance.yaml
-plotty benchmark --config config/default.yaml
+vfab benchmark --config config/performance.yaml
+vfab benchmark --config config/default.yaml
 
 # Set as default for production
 cp config/performance.yaml config/config.yaml
@@ -82,34 +82,34 @@ cp config/performance.yaml config/config.yaml
 ### **Plotter Hardware Tuning**
 ```bash
 # Optimize AxiDraw settings
-plotty hardware axidraw tune --speed-test
+vfab hardware axidraw tune --speed-test
 
 # Set optimal speed for your paper/pen combo
-plotty hardware axidraw preset --paper premium --pen fine
+vfab hardware axidraw preset --paper premium --pen fine
 
 # Calibrate for precision vs speed
-plotty hardware calibrate --mode speed
+vfab hardware calibrate --mode speed
 
 # Test different acceleration profiles
 for accel in 1.0 1.2 1.5 2.0; do
     echo "Testing acceleration: $accel"
-    plotty add --acceleration $accel test_pattern.svg
-    plotty resume
-    plotty wait
+    vfab add --acceleration $accel test_pattern.svg
+    vfab resume
+    vfab wait
 done
 ```
 
 ### **Pen and Paper Optimization**
 ```bash
 # Find optimal pen pressure
-plotty tune pen-pressure --range 20-60 --step 5
+vfab tune pen-pressure --range 20-60 --step 5
 
 # Test different pen speeds for paper type
-plotty tune pen-speed --paper premium --pen fine
+vfab tune pen-speed --paper premium --pen fine
 
 # Create material-specific presets
-plotty preset create --name "fast_draft" --speed 60 --force 30
-plotty preset create --name "quality_final" --speed 25 --force 45
+vfab preset create --name "fast_draft" --speed 60 --force 30
+vfab preset create --name "quality_final" --speed 25 --force 45
 ```
 
 ## **Memory and Storage Optimization**
@@ -124,7 +124,7 @@ from pathlib import Path
 
 class MemoryMonitor:
     def __init__(self):
-        self.process_name = "plottyd"
+        self.process_name = "vfabd"
         self.log_file = "performance/memory_usage.log"
         Path("performance").mkdir(exist_ok=True)
     
@@ -136,7 +136,7 @@ class MemoryMonitor:
             f.write("timestamp,memory_mb,cpu_percent\n")
             
             while time.time() - start_time < duration:
-                # Find ploTTY process
+                # Find vfab process
                 for proc in psutil.process_iter(['pid', 'name', 'memory_info', 'cpu_percent']):
                     if proc.info['name'] == self.process_name:
                         memory_mb = proc.info['memory_info'].rss / 1024 / 1024
@@ -197,30 +197,30 @@ dd if=/dev/zero of=performance/test_file bs=1M count=100 oflag=direct
 dd if=performance/test_file of=/dev/null bs=1M iflag=direct
 
 # Optimize database location (use SSD if available)
-sudo systemctl stop plottyd
-sudo mv /var/lib/plotty /ssd/plotty
-sudo ln -s /ssd/plotty /var/lib/plotty
-sudo systemctl start plottyd
+sudo systemctl stop vfabd
+sudo mv /var/lib/vfab /ssd/vfab
+sudo ln -s /ssd/vfab /var/lib/vfab
+sudo systemctl start vfabd
 
 # Check database performance
-plotty db benchmark --operations 1000
+vfab db benchmark --operations 1000
 ```
 
 ## **Network Optimization**
 
-### **Remote ploTTY Setup**
+### **Remote vfab Setup**
 ```bash
 # Optimize for remote access
-plotty config set network.buffer_size 1MB
-plotty config set network.compression true
-plotty config set network.timeout 30s
+vfab config set network.buffer_size 1MB
+vfab config set network.compression true
+vfab config set network.timeout 30s
 
 # Test network latency
 ping -c 10 plotter-server.local
 
 # Test file transfer speed
 scp large_design.svg plotter-server.local:/tmp/
-time plotty --host plotter-server.local add /tmp/large_design.svg
+time vfab --host plotter-server.local add /tmp/large_design.svg
 ```
 
 ### **Caching Strategies**
@@ -229,7 +229,7 @@ time plotty --host plotter-server.local add /tmp/large_design.svg
 cache:
   # File caching
   enable_file_cache: true
-  cache_directory: /tmp/plotty_cache
+  cache_directory: /tmp/vfab_cache
   max_cache_size: 1GB
   
   # Path optimization cache
@@ -360,12 +360,12 @@ switch_profile() {
     # Apply new profile
     cp "config/profiles/$profile.yaml" config/config.yaml
     
-    # Restart ploTTY with new config
-    sudo systemctl restart plottyd
+    # Restart vfab with new config
+    sudo systemctl restart vfabd
     
     # Verify new settings
     sleep 3
-    plotty config show | grep -E "(speed|acceleration|precision)"
+    vfab config show | grep -E "(speed|acceleration|precision)"
     
     echo "Profile switch complete"
 }
@@ -401,22 +401,22 @@ class RealtimeMonitor:
             memory = psutil.virtual_memory()
             disk = psutil.disk_usage('/')
             
-            # ploTTY specific metrics
-            plotty_memory = 0
-            plotty_cpu = 0
+            # vfab specific metrics
+            vfab_memory = 0
+            vfab_cpu = 0
             
             for proc in psutil.process_iter(['pid', 'name', 'memory_info', 'cpu_percent']):
-                if proc.info['name'] == 'plottyd':
-                    plotty_memory = proc.info['memory_info'].rss / 1024 / 1024
-                    plotty_cpu = proc.info['cpu_percent']
+                if proc.info['name'] == 'vfabd':
+                    vfab_memory = proc.info['memory_info'].rss / 1024 / 1024
+                    vfab_cpu = proc.info['cpu_percent']
                     break
             
             metric = {
                 'timestamp': timestamp,
                 'system_cpu': cpu_percent,
                 'system_memory': memory.percent,
-                'plotty_memory_mb': plotty_memory,
-                'plotty_cpu': plotty_cpu,
+                'vfab_memory_mb': vfab_memory,
+                'vfab_cpu': vfab_cpu,
                 'disk_free_gb': disk.free / 1024 / 1024 / 1024
             }
             
@@ -425,7 +425,7 @@ class RealtimeMonitor:
             # Display current metrics
             print(f"\rCPU: {cpu_percent:5.1f}% | "
                   f"Memory: {memory.percent:5.1f}% | "
-                  f"ploTTY: {plotty_memory:6.1f}MB | "
+                  f"vfab: {vfab_memory:6.1f}MB | "
                   f"Disk: {disk.free/1024/1024/1024:6.1f}GB free", end='')
             
             time.sleep(2)
@@ -450,17 +450,17 @@ class RealtimeMonitor:
         # Calculate averages
         avg_cpu = sum(m['system_cpu'] for m in self.metrics) / len(self.metrics)
         avg_memory = sum(m['system_memory'] for m in self.metrics) / len(self.metrics)
-        avg_plotty_memory = sum(m['plotty_memory_mb'] for m in self.metrics) / len(self.metrics)
+        avg_vfab_memory = sum(m['vfab_memory_mb'] for m in self.metrics) / len(self.metrics)
         
         # Find peaks
         max_cpu = max(m['system_cpu'] for m in self.metrics)
         max_memory = max(m['system_memory'] for m in self.metrics)
-        max_plotty_memory = max(m['plotty_memory_mb'] for m in self.metrics)
+        max_vfab_memory = max(m['vfab_memory_mb'] for m in self.metrics)
         
         print(f"\nPerformance Analysis:")
         print(f"  Average CPU: {avg_cpu:.1f}% (Peak: {max_cpu:.1f}%)")
         print(f"  Average Memory: {avg_memory:.1f}% (Peak: {max_memory:.1f}%)")
-        print(f"  Average ploTTY Memory: {avg_plotty_memory:.1f}MB (Peak: {max_plotty_memory:.1f}MB)")
+        print(f"  Average vfab Memory: {avg_vfab_memory:.1f}MB (Peak: {max_vfab_memory:.1f}MB)")
 
 # Usage
 if __name__ == "__main__":
@@ -478,34 +478,34 @@ if __name__ == "__main__":
 ### **Common Performance Problems**
 ```bash
 # Check for memory leaks
-plotty system memory --leak-detection
+vfab system memory --leak-detection
 
 # Identify slow operations
-plotty debug --profile slow_operation.svg
+vfab debug --profile slow_operation.svg
 
 # Check database performance
-plotty db analyze --slow-queries
+vfab db analyze --slow-queries
 
 # Test with different configurations
 for config in speed balanced quality; do
     echo "Testing $config profile..."
-    time plotty --config config/profiles/$config.yaml add test.svg
+    time vfab --config config/profiles/$config.yaml add test.svg
 done
 ```
 
 ### **Performance Recovery**
 ```bash
 # Clear caches if memory is high
-plotty cache clear --all
+vfab cache clear --all
 
 # Restart services if performance degrades
-sudo systemctl restart plottyd
+sudo systemctl restart vfabd
 
 # Optimize database
-plotty db optimize --full
+vfab db optimize --full
 
 # Reset to defaults if needed
-plotty config reset --performance
+vfab config reset --performance
 ```
 
 ## **Related Cheat Sheets**

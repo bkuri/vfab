@@ -10,8 +10,8 @@ from pathlib import Path
 from datetime import datetime, timezone
 from unittest.mock import Mock, patch
 
-from plotty.recovery import CrashRecovery, get_crash_recovery, requeue_job_to_front
-from plotty.fsm import JobState
+from vfab.recovery import CrashRecovery, get_crash_recovery, requeue_job_to_front
+from vfab.fsm import JobState
 
 
 class TestCrashRecovery:
@@ -102,7 +102,7 @@ class TestCrashRecovery:
                 f.write(json.dumps(entry) + "\n")
 
         # Recover the job
-        with patch("plotty.recovery.JobFSM") as mock_job_fsm:
+        with patch("vfab.recovery.JobFSM") as mock_job_fsm:
             mock_fsm_instance = Mock()
             mock_fsm_instance.job_id = job_id
             mock_fsm_instance.current_state = JobState.NEW
@@ -145,7 +145,7 @@ class TestCrashRecovery:
             for entry in journal_entries:
                 f.write(json.dumps(entry) + "\n")
 
-        with patch("plotty.recovery.JobFSM") as mock_job_fsm:
+        with patch("vfab.recovery.JobFSM") as mock_job_fsm:
             mock_fsm_instance = Mock()
             mock_fsm_instance.job_id = job_id
             mock_fsm_instance.current_state = JobState.NEW
@@ -386,9 +386,9 @@ class TestGlobalFunctions:
             workspace = Path(tmp_dir)
 
             # Reset global instance
-            import plotty.recovery
+            import vfab.recovery
 
-            plotty.recovery._crash_recovery_instance = None
+            vfab.recovery._crash_recovery_instance = None
 
             # Get instance twice
             recovery1 = get_crash_recovery(workspace)
@@ -453,9 +453,9 @@ class TestSignalHandling:
             workspace = Path(tmp_dir)
 
             # Reset global instance to test fresh initialization
-            import plotty.recovery
+            import vfab.recovery
 
-            plotty.recovery._crash_recovery_instance = None
+            vfab.recovery._crash_recovery_instance = None
 
             recovery = get_crash_recovery(workspace)
 

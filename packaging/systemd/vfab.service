@@ -1,0 +1,13 @@
+[Unit]
+Description=vfab daemon
+After=network.target
+
+[Service]
+Type=simple
+Environment=PYTHONUNBUFFERED=1
+Environment=VFAB_CONFIG=%h/.config/vfab/config.yaml
+ExecStart=/usr/bin/vfab daemon --foreground
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

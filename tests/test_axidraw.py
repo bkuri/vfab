@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 
 # Import functions if available
 try:
-    from plotty.drivers import create_manager, is_axidraw_available
+    from vfab.drivers import create_manager, is_axidraw_available
 except ImportError:
     create_manager = None
 
@@ -18,7 +18,7 @@ except ImportError:
 def get_create_manager():
     """Get create_manager function if available."""
     try:
-        from plotty.drivers import create_manager
+        from vfab.drivers import create_manager
 
         return create_manager
     except ImportError:
@@ -39,7 +39,7 @@ class TestAxiDrawManager:
         assert manager.port is None
         assert not manager.connected
 
-    @patch("plotty.drivers.axidraw.axidraw")
+    @patch("vfab.drivers.axidraw.axidraw")
     @pytest.mark.skipif(
         not is_axidraw_available(),
         reason="pyaxidraw not available",
@@ -61,7 +61,7 @@ class TestAxiDrawManager:
         mock_ad.plot_run.assert_called_once_with(True)
         # Note: speed_pendown is not set by default, so we don't test it
 
-    @patch("plotty.drivers.axidraw.axidraw")
+    @patch("vfab.drivers.axidraw.axidraw")
     @pytest.mark.skipif(
         not is_axidraw_available(),
         reason="pyaxidraw not available",
@@ -81,7 +81,7 @@ class TestAxiDrawManager:
         assert result["success"] is True
         # Note: preview is set internally, we just check success
 
-    @patch("plotty.drivers.axidraw.axidraw")
+    @patch("vfab.drivers.axidraw.axidraw")
     @pytest.mark.skipif(
         not is_axidraw_available(),
         reason="pyaxidraw not available",
@@ -101,7 +101,7 @@ class TestAxiDrawManager:
         assert result["success"] is False
         assert "Connection failed" in result["error"]
 
-    @patch("plotty.drivers.axidraw.axidraw")
+    @patch("vfab.drivers.axidraw.axidraw")
     @pytest.mark.skipif(
         not is_axidraw_available(),
         reason="pyaxidraw not available",
@@ -168,7 +168,7 @@ class TestAxiDrawManager:
         with pytest.raises(RuntimeError, match="Not connected to AxiDraw"):
             manager.get_pen_state()
 
-    @patch("plotty.drivers.axidraw.axidraw")
+    @patch("vfab.drivers.axidraw.axidraw")
     @pytest.mark.skipif(
         not is_axidraw_available(),
         reason="pyaxidraw not available",
@@ -190,7 +190,7 @@ class TestAxiDrawManager:
         # Note: pen_height_up/pen_height_down are not directly mapped to options
         # They would need to be implemented in the plot_file method
 
-    @patch("plotty.drivers.axidraw.axidraw")
+    @patch("vfab.drivers.axidraw.axidraw")
     @pytest.mark.skipif(
         not is_axidraw_available(),
         reason="pyaxidraw not available",
@@ -214,7 +214,7 @@ class TestAxiDrawManager:
         assert "version" in info
         assert info["version"] == "3.9.6"
 
-    @patch("plotty.drivers.axidraw.axidraw")
+    @patch("vfab.drivers.axidraw.axidraw")
     @pytest.mark.skipif(
         not is_axidraw_available(),
         reason="pyaxidraw not available",
@@ -241,7 +241,7 @@ class TestAxiDrawManager:
         not is_axidraw_available(),
         reason="pyaxidraw not available",
     )
-    @patch("plotty.drivers.axidraw.axidraw")
+    @patch("vfab.drivers.axidraw.axidraw")
     def test_set_units(self, mock_axidraw):
         """Test unit setting."""
         mock_ad = Mock()
@@ -262,7 +262,7 @@ class TestAxiDrawManager:
         with pytest.raises(ValueError, match="Invalid units"):
             manager.set_units("invalid")
 
-    @patch("plotty.drivers.axidraw.axidraw")
+    @patch("vfab.drivers.axidraw.axidraw")
     @pytest.mark.skipif(
         not is_axidraw_available(),
         reason="pyaxidraw not available",
@@ -282,7 +282,7 @@ class TestAxiDrawManager:
         mock_ad.plot_setup.assert_called_once()
         assert mock_ad.options.mode == "cycle"
 
-    @patch("plotty.drivers.axidraw.axidraw")
+    @patch("vfab.drivers.axidraw.axidraw")
     @pytest.mark.skipif(
         not is_axidraw_available(),
         reason="pyaxidraw not available",

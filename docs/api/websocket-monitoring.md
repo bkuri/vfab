@@ -1,6 +1,6 @@
 # WebSocket Monitoring System
 
-Real-time monitoring and notification system for ploTTY job execution and system state changes.
+Real-time monitoring and notification system for vfab job execution and system state changes.
 
 ## Overview
 
@@ -14,7 +14,7 @@ The WebSocket monitoring system provides real-time updates for:
 
 ```
 ┌─────────────────┐    WebSocket     ┌─────────────────┐
-│   ploTTY Daemon │ ◄──────────────► │  Monitor Client │
+│   vfab Daemon │ ◄──────────────► │  Monitor Client │
 │   (WebSocket    │    Messages      │  (Browser/CLI)  │
 │    Server)      │                 │                 │
 └─────────────────┘                 └─────────────────┘
@@ -181,7 +181,7 @@ import asyncio
 import websockets
 import json
 
-async def monitor_plotty():
+async def monitor_vfab():
     uri = "ws://localhost:8766/ws"
     
     async with websockets.connect(uri) as websocket:
@@ -201,19 +201,19 @@ async def monitor_plotty():
                 print(f"Job {data['job_id']}: {data['from_state']} → {data['to_state']}")
 
 # Run monitor
-asyncio.run(monitor_plotty())
+asyncio.run(monitor_vfab())
 ```
 
 ### CLI Monitor
 ```bash
 # Start built-in monitor
-plotty monitor --channels jobs,system
+vfab monitor --channels jobs,system
 
 # Monitor with filters
-plotty monitor --job-id my_design_001 --level info
+vfab monitor --job-id my_design_001 --level info
 
 # Continuous monitoring
-plotty monitor --follow --format json
+vfab monitor --follow --format json
 ```
 
 ## Configuration
@@ -272,7 +272,7 @@ The server implements rate limiting to prevent abuse:
 ### Connection Issues
 ```bash
 # Check if WebSocket server is running
-plotty info system | grep websocket
+vfab info system | grep websocket
 
 # Test connectivity
 curl -i -N -H "Connection: Upgrade" \
@@ -304,7 +304,7 @@ Enable debug logging for WebSocket issues:
 logging:
   level: "debug"
   modules:
-    - "plotty.websocket"
+    - "vfab.websocket"
 ```
 
 ## Performance
@@ -318,10 +318,10 @@ logging:
 ### Monitoring Performance
 ```bash
 # Check WebSocket connection count
-plotty stats websocket
+vfab stats websocket
 
 # Monitor message throughput
-plotty monitor --stats --interval 60
+vfab monitor --stats --interval 60
 ```
 
 ## Integration Examples
@@ -398,8 +398,8 @@ class AlertManager:
             await self.email_alert(alert)
     
     async def email_alert(self, alert):
-        msg = MIMEText(f"ploTTY Alert: {alert['message']}")
-        msg['Subject'] = f"ploTTY {alert['level'].upper()}: {alert['message']}"
+        msg = MIMEText(f"vfab Alert: {alert['message']}")
+        msg['Subject'] = f"vfab {alert['level'].upper()}: {alert['message']}"
         msg['From'] = self.email_config['from']
         msg['To'] = self.email_config['to']
         
@@ -408,10 +408,10 @@ class AlertManager:
 
 # Usage
 alert_manager = AlertManager({
-    'from': 'plotty@studio.com',
+    'from': 'vfab@studio.com',
     'to': 'admin@studio.com'
 })
 asyncio.run(alert_manager.monitor_alerts())
 ```
 
-This WebSocket monitoring system provides real-time visibility into ploTTY operations, enabling responsive user interfaces, automated workflows, and comprehensive system observability.
+This WebSocket monitoring system provides real-time visibility into vfab operations, enabling responsive user interfaces, automated workflows, and comprehensive system observability.

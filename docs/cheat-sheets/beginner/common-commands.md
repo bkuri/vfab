@@ -9,43 +9,43 @@
 ### Add Jobs
 ```bash
 # Basic add
-plotty add design.svg
+vfab add design.svg
 
 # With custom name
-plotty add design.svg --name "My Art"
+vfab add design.svg --name "My Art"
 
 # With paper size
-plotty add design.svg --paper a4 --name "A4 Art"
+vfab add design.svg --paper a4 --name "A4 Art"
 
 # Multiple files
-plotty add *.svg --name "Batch Job"
+vfab add *.svg --name "Batch Job"
 ```
 
 ### List Jobs
 ```bash
 # All jobs
-plotty list jobs
+vfab list jobs
 
 # Current queue
-plotty list queue
+vfab list queue
 
 # Job details
-plotty info job my_job
+vfab info job my_job
 
 # Completed jobs
-plotty list jobs --state completed
+vfab list jobs --state completed
 ```
 
 ### Remove Jobs
 ```bash
 # Specific job
-plotty remove job my_job
+vfab remove job my_job
 
 # Completed jobs
-plotty queue cleanup --state completed
+vfab queue cleanup --state completed
 
 # Old jobs (older than 7 days)
-plotty queue cleanup --older-than 7d
+vfab queue cleanup --older-than 7d
 ```
 
 ---
@@ -55,31 +55,31 @@ plotty queue cleanup --older-than 7d
 ### Plan Jobs
 ```bash
 # Quick planning (fast preset)
-plotty plan my_job
+vfab plan my_job
 
 # Interactive planning
-plotty plan my_job --interactive
+vfab plan my_job --interactive
 
 # High quality planning
-plotty plan my_job --preset hq
+vfab plan my_job --preset hq
 
 # Plan all jobs
-plotty plan-all --preset fast
+vfab plan-all --preset fast
 ```
 
 ### Plot Jobs
 ```bash
 # Plot single job
-plotty plot my_job
+vfab plot my_job
 
 # Plot all planned jobs
-plotty plot-all
+vfab plot-all
 
 # With preview
-plotty plot my_job --preview
+vfab plot my_job --preview
 
 # With recording
-plotty plot my_job --record
+vfab plot my_job --record
 ```
 
 ---
@@ -89,31 +89,31 @@ plotty plot my_job --record
 ### System Status
 ```bash
 # Quick status
-plotty status
+vfab status
 
 # Full system check
-plotty check ready
+vfab check ready
 
 # Device status
-plotty check device
+vfab check device
 
 # Database status
-plotty check database
+vfab check database
 ```
 
 ### Job Information
 ```bash
 # Job details
-plotty info job my_job
+vfab info job my_job
 
 # Time estimation
-plotty estimate my_job
+vfab estimate my_job
 
 # Detailed estimation
-plotty estimate my_job --detailed
+vfab estimate my_job --detailed
 
 # Job report
-plotty info job my_job --show-report
+vfab info job my_job --show-report
 ```
 
 ---
@@ -123,25 +123,25 @@ plotty info job my_job --show-report
 ### Quick Stats
 ```bash
 # Summary statistics
-plotty stats summary
+vfab stats summary
 
 # Today's stats
-plotty stats summary --today
+vfab stats summary --today
 
 # Last 30 days
-plotty stats summary --last 30
+vfab stats summary --last 30
 ```
 
 ### Detailed Analytics
 ```bash
 # Job statistics
-plotty stats jobs --last 30
+vfab stats jobs --last 30
 
 # Performance metrics
-plotty stats performance
+vfab stats performance
 
 # Pen usage
-plotty stats pens --last 30
+vfab stats pens --last 30
 ```
 
 ---
@@ -151,28 +151,28 @@ plotty stats pens --last 30
 ### Pen Management
 ```bash
 # List pens
-plotty list pens
+vfab list pens
 
 # Add pen
-plotty add pen --name "Fine Black" --width 0.3 --color "#000000"
+vfab add pen --name "Fine Black" --width 0.3 --color "#000000"
 
 # Update pen
-plotty update pen 1 --speed-cap 60
+vfab update pen 1 --speed-cap 60
 
 # Pen usage
-plotty list pens --show-usage
+vfab list pens --show-usage
 ```
 
 ### Paper Management
 ```bash
 # List paper types
-plotty list paper
+vfab list paper
 
 # Add paper size
-plotty add paper --name "Custom" --width 200 --height 150
+vfab add paper --name "Custom" --width 200 --height 150
 
 # Paper usage
-plotty list paper --show-usage
+vfab list paper --show-usage
 ```
 
 ---
@@ -182,28 +182,28 @@ plotty list paper --show-usage
 ### Device Configuration
 ```bash
 # View config
-plotty config show
+vfab config show
 
 # Set device port
-plotty config device --port /dev/ttyUSB0
+vfab config device --port /dev/ttyUSB0
 
 # Set pen positions
-plotty config device --pen-up 60 --pen-down 40
+vfab config device --pen-up 60 --pen-down 40
 
 # Test device
-plotty check device --test-move
+vfab check device --test-move
 ```
 
 ### General Configuration
 ```bash
 # Interactive setup
-plotty setup
+vfab setup
 
 # Setup wizard
-plotty setup device
+vfab setup device
 
 # Validate config
-plotty config validate
+vfab config validate
 ```
 
 ---
@@ -213,31 +213,31 @@ plotty config validate
 ### Recovery Commands
 ```bash
 # List recovery options
-plotty recovery list
+vfab recovery list
 
 # Resume interrupted job
-plotty resume my_job
+vfab resume my_job
 
 # Restart job
-plotty restart my_job
+vfab restart my_job
 
 # Abort stuck job
-plotty abort my_job
+vfab abort my_job
 ```
 
 ### Diagnostic Commands
 ```bash
 # System information
-plotty info system
+vfab info system
 
 # Health check
-plotty check ready --detailed
+vfab check ready --detailed
 
 # Log files
-plotty logs --tail 50
+vfab logs --tail 50
 
 # Test patterns
-plotty test pattern --basic
+vfab test pattern --basic
 ```
 
 ---
@@ -247,40 +247,40 @@ plotty test pattern --basic
 ### Daily Workflow
 ```bash
 # Morning setup
-plotty check ready
-plotty list queue
+vfab check ready
+vfab list queue
 
 # Add and plot new design
-plotty add new.svg --name "Today's Art"
-plotty plan new_art --interactive
-plotty plot new_art
+vfab add new.svg --name "Today's Art"
+vfab plan new_art --interactive
+vfab plot new_art
 
 # End of day cleanup
-plotty queue cleanup --state completed
-plotty stats summary --today
+vfab queue cleanup --state completed
+vfab stats summary --today
 ```
 
 ### Batch Processing
 ```bash
 # Add multiple files
 for file in *.svg; do
-    plotty add "$file" --name "Batch: $(basename "$file" .svg)"
+    vfab add "$file" --name "Batch: $(basename "$file" .svg)"
 done
 
 # Plan all
-plotty plan-all --preset fast
+vfab plan-all --preset fast
 
 # Plot all
-plotty plot-all
+vfab plot-all
 ```
 
 ### Troubleshooting Sequence
 ```bash
 # When something goes wrong
-plotty check ready
-plotty status
-plotty recovery list
-plotty info system
+vfab check ready
+vfab status
+vfab recovery list
+vfab info system
 ```
 
 ---
@@ -320,25 +320,25 @@ plotty info system
 **When plotter goes crazy:**
 ```bash
 # IMMEDIATELY STOP
-plotty abort
+vfab abort
 
 # Emergency device reset
-plotty check device --reset
+vfab check device --reset
 
 # Full system restart
-plotty restart
+vfab restart
 ```
 
 **When you're stuck:**
 ```bash
 # Get help for any command
-plotty <command> --help
+vfab <command> --help
 
 # Full system status
-plotty info system
+vfab info system
 
 # Check what's running
-plotty status --verbose
+vfab status --verbose
 ```
 
 ---
@@ -348,22 +348,22 @@ plotty status --verbose
 **Save time with aliases:**
 ```bash
 # Add to your .bashrc/.zshrc
-alias pp='plotty plot'
-alias pa='plotty add'
-alias pl='plotty list'
-alias ps='plotty status'
+alias pp='vfab plot'
+alias pa='vfab add'
+alias pl='vfab list'
+alias ps='vfab status'
 ```
 
 **Useful combinations:**
 ```bash
 # Add and plan in one step
-plotty add design.svg --name "Art" && plotty plan Art
+vfab add design.svg --name "Art" && vfab plan Art
 
 # Quick status check
-plotty status && plotty list queue
+vfab status && vfab list queue
 
 # Clean and report
-plotty queue cleanup --completed && plotty stats summary --today
+vfab queue cleanup --completed && vfab stats summary --today
 ```
 
 ---

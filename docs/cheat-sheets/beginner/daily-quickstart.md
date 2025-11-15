@@ -5,7 +5,7 @@
 ---
 
 ## 🧭 Quick Navigation
-- **New to ploTTY?** Start with [First Plot Checklist](first-plot-checklist.md)
+- **New to vfab?** Start with [First Plot Checklist](first-plot-checklist.md)
 - **Need more commands?** [Common Commands Reference](common-commands.md)
 - **Something wrong?** [Troubleshooting Basics](troubleshooting-basics.md)
 - **Ready for more?** [Multi-Pen Workflow](../creative/multi-pen-workflow.md)
@@ -16,13 +16,13 @@
 
 ```bash
 # 1. Check everything is ready
-plotty check ready
+vfab check ready
 
 # 2. See today's queue
-plotty list queue
+vfab list queue
 
 # 3. Quick status overview
-plotty status
+vfab status
 ```
 
 **Expected output:** ✅ Device ready, ✅ Database healthy, X jobs pending
@@ -33,13 +33,13 @@ plotty status
 
 ```bash
 # Quick add with defaults
-plotty add my_design.svg
+vfab add my_design.svg
 
 # Add with custom name
-plotty add my_design.svg --name "My Art"
+vfab add my_design.svg --name "My Art"
 
 # Add with paper size
-plotty add my_design.svg --paper a4 --name "Today's Art"
+vfab add my_design.svg --paper a4 --name "Today's Art"
 ```
 
 **Expected output:** ✅ Added job: my_design (47 points, ~2 minutes)
@@ -50,13 +50,13 @@ plotty add my_design.svg --paper a4 --name "Today's Art"
 
 ```bash
 # Plan with defaults (fast optimization)
-plotty plan my_design
+vfab plan my_design
 
 # Interactive planning (better for new designs)
-plotty plan my_design --interactive
+vfab plan my_design --interactive
 
 # Start plotting
-plotty plot my_design
+vfab plot my_design
 ```
 
 **Interactive planning tips:**
@@ -70,7 +70,7 @@ plotty plot my_design
 
 ```bash
 # Job information
-plotty info job my_design
+vfab info job my_design
 
 # View report (opens in browser)
 # Open: workspace/jobs/my_design/report.html
@@ -87,13 +87,13 @@ plotty info job my_design
 
 ```bash
 # Clean up completed jobs
-plotty queue cleanup --state completed
+vfab queue cleanup --state completed
 
 # Quick daily stats
-plotty stats summary --today
+vfab stats summary --today
 
 # Check device for tomorrow
-plotty check ready
+vfab check ready
 ```
 
 ---
@@ -103,8 +103,8 @@ plotty check ready
 | Problem | Quick Fix |
 |---------|-----------|
 | Device not found | Check USB cable, try different port |
-| Poor line quality | `plotty check servo` |
-| Job stuck | `plotty recovery list` |
+| Poor line quality | `vfab check servo` |
+| Job stuck | `vfab recovery list` |
 | Camera not working | Skip camera for now (optional) |
 
 ---
@@ -115,13 +115,13 @@ plotty check ready
 
 ```bash
 # Add and plan in one step
-plotty add design.svg --name "Art" && plotty plan Art
+vfab add design.svg --name "Art" && vfab plan Art
 
 # Plan all pending jobs
-plotty plan-all --preset fast
+vfab plan-all --preset fast
 
 # Plot all planned jobs
-plotty plot-all
+vfab plot-all
 ```
 
 **Daily routine checklist:**
@@ -137,12 +137,12 @@ plotty plot-all
 
 ```bash
 # Quick help for any command
-plotty --help
-plotty add --help
-plotty plot --help
+vfab --help
+vfab add --help
+vfab plot --help
 
 # System info for support
-plotty info system
+vfab info system
 ```
 
 ---

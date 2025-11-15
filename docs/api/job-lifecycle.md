@@ -1,6 +1,6 @@
 # Job Lifecycle and States
 
-ploTTY uses a sophisticated Finite State Machine (FSM) to manage the complete lifecycle of plotting jobs. Understanding the job states and transitions is crucial for integrating with ploTTY and building custom workflows.
+vfab uses a sophisticated Finite State Machine (FSM) to manage the complete lifecycle of plotting jobs. Understanding the job states and transitions is crucial for integrating with vfab and building custom workflows.
 
 ## Job States
 
@@ -86,7 +86,7 @@ The FSM enforces strict state transitions to ensure job integrity:
 ### Creating and Managing FSM
 
 ```python
-from plotty.fsm import create_fsm, JobState
+from vfab.fsm import create_fsm, JobState
 from pathlib import Path
 
 # Create FSM for job
@@ -544,4 +544,4 @@ def monitor_job_state(job_id: str, workspace: Path):
         time.sleep(1)  # Check every second
 ```
 
-Understanding the job lifecycle and FSM is essential for building robust ploTTY integrations and custom workflows. The state system ensures job integrity, enables error recovery, and provides hooks for automation.
+Understanding the job lifecycle and FSM is essential for building robust vfab integrations and custom workflows. The state system ensures job integrity, enables error recovery, and provides hooks for automation.

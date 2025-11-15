@@ -1,4 +1,4 @@
-from plotty.config import load_config
+from vfab.config import load_config
 
 
 def test_cfg():

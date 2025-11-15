@@ -1,4 +1,4 @@
-# ploTTY
+# vfab
 
 Headless-first FSM plotter manager with vpype optimization, smart multi-pen detection,
 and per-session recording (IP feed v1; native v4l2 later).
@@ -9,7 +9,7 @@ and per-session recording (IP feed v1; native v4l2 later).
 - **[Cheat Sheets](docs/cheat-sheets/)** - ⭐ Quick reference for common tasks
 - **[Installation Guide](docs/installation.md)** - Multi-platform setup instructions
 - **[User Guide](docs/user-guide.md)** - Complete usage documentation  
-- **[vpype-plotty Integration Guide](docs/vpype-plotty.md)** - Bridge creative tools with ploTTY production
+- **[vpype-vfab Integration Guide](docs/vpype-plotty.md)** - Bridge creative tools with vfab production
 - **[API Reference](docs/api/)** - Developer documentation and integration
 - **[Troubleshooting](docs/troubleshooting/)** - Common issues and solutions
 - **[Changelog](CHANGELOG.md)** - Version history and release notes
@@ -49,7 +49,7 @@ uv run alembic upgrade head
 uv run pytest -q
 
 # try CLI
-uv run plotty --help
+uv run vfab --help
 ```
 
 **For AxiDraw Hardware Support:**
@@ -62,14 +62,14 @@ uv run alembic upgrade head
 uv run pytest -q
 
 # try CLI
-uv run plotty --help
+uv run vfab --help
 ```
 
-> **Note**: ploTTY works perfectly without AxiDraw hardware for planning, optimization, and simulation. Install axidraw extra only if you have physical hardware.
+> **Note**: vfab works perfectly without AxiDraw hardware for planning, optimization, and simulation. Install axidraw extra only if you have physical hardware.
 
 ## AxiDraw Integration
 
-ploTTY provides **smart AxiDraw integration** with automatic multipen detection and graceful degradation.
+vfab provides **smart AxiDraw integration** with automatic multipen detection and graceful degradation.
 
 ### Installation
 
@@ -78,36 +78,36 @@ ploTTY provides **smart AxiDraw integration** with automatic multipen detection 
 uv pip install -e ".[dev,vpype,axidraw]"
 ```
 
-> **Important**: ploTTY works without AxiDraw hardware for planning and simulation. The axidraw extra is only needed for physical plotting.
+> **Important**: vfab works without AxiDraw hardware for planning and simulation. The axidraw extra is only needed for physical plotting.
 
 ### AxiDraw CLI Commands
 
 ```bash
 # Plan a job with smart multipen detection
-uv run plotty plan <job_id> --interactive
+uv run vfab plan <job_id> --interactive
 
 # Plot a job with AxiDraw (supports multipen)
-uv run plotty plot <job_id>
+uv run vfab plot <job_id>
 
 # Preview plot without moving pen
-uv run plotty plot <job_id> --preview
+uv run vfab plot <job_id> --preview
 
 # Interactive XY control
-uv run plotty interactive
+uv run vfab interactive
 
 # Test pen up/down movement
-uv run plotty check servo
+uv run vfab check servo
 
 # List available pens from database
-uv run plotty list pens
+uv run vfab list pens
 
 # Add new pen to database
-uv run plotty setup
+uv run vfab setup
 ```
 
 ### Smart Multipen Detection
 
-ploTTY automatically detects layers in your SVG files and provides:
+vfab automatically detects layers in your SVG files and provides:
 
 - **🎨 Color-coded layer overview** with element counts
 - **🚫 Hidden layer filtering** (skips Inkscape hidden layers and `%` documentation layers)  
@@ -116,7 +116,7 @@ ploTTY automatically detects layers in your SVG files and provides:
 
 ### vpype Optimization Presets
 
-ploTTY includes vpype presets for different optimization levels with **dynamic paper sizing**:
+vfab includes vpype presets for different optimization levels with **dynamic paper sizing**:
 
 ```yaml
 # config/vpype-presets.yaml
@@ -164,7 +164,7 @@ device:
 
 ### Error Handling
 
-If AxiDraw support is not installed, ploTTY provides clear guidance:
+If AxiDraw support is not installed, vfab provides clear guidance:
 
 ```
 ❌ AxiDraw support not available. Install with: uv pip install -e '.[axidraw]'
@@ -176,22 +176,22 @@ All non-AxiDraw features (planning, optimization, simulation) work without the a
 
 ```bash
 # Check system readiness including AxiDraw
-uv run plotty check ready
+uv run vfab check ready
 
 # Check servo operation (pen up/down)
-uv run plotty check servo
+uv run vfab check servo
 
 # Plot a job with AxiDraw (with time estimation)
-uv run plotty plot <job_id>
+uv run vfab plot <job_id>
 
 # Preview plot without moving pen
-uv run plotty plot <job_id> --dry-run
+uv run vfab plot <job_id> --dry-run
 
 # Interactive XY control
-uv run plotty interactive
+uv run vfab interactive
 
 # Check device timing
-uv run plotty check timing
+uv run vfab check timing
 ```
 
 ### AxiDraw Configuration

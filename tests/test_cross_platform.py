@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Cross-platform compatibility test for ploTTY.
+Cross-platform compatibility test for vfab.
 
-This script tests ploTTY functionality across different platforms.
+This script tests vfab functionality across different platforms.
 """
 
 import os
@@ -114,7 +114,7 @@ def test_database_operations():
 
     try:
         # Test database initialization
-        result = run_command("plotty check config", check=False)
+        result = run_command("vfab check config", check=False)
         if result and result.returncode <= 2:  # Allow warnings
             print("✅ Database operations passed")
             return True
@@ -131,11 +131,11 @@ def test_cli_commands():
     print("💻 Testing CLI commands...")
 
     commands = [
-        ("plotty --help", "Help command"),
-        ("plotty check config", "Config check"),
-        ("plotty list pens", "List pens"),
-        ("plotty list papers", "List papers"),
-        ("plotty info system", "System info"),
+        ("vfab --help", "Help command"),
+        ("vfab check config", "Config check"),
+        ("vfab list pens", "List pens"),
+        ("vfab list papers", "List papers"),
+        ("vfab info system", "System info"),
     ]
 
     all_passed = True
@@ -160,15 +160,15 @@ def test_environment_variables():
     print("🌍 Testing environment variables...")
 
     # Test setting environment variable
-    os.environ["PLOTTY_TEST"] = "test_value"
+    os.environ["VFAB_TEST"] = "test_value"
 
-    if os.environ.get("PLOTTY_TEST") != "test_value":
+    if os.environ.get("VFAB_TEST") != "test_value":
         print("❌ Environment variable setting failed")
         return False
 
     # Test environment variable in subprocess
     result = run_command(
-        "python -c \"import os; print(os.environ.get('PLOTTY_TEST', 'not_found'))\"",
+        "python -c \"import os; print(os.environ.get('VFAB_TEST', 'not_found'))\"",
         check=False,
     )
 
@@ -242,7 +242,7 @@ def test_special_characters():
 
 def main():
     """Main cross-platform test."""
-    print("🌍 ploTTY Cross-Platform Compatibility Test")
+    print("🌍 vfab Cross-Platform Compatibility Test")
     print("=" * 60)
 
     # Get platform information

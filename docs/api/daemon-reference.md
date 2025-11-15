@@ -1,10 +1,10 @@
 # Daemon Command Reference
 
-Complete reference for the ploTTY daemon process and WebSocket server.
+Complete reference for the vfab daemon process and WebSocket server.
 
 ## Overview
 
-The ploTTY daemon (`plotty daemon`) is a long-running background process that manages:
+The vfab daemon (`vfab daemon`) is a long-running background process that manages:
 - Job queue processing and execution
 - WebSocket server for real-time monitoring
 - Hardware device management
@@ -13,7 +13,7 @@ The ploTTY daemon (`plotty daemon`) is a long-running background process that ma
 ## Command Syntax
 
 ```bash
-plotty daemon [OPTIONS]
+vfab daemon [OPTIONS]
 ```
 
 ## Options
@@ -25,13 +25,13 @@ plotty daemon [OPTIONS]
 **Examples:**
 ```bash
 # Bind to localhost (default)
-plotty daemon
+vfab daemon
 
 # Bind to all interfaces
-plotty daemon --host 0.0.0.0
+vfab daemon --host 0.0.0.0
 
 # Bind to specific network interface
-plotty daemon --host 192.168.1.100
+vfab daemon --host 192.168.1.100
 ```
 
 ### `--port, -p`
@@ -41,29 +41,29 @@ plotty daemon --host 192.168.1.100
 **Examples:**
 ```bash
 # Use default port
-plotty daemon
+vfab daemon
 
 # Use custom port
-plotty daemon --port 8080
+vfab daemon --port 8080
 
 # Use port in production range
-plotty daemon --port 8765
+vfab daemon --port 8765
 ```
 
 ### `--workspace, -w`
-**Default:** `$XDG_DATA_HOME/plotty/workspace`  
+**Default:** `$XDG_DATA_HOME/vfab/workspace`  
 **Description:** Working directory for jobs and data
 
 **Examples:**
 ```bash
 # Use default workspace
-plotty daemon
+vfab daemon
 
 # Use custom workspace
-plotty daemon --workspace /mnt/storage/plotty-workspace
+vfab daemon --workspace /mnt/storage/vfab-workspace
 
 # Use relative workspace
-plotty daemon --workspace ./my-workspace
+vfab daemon --workspace ./my-workspace
 ```
 
 ### `--log-level, -l`
@@ -80,29 +80,29 @@ plotty daemon --workspace ./my-workspace
 **Examples:**
 ```bash
 # Default info level
-plotty daemon
+vfab daemon
 
 # Debug mode for troubleshooting
-plotty daemon --log-level debug
+vfab daemon --log-level debug
 
 # Production mode (errors only)
-plotty daemon --log-level error
+vfab daemon --log-level error
 ```
 
 ### `--config, -c`
-**Default:** `$XDG_CONFIG_HOME/plotty/config.yaml`  
+**Default:** `$XDG_CONFIG_HOME/vfab/config.yaml`  
 **Description:** Path to configuration file
 
 **Examples:**
 ```bash
 # Use default config
-plotty daemon
+vfab daemon
 
 # Use custom config
-plotty daemon --config /etc/plotty/production.yaml
+vfab daemon --config /etc/vfab/production.yaml
 
 # Use project-specific config
-plotty daemon --config ./studio-config.yaml
+vfab daemon --config ./studio-config.yaml
 ```
 
 ### `--pid-file`
@@ -112,10 +112,10 @@ plotty daemon --config ./studio-config.yaml
 **Examples:**
 ```bash
 # Create PID file
-plotty daemon --pid-file /var/run/plotty/plotty.pid
+vfab daemon --pid-file /var/run/vfab/vfab.pid
 
 # Use user-local PID file
-plotty daemon --pid-file ~/.local/run/plotty.pid
+vfab daemon --pid-file ~/.local/run/vfab.pid
 ```
 
 ### `--daemonize, -d`
@@ -125,13 +125,13 @@ plotty daemon --pid-file ~/.local/run/plotty.pid
 **Examples:**
 ```bash
 # Run in foreground (default)
-plotty daemon
+vfab daemon
 
 # Run as background daemon
-plotty daemon --daemonize
+vfab daemon --daemonize
 
 # Background with custom PID file
-plotty daemon --daemonize --pid-file /var/run/plotty/plotty.pid
+vfab daemon --daemonize --pid-file /var/run/vfab/vfab.pid
 ```
 
 ### `--user, -u`
@@ -141,13 +141,13 @@ plotty daemon --daemonize --pid-file /var/run/plotty/plotty.pid
 **Examples:**
 ```bash
 # Run as current user
-plotty daemon
+vfab daemon
 
 # Run as specific user (system-wide installation)
-sudo plotty daemon --user plotty
+sudo vfab daemon --user vfab
 
 # Run as nobody for security
-sudo plotty daemon --user nobody
+sudo vfab daemon --user nobody
 ```
 
 ### `--group, -g`
@@ -156,11 +156,11 @@ sudo plotty daemon --user nobody
 
 **Examples:**
 ```bash
-# Run as plotty group
-sudo plotty daemon --group plotty
+# Run as vfab group
+sudo vfab daemon --group vfab
 
 # Run as dialout group for device access
-sudo plotty daemon --group dialout
+sudo vfab daemon --group dialout
 ```
 
 ## Usage Examples
@@ -168,31 +168,31 @@ sudo plotty daemon --group dialout
 ### Basic Development Setup
 ```bash
 # Start daemon for development
-plotty daemon --log-level debug
+vfab daemon --log-level debug
 
 # Start with custom workspace
-plotty daemon --workspace ./dev-workspace --log-level debug
+vfab daemon --workspace ./dev-workspace --log-level debug
 ```
 
 ### Production Deployment
 ```bash
 # Production daemon with all options
-sudo plotty daemon \
+sudo vfab daemon \
   --host 0.0.0.0 \
   --port 8766 \
-  --workspace /var/lib/plotty/workspace \
-  --config /etc/plotty/production.yaml \
+  --workspace /var/lib/vfab/workspace \
+  --config /etc/vfab/production.yaml \
   --log-level info \
   --daemonize \
-  --pid-file /var/run/plotty/plotty.pid \
-  --user plotty \
-  --group plotty
+  --pid-file /var/run/vfab/vfab.pid \
+  --user vfab \
+  --group vfab
 ```
 
 ### Docker/Container Setup
 ```bash
 # Container-friendly daemon
-plotty daemon \
+vfab daemon \
   --host 0.0.0.0 \
   --port 8766 \
   --workspace /data/workspace \
@@ -202,10 +202,10 @@ plotty daemon \
 ### Testing and Debugging
 ```bash
 # Debug mode with verbose logging
-plotty daemon --log-level debug --workspace ./test-workspace
+vfab daemon --log-level debug --workspace ./test-workspace
 
 # Test configuration
-plotty daemon --config ./test-config.yaml --log-level debug
+vfab daemon --config ./test-config.yaml --log-level debug
 ```
 
 ## Daemon Lifecycle
@@ -238,22 +238,22 @@ The daemon handles shutdown signals gracefully:
 
 ### Systemd Service
 ```ini
-# /etc/systemd/system/plotty.service
+# /etc/systemd/system/vfab.service
 [Unit]
-Description=ploTTY Daemon
+Description=vfab Daemon
 After=network.target
 
 [Service]
 Type=simple
-User=plotty
-Group=plotty
-ExecStart=/usr/bin/plotty daemon \
+User=vfab
+Group=vfab
+ExecStart=/usr/bin/vfab daemon \
   --host 0.0.0.0 \
   --port 8766 \
-  --workspace /var/lib/plotty/workspace \
-  --config /etc/plotty/config.yaml \
+  --workspace /var/lib/vfab/workspace \
+  --config /etc/vfab/config.yaml \
   --log-level info
-PIDFile=/var/run/plotty/plotty.pid
+PIDFile=/var/run/vfab/vfab.pid
 Restart=always
 RestartSec=5
 
@@ -264,32 +264,32 @@ WantedBy=multi-user.target
 ### Service Management
 ```bash
 # Enable and start service
-sudo systemctl enable plotty
-sudo systemctl start plotty
+sudo systemctl enable vfab
+sudo systemctl start vfab
 
 # Check status
-sudo systemctl status plotty
+sudo systemctl status vfab
 
 # View logs
-sudo journalctl -u plotty -f
+sudo journalctl -u vfab -f
 
 # Restart service
-sudo systemctl restart plotty
+sudo systemctl restart vfab
 
 # Stop service
-sudo systemctl stop plotty
+sudo systemctl stop vfab
 ```
 
 ### OpenRC Service (Gentoo/Alpine)
 ```bash
 #!/sbin/openrc-run
-# /etc/init.d/plotty
+# /etc/init.d/vfab
 
-command="/usr/bin/plotty daemon"
-command_args="--host 0.0.0.0 --port 8766 --workspace /var/lib/plotty/workspace"
-command_user="plotty"
-command_group="plotty"
-pidfile="/var/run/plotty/plotty.pid"
+command="/usr/bin/vfab daemon"
+command_args="--host 0.0.0.0 --port 8766 --workspace /var/lib/vfab/workspace"
+command_user="vfab"
+command_group="vfab"
+pidfile="/var/run/vfab/vfab.pid"
 command_background="true"
 
 depend() {
@@ -317,7 +317,7 @@ websocket:
 ### Database Configuration
 ```yaml
 database:
-  url: "sqlite:///workspace/plotty.db"
+  url: "sqlite:///workspace/vfab.db"
   pool_size: 10
   max_overflow: 20
 ```
@@ -335,7 +335,7 @@ device:
 ```yaml
 logging:
   level: "info"
-  file: "workspace/logs/plotty.log"
+  file: "workspace/logs/vfab.log"
   max_size: "10MB"
   backup_count: 5
   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -370,25 +370,25 @@ ws.send(JSON.stringify({
 #### Process Monitoring
 ```bash
 # Check if daemon is running
-ps aux | grep plotty
+ps aux | grep vfab
 
 # Check WebSocket connections
 netstat -an | grep 8766
 
 # Monitor resource usage
-top -p $(cat /var/run/plotty/plotty.pid)
+top -p $(cat /var/run/vfab/vfab.pid)
 ```
 
 #### Log Monitoring
 ```bash
 # Follow daemon logs
-tail -f /var/lib/plotty/workspace/logs/plotty.log
+tail -f /var/lib/vfab/workspace/logs/vfab.log
 
 # Systemd logs
-sudo journalctl -u plotty -f
+sudo journalctl -u vfab -f
 
 # Filter for WebSocket events
-grep "websocket" /var/lib/plotty/workspace/logs/plotty.log
+grep "websocket" /var/lib/vfab/workspace/logs/vfab.log
 ```
 
 ## Performance Tuning
@@ -408,10 +408,10 @@ websocket:
 ### CPU Optimization
 ```bash
 # Set process priority
-plotty daemon --nice 10
+vfab daemon --nice 10
 
 # Limit CPU usage (requires cpulimit)
-cpulimit -l 50 -p $(cat /var/run/plotty/plotty.pid) &
+cpulimit -l 50 -p $(cat /var/run/vfab/vfab.pid) &
 ```
 
 ### I/O Optimization
@@ -429,13 +429,13 @@ logging:
 **Daemon Won't Start**
 ```bash
 # Check configuration
-plotty check config
+vfab check config
 
 # Check database access
-plotty check database
+vfab check database
 
 # Check permissions
-ls -la /var/lib/plotty/workspace
+ls -la /var/lib/vfab/workspace
 ```
 
 **WebSocket Connection Issues**
@@ -452,19 +452,19 @@ curl -i -N -H "Connection: Upgrade" \
 **Permission Issues**
 ```bash
 # Check user permissions
-id plotty
+id vfab
 
 # Check device access
 ls -la /dev/ttyUSB*
 
 # Fix device permissions
-sudo usermod -a -G dialout plotty
+sudo usermod -a -G dialout vfab
 ```
 
 ### Debug Mode
 ```bash
 # Enable comprehensive debugging
-plotty daemon \
+vfab daemon \
   --log-level debug \
   --workspace ./debug-workspace \
   --config ./debug-config.yaml
@@ -473,13 +473,13 @@ plotty daemon \
 ### Log Analysis
 ```bash
 # Error analysis
-grep "ERROR" /var/lib/plotty/workspace/logs/plotty.log
+grep "ERROR" /var/lib/vfab/workspace/logs/vfab.log
 
 # WebSocket connection analysis
-grep "websocket" /var/lib/plotty/workspace/logs/plotty.log
+grep "websocket" /var/lib/vfab/workspace/logs/vfab.log
 
 # Performance analysis
-grep "performance" /var/lib/plotty/workspace/logs/plotty.log
+grep "performance" /var/lib/vfab/workspace/logs/vfab.log
 ```
 
 ## Security Considerations
@@ -510,4 +510,4 @@ logging:
   security_events: true
 ```
 
-The ploTTY daemon provides a robust, production-ready foundation for automated plotting operations with comprehensive monitoring and management capabilities.
+The vfab daemon provides a robust, production-ready foundation for automated plotting operations with comprehensive monitoring and management capabilities.

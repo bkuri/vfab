@@ -5,19 +5,19 @@
 ### **Choose by Use Case**
 ```bash
 # Fast drafting
-plotty add --preset draft design.svg
+vfab add --preset draft design.svg
 
 # High quality final output
-plotty add --preset quality final_art.svg
+vfab add --preset quality final_art.svg
 
 # Balanced performance
-plotty add --preset balanced standard_job.svg
+vfab add --preset balanced standard_job.svg
 
 # delicate materials
-plotty add --preset delicate fragile_design.svg
+vfab add --preset delicate fragile_design.svg
 
 # Heavy materials
-plotty add --preset heavy thick_cardstock.svg
+vfab add --preset heavy thick_cardstock.svg
 ```
 
 ## **Built-in Presets**
@@ -311,13 +311,13 @@ pen:
 ### **Create Custom Preset**
 ```bash
 # Create from scratch
-plotty preset create my_custom_preset
+vfab preset create my_custom_preset
 
 # Create based on existing preset
-plotty preset create --from quality my_quality_variant
+vfab preset create --from quality my_quality_variant
 
 # Create interactively
-plotty preset create --interactive my_interactive_preset
+vfab preset create --interactive my_interactive_preset
 ```
 
 ### **Custom Preset Template**
@@ -389,12 +389,12 @@ class PresetOptimizer:
         print(f"Testing preset: {preset_name}")
         
         # Clear queue
-        subprocess.run(['plotty', 'remove', '--all'], capture_output=True)
+        subprocess.run(['vfab', 'remove', '--all'], capture_output=True)
         
         # Add test job with preset
         start_time = time.time()
         result = subprocess.run([
-            'plotty', 'add', '--preset', preset_name, test_file
+            'vfab', 'add', '--preset', preset_name, test_file
         ], capture_output=True, text=True)
         
         if result.returncode != 0:
@@ -402,11 +402,11 @@ class PresetOptimizer:
             return None
         
         # Wait for completion
-        subprocess.run(['plotty', 'resume'], capture_output=True)
+        subprocess.run(['vfab', 'resume'], capture_output=True)
         
         # Monitor completion
         while True:
-            queue_result = subprocess.run(['plotty', 'list'], 
+            queue_result = subprocess.run(['vfab', 'list'], 
                                         capture_output=True, text=True)
             if len(queue_result.stdout.strip().split('\n')) <= 1:
                 break
@@ -417,7 +417,7 @@ class PresetOptimizer:
         
         # Get quality metrics
         quality_result = subprocess.run([
-            'plotty', 'check', '--quality', test_file
+            'vfab', 'check', '--quality', test_file
         ], capture_output=True, text=True)
         
         # Parse results
@@ -434,7 +434,7 @@ class PresetOptimizer:
         return metrics
     
     def parse_quality_score(self, quality_output):
-        """Parse quality score from ploTTY check output"""
+        """Parse quality score from vfab check output"""
         try:
             for line in quality_output.split('\n'):
                 if 'Quality Score:' in line:
@@ -552,47 +552,47 @@ if __name__ == "__main__":
 ### **Preset Commands**
 ```bash
 # List all available presets
-plotty preset list
-plotty preset list --detailed
+vfab preset list
+vfab preset list --detailed
 
 # Show preset details
-plotty preset show quality
-plotty preset show my_custom_preset
+vfab preset show quality
+vfab preset show my_custom_preset
 
 # Create new preset
-plotty preset create new_preset
-plotty preset create --from quality new_quality_variant
+vfab preset create new_preset
+vfab preset create --from quality new_quality_variant
 
 # Edit preset
-plotty preset edit my_preset
-plotty preset edit --editor vim my_preset
+vfab preset edit my_preset
+vfab preset edit --editor vim my_preset
 
 # Delete preset
-plotty preset delete old_preset
+vfab preset delete old_preset
 
 # Copy preset
-plotty preset copy quality new_quality_copy
+vfab preset copy quality new_quality_copy
 
 # Validate preset
-plotty preset validate my_preset
-plotty preset validate --all
+vfab preset validate my_preset
+vfab preset validate --all
 
 # Export/Import presets
-plotty preset export my_preset.yaml
-plotty preset import downloaded_preset.yaml
+vfab preset export my_preset.yaml
+vfab preset import downloaded_preset.yaml
 ```
 
 ### **Preset Categories**
 ```bash
 # List by category
-plotty preset list --category speed
-plotty preset list --category material
-plotty preset list --category pen
+vfab preset list --category speed
+vfab preset list --category material
+vfab preset list --category pen
 
 # Search presets
-plotty preset search "fast"
-plotty preset search "paper"
-plotty preset search "fine"
+vfab preset search "fast"
+vfab preset search "paper"
+vfab preset search "fine"
 ```
 
 ## **Advanced Preset Features**

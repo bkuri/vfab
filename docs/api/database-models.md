@@ -1,6 +1,6 @@
 # Database Models
 
-ploTTY uses SQLAlchemy ORM with a well-defined database schema for managing plotting resources, jobs, and statistics. The models are defined in `src/plotty/models.py` and managed through Alembic migrations.
+vfab uses SQLAlchemy ORM with a well-defined database schema for managing plotting resources, jobs, and statistics. The models are defined in `src/vfab/models.py` and managed through Alembic migrations.
 
 ## Core Models
 
@@ -340,7 +340,7 @@ Jobs progress through the following states (defined in `JobState` enum):
 ### Session Management
 
 ```python
-from plotty.db import get_session
+from vfab.db import get_session
 
 # Using context manager
 with get_session() as session:
@@ -428,7 +428,7 @@ The database connection is configured through the `DatabaseCfg` model:
 
 ```python
 class DatabaseCfg(BaseModel):
-    url: str = "sqlite:///path/to/plotty.db"
+    url: str = "sqlite:///path/to/vfab.db"
     echo: bool = False  # Enable SQLAlchemy query logging
 ```
 
@@ -437,6 +437,6 @@ Default database is SQLite, but PostgreSQL is also supported:
 ```yaml
 # config/config.yaml
 database:
-  url: "postgresql://user:password@localhost/plotty"
+  url: "postgresql://user:password@localhost/vfab"
   echo: false
 ```

@@ -8,7 +8,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from plotty.plotting import PenSwapPrompt, MultiPenPlotter
+from vfab.plotting import PenSwapPrompt, MultiPenPlotter
 
 
 class TestPenSwapPrompt:
@@ -134,14 +134,14 @@ class TestMultiPenPlotter:
 
     def test_multipen_plotter_no_axidraw_available(self):
         """Test MultiPenPlotter initialization when AxiDraw is not available."""
-        with patch("plotty.plotting.is_axidraw_available", return_value=False):
+        with patch("vfab.plotting.is_axidraw_available", return_value=False):
             with pytest.raises(ImportError, match="AxiDraw support not available"):
                 MultiPenPlotter()
 
     def test_multipen_plotter_initialization(self, mock_manager):
         """Test MultiPenPlotter initialization with AxiDraw available."""
-        with patch("plotty.plotting.is_axidraw_available", return_value=True):
-            with patch("plotty.plotting.create_manager", return_value=mock_manager):
+        with patch("vfab.plotting.is_axidraw_available", return_value=True):
+            with patch("vfab.plotting.create_manager", return_value=mock_manager):
                 plotter = MultiPenPlotter(
                     port="/dev/ttyUSB0", model=2, interactive=False
                 )
@@ -153,8 +153,8 @@ class TestMultiPenPlotter:
 
     def test_plot_multipen_job_success(self, mock_manager, workspace):
         """Test successful multi-pen job plotting."""
-        with patch("plotty.plotting.is_axidraw_available", return_value=True):
-            with patch("plotty.plotting.create_manager", return_value=mock_manager):
+        with patch("vfab.plotting.is_axidraw_available", return_value=True):
+            with patch("vfab.plotting.create_manager", return_value=mock_manager):
                 plotter = MultiPenPlotter(interactive=False)
 
                 # Create test layer files
@@ -214,8 +214,8 @@ class TestMultiPenPlotter:
 
     def test_plot_multipen_job_with_pen_swaps(self, mock_manager, workspace):
         """Test multi-pen job with pen swaps."""
-        with patch("plotty.plotting.is_axidraw_available", return_value=True):
-            with patch("plotty.plotting.create_manager", return_value=mock_manager):
+        with patch("vfab.plotting.is_axidraw_available", return_value=True):
+            with patch("vfab.plotting.create_manager", return_value=mock_manager):
                 plotter = MultiPenPlotter(interactive=False)
 
                 # Create test layer files
@@ -254,8 +254,8 @@ class TestMultiPenPlotter:
 
     def test_plot_multipen_job_missing_layer_file(self, mock_manager, workspace):
         """Test multi-pen job with missing layer file."""
-        with patch("plotty.plotting.is_axidraw_available", return_value=True):
-            with patch("plotty.plotting.create_manager", return_value=mock_manager):
+        with patch("vfab.plotting.is_axidraw_available", return_value=True):
+            with patch("vfab.plotting.create_manager", return_value=mock_manager):
                 plotter = MultiPenPlotter(interactive=False)
 
                 job_dir = workspace / "test_job"
@@ -287,8 +287,8 @@ class TestMultiPenPlotter:
             "error": "Device not connected",
         }
 
-        with patch("plotty.plotting.is_axidraw_available", return_value=True):
-            with patch("plotty.plotting.create_manager", return_value=mock_manager):
+        with patch("vfab.plotting.is_axidraw_available", return_value=True):
+            with patch("vfab.plotting.create_manager", return_value=mock_manager):
                 plotter = MultiPenPlotter(interactive=False)
 
                 job_dir = workspace / "test_job"
@@ -311,8 +311,8 @@ class TestMultiPenPlotter:
 
     def test_plot_multipen_job_with_progress_callback(self, mock_manager, workspace):
         """Test multi-pen job with progress callback."""
-        with patch("plotty.plotting.is_axidraw_available", return_value=True):
-            with patch("plotty.plotting.create_manager", return_value=mock_manager):
+        with patch("vfab.plotting.is_axidraw_available", return_value=True):
+            with patch("vfab.plotting.create_manager", return_value=mock_manager):
                 plotter = MultiPenPlotter(interactive=False)
 
                 job_dir = workspace / "test_job"
@@ -342,8 +342,8 @@ class TestMultiPenPlotter:
 
     def test_plot_multipen_job_user_interrupt(self, mock_manager, workspace):
         """Test multi-pen job interrupted by user."""
-        with patch("plotty.plotting.is_axidraw_available", return_value=True):
-            with patch("plotty.plotting.create_manager", return_value=mock_manager):
+        with patch("vfab.plotting.is_axidraw_available", return_value=True):
+            with patch("vfab.plotting.create_manager", return_value=mock_manager):
                 plotter = MultiPenPlotter(interactive=False)
 
                 job_dir = workspace / "test_job"
@@ -375,8 +375,8 @@ class TestMultiPenPlotter:
 
     def test_plot_multipen_job_with_pen_info(self, mock_manager, workspace):
         """Test multi-pen job with pen-specific settings."""
-        with patch("plotty.plotting.is_axidraw_available", return_value=True):
-            with patch("plotty.plotting.create_manager", return_value=mock_manager):
+        with patch("vfab.plotting.is_axidraw_available", return_value=True):
+            with patch("vfab.plotting.create_manager", return_value=mock_manager):
                 plotter = MultiPenPlotter(interactive=False)
 
                 job_dir = workspace / "test_job"
@@ -407,8 +407,8 @@ class TestMultiPenPlotter:
 
     def test_plot_with_axidraw_layers_success(self, mock_manager, workspace):
         """Test plotting with AxiDraw native layer control."""
-        with patch("plotty.plotting.is_axidraw_available", return_value=True):
-            with patch("plotty.plotting.create_manager", return_value=mock_manager):
+        with patch("vfab.plotting.is_axidraw_available", return_value=True):
+            with patch("vfab.plotting.create_manager", return_value=mock_manager):
                 plotter = MultiPenPlotter(interactive=False)
 
                 svg_file = workspace / "multipen.svg"
@@ -417,10 +417,10 @@ class TestMultiPenPlotter:
                 # Mock detect_svg_layers
                 mock_layers = [Mock(name="test_layer")]
                 with patch(
-                    "plotty.plotting.detect_svg_layers", return_value=mock_layers
+                    "vfab.plotting.detect_svg_layers", return_value=mock_layers
                 ):
                     with patch(
-                        "plotty.plotting.parse_axidraw_layer_control"
+                        "vfab.plotting.parse_axidraw_layer_control"
                     ) as mock_parse:
                         mock_control = Mock()
                         mock_control.speed = 30
@@ -445,14 +445,14 @@ class TestMultiPenPlotter:
             "error": "Plotting device error",
         }
 
-        with patch("plotty.plotting.is_axidraw_available", return_value=True):
-            with patch("plotty.plotting.create_manager", return_value=mock_manager):
+        with patch("vfab.plotting.is_axidraw_available", return_value=True):
+            with patch("vfab.plotting.create_manager", return_value=mock_manager):
                 plotter = MultiPenPlotter(interactive=False)
 
                 svg_file = workspace / "multipen.svg"
                 svg_file.write_text('<svg><g layer="test_layer"/></svg>')
 
-                with patch("plotty.plotting.detect_svg_layers", return_value=[]):
+                with patch("vfab.plotting.detect_svg_layers", return_value=[]):
                     with patch("builtins.print"):
                         result = plotter.plot_with_axidraw_layers(svg_file)
 
@@ -492,8 +492,8 @@ class TestPlottingIntegration:
             "distance_pendown": 100.0,
         }
 
-        with patch("plotty.plotting.is_axidraw_available", return_value=True):
-            with patch("plotty.plotting.create_manager", return_value=mock_manager):
+        with patch("vfab.plotting.is_axidraw_available", return_value=True):
+            with patch("vfab.plotting.create_manager", return_value=mock_manager):
                 plotter = MultiPenPlotter(interactive=False)
 
                 # Create layers out of order

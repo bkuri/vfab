@@ -5,13 +5,13 @@ import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from plotty.utils import PlottyError, create_error, validate_file_exists
+from vfab.utils import PlottyError, create_error, validate_file_exists
 
 
 class TestUtils:
     """Test utility functions."""
 
-    def test_plotty_error_creation(self):
+    def test_vfab_error_creation(self):
         """Test PlottyError creation."""
         error = PlottyError(
             message="Test error",
@@ -25,7 +25,7 @@ class TestUtils:
         assert "Try again" in error_str
         assert "Details" in error_str
 
-    def test_plotty_error_minimal(self):
+    def test_vfab_error_minimal(self):
         """Test PlottyError with minimal parameters."""
         error = PlottyError(message="Simple error")
 
@@ -159,24 +159,24 @@ class TestConfiguration:
 
     def test_config_loading_error_handling(self):
         """Test configuration loading error handling."""
-        with patch("plotty.config.load_config") as mock_load:
+        with patch("vfab.config.load_config") as mock_load:
             mock_load.side_effect = Exception("Config file corrupted")
 
             # Should handle config errors gracefully
             with pytest.raises(Exception):
-                from plotty.config import load_config
+                from vfab.config import load_config
 
                 load_config()
 
     def test_config_default_values(self):
         """Test configuration default values."""
-        with patch("plotty.config.load_config") as mock_load:
+        with patch("vfab.config.load_config") as mock_load:
             mock_config = Mock()
             mock_config.database = Mock()
             mock_config.database.url = "sqlite:///default.db"
             mock_load.return_value = mock_config
 
-            from plotty.config import load_config
+            from vfab.config import load_config
 
             config = load_config()
 
@@ -232,21 +232,21 @@ class TestModuleImports:
 
     def test_import_backup_module(self):
         """Test backup module import."""
-        from plotty import backup
+        from vfab import backup
 
         assert backup is not None
         assert hasattr(backup, "BackupManager")
 
     def test_import_paper_module(self):
         """Test paper module import."""
-        from plotty import paper
+        from vfab import paper
 
         assert paper is not None
         assert hasattr(paper, "PaperManager")
 
     def test_import_utils_module(self):
         """Test utils module import."""
-        from plotty import utils
+        from vfab import utils
 
         assert utils is not None
         assert hasattr(utils, "PlottyError")
@@ -254,7 +254,7 @@ class TestModuleImports:
 
     def test_import_db_module(self):
         """Test db module import."""
-        from plotty import db
+        from vfab import db
 
         assert db is not None
         assert hasattr(db, "get_session")
@@ -263,7 +263,7 @@ class TestModuleImports:
 class TestClassInstantiation:
     """Test that core classes can be instantiated."""
 
-    def test_plotty_error_instantiation(self):
+    def test_vfab_error_instantiation(self):
         """Test PlottyError can be instantiated."""
         error = PlottyError("Test message")
         assert isinstance(error, Exception)
@@ -273,7 +273,7 @@ class TestClassInstantiation:
         assert error.technical is None
         assert error.category == "general"
 
-    def test_plotty_error_inheritance(self):
+    def test_vfab_error_inheritance(self):
         """Test PlottyError inherits from Exception."""
         error = PlottyError("Test")
         assert isinstance(error, Exception)

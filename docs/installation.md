@@ -1,6 +1,6 @@
-# ploTTY Multi-Platform Installation Guide
+# vfab Multi-Platform Installation Guide
 
-**Purpose:** Comprehensive installation instructions for ploTTY across different operating systems and environments.
+**Purpose:** Comprehensive installation instructions for vfab across different operating systems and environments.
 
 ---
 
@@ -26,7 +26,7 @@
 **All Platforms:**
 - **Python**: 3.11 or higher
 - **RAM**: 2GB minimum, 4GB recommended
-- **Storage**: 500MB for ploTTY + workspace
+- **Storage**: 500MB for vfab + workspace
 - **Network**: Internet connection for dependencies
 
 **Optional Hardware:**
@@ -58,11 +58,11 @@ sudo pacman -Syu python python-pip git base-devel
 curl -LsSf https://astral.sh/uv/install.sh | sh
 source ~/.bashrc
 
-# Clone ploTTY
-git clone https://github.com/your-org/plotty.git
-cd plotty
+# Clone vfab
+git clone https://github.com/your-org/vfab.git
+cd vfab
 
-# Install ploTTY
+# Install vfab
 uv pip install -e ".[dev,vpype]"
 
 # For AxiDraw support
@@ -116,9 +116,9 @@ sudo apt install -y python3 python3-pip python3-venv git build-essential
 curl -LsSf https://astral.sh/uv/install.sh | sh
 source ~/.bashrc
 
-# Clone ploTTY
-git clone https://github.com/your-org/plotty.git
-cd plotty
+# Clone vfab
+git clone https://github.com/your-org/vfab.git
+cd vfab
 
 # Create virtual environment
 python3 -m venv .venv
@@ -127,7 +127,7 @@ source .venv/bin/activate
 # Upgrade pip
 pip install --upgrade pip
 
-# Install ploTTY
+# Install vfab
 pip install -e ".[dev,vpype]"
 
 # For AxiDraw support
@@ -151,11 +151,11 @@ sudo dnf install -y python3 python3-pip git gcc
 curl -LsSf https://astral.sh/uv/install.sh | sh
 source ~/.bashrc
 
-# Clone ploTTY
-git clone https://github.com/your-org/plotty.git
-cd plotty
+# Clone vfab
+git clone https://github.com/your-org/vfab.git
+cd vfab
 
-# Install ploTTY
+# Install vfab
 uv pip install -e ".[dev,vpype]"
 
 # For AxiDraw support
@@ -185,11 +185,11 @@ brew install python@3.11 git
 # Install uv
 brew install uv
 
-# Clone ploTTY
-git clone https://github.com/your-org/plotty.git
-cd plotty
+# Clone vfab
+git clone https://github.com/your-org/vfab.git
+cd vfab
 
-# Install ploTTY
+# Install vfab
 uv pip install -e ".[dev,vpype]"
 
 # For AxiDraw support
@@ -211,11 +211,11 @@ brew install python@3.11 git
 # Install uv
 brew install uv
 
-# Clone ploTTY
-git clone https://github.com/your-org/plotty.git
-cd plotty
+# Clone vfab
+git clone https://github.com/your-org/vfab.git
+cd vfab
 
-# Install ploTTY
+# Install vfab
 uv pip install -e ".[dev,vpype]"
 
 # For AxiDraw support
@@ -256,11 +256,11 @@ choco install python git --params "/InstallDir:C:\Python311"
 # Install uv
 python -m pip install uv
 
-# Clone ploTTY
-git clone https://github.com/your-org/plotty.git
-cd plotty
+# Clone vfab
+git clone https://github.com/your-org/vfab.git
+cd vfab
 
-# Install ploTTY
+# Install vfab
 uv pip install -e ".[dev,vpype]"
 
 # For AxiDraw support
@@ -287,11 +287,11 @@ sudo apt install -y python3 python3-pip python3-venv git build-essential
 curl -LsSf https://astral.sh/uv/install.sh | sh
 source ~/.bashrc
 
-# Clone ploTTY
-git clone https://github.com/your-org/plotty.git
-cd plotty
+# Clone vfab
+git clone https://github.com/your-org/vfab.git
+cd vfab
 
-# Install ploTTY
+# Install vfab
 uv pip install -e ".[dev,vpype]"
 
 # For AxiDraw support (requires USB passthrough)
@@ -319,27 +319,27 @@ uv run alembic upgrade head
 ### 5.1 Docker
 
 ```bash
-# Build ploTTY Docker image
-git clone https://github.com/your-org/plotty.git
-cd plotty
+# Build vfab Docker image
+git clone https://github.com/your-org/vfab.git
+cd vfab
 
 # Build image
-docker build -t plotty:latest .
+docker build -t vfab:latest .
 
 # Run container
 docker run -it --rm \
   -v $(pwd)/workspace:/app/workspace \
   -v /dev/bus/usb:/dev/bus/usb \
   --device-cgroup-rule='c 188:* rmw' \
-  plotty:latest
+  vfab:latest
 
 # For persistent data
 docker run -d \
-  --name plotty \
-  -v plotty-data:/app/workspace \
+  --name vfab \
+  -v vfab-data:/app/workspace \
   -v /dev/bus/usb:/dev/bus/usb \
   --device-cgroup-rule='c 188:* rmw' \
-  plotty:latest
+  vfab:latest
 ```
 
 ### 5.2 Podman (Quadlet)
@@ -347,17 +347,17 @@ docker run -d \
 ```bash
 # Create quadlet file
 sudo mkdir -p /etc/containers/systemd
-sudo tee /etc/containers/systemd/plotty.container << 'EOF'
+sudo tee /etc/containers/systemd/vfab.container << 'EOF'
 [Unit]
-Description=ploTTY Plotter Manager
+Description=vfab Plotter Manager
 After=network.target
 
 [Container]
-Image=plotty:latest
-Volume=/home/user/plotty/workspace:/app/workspace:Z
+Image=vfab:latest
+Volume=/home/user/vfab/workspace:/app/workspace:Z
 Volume=/dev/bus/usb:/dev/bus/usb
 Device=c 188:* rmw
-Exec=plotty --help
+Exec=vfab --help
 
 [Service]
 Restart=always
@@ -368,7 +368,7 @@ EOF
 
 # Reload and start
 sudo systemctl daemon-reload
-sudo systemctl enable --now plotty.service
+sudo systemctl enable --now vfab.service
 ```
 
 ### 5.3 Docker Compose
@@ -378,9 +378,9 @@ sudo systemctl enable --now plotty.service
 version: '3.8'
 
 services:
-  plotty:
+  vfab:
     build: .
-    container_name: plotty
+    container_name: vfab
     volumes:
       - ./workspace:/app/workspace
       - /dev/bus/usb:/dev/bus/usb
@@ -389,15 +389,15 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
-    command: plotty --help
+    command: vfab --help
 
   # Optional: Database service
   postgres:
     image: postgres:15
-    container_name: plotty-db
+    container_name: vfab-db
     environment:
-      POSTGRES_DB: plotty
-      POSTGRES_USER: plotty
+      POSTGRES_DB: vfab
+      POSTGRES_USER: vfab
       POSTGRES_PASSWORD: password
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -418,59 +418,59 @@ volumes:
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Create project
-mkdir my-plotty-project
-cd my-plotty-project
+mkdir my-vfab-project
+cd my-vfab-project
 
 # Initialize with uv
 uv init
 
-# Install ploTTY
-uv pip install plotty[vpype]
+# Install vfab
+uv pip install vfab[vpype]
 
 # For development
-uv pip install plotty[dev,vpype,axidraw]
+uv pip install vfab[dev,vpype,axidraw]
 
-# Run ploTTY
-plotty --help
+# Run vfab
+vfab --help
 ```
 
 ### 6.2 Using venv
 
 ```bash
 # Create virtual environment
-python3 -m venv plotty-env
-source plotty-env/bin/activate  # Linux/macOS
+python3 -m venv vfab-env
+source vfab-env/bin/activate  # Linux/macOS
 # or
-plotty-env\Scripts\activate  # Windows
+vfab-env\Scripts\activate  # Windows
 
 # Upgrade pip
 pip install --upgrade pip
 
-# Install ploTTY
-pip install plotty[vpype]
+# Install vfab
+pip install vfab[vpype]
 
 # For development
-pip install plotty[dev,vpype,axidraw]
+pip install vfab[dev,vpype,axidraw]
 
-# Run ploTTY
-plotty --help
+# Run vfab
+vfab --help
 ```
 
 ### 6.3 Using conda
 
 ```bash
 # Create conda environment
-conda create -n plotty python=3.11
-conda activate plotty
+conda create -n vfab python=3.11
+conda activate vfab
 
-# Install ploTTY
-pip install plotty[vpype]
+# Install vfab
+pip install vfab[vpype]
 
 # For development
-pip install plotty[dev,vpype,axidraw]
+pip install vfab[dev,vpype,axidraw]
 
-# Run ploTTY
-plotty --help
+# Run vfab
+vfab --help
 ```
 
 ---
@@ -490,7 +490,7 @@ ls -la /dev/ttyUSB*
 groups $USER | grep -o uucp
 
 # Test connection
-plotty check device
+vfab check device
 ```
 
 **macOS:**
@@ -507,8 +507,8 @@ ls /dev/cu.usbserial*
 # Check Device Manager
 # Look under "Ports (COM & LPT)" for "USB Serial Port"
 
-# Test with ploTTY
-plotty check device
+# Test with vfab
+vfab check device
 ```
 
 ### 7.2 Camera Setup
@@ -518,9 +518,9 @@ plotty check device
 # Test IP camera connection
 curl -I http://camera-ip/stream.mjpeg
 
-# Configure in ploTTY
-plotty config camera --url "http://camera-ip/stream.mjpeg"
-plotty check camera
+# Configure in vfab
+vfab config camera --url "http://camera-ip/stream.mjpeg"
+vfab check camera
 ```
 
 **USB Camera (Linux):**
@@ -558,88 +558,88 @@ sudo udevadm trigger
 
 ```bash
 # Run interactive setup
-plotty setup
+vfab setup
 
 # Verify installation
-plotty info system
+vfab info system
 
 # Test basic functionality
-plotty check ready
+vfab check ready
 ```
 
 ### 8.2 Configuration Files
 
 **Default locations:**
-- **Linux/macOS**: `~/.config/plotty/`
-- **Windows**: `%APPDATA%\ploTTY\`
+- **Linux/macOS**: `~/.config/vfab/`
+- **Windows**: `%APPDATA%\vfab\`
 - **Container**: `/app/config/`
 
 **Manual configuration:**
 ```bash
 # Create config directory
-mkdir -p ~/.config/plotty
+mkdir -p ~/.config/vfab
 
 # Copy default config
-cp config/config.yaml ~/.config/plotty/
+cp config/config.yaml ~/.config/vfab/
 
 # Edit configuration
-nano ~/.config/plotty/config.yaml
+nano ~/.config/vfab/config.yaml
 ```
 
 ### 8.3 Database Setup
 
 ```bash
 # Initialize database
-plotty database init
+vfab database init
 
 # Run migrations
-plotty database migrate
+vfab database migrate
 
 # Verify database
-plotty check database
+vfab check database
 ```
 
-### 8.4 vpype-plotty Integration (Optional)
+### 8.4 vpype-vfab Integration (Optional)
 
 For seamless integration with creative tools like vsketch:
 
 ```bash
-# Install vpype-plotty for vsketch integration
-pipx inject vsketch vpype-plotty
+# Install vpype-vfab for vsketch integration
+pipx inject vsketch vpype-vfab
 
 # Or install for vpype standalone
-pipx inject vpype vpype-plotty
+pipx inject vpype vpype-vfab
 
 # Verify installation
-vpype --help | grep plotty
+vpype --help | grep vfab
 ```
 
-**Benefits of vpype-plotty:**
-- **One-click workflow**: From vsketch creation to ploTTY queue
+**Benefits of vpype-vfab:**
+- **One-click workflow**: From vsketch creation to vfab queue
 - **Batch processing**: Generate and queue multiple designs
-- **Parameter passing**: Creative parameters preserved in ploTTY jobs
+- **Parameter passing**: Creative parameters preserved in vfab jobs
 - **Multi-pen support**: Interactive pen mapping for complex designs
 - **Optimization control**: Prevent double-processing with smart preset handling
 
-**Quick start with vpype-plotty:**
+**Quick start with vpype-vfab:**
 ```python
 # In your vsketch finalize() method
 def finalize(self, vsk: vsketch.Vsketch) -> None:
     vsk.vpype("linemerge linesimplify reloop linesort")
-    # Use --preset none to skip ploTTY optimization (already done)
-    vsk.vpype("plotty-add --name my_design --preset none --queue")
+    # Use --preset none to skip vfab optimization (already done)
+    vsk.vpype("vfab-add --name my_design --preset none --queue")
 ```
 
 **Optimization Control:**
 ```python
-# Let ploTTY handle optimization
-vsk.vpype("plotty-add --name raw_design --preset hq --queue")
+# Let vfab handle optimization
+vsk.vpype("vfab-add --name raw_design --preset hq --queue")
 
-# Skip ploTTY optimization (vsketch already optimized)
-vsk.vpype("plotty-add --name optimized_design --preset none --queue")
+# Skip vfab optimization (vsketch already optimized)
+vsk.vpype("vfab-add --name optimized_design --preset none --queue")
 ```
 
-For complete vpype-plotty documentation, see: **[vpype-plotty Integration Guide](vpype-plotty.md)**
+For complete vpype-vfab documentation, see: **[vpype-vfab Integration Guide](vpype-vfab.md)**
 
 ---
 
@@ -648,43 +648,43 @@ For complete vpype-plotty documentation, see: **[vpype-plotty Integration Guide]
 ### 9.1 Basic Functionality Test
 
 ```bash
-# Test ploTTY installation
-plotty --version
-plotty --help
+# Test vfab installation
+vfab --version
+vfab --help
 
 # Test all checks
-plotty check all
+vfab check all
 
 # Test without hardware
-plotty add --help
-plotty plan --help
+vfab add --help
+vfab plan --help
 ```
 
 ### 9.2 Hardware Test (if available)
 
 ```bash
 # Test AxiDraw connection
-plotty check device
-plotty check servo
+vfab check device
+vfab check servo
 
 # Test camera
-plotty check camera
+vfab check camera
 
 # Test plotting (with test file)
-plotty add test.svg --paper a4
-plotty plan test --dry-run
+vfab add test.svg --paper a4
+vfab plan test --dry-run
 ```
 
 ### 9.3 Integration Test
 
 ```bash
 # Full workflow test
-plotty add https://example.com/test.svg --paper a4
-plotty plan test_job --interactive
-plotty info job test_job
+vfab add https://example.com/test.svg --paper a4
+vfab plan test_job --interactive
+vfab info job test_job
 
 # Clean up test
-plotty remove test_job
+vfab remove test_job
 ```
 
 ---
@@ -735,7 +735,7 @@ source ~/.zshrc
 **Permission Issues:**
 ```bash
 # Fix file permissions
-chmod +x /usr/local/bin/plotty
+chmod +x /usr/local/bin/vfab
 ```
 
 ### 10.3 Windows Issues
@@ -766,22 +766,22 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 **USB Device Access:**
 ```bash
 # Pass USB devices to container
-docker run --device=/dev/bus/usb:/dev/bus/usb plotty
+docker run --device=/dev/bus/usb:/dev/bus/usb vfab
 
 # Or use specific device
-docker run --device=/dev/ttyUSB0 plotty
+docker run --device=/dev/ttyUSB0 vfab
 ```
 
 **Permission Issues:**
 ```bash
 # Fix container permissions
-docker run -u $(id -u):$(id -g) plotty
+docker run -u $(id -u):$(id -g) vfab
 ```
 
 **Volume Mounts:**
 ```bash
 # Ensure correct volume permissions
-docker run -v $(pwd)/workspace:/app/workspace:Z plotty
+docker run -v $(pwd)/workspace:/app/workspace:Z vfab
 ```
 
 ---
@@ -817,7 +817,7 @@ When reporting issues, include:
 
 ```bash
 # System information
-plotty info system --full
+vfab info system --full
 
 # Platform information
 uname -a  # Linux/macOS
@@ -825,12 +825,12 @@ systeminfo | findstr /B /C:"OS"  # Windows
 
 # Python environment
 python --version
-pip list | grep -E "(plotty|axidraw|vpype)"
+pip list | grep -E "(vfab|axidraw|vpype)"
 
 # Hardware information
-plotty check all --verbose
+vfab check all --verbose
 ```
 
 ---
 
-**This guide covers installation across all major platforms. Choose the section that matches your operating system and follow the step-by-step instructions for a successful ploTTY installation.**
+**This guide covers installation across all major platforms. Choose the section that matches your operating system and follow the step-by-step instructions for a successful vfab installation.**

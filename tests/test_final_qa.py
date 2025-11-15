@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Final QA testing for ploTTY v0.8.0 release candidate.
+Final QA testing for vfab v0.8.0 release candidate.
 
 This script runs comprehensive end-to-end integration testing including:
 - All performance tests
@@ -67,16 +67,16 @@ def run_test_suite(test_name: str, test_commands: List[Tuple[str, str]]) -> bool
 
 
 def test_core_functionality():
-    """Test core ploTTY functionality."""
+    """Test core vfab functionality."""
     tests = [
-        ("plotty --help", "Help system"),
-        ("plotty check config", "Configuration validation"),
-        ("plotty list pens", "Pen management"),
-        ("plotty list papers", "Paper management"),
-        ("plotty info system", "System information"),
-        ("plotty info queue", "Queue status"),
-        ("plotty stats summary", "Statistics summary"),
-        ("plotty stats performance", "Performance statistics"),
+        ("vfab --help", "Help system"),
+        ("vfab check config", "Configuration validation"),
+        ("vfab list pens", "Pen management"),
+        ("vfab list papers", "Paper management"),
+        ("vfab info system", "System information"),
+        ("vfab info queue", "Queue status"),
+        ("vfab stats summary", "Statistics summary"),
+        ("vfab stats performance", "Performance statistics"),
     ]
 
     return run_test_suite("Core Functionality Tests", tests)
@@ -118,11 +118,11 @@ def test_job_lifecycle():
             )
 
             tests = [
-                (f'plotty add job qa-test "{test_svg}" --apply', "Job creation"),
-                ("plotty list jobs", "Job listing"),
-                ("plotty info job qa-test", "Job information"),
-                ("plotty check job qa-test", "Job validation"),
-                ("plotty remove job qa-test", "Job removal"),
+                (f'vfab add job qa-test "{test_svg}" --apply', "Job creation"),
+                ("vfab list jobs", "Job listing"),
+                ("vfab info job qa-test", "Job information"),
+                ("vfab check job qa-test", "Job validation"),
+                ("vfab remove job qa-test", "Job removal"),
             ]
 
             result = run_test_suite("Job Lifecycle Tests", tests)
@@ -166,9 +166,9 @@ def test_integration_workflows():
     print("=" * 26)
 
     tests = [
-        ("plotty check ready", "System readiness"),
-        ("plotty check self --level=basic", "Basic self-test"),
-        ("plotty check self --level=intermediate", "Intermediate self-test"),
+        ("vfab check ready", "System readiness"),
+        ("vfab check self --level=basic", "Basic self-test"),
+        ("vfab check self --level=intermediate", "Intermediate self-test"),
     ]
 
     return run_test_suite("Integration Workflows", tests)
@@ -180,9 +180,9 @@ def test_error_handling():
     print("=" * 24)
 
     tests = [
-        ("plotty info job nonexistent-job-12345", "Non-existent job handling"),
-        ("plotty remove job nonexistent-job-12345", "Non-existent job removal"),
-        ("plotty add job test /nonexistent/file.svg", "Invalid file handling"),
+        ("vfab info job nonexistent-job-12345", "Non-existent job handling"),
+        ("vfab remove job nonexistent-job-12345", "Non-existent job removal"),
+        ("vfab add job test /nonexistent/file.svg", "Invalid file handling"),
     ]
 
     # For error handling tests, we expect non-zero exit codes for proper error handling
@@ -218,7 +218,7 @@ def generate_qa_report(results: Dict[str, bool]) -> str:
     total = len(results)
     success_rate = (passed / total) * 100
 
-    report = f"""# ploTTY v0.8.0 Final QA Report
+    report = f"""# vfab v0.8.0 Final QA Report
 
 ## Executive Summary
 
@@ -291,7 +291,7 @@ Based on comprehensive testing:
 
 ## Conclusion
 
-ploTTY v0.8.0 demonstrates excellent performance, reliability, and cross-platform compatibility.
+vfab v0.8.0 demonstrates excellent performance, reliability, and cross-platform compatibility.
 The comprehensive test suite validates readiness for production deployment.
 """
 
@@ -300,7 +300,7 @@ The comprehensive test suite validates readiness for production deployment.
 
 def main():
     """Main QA testing process."""
-    print("🚀 ploTTY v0.8.0 Final QA Testing")
+    print("🚀 vfab v0.8.0 Final QA Testing")
     print("=" * 50)
     print("Running comprehensive end-to-end integration tests...")
     print()
@@ -355,11 +355,11 @@ def main():
 
     # Final assessment
     if success_rate >= 90:
-        print("\n🎉 EXCELLENT! ploTTY v0.8.0 is ready for release!")
+        print("\n🎉 EXCELLENT! vfab v0.8.0 is ready for release!")
         print("✅ All critical tests passed with excellent performance metrics")
         return True
     elif success_rate >= 80:
-        print("\n✅ GOOD! ploTTY v0.8.0 is ready for release with minor notes")
+        print("\n✅ GOOD! vfab v0.8.0 is ready for release with minor notes")
         print("⚠️  Some non-critical issues found but acceptable for release")
         return True
     else:

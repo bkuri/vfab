@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from plotty.config import (
+from vfab.config import (
     load_config,
     get_workspace_path,
     get_database_url,
@@ -61,12 +61,12 @@ class TestConfigHelpers:
             config = get_config()
             url = get_database_url(config)
 
-            expected = f"sqlite:///{temp_dir}/plotty/plotty.db"
+            expected = f"sqlite:///{temp_dir}/vfab/vfab.db"
             assert url == expected
 
     def test_get_database_url_custom(self):
         """Test database URL with custom configuration."""
-        config_data = {"database": {"url": "postgresql://user:pass@localhost/plotty"}}
+        config_data = {"database": {"url": "postgresql://user:pass@localhost/vfab"}}
 
         with tempfile.TemporaryDirectory() as temp_dir:
             config_file = Path(temp_dir) / "config.yaml"
@@ -76,7 +76,7 @@ class TestConfigHelpers:
             config = load_config(str(config_file))
             url = get_database_url(config)
 
-            assert url == "postgresql://user:pass@localhost/plotty"
+            assert url == "postgresql://user:pass@localhost/vfab"
 
     def test_get_vpype_presets_path_default(self):
         """Test VPype presets path with default configuration."""
@@ -86,7 +86,7 @@ class TestConfigHelpers:
             config = get_config()
             path = get_vpype_presets_path(config)
 
-            expected = Path(temp_dir) / "plotty" / "vpype-presets.yaml"
+            expected = Path(temp_dir) / "vfab" / "vpype-presets.yaml"
             assert path == expected
 
     def test_get_vpype_presets_path_custom(self):
@@ -118,12 +118,12 @@ class TestConfigHelpers:
 
             # Should use platformdirs default (we can't easily mock this in test)
             assert isinstance(path, Path)
-            assert path.name == "plotty.log"
+            assert path.name == "vfab.log"
             assert path.parent.name == "logs"
 
     def test_get_log_file_path_custom(self):
         """Test log file path with custom configuration."""
-        config_data = {"logging": {"file": "/custom/logs/plotty.log"}}
+        config_data = {"logging": {"file": "/custom/logs/vfab.log"}}
 
         with tempfile.TemporaryDirectory() as temp_dir:
             config_file = Path(temp_dir) / "config.yaml"
@@ -182,7 +182,7 @@ class TestConfigLoading:
         """Test that config files no longer contain XDG variables."""
         # Load the actual config file from the project
         config_file = (
-            Path(__file__).parent.parent / "src" / "plotty" / "config" / "config.yaml"
+            Path(__file__).parent.parent / "src" / "vfab" / "config" / "config.yaml"
         )
 
         with open(config_file) as f:

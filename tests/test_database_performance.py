@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Database performance analysis and optimization for ploTTY.
+Database performance analysis and optimization for vfab.
 
 This script analyzes database performance and suggests optimizations.
 """
@@ -13,16 +13,16 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 try:
-    from plotty.db import get_session
-    from plotty.models import Job, Layer, Pen, Paper, JobStatistics
+    from vfab.db import get_session
+    from vfab.models import Job, Layer, Pen, Paper, JobStatistics
 except ImportError as e:
-    print(f"Error importing ploTTY modules: {e}")
+    print(f"Error importing vfab modules: {e}")
     sys.exit(1)
 
 
 def analyze_database_performance():
     """Analyze current database performance."""
-    print("🔍 ploTTY Database Performance Analysis")
+    print("🔍 vfab Database Performance Analysis")
     print("=" * 50)
 
     try:

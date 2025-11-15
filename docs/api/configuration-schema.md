@@ -1,6 +1,6 @@
 # Configuration Schema
 
-ploTTY uses a comprehensive configuration system built with Pydantic for validation and YAML for human-readable configuration files. The configuration is defined in `src/plotty/config.py`.
+vfab uses a comprehensive configuration system built with Pydantic for validation and YAML for human-readable configuration files. The configuration is defined in `src/vfab/config.py`.
 
 ## Configuration Structure
 
@@ -8,7 +8,7 @@ The main configuration is represented by the `Settings` class, which contains al
 
 ```python
 class Settings(BaseModel):
-    workspace: str = str(Path(platformdirs.user_data_dir("plotty")) / "workspace")
+    workspace: str = str(Path(platformdirs.user_data_dir("vfab")) / "workspace")
     camera: CameraCfg = Field(default_factory=CameraCfg)
     database: DatabaseCfg = Field(default_factory=DatabaseCfg)
     device: DeviceCfg = Field(default_factory=DeviceCfg)
@@ -55,7 +55,7 @@ Database connection settings.
 
 ```python
 class DatabaseCfg(BaseModel):
-    url: str = f"sqlite:///{Path(platformdirs.user_data_dir('plotty')) / 'plotty.db'}"
+    url: str = f"sqlite:///{Path(platformdirs.user_data_dir('vfab')) / 'vfab.db'}"
     echo: bool = False
 ```
 
@@ -64,14 +64,14 @@ class DatabaseCfg(BaseModel):
 SQLite (default):
 ```yaml
 database:
-  url: "sqlite:///path/to/plotty.db"
+  url: "sqlite:///path/to/vfab.db"
   echo: false
 ```
 
 PostgreSQL:
 ```yaml
 database:
-  url: "postgresql://user:password@localhost/plotty"
+  url: "postgresql://user:password@localhost/vfab"
   echo: false
 ```
 
@@ -360,7 +360,7 @@ class LoggingSettings(BaseModel):
     level: str = "INFO"                            # Log level
     format: str = "rich"                           # Log format
     output: str = "both"                           # Output destination
-    log_file: str = str(Path(platformdirs.user_data_dir("plotty")) / "logs" / "plotty.log")
+    log_file: str = str(Path(platformdirs.user_data_dir("vfab")) / "logs" / "vfab.log")
     max_file_size: int = 10485760                  # Max file size (10MB)
     backup_count: int = 5                          # Number of backup files
     console_show_timestamp: bool = False           # Show timestamp in console
@@ -380,7 +380,7 @@ logging:
   level: "DEBUG"
   format: "rich"
   output: "both"
-  log_file: "/var/log/plotty/plotty.log"
+  log_file: "/var/log/vfab/vfab.log"
   max_file_size: 20971520  # 20MB
   backup_count: 10
   console_show_timestamp: true
@@ -394,7 +394,7 @@ logging:
 ### Loading Configuration
 
 ```python
-from plotty.config import load_config, get_config
+from vfab.config import load_config, get_config
 
 # Load from default location
 config = load_config()
@@ -409,7 +409,7 @@ config = get_config()
 ### Saving Configuration
 
 ```python
-from plotty.config import load_config, save_config
+from vfab.config import load_config, save_config
 
 # Load, modify, and save
 config = load_config()
@@ -432,7 +432,7 @@ save_config(config, "/path/to/new_config.yaml")
 
 ```yaml
 # config/config.yaml
-workspace: "/home/user/plotty-workspace"
+workspace: "/home/user/vfab-workspace"
 
 camera:
   mode: "ip"
@@ -442,7 +442,7 @@ camera:
   test_access: true
 
 database:
-  url: "postgresql://plotty:password@localhost/plotty"
+  url: "postgresql://vfab:password@localhost/vfab"
   echo: false
 
 device:
@@ -502,7 +502,7 @@ logging:
   level: "DEBUG"
   format: "rich"
   output: "both"
-  log_file: "/var/log/plotty/plotty.log"
+  log_file: "/var/log/vfab/vfab.log"
   max_file_size: 20971520
   backup_count: 10
   console_show_timestamp: true
@@ -516,7 +516,7 @@ logging:
 The configuration system uses Pydantic for automatic validation:
 
 ```python
-from plotty.config import Settings
+from vfab.config import Settings
 from pydantic import ValidationError
 
 try:
@@ -536,7 +536,7 @@ Common validation errors:
 Some configuration sections support runtime updates:
 
 ```python
-from plotty.config import get_config
+from vfab.config import get_config
 
 config = get_config()
 
@@ -549,7 +549,7 @@ config.logging.level = "DEBUG"
 
 ## Configuration Templates
 
-ploTTY provides configuration templates for different use cases:
+vfab provides configuration templates for different use cases:
 
 ### Development Template
 ```yaml
@@ -565,17 +565,17 @@ logging:
 ```yaml
 # config/production.yaml
 database:
-  url: "postgresql://plotty:password@db.example.com/plotty"
+  url: "postgresql://vfab:password@db.example.com/vfab"
 logging:
   level: "INFO"
   output: "file"
-  log_file: "/var/log/plotty/plotty.log"
+  log_file: "/var/log/vfab/vfab.log"
 ```
 
 ### Testing Template
 ```yaml
 # config/testing.yaml
-workspace: "/tmp/plotty-test"
+workspace: "/tmp/vfab-test"
 database:
   url: "sqlite:///test.db"
 logging:

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-API documentation generator for ploTTY v0.9.0.
+API documentation generator for vfab v0.9.0.
 
 This script generates comprehensive API documentation based on the
 API stability analysis and existing code structure.
@@ -44,7 +44,7 @@ def generate_config_api_docs() -> str:
 
 ## Overview
 
-ploTTY uses a hierarchical configuration system based on Pydantic models. All configuration is stored in YAML format and validated at runtime.
+vfab uses a hierarchical configuration system based on Pydantic models. All configuration is stored in YAML format and validated at runtime.
 
 ## Configuration Classes
 
@@ -73,7 +73,7 @@ ploTTY uses a hierarchical configuration system based on Pydantic models. All co
             f"Configuration class for {cls.replace('Cfg', '').lower()} settings.\n\n"
         )
         docs += "```python\n"
-        docs += f"from plotty.config import {cls}\n\n"
+        docs += f"from vfab.config import {cls}\n\n"
         docs += "# Access configuration\n"
         docs += "config = get_config()\n"
         docs += f"setting = config.{cls.lower() if cls != 'Settings' else 'settings'}\n"
@@ -88,7 +88,7 @@ def generate_model_api_docs() -> str:
 
 ## Overview
 
-ploTTY uses SQLAlchemy models for database persistence. All models are defined in `plotty.models` and support full SQLAlchemy operations.
+vfab uses SQLAlchemy models for database persistence. All models are defined in `vfab.models` and support full SQLAlchemy operations.
 
 ## Model Classes
 
@@ -111,7 +111,7 @@ ploTTY uses SQLAlchemy models for database persistence. All models are defined i
         docs += f"### {cls}\n\n"
         docs += f"{description}.\n\n"
         docs += "```python\n"
-        docs += f"from plotty.models import {cls}\n\n"
+        docs += f"from vfab.models import {cls}\n\n"
         docs += "# Query model\n"
         docs += "with get_session() as session:\n"
         docs += f"    items = session.query({cls}).all()\n"
@@ -126,7 +126,7 @@ def generate_fsm_api_docs() -> str:
 
 ## Overview
 
-The ploTTY FSM (Finite State Machine) manages job lifecycle with well-defined states and transitions. All FSM operations are validated and logged.
+The vfab FSM (Finite State Machine) manages job lifecycle with well-defined states and transitions. All FSM operations are validated and logged.
 
 ## Job States
 
@@ -152,7 +152,7 @@ The ploTTY FSM (Finite State Machine) manages job lifecycle with well-defined st
     docs += """## FSM Operations
 
 ```python
-from plotty.fsm import JobFSM, JobState, create_fsm
+from vfab.fsm import JobFSM, JobState, create_fsm
 
 # Create FSM instance
 fsm = create_fsm(job_id="example", workspace=Path("/workspace"))
@@ -194,12 +194,12 @@ def generate_utility_api_docs() -> str:
 
 ## Overview
 
-ploTTY provides various utility functions for common operations, file handling, and system interactions.
+vfab provides various utility functions for common operations, file handling, and system interactions.
 
 ## Core Utilities
 
 ```python
-from plotty.utils import (
+from vfab.utils import (
     format_duration,
     format_bytes,
     safe_filename,
@@ -253,16 +253,16 @@ def generate_integration_examples() -> str:
 
 ## Overview
 
-This section provides practical examples for integrating ploTTY into various workflows and applications.
+This section provides practical examples for integrating vfab into various workflows and applications.
 
 ## Basic Job Management
 
 ```python
-from plotty.fsm import create_fsm
-from plotty.config import get_config
+from vfab.fsm import create_fsm
+from vfab.config import get_config
 from pathlib import Path
 
-# Initialize ploTTY
+# Initialize vfab
 config = get_config()
 workspace = Path(config.workspace)
 
@@ -285,8 +285,8 @@ if fsm.transition_to("ANALYZED", "Starting analysis"):
 ## Custom Guard Implementation
 
 ```python
-from plotty.guards.base import BaseGuard
-from plotty.guards.manager import GuardSystem
+from vfab.guards.base import BaseGuard
+from vfab.guards.manager import GuardSystem
 
 class CustomSetupGuard(BaseGuard):
     def check(self, context: dict) -> Tuple[bool, str]:
@@ -306,8 +306,8 @@ guards.register_guard("custom_setup", CustomSetupGuard())
 ## Statistics Collection
 
 ```python
-from plotty.stats import StatisticsService
-from plotty.models import JobStatistics
+from vfab.stats import StatisticsService
+from vfab.models import JobStatistics
 
 # Create statistics service
 stats = StatisticsService()
@@ -330,7 +330,7 @@ system_stats = stats.get_system_statistics()
 ## Configuration Management
 
 ```python
-from plotty.config import load_config, save_config, Settings
+from vfab.config import load_config, save_config, Settings
 
 # Load configuration
 config = load_config()
@@ -353,8 +353,8 @@ custom_settings = Settings(
 ## Database Operations
 
 ```python
-from plotty.db import get_session
-from plotty.models import Job, Pen, Paper
+from vfab.db import get_session
+from vfab.models import Job, Pen, Paper
 
 # Query jobs
 with get_session() as session:
@@ -384,8 +384,8 @@ with get_session() as session:
 ## Error Handling and Recovery
 
 ```python
-from plotty.recovery import detect_interrupted_jobs, CrashRecovery
-from plotty.fsm import JobState
+from vfab.recovery import detect_interrupted_jobs, CrashRecovery
+from vfab.fsm import JobState
 
 # Detect interrupted jobs
 workspace = Path("/workspace")
@@ -414,11 +414,11 @@ def generate_complete_api_docs() -> str:
     """Generate complete API documentation."""
     print("📚 Generating complete API documentation...")
 
-    docs = """# ploTTY v0.9.0 Complete API Documentation
+    docs = """# vfab v0.9.0 Complete API Documentation
 
 ## Overview
 
-This is the comprehensive API documentation for ploTTY v0.9.0, covering all stable public APIs for v1.0.0 compatibility.
+This is the comprehensive API documentation for vfab v0.9.0, covering all stable public APIs for v1.0.0 compatibility.
 
 ## Table of Contents
 
@@ -447,7 +447,7 @@ This is the comprehensive API documentation for ploTTY v0.9.0, covering all stab
 
 ## API Stability Guarantee
 
-For ploTTY v1.0.0, the following APIs are guaranteed to remain stable:
+For vfab v1.0.0, the following APIs are guaranteed to remain stable:
 
 ### ✅ Guaranteed Stable
 - All configuration classes and their public attributes
@@ -470,7 +470,7 @@ For ploTTY v1.0.0, the following APIs are guaranteed to remain stable:
 
 ## Versioning Policy
 
-ploTTY follows Semantic Versioning (SemVer):
+vfab follows Semantic Versioning (SemVer):
 - **Major (X.0.0)**: Breaking changes to stable APIs
 - **Minor (X.Y.0)**: New features, backward compatible
 - **Patch (X.Y.Z)**: Bug fixes, backward compatible
@@ -478,9 +478,9 @@ ploTTY follows Semantic Versioning (SemVer):
 ## Support
 
 For API questions and support:
-- 📖 [Documentation](https://plotty.ai/docs)
-- 🐛 [Issue Tracker](https://github.com/your-repo/plotty/issues)
-- 💬 [Discussions](https://github.com/your-repo/plotty/discussions)
+- 📖 [Documentation](https://vfab.ai/docs)
+- 🐛 [Issue Tracker](https://github.com/your-repo/vfab/issues)
+- 💬 [Discussions](https://github.com/your-repo/vfab/discussions)
 
 """
 
@@ -489,7 +489,7 @@ For API questions and support:
 
 def main():
     """Main documentation generation."""
-    print("📚 ploTTY v0.9.0 API Documentation Generation")
+    print("📚 vfab v0.9.0 API Documentation Generation")
     print("=" * 60)
 
     docs = generate_complete_api_docs()

@@ -1,4 +1,4 @@
-"""Integration tests for complete ploTTY user workflows."""
+"""Integration tests for complete vfab user workflows."""
 
 import pytest
 import tempfile
@@ -78,18 +78,18 @@ class TestCLIIntegration:
     def test_help_commands(self):
         """Test all help commands work without errors."""
         commands = [
-            ["plotty", "--help"],
-            ["plotty", "add", "--help"],
-            ["plotty", "remove", "--help"],
-            ["plotty", "list", "--help"],
-            ["plotty", "info", "--help"],
-            ["plotty", "check", "--help"],
-            ["plotty", "stats", "--help"],
+            ["vfab", "--help"],
+            ["vfab", "add", "--help"],
+            ["vfab", "remove", "--help"],
+            ["vfab", "list", "--help"],
+            ["vfab", "info", "--help"],
+            ["vfab", "check", "--help"],
+            ["vfab", "stats", "--help"],
         ]
 
         for cmd in commands:
             result = subprocess.run(
-                [sys.executable, "-m", "plotty.cli"] + cmd[1:],
+                [sys.executable, "-m", "vfab.cli"] + cmd[1:],
                 capture_output=True,
                 text=True,
                 timeout=30,
@@ -100,7 +100,7 @@ class TestCLIIntegration:
     def test_version_command(self):
         """Test version command works."""
         result = subprocess.run(
-            [sys.executable, "-m", "plotty.cli", "--version"],
+            [sys.executable, "-m", "vfab.cli", "--version"],
             capture_output=True,
             text=True,
             timeout=10,
@@ -115,7 +115,7 @@ class TestDatabaseIntegration:
     @pytest.fixture
     def test_db(self):
         """Create test database."""
-        from plotty.db import init_database
+        from vfab.db import init_database
         from tempfile import NamedTemporaryFile
 
         with NamedTemporaryFile(suffix=".db", delete=False) as f:
@@ -132,7 +132,7 @@ class TestDatabaseIntegration:
     def test_database_migration_workflow(self, test_db):
         """Test database migration and setup."""
         # Test that database can be created and migrated
-        from plotty.db import get_session
+        from vfab.db import get_session
 
         with get_session() as session:
             # Test basic database operations
@@ -149,7 +149,7 @@ class TestConfigurationIntegration:
 
     def test_config_loading_workflow(self):
         """Test configuration loading in various scenarios."""
-        from plotty.config import load_config
+        from vfab.config import load_config
 
         # Test default config loading
         config = load_config()
@@ -171,7 +171,7 @@ class TestHardwareIntegration:
 
     def test_axidraw_simulation_workflow(self):
         """Test AxiDraw workflow without hardware."""
-        # Test that ploTTY works without AxiDraw hardware
+        # Test that vfab works without AxiDraw hardware
         # Test graceful degradation
         # Test simulation modes
 

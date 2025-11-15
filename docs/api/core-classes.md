@@ -1,6 +1,6 @@
 # Core Classes and Methods
 
-ploTTY provides a rich set of core classes for managing plotting operations, job lifecycle, and device interactions. This section documents the main public APIs.
+vfab provides a rich set of core classes for managing plotting operations, job lifecycle, and device interactions. This section documents the main public APIs.
 
 ## Finite State Machine (FSM)
 
@@ -9,7 +9,7 @@ ploTTY provides a rich set of core classes for managing plotting operations, job
 The core class managing job lifecycle and state transitions.
 
 ```python
-from plotty.fsm import JobFSM, JobState, create_fsm
+from vfab.fsm import JobFSM, JobState, create_fsm
 
 # Create FSM for a job
 fsm = create_fsm(job_id="abc123", workspace=Path("/workspace"))
@@ -76,7 +76,7 @@ class JobState(Enum):
 Handles multi-pen plotting with pen swap management.
 
 ```python
-from plotty.plotting import MultiPenPlotter
+from vfab.plotting import MultiPenPlotter
 
 # Create plotter instance
 plotter = MultiPenPlotter(
@@ -112,7 +112,7 @@ Plot multi-pen job with pen swap prompts.
 Handles user interaction for pen changes.
 
 ```python
-from plotty.plotting import PenSwapPrompt
+from vfab.plotting import PenSwapPrompt
 
 prompt = PenSwapPrompt(interactive=True)
 
@@ -131,7 +131,7 @@ should_continue = prompt.prompt_pen_swap(
 Plan job layers and create plotting strategy.
 
 ```python
-from plotty.planner import plan_layers
+from vfab.planner import plan_layers
 
 result = plan_layers(
     src_svg=Path("design.svg"),
@@ -155,7 +155,7 @@ result = plan_layers(
 Estimate plotting time for features.
 
 ```python
-from plotty.estimation import estimate_seconds, features
+from vfab.estimation import estimate_seconds, features
 
 # Get feature analysis
 feature_data = features(svg_path)
@@ -171,8 +171,8 @@ time_seconds = estimate_seconds(feature_data, speed_factor=1.0)
 Get database session for operations.
 
 ```python
-from plotty.db import get_session
-from plotty.models import Job, Pen, Paper
+from vfab.db import get_session
+from vfab.models import Job, Pen, Paper
 
 with get_session() as session:
     # Query jobs
@@ -219,7 +219,7 @@ session.commit()
 Load and access configuration.
 
 ```python
-from plotty.config import load_config, get_config, save_config
+from vfab.config import load_config, get_config, save_config
 
 # Load configuration
 config = load_config("/path/to/config.yaml")
@@ -242,7 +242,7 @@ save_config(config)
 Load VPype presets from file.
 
 ```python
-from plotty.config import load_vpype_presets
+from vfab.config import load_vpype_presets
 
 presets = load_vpype_presets("config/vpype-presets.yaml")
 
@@ -257,7 +257,7 @@ fast_preset = presets.get("fast", {})
 Create device manager for plotting hardware.
 
 ```python
-from plotty.drivers import create_manager, is_axidraw_available
+from vfab.drivers import create_manager, is_axidraw_available
 
 if is_axidraw_available():
     manager = create_manager(port="/dev/ttyUSB0", model=2)
@@ -274,7 +274,7 @@ if is_axidraw_available():
 Check if AxiDraw support is available.
 
 ```python
-from plotty.drivers import is_axidraw_available
+from vfab.drivers import is_axidraw_available
 
 if is_axidraw_available():
     print("AxiDraw support available")
@@ -289,7 +289,7 @@ else:
 Detect layers in SVG file.
 
 ```python
-from plotty.multipen import detect_svg_layers
+from vfab.multipen import detect_svg_layers
 
 layers = detect_svg_layers(Path("design.svg"))
 
@@ -303,7 +303,7 @@ for layer in layers:
 Parse AxiDraw layer control comments.
 
 ```python
-from plotty.multipen import parse_axidraw_layer_control
+from vfab.multipen import parse_axidraw_layer_control
 
 layer_info = parse_axidraw_layer_control(svg_content)
 
@@ -318,7 +318,7 @@ pen_assignments = layer_info.get("pen_assignments", {})
 Display status messages with consistent formatting.
 
 ```python
-from plotty.progress import show_status, progress_task
+from vfab.progress import show_status, progress_task
 
 # Simple status
 show_status("Job completed successfully", "success")
@@ -337,7 +337,7 @@ with progress_task("Processing files", 100) as update:
 Context manager for progress tracking.
 
 ```python
-from plotty.progress import progress_task
+from vfab.progress import progress_task
 
 with progress_task("Optimizing jobs", job_count) as update:
     for job in jobs:
@@ -353,7 +353,7 @@ with progress_task("Optimizing jobs", job_count) as update:
 Global error handler for consistent error reporting.
 
 ```python
-from plotty.utils import error_handler
+from vfab.utils import error_handler
 
 try:
     # Operation that might fail
@@ -368,7 +368,7 @@ except Exception as e:
 ### Common utilities
 
 ```python
-from plotty.utils import (
+from vfab.utils import (
     get_available_job_ids,
     format_duration,
     format_distance,
@@ -395,7 +395,7 @@ clean_name = sanitize_filename("my design/2024")
 Create hook executor for custom automation.
 
 ```python
-from plotty.hooks import create_hook_executor
+from vfab.hooks import create_hook_executor
 
 executor = create_hook_executor(job_id="abc123", workspace=Path("/workspace"))
 
@@ -414,7 +414,7 @@ executor.execute_hooks("COMPLETED", {
 Create guard system for validation.
 
 ```python
-from plotty.guards import create_guard_system
+from vfab.guards import create_guard_system
 
 guards = create_guard_system(config, workspace=Path("/workspace"))
 
@@ -435,7 +435,7 @@ if not result.passed:
 Get crash recovery system.
 
 ```python
-from plotty.recovery import get_crash_recovery, detect_interrupted_jobs
+from vfab.recovery import get_crash_recovery, detect_interrupted_jobs
 
 recovery = get_crash_recovery(workspace=Path("/workspace"))
 
@@ -455,7 +455,7 @@ if fsm:
 Get statistics service for analytics.
 
 ```python
-from plotty.stats import get_statistics_service
+from vfab.stats import get_statistics_service
 
 stats = get_statistics_service()
 
@@ -477,9 +477,9 @@ summary = stats.get_system_summary()
 
 ```python
 from pathlib import Path
-from plotty.fsm import create_fsm, JobState
-from plotty.plotting import MultiPenPlotter
-from plotty.config import get_config
+from vfab.fsm import create_fsm, JobState
+from vfab.plotting import MultiPenPlotter
+from vfab.config import get_config
 
 def process_and_plot_job(job_id: str, svg_path: Path):
     """Complete job processing and plotting workflow."""
@@ -527,7 +527,7 @@ def process_and_plot_job(job_id: str, svg_path: Path):
 ### Custom Hook Implementation
 
 ```python
-from plotty.hooks import HookExecutor
+from vfab.hooks import HookExecutor
 
 class CustomHookExecutor(HookExecutor):
     def execute_custom_notification(self, event_type: str, data: dict):
@@ -547,7 +547,7 @@ class CustomHookExecutor(HookExecutor):
 ### Custom Guard Implementation
 
 ```python
-from plotty.guards import GuardSystem, GuardResult
+from vfab.guards import GuardSystem, GuardResult
 
 class CustomGuardSystem(GuardSystem):
     def check_device_temperature(self, context: dict) -> GuardResult:
@@ -570,7 +570,7 @@ class CustomGuardSystem(GuardSystem):
 ### Test Environment
 
 ```python
-from plotty.testing import TestEnvironment, create_test_job
+from vfab.testing import TestEnvironment, create_test_job
 
 # Create test environment
 env = TestEnvironment()
@@ -587,4 +587,4 @@ fsm = create_fsm(job_id, env.workspace)
 assert fsm.current_state == JobState.NEW
 ```
 
-These core classes provide the foundation for building custom ploTTY integrations, extensions, and automated workflows.
+These core classes provide the foundation for building custom vfab integrations, extensions, and automated workflows.

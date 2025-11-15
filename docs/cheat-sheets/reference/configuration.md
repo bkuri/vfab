@@ -13,10 +13,10 @@
 ### **Default Locations**
 ```bash
 # System-wide configuration
-/etc/plotty/config.yaml
+/etc/vfab/config.yaml
 
 # User configuration  
-~/.config/plotty/config.yaml
+~/.config/vfab/config.yaml
 
 # Project configuration
 ./config/config.yaml
@@ -34,9 +34,9 @@ $PLOTTY_CONFIG_DIR/config.yaml
 
 ## **Complete Configuration Schema**
 
-### **Core ploTTY Configuration**
+### **Core vfab Configuration**
 ```yaml
-# ploTTY main configuration
+# vfab main configuration
 version: "1.0"
 
 # Plotting settings
@@ -72,7 +72,7 @@ system:
   resources:
     max_memory: "2GB"           # Maximum memory usage
     cpu_cores: 4                # Number of CPU cores to use
-    temp_dir: "/tmp/plotty"     # Temporary directory
+    temp_dir: "/tmp/vfab"     # Temporary directory
     
   # Performance settings
   performance:
@@ -83,7 +83,7 @@ system:
   # Logging
   logging:
     level: "INFO"               # DEBUG, INFO, WARNING, ERROR
-    file: "/var/log/plotty/plotty.log"
+    file: "/var/log/vfab/vfab.log"
     max_size: "100MB"           # Max log file size
     backup_count: 5             # Number of log backups
 
@@ -94,8 +94,8 @@ database:
     type: "sqlite"              # sqlite, postgresql, mysql
     host: "localhost"
     port: 5432
-    database: "plotty"
-    username: "plotty_user"
+    database: "vfab"
+    username: "vfab_user"
     password: "secure_password"
     
   # Performance settings
@@ -109,7 +109,7 @@ database:
     enabled: true               # Enable automatic backups
     interval: "daily"           # daily, weekly, monthly
     retention: 30              # Backup retention (days)
-    location: "/var/backups/plotty"
+    location: "/var/backups/vfab"
 
 # Network settings
 network:
@@ -220,7 +220,7 @@ integrations:
 
 ## **Environment Variables**
 
-### **ploTTY Environment Variables**
+### **vfab Environment Variables**
 ```bash
 # Configuration
 export PLOTTY_CONFIG_DIR="/path/to/config"
@@ -228,11 +228,11 @@ export PLOTTY_DATA_DIR="/path/to/data"
 export PLOTTY_LOG_LEVEL="INFO"
 
 # Database
-export PLOTTY_DB_URL="postgresql://user:pass@localhost/plotty"
+export PLOTTY_DB_URL="postgresql://user:pass@localhost/vfab"
 export PLOTTY_DB_HOST="localhost"
 export PLOTTY_DB_PORT="5432"
-export PLOTTY_DB_NAME="plotty"
-export PLOTTY_DB_USER="plotty_user"
+export PLOTTY_DB_NAME="vfab"
+export PLOTTY_DB_USER="vfab_user"
 export PLOTTY_DB_PASSWORD="secure_password"
 
 # Hardware
@@ -261,42 +261,42 @@ export PLOTTY_SSL_KEY_PATH="/path/to/key.pem"
 ### **Configuration Commands**
 ```bash
 # View current configuration
-plotty config show
-plotty config show --section plotting
-plotty config show --key plotting.speed
+vfab config show
+vfab config show --section plotting
+vfab config show --key plotting.speed
 
 # Set configuration values
-plotty config set plotting.speed 50
-plotty config set logging.level DEBUG
-plotty config set database.type postgresql
+vfab config set plotting.speed 50
+vfab config set logging.level DEBUG
+vfab config set database.type postgresql
 
 # Reset configuration
-plotty config reset                    # Reset all
-plotty config reset --section plotting  # Reset section
-plotty config reset --key plotting.speed # Reset specific key
+vfab config reset                    # Reset all
+vfab config reset --section plotting  # Reset section
+vfab config reset --key plotting.speed # Reset specific key
 
 # Validate configuration
-plotty config validate
-plotty config validate --strict
+vfab config validate
+vfab config validate --strict
 
 # Export/Import configuration
-plotty config export > my_config.yaml
-plotty config import my_config.yaml
+vfab config export > my_config.yaml
+vfab config import my_config.yaml
 
 # Generate default configuration
-plotty config generate --output default_config.yaml
-plotty config generate --template minimal > minimal.yaml
+vfab config generate --output default_config.yaml
+vfab config generate --template minimal > minimal.yaml
 ```
 
 ### **Runtime Configuration Override**
 ```bash
 # Override configuration for single command
-plotty --config custom.yaml add design.svg
-plotty --config-key plotting.speed=60 add design.svg
-plotty --log-level DEBUG list
+vfab --config custom.yaml add design.svg
+vfab --config-key plotting.speed=60 add design.svg
+vfab --log-level DEBUG list
 
 # Multiple overrides
-plotty \
+vfab \
   --config-key plotting.speed=70 \
   --config-key plotting.precision=high \
   --config-key logging.level=DEBUG \
@@ -343,14 +343,14 @@ plotting:
 system:
   logging:
     level: "DEBUG"  # Verbose logging
-    file: "dev_plotty.log"
+    file: "dev_vfab.log"
   resources:
-    temp_dir: "/tmp/plotty_dev"
+    temp_dir: "/tmp/vfab_dev"
 
 database:
   connection:
     type: "sqlite"
-    database: "dev_plotty.db"
+    database: "dev_vfab.db"
 
 guards:
   job:
@@ -385,7 +385,7 @@ system:
     parallel_processing: true
   logging:
     level: "INFO"
-    file: "/var/log/plotty/plotty.log"
+    file: "/var/log/vfab/vfab.log"
     max_size: "100MB"
     backup_count: 10
 
@@ -394,8 +394,8 @@ database:
     type: "postgresql"
     host: "localhost"
     port: 5432
-    database: "plotty_prod"
-    username: "plotty_user"
+    database: "vfab_prod"
+    username: "vfab_user"
     password: "secure_password"
   performance:
     connection_pool: 20
@@ -566,7 +566,7 @@ if __name__ == "__main__":
 #!/bin/bash
 # config_profiles.sh - Manage multiple configuration profiles
 
-CONFIG_DIR="$HOME/.config/plotty/profiles"
+CONFIG_DIR="$HOME/.config/vfab/profiles"
 
 create_profile() {
     local profile_name=$1
@@ -575,7 +575,7 @@ create_profile() {
     mkdir -p "$profile_dir"
     
     # Generate default config for profile
-    plotty config generate --template minimal > "$profile_dir/config.yaml"
+    vfab config generate --template minimal > "$profile_dir/config.yaml"
     
     echo "Created profile: $profile_name"
     echo "Edit: $profile_dir/config.yaml"
@@ -584,7 +584,7 @@ create_profile() {
 switch_profile() {
     local profile_name=$1
     local profile_dir="$CONFIG_DIR/$profile_name"
-    local current_config="$HOME/.config/plotty/config.yaml"
+    local current_config="$HOME/.config/vfab/config.yaml"
     
     if [ ! -d "$profile_dir" ]; then
         echo "Profile '$profile_name' does not exist"
@@ -607,8 +607,8 @@ list_profiles() {
     for profile in "$CONFIG_DIR"/*; do
         if [ -d "$profile" ]; then
             profile_name=$(basename "$profile")
-            if [ -L "$HOME/.config/plotty/config.yaml" ]; then
-                current_target=$(readlink "$HOME/.config/plotty/config.yaml")
+            if [ -L "$HOME/.config/vfab/config.yaml" ]; then
+                current_target=$(readlink "$HOME/.config/vfab/config.yaml")
                 if [ "$current_target" = "$profile/config.yaml" ]; then
                     echo "  * $profile_name (active)"
                 else

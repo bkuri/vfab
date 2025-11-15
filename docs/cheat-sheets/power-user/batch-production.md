@@ -42,13 +42,13 @@ mkdir -p documentation/{specs,reports,invoices}
 # Import all designs from directory
 for file in designs/approved/*.svg; do
     basename=$(basename "$file" .svg)
-    plotty add "$file" --name "Client: $basename" --paper a4
+    vfab add "$file" --name "Client: $basename" --paper a4
 done
 
 # Import with metadata
 for file in designs/approved/*.svg; do
     basename=$(basename "$file" .svg)
-    plotty add "$file" \
+    vfab add "$file" \
         --name "Client: $basename" \
         --paper a4 \
         --priority normal \
@@ -59,14 +59,14 @@ done
 ### Smart Batch Categorization
 ```bash
 # Categorize by type
-plotty add logos/*.svg --name "Client: Logo" --category "logo"
-plotty add cards/*.svg --name "Client: Business Card" --category "card"
-plotty add letterhead/*.svg --name "Client: Letterhead" --category "letterhead"
+vfab add logos/*.svg --name "Client: Logo" --category "logo"
+vfab add cards/*.svg --name "Client: Business Card" --category "card"
+vfab add letterhead/*.svg --name "Client: Letterhead" --category "letterhead"
 
 # Batch by priority
-plotty add urgent/*.svg --priority high
-plotty add normal/*.svg --priority normal
-plotty add backlog/*.svg --priority low
+vfab add urgent/*.svg --priority high
+vfab add normal/*.svg --priority normal
+vfab add backlog/*.svg --priority low
 ```
 
 ---
@@ -76,50 +76,50 @@ plotty add backlog/*.svg --priority low
 ### Global Optimization Strategies
 ```bash
 # Plan all jobs with global pen optimization
-plotty plan-all --preset fast --optimize-pens --global-pen-order
+vfab plan-all --preset fast --optimize-pens --global-pen-order
 
 # Plan by priority
-plotty plan-all --priority-order --optimize-pens
+vfab plan-all --priority-order --optimize-pens
 
 # Plan by time constraints
-plotty plan-all --max-time-per-job 30m --preset fast
+vfab plan-all --max-time-per-job 30m --preset fast
 ```
 
 ### Advanced Planning Options
 ```bash
 # Plan with custom pen order
-plotty plan-all --pen-order 2,1,3,4 --minimize-distance
+vfab plan-all --pen-order 2,1,3,4 --minimize-distance
 
 # Plan with quality tiers
-plotty plan-all --quality-tiers --auto-preset-selection
+vfab plan-all --quality-tiers --auto-preset-selection
 
 # Plan with resource constraints
-plotty plan-all --max-pen-changes 50 --max-total-time 4h
+vfab plan-all --max-pen-changes 50 --max-total-time 4h
 ```
 
 ### Selective Batch Planning
 ```bash
 # Plan specific job categories
-plotty plan "Client: Logo*" --preset hq
-plotty plan "Client: Business Card*" --preset fast
+vfab plan "Client: Logo*" --preset hq
+vfab plan "Client: Business Card*" --preset fast
 
 # Plan by date range
-plotty plan --added-after "2025-11-01" --added-before "2025-11-07"
+vfab plan --added-after "2025-11-01" --added-before "2025-11-07"
 
 # Plan by complexity
-plotty plan-all --complexity-low --preset fast
-plotty plan-all --complexity-high --preset hq
+vfab plan-all --complexity-low --preset fast
+vfab plan-all --complexity-high --preset hq
 ```
 
 ### Planning Analysis
 ```bash
 # Compare planning strategies
-plotty plan-all --preset fast --dry-run --save-as fast_plan
-plotty plan-all --preset hq --dry-run --save-as hq_plan
-plotty compare fast_plan hq_plan --show-time-estimates
+vfab plan-all --preset fast --dry-run --save-as fast_plan
+vfab plan-all --preset hq --dry-run --save-as hq_plan
+vfab compare fast_plan hq_plan --show-time-estimates
 
 # Analyze planning efficiency
-plotty analyze planning --show-bottlenecks --suggest-improvements
+vfab analyze planning --show-bottlenecks --suggest-improvements
 ```
 
 ---
@@ -129,49 +129,49 @@ plotty analyze planning --show-bottlenecks --suggest-improvements
 ### Standard Batch Execution
 ```bash
 # Plot all planned jobs
-plotty plot-all
+vfab plot-all
 
 # Plot with safety monitoring
-plotty plot-all --preset safe --monitor --auto-retry
+vfab plot-all --preset safe --monitor --auto-retry
 
 # Plot with progress notifications
-plotty plot-all --notify-on-complete --notify-on-error
+vfab plot-all --notify-on-complete --notify-on-error
 ```
 
 ### Advanced Batch Plotting
 ```bash
 # Plot with time constraints
-plotty plot-all --max-total-time 6h --auto-pause
+vfab plot-all --max-total-time 6h --auto-pause
 
 # Plot with resource management
-plotty plot-all --pen-usage-tracking --paper-usage-tracking
+vfab plot-all --pen-usage-tracking --paper-usage-tracking
 
 # Plot with quality control
-plotty plot-all --quality-checks --auto-replot-failed
+vfab plot-all --quality-checks --auto-replot-failed
 ```
 
 ### Conditional Batch Plotting
 ```bash
 # Plot only jobs under time threshold
-plotty plot-all --max-job-time 20m
+vfab plot-all --max-job-time 20m
 
 # Plot high-priority jobs first
-plotty plot-all --priority-order --skip-low-priority
+vfab plot-all --priority-order --skip-low-priority
 
 # Plot with automatic error recovery
-plotty plot-all --auto-recovery --max-retries 2
+vfab plot-all --auto-recovery --max-retries 2
 ```
 
 ### Parallel Processing (Multiple Devices)
 ```bash
 # Distribute across multiple devices
-plotty plot-all --devices axidraw_v3_1,axidraw_v3_2 --load-balance
+vfab plot-all --devices axidraw_v3_1,axidraw_v3_2 --load-balance
 
 # Device-specific optimization
-plotty plot-all --device-1-preset fast --device-2-preset hq
+vfab plot-all --device-1-preset fast --device-2-preset hq
 
 # Monitor multiple devices
-plotty monitor --all-devices --consolidated-status
+vfab monitor --all-devices --consolidated-status
 ```
 
 ---
@@ -181,38 +181,38 @@ plotty monitor --all-devices --consolidated-status
 ### Real-time Queue Monitoring
 ```bash
 # Live queue monitoring
-plotty list queue --watch --refresh 30s
+vfab list queue --watch --refresh 30s
 
 # Detailed queue analysis
-plotty list queue --detailed --show-estimates --show-pen-changes
+vfab list queue --detailed --show-estimates --show-pen-changes
 
 # Queue performance metrics
-plotty analyze queue --efficiency --bottlenecks --optimization-suggestions
+vfab analyze queue --efficiency --bottlenecks --optimization-suggestions
 ```
 
 ### Intelligent Queue Organization
 ```bash
 # Group jobs by client
-plotty queue group --by-client "Acme Corp"
+vfab queue group --by-client "Acme Corp"
 
 # Reorder by optimization
-plotty queue reorder --by-pen-efficiency
+vfab queue reorder --by-pen-efficiency
 
 # Split large batches
-plotty queue split --batch-size 10 --name-suffix "batch_{n}"
+vfab queue split --batch-size 10 --name-suffix "batch_{n}"
 ```
 
 ### Automated Queue Management
 ```bash
 # Smart queue cleanup
-plotty queue cleanup --completed --older-than 1d --archive
+vfab queue cleanup --completed --older-than 1d --archive
 
 # Queue optimization
-plotty queue optimize --global-pen-order --minimize-total-time
+vfab queue optimize --global-pen-order --minimize-total-time
 
 # Queue backup and restore
-plotty queue backup --file "queue_backup_$(date +%Y%m%d).json"
-plotty queue restore --file "queue_backup_20251107.json"
+vfab queue backup --file "queue_backup_$(date +%Y%m%d).json"
+vfab queue restore --file "queue_backup_20251107.json"
 ```
 
 ---
@@ -222,19 +222,19 @@ plotty queue restore --file "queue_backup_20251107.json"
 ### Comprehensive Production Reports
 ```bash
 # Daily production summary
-plotty report production --date today \
+vfab report production --date today \
     --include-time-analysis \
     --include-resource-usage \
     --export "production_report_$(date +%Y%m%d).pdf"
 
 # Client-specific reports
-plotty report client --name "Acme Corp" \
+vfab report client --name "Acme Corp" \
     --date-range "2025-11-01:2025-11-07" \
     --include-cost-analysis \
     --include-quality-metrics
 
 # Batch performance analysis
-plotty analyze batch --name "November Production" \
+vfab analyze batch --name "November Production" \
     --show-efficiency-trends \
     --identify-improvements
 ```
@@ -242,25 +242,25 @@ plotty analyze batch --name "November Production" \
 ### Resource Utilization Tracking
 ```bash
 # Pen usage analysis
-plotty analyze pens --usage-patterns --wear-analysis --replacement-schedule
+vfab analyze pens --usage-patterns --wear-analysis --replacement-schedule
 
 # Paper consumption tracking
-plotty analyze paper --consumption-by-job --cost-analysis --waste-reduction
+vfab analyze paper --consumption-by-job --cost-analysis --waste-reduction
 
 # Device performance metrics
-plotty analyze devices --uptime --error-rates --maintenance-schedule
+vfab analyze devices --uptime --error-rates --maintenance-schedule
 ```
 
 ### Quality Metrics
 ```bash
 # Quality trend analysis
-plotty analyze quality --trends --by-pen --by-paper --by-complexity
+vfab analyze quality --trends --by-pen --by-paper --by-complexity
 
 # Error rate analysis
-plotty analyze errors --by-job-type --by-device --by-time-of-day
+vfab analyze errors --by-job-type --by-device --by-time-of-day
 
 # Customer satisfaction tracking
-plotty analyze satisfaction --by-client --by-job-type --correlate-quality
+vfab analyze satisfaction --by-client --by-job-type --correlate-quality
 ```
 
 ---
@@ -275,23 +275,23 @@ plotty analyze satisfaction --by-client --by-job-type --correlate-quality
 echo "🌅 Starting daily production routine..."
 
 # Morning system check
-plotty check ready --detailed
+vfab check ready --detailed
 if [ $? -ne 0 ]; then
     echo "❌ System check failed. Aborting production."
     exit 1
 fi
 
 # Load today's production schedule
-plotty load schedule --file "today/production_schedule.json"
+vfab load schedule --file "today/production_schedule.json"
 
 # Optimize for today's constraints
-plotty plan-all --optimize-for-today --resource-constraints
+vfab plan-all --optimize-for-today --resource-constraints
 
 # Start production with monitoring
-plotty plot-all --monitor --notify-on-complete --auto-recovery
+vfab plot-all --monitor --notify-on-complete --auto-recovery
 
 # Generate end-of-day report
-plotty report daily --auto-generate --email-studio
+vfab report daily --auto-generate --email-studio
 
 echo "✅ Daily production routine complete."
 ```
@@ -336,7 +336,7 @@ class ClientProduction:
         designs = self.config.get('designs', [])
         for design in designs:
             cmd = [
-                "plotty", "add", design['file'],
+                "vfab", "add", design['file'],
                 "--name", f"{self.client_name}: {design['name']}",
                 "--paper", design.get('paper', 'a4'),
                 "--priority", design.get('priority', 'normal'),
@@ -353,7 +353,7 @@ class ClientProduction:
         quality_preset = self.config.get('quality_preset', 'hq')
         
         subprocess.run([
-            "plotty", "plan-all",
+            "vfab", "plan-all",
             "--pen-mapping", pen_mapping,
             "--preset", quality_preset,
             "--client-standards", self.client_name
@@ -362,7 +362,7 @@ class ClientProduction:
     def execute_production(self):
         """Execute production with client monitoring."""
         subprocess.run([
-            "plotty", "plot-all",
+            "vfab", "plot-all",
             "--monitor", "--quality-checks",
             "--notify-client", self.config.get('notify_email'),
             "--document-for-client"
@@ -473,7 +473,7 @@ class BatchScheduler:
             # Plan batch with optimization
             job_names = [job['name'] for job in batch]
             subprocess.run([
-                "plotty", "plan"
+                "vfab", "plan"
             ] + job_names + [
                 "--optimize-batch",
                 "--pen-order", self.calculate_optimal_pen_order(batch)
@@ -481,7 +481,7 @@ class BatchScheduler:
             
             # Execute batch
             subprocess.run([
-                "plotty", "plot-all",
+                "vfab", "plot-all",
                 "--monitor", "--batch-id", str(i+1)
             ])
 
@@ -497,45 +497,45 @@ if __name__ == "__main__":
 ### Production Templates
 ```bash
 # Create production templates
-plotty template create --name "client_standard" \
+vfab template create --name "client_standard" \
     --preset hq \
     --pen-mapping "2,1,3" \
     --quality-checks \
     --documentation
 
-plotty template create --name "workshop_fast" \
+vfab template create --name "workshop_fast" \
     --preset fast \
     --pen-mapping "auto" \
     --minimal-documentation
 
 # Apply templates
-plotty plan-all --template client_standard
-plotty add design.svg --template workshop_fast
+vfab plan-all --template client_standard
+vfab add design.svg --template workshop_fast
 ```
 
 ### Resource Constraints
 ```bash
 # Set production constraints
-plotty config production \
+vfab config production \
     --max-daily-time 6h \
     --max-pen-changes 80 \
     --paper-budget 100 \
     --quality-threshold 95
 
 # Plan with constraints
-plotty plan-all --respect-constraints --optimize-within-limits
+vfab plan-all --respect-constraints --optimize-within-limits
 ```
 
 ### Quality Gates
 ```bash
 # Set quality gates for production
-plotty config quality-gates \
+vfab config quality-gates \
     --min-success-rate 98 \
     --max-replot-rate 2 \
     --min-customer-satisfaction 4.5
 
 # Production with quality enforcement
-plotty plot-all --enforce-quality-gates --auto-hold-on-failure
+vfab plot-all --enforce-quality-gates --auto-hold-on-failure
 ```
 
 ---
@@ -545,25 +545,25 @@ plotty plot-all --enforce-quality-gates --auto-hold-on-failure
 ### Key Performance Indicators
 ```bash
 # Daily KPI dashboard
-plotty kpi dashboard --daily --show-trends
+vfab kpi dashboard --daily --show-trends
 
 # Production efficiency metrics
-plotty analyze efficiency --by-job-type --by-time-of-day
+vfab analyze efficiency --by-job-type --by-time-of-day
 
 # Resource utilization KPIs
-plotty kpi resources --utilization --cost-per-unit --waste-analysis
+vfab kpi resources --utilization --cost-per-unit --waste-analysis
 ```
 
 ### Benchmarking
 ```bash
 # Production benchmarking
-plotty benchmark production --period last_30_days --industry-comparison
+vfab benchmark production --period last_30_days --industry-comparison
 
 # Performance improvement tracking
-plotty analyze improvements --since "2025-10-01" --by-metric
+vfab analyze improvements --since "2025-10-01" --by-metric
 
 # Capacity planning
-plotty analyze capacity --current --projected --growth-scenarios
+vfab analyze capacity --current --projected --growth-scenarios
 ```
 
 ---
@@ -595,25 +595,25 @@ plotty analyze capacity --current --projected --growth-scenarios
 ### Batch Production Issues
 ```bash
 # Batch planning problems
-plotty diagnose batch-planning --show-conflicts --suggest-fixes
+vfab diagnose batch-planning --show-conflicts --suggest-fixes
 
 # Queue optimization issues
-plotty diagnose queue-optimization --identify-bottlenecks
+vfab diagnose queue-optimization --identify-bottlenecks
 
 # Resource constraint conflicts
-plotty diagnose resource-conflicts --suggest-alternatives
+vfab diagnose resource-conflicts --suggest-alternatives
 ```
 
 ### Recovery Procedures
 ```bash
 # Batch failure recovery
-plotty recovery batch --batch-id 3 --resume-from-failure
+vfab recovery batch --batch-id 3 --resume-from-failure
 
 # Partial batch completion
-plotty recovery partial-batch --complete-remaining --preserve-completed
+vfab recovery partial-batch --complete-remaining --preserve-completed
 
 # Quality issue recovery
-plotty recovery quality --replot-failed --adjust-parameters
+vfab recovery quality --replot-failed --adjust-parameters
 ```
 
 ---

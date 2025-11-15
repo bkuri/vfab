@@ -5,13 +5,13 @@
 ### **Before Plotting**
 ```bash
 # Check design complexity
-plotty check my_design.svg
+vfab check my_design.svg
 
 # Estimate plotting time
-plotty info my_design.svg
+vfab info my_design.svg
 
 # Test with dry run
-plotty add --dry-run my_design.svg
+vfab add --dry-run my_design.svg
 ```
 
 ## **Path Optimization**
@@ -50,8 +50,8 @@ vpype read my_design.svg \
       write optimized_design.svg
 
 # Check improvement
-plotty check my_design.svg
-plotty check optimized_design.svg
+vfab check my_design.svg
+vfab check optimized_design.svg
 ```
 
 ## **Complexity Reduction**
@@ -109,7 +109,7 @@ draw_all_details()
 ### **Minimize Pen Changes**
 ```bash
 # Check layer distribution
-plotty info multilayer_design.svg
+vfab info multilayer_design.svg
 
 # Reorder layers if needed
 vpype read design.svg \
@@ -144,8 +144,8 @@ vpype read large_design.svg \
       write scaled_design.svg
 
 # Check plotting time improvement
-plotty info large_design.svg
-plotty info scaled_design.svg
+vfab info large_design.svg
+vfab info scaled_design.svg
 ```
 
 ## **Performance Testing**
@@ -162,7 +162,7 @@ done
 # Compare performance
 for file in test_*.svg; do
     echo "=== $file ==="
-    plotty check "$file"
+    vfab check "$file"
 done
 ```
 
@@ -201,10 +201,10 @@ thick_paper_settings = {
 ### **Pen Type Considerations**
 ```bash
 # Fine pen (0.3mm) - use less detail
-plotty add --preset fine-pen detailed_design.svg
+vfab add --preset fine-pen detailed_design.svg
 
 # Bold pen (1.0mm) - can handle more detail
-plotty add --preset bold-pen detailed_design.svg
+vfab add --preset bold-pen detailed_design.svg
 ```
 
 ## **Automated Optimization Pipeline**
@@ -220,7 +220,7 @@ echo "Optimizing $design_file..."
 
 # 1. Check original
 echo "Original design:"
-plotty check "$design_file"
+vfab check "$design_file"
 
 # 2. Optimize paths
 vpype read "$design_file" \
@@ -231,11 +231,11 @@ vpype read "$design_file" \
 
 # 3. Check optimized version
 echo "Optimized design:"
-plotty check "optimized_$design_file"
+vfab check "optimized_$design_file"
 
 # 4. Generate comparison
 echo "Improvement:"
-diff -u <(plotty check "$design_file") <(plotty check "optimized_$design_file")
+diff -u <(vfab check "$design_file") <(vfab check "optimized_$design_file")
 ```
 
 ### **Batch Optimization**
@@ -278,7 +278,7 @@ vpype read huge_design.svg \
 
 # Process each page individually
 for page in page_*.svg; do
-    plotty add "$page"
+    vfab add "$page"
 done
 ```
 
@@ -293,13 +293,13 @@ validate_design() {
     echo "=== Validating $file ==="
     
     # Check file integrity
-    plotty check "$file" || return 1
+    vfab check "$file" || return 1
     
     # Estimate time
-    plotty info "$file" | grep "Estimated"
+    vfab info "$file" | grep "Estimated"
     
     # Test dry run
-    plotty add --dry-run "$file" || return 1
+    vfab add --dry-run "$file" || return 1
     
     echo "✓ Design validation passed"
 }
@@ -312,7 +312,7 @@ vpype read final_design.svg \
       show  # Display preview
 
 # Create test plot on paper
-plotty add --test-mode final_design.svg
+vfab add --test-mode final_design.svg
 ```
 
 ## **Related Cheat Sheets**
@@ -322,6 +322,6 @@ plotty add --test-mode final_design.svg
 
 ## **Optimization Tools**
 - **vpype**: Powerful vector processing pipeline
-- **plotty check**: Built-in design validation
-- **plotty info**: Performance estimation
+- **vfab check**: Built-in design validation
+- **vfab info**: Performance estimation
 - **Custom scripts**: Automate your optimization workflow

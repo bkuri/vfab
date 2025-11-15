@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Quick validation script for ploTTY release readiness.
+Quick validation script for vfab release readiness.
 """
 
 import subprocess
@@ -64,12 +64,12 @@ def check_tests():
     tests = [
         (
             "Import test",
-            "uv run python -c \"import plotty; print('✅ Import successful')\"",
+            "uv run python -c \"import vfab; print('✅ Import successful')\"",
         ),
-        ("CLI test", "plotty --help > /dev/null"),
+        ("CLI test", "vfab --help > /dev/null"),
         (
             "Config check",
-            "plotty check config > /dev/null 2>&1 || echo 'Config check completed with warnings'",
+            "vfab check config > /dev/null 2>&1 || echo 'Config check completed with warnings'",
         ),
     ]
 
@@ -102,7 +102,7 @@ def check_build():
 
 def main():
     """Main validation."""
-    print("🚀 ploTTY Release Readiness Validation")
+    print("🚀 vfab Release Readiness Validation")
     print("=" * 50)
 
     checks = [

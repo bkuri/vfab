@@ -1,11 +1,11 @@
-# ploTTY API Documentation Index
+# vfab API Documentation Index
 
-Welcome to the comprehensive ploTTY API documentation. This documentation provides complete coverage of ploTTY's APIs for developers, users, and system integrators.
+Welcome to the comprehensive vfab API documentation. This documentation provides complete coverage of vfab's APIs for developers, users, and system integrators.
 
 ## 📚 Documentation Sections
 
 ### [📖 Overview](README.md)
-- Introduction to ploTTY architecture
+- Introduction to vfab architecture
 - Quick start guide
 - Key concepts and terminology
 - System architecture overview
@@ -51,23 +51,23 @@ Welcome to the comprehensive ploTTY API documentation. This documentation provid
 ### For Users
 
 ```bash
-# Install ploTTY
+# Install vfab
 uv pip install -e ".[dev,vpype]"
 
 # Add and plot a job
-plotty add job my_design design.svg --preset hq --apply
-plotty plot my_design --preset safe --apply
+vfab add job my_design design.svg --preset hq --apply
+vfab plot my_design --preset safe --apply
 
 # Check status
-plotty info system
+vfab info system
 ```
 
 ### For Developers
 
 ```python
-from plotty.fsm import create_fsm, JobState
-from plotty.plotting import MultiPenPlotter
-from plotty.config import get_config
+from vfab.fsm import create_fsm, JobState
+from vfab.plotting import MultiPenPlotter
+from vfab.config import get_config
 
 # Create and manage jobs
 config = get_config()
@@ -81,7 +81,7 @@ if fsm.apply_optimizations(preset="hq", digest=1):
 
 ## 🏗️ Architecture Overview
 
-ploTTY follows a modular architecture with clear separation of concerns:
+vfab follows a modular architecture with clear separation of concerns:
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -129,26 +129,26 @@ NEW → QUEUED → ANALYZED → OPTIMIZED → READY → ARMED → PLOTTING → C
 ### Command Line Integration
 ```bash
 # Direct CLI usage
-plotty add job my_design design.svg --apply
-plotty plot my_design --preset safe --apply
+vfab add job my_design design.svg --apply
+vfab plot my_design --preset safe --apply
 ```
 
 ### Python Module Integration
 ```python
-# Import ploTTY as a module
-from plotty.fsm import create_fsm
-from plotty.plotting import MultiPenPlotter
+# Import vfab as a module
+from vfab.fsm import create_fsm
+from vfab.plotting import MultiPenPlotter
 
-# Use ploTTY APIs
+# Use vfab APIs
 fsm = create_fsm("job_id", workspace)
 plotter = MultiPenPlotter()
 ```
 
 ### Web API Integration
 ```python
-# Build web services on top of ploTTY
+# Build web services on top of vfab
 from flask import Flask
-from plotty.fsm import create_fsm
+from vfab.fsm import create_fsm
 
 app = Flask(__name__)
 @app.route('/api/jobs/<job_id>/plot')
@@ -216,7 +216,7 @@ uv run pytest -q
 uv run pytest tests/test_fsm_unit.py -q
 
 # Run with coverage
-uv run pytest --cov=plotty tests/
+uv run pytest --cov=vfab tests/
 ```
 
 ### Development Setup
@@ -240,30 +240,30 @@ uvx black .
 - Review the [Configuration Schema](configuration-schema.md) for setup options
 
 ### Community
-- Check the ploTTY repository for issues and discussions
+- Check the vfab repository for issues and discussions
 - Review test files for additional usage examples
 - Examine the source code for detailed implementation information
 
 ### Troubleshooting
-- Use `plotty check self` to verify installation
-- Check `plotty info system` for system status
+- Use `vfab check self` to verify installation
+- Check `vfab info system` for system status
 - Review logs in the configured log directory
 - Use `--dry-run` options to preview operations
 
 ## 📈 Version Information
 
-This documentation covers ploTTY version 1.2.0 and later. API compatibility is maintained within major versions, but always check the specific version documentation for any changes.
+This documentation covers vfab version 1.2.0 and later. API compatibility is maintained within major versions, but always check the specific version documentation for any changes.
 
 ## 🔄 Continuous Updates
 
-The ploTTY API is continuously evolving. This documentation is updated with each release to reflect:
+The vfab API is continuously evolving. This documentation is updated with each release to reflect:
 - New commands and options
 - Additional configuration settings
 - Enhanced integration patterns
 - Improved error handling and recovery
 
-For the latest information, always refer to the version-specific documentation included with your ploTTY installation.
+For the latest information, always refer to the version-specific documentation included with your vfab installation.
 
 ---
 
-**Happy plotting with ploTTY!** 🎨✨
+**Happy plotting with vfab!** 🎨✨

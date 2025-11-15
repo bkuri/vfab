@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 from typer import BadParameter
 
-from plotty.utils import (
+from vfab.utils import (
     PlottyError,
     JobError,
     DeviceError,
@@ -83,7 +83,7 @@ class TestErrorHandler:
         """Create error handler with mock console."""
         return ErrorHandler(console=mock_console)
 
-    def test_handle_plotty_error(self, error_handler, mock_console):
+    def test_handle_vfab_error(self, error_handler, mock_console):
         """Test handling PlottyError."""
         error = PlottyError("Test error", suggestion="Fix it")
         error_handler.handle(error, exit_on_error=False)

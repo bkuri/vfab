@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-WebSocket integration tests for ploTTY monitoring system.
+WebSocket integration tests for vfab monitoring system.
 
 This module tests core WebSocket functionality including server startup,
 message validation, channel subscriptions, and multi-client support.
@@ -17,9 +17,9 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 import websockets
-from plotty.config import load_config
-from plotty.websocket.server import WebSocketManager, create_websocket_app
-from plotty.websocket.schemas import (
+from vfab.config import load_config
+from vfab.websocket.server import WebSocketManager, create_websocket_app
+from vfab.websocket.schemas import (
     JobStateChangeMessage,
     Channel,
 )

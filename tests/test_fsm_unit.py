@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 from pathlib import Path
 from datetime import datetime, timezone
 
-from plotty.fsm import JobState, StateTransition
+from vfab.fsm import JobState, StateTransition
 
 
 class TestJobState:
@@ -82,15 +82,15 @@ class TestBasicFSM:
         mock_guard_system.can_transition.return_value = (True, [])
 
         with (
-            patch("plotty.fsm.create_hook_executor", return_value=Mock()),
-            patch("plotty.fsm.create_guard_system", return_value=mock_guard_system),
-            patch("plotty.fsm.get_crash_recovery", return_value=Mock()),
-            patch("plotty.fsm.create_checklist", return_value=Mock()),
-            patch("plotty.fsm.get_statistics_service", return_value=Mock()),
-            patch("plotty.fsm.load_config", return_value={}),
+            patch("vfab.fsm.create_hook_executor", return_value=Mock()),
+            patch("vfab.fsm.create_guard_system", return_value=mock_guard_system),
+            patch("vfab.fsm.get_crash_recovery", return_value=Mock()),
+            patch("vfab.fsm.create_checklist", return_value=Mock()),
+            patch("vfab.fsm.get_statistics_service", return_value=Mock()),
+            patch("vfab.fsm.load_config", return_value={}),
         ):
 
-            from plotty.fsm import JobFSM
+            from vfab.fsm import JobFSM
 
             return JobFSM("test_job", mock_workspace)
 

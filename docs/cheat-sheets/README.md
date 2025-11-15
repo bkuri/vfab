@@ -1,6 +1,6 @@
-# ploTTY Cheat Sheets
+# vfab Cheat Sheets
 
-Quick reference guides for common ploTTY tasks and workflows.
+Quick reference guides for common vfab tasks and workflows.
 
 ## 📋 Available Cheat Sheets
 
@@ -43,7 +43,7 @@ Quick reference guides for common ploTTY tasks and workflows.
 
 ## 📚 Learning Path
 
-**New to ploTTY?** Follow this sequence:
+**New to vfab?** Follow this sequence:
 1. [Daily Quick Start](beginner/daily-quickstart.md) → 
 2. [First Plot Checklist](beginner/first-plot-checklist.md) → 
 3. [Common Commands](beginner/common-commands.md) → 
@@ -59,6 +59,6 @@ Quick reference guides for common ploTTY tasks and workflows.
 
 ---
 
-**🔄 Updated for ploTTY v1.0.1+**
+**🔄 Updated for vfab v1.0.1+**
 
-These cheat sheets are maintained with the latest ploTTY features and best practices. Check back regularly for updates!
+These cheat sheets are maintained with the latest vfab features and best practices. Check back regularly for updates!

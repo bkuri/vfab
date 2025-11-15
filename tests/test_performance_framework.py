@@ -1,4 +1,4 @@
-"""Performance testing framework for ploTTY."""
+"""Performance testing framework for vfab."""
 
 import time
 import pytest
@@ -116,12 +116,12 @@ class TestPerformanceTargets:
     def test_startup_performance(self, benchmark):
         """Test application startup performance."""
         with benchmark.measure_performance("startup"):
-            # Test ploTTY startup time
+            # Test vfab startup time
             import subprocess
             import sys
 
             result = subprocess.run(
-                [sys.executable, "-m", "plotty.cli", "--help"],
+                [sys.executable, "-m", "vfab.cli", "--help"],
                 capture_output=True,
                 text=True,
                 timeout=30,
@@ -136,7 +136,7 @@ class TestPerformanceTargets:
     def test_configuration_loading_performance(self, benchmark):
         """Test configuration loading performance."""
         with benchmark.measure_performance("config_loading"):
-            from plotty.config import load_config
+            from vfab.config import load_config
 
             config = load_config()
             assert config is not None
@@ -149,7 +149,7 @@ class TestPerformanceTargets:
     def test_database_operations_performance(self, benchmark):
         """Test database operations performance."""
         with benchmark.measure_performance("database_init"):
-            from plotty.db import init_database, get_session
+            from vfab.db import init_database, get_session
             from tempfile import NamedTemporaryFile
             import os
 
@@ -192,7 +192,7 @@ class TestPerformanceTargets:
         for i in range(10):
             with benchmark.measure_performance(f"operation_{i}"):
                 # Simulate various operations
-                from plotty.config import load_config
+                from vfab.config import load_config
 
                 load_config()
 
@@ -238,8 +238,8 @@ class TestPerformanceRegression:
 
             # Test guard system creation performance
             with benchmark.measure_performance("guard_system_creation"):
-                from plotty.guards import create_guard_system
-                from plotty.config import Settings
+                from vfab.guards import create_guard_system
+                from vfab.config import Settings
 
                 config = Settings()
                 config.database.url = f"sqlite:///{workspace}/test.db"
@@ -327,7 +327,7 @@ class TestPerformanceRegression:
             start_time = time.time()
 
             result = subprocess.run(
-                [sys.executable, "-m", "plotty.cli"] + cmd,
+                [sys.executable, "-m", "vfab.cli"] + cmd,
                 capture_output=True,
                 text=True,
                 timeout=30,
@@ -364,8 +364,8 @@ class TestLoadPerformance:
 
             # Initialize database with WAL mode for better concurrency
             with benchmark.measure_performance("concurrent_db_setup"):
-                from plotty.db import init_database, get_session
-                from plotty.models import Job, Paper, Pen
+                from vfab.db import init_database, get_session
+                from vfab.models import Job, Paper, Pen
 
                 db_url = f"sqlite:///{db_path}"
                 init_database(db_url, echo=False)
@@ -407,7 +407,7 @@ class TestLoadPerformance:
             def concurrent_read_job(job_id: str, result_queue: Queue):
                 """Read job in separate thread."""
                 try:
-                    from plotty.db import get_session
+                    from vfab.db import get_session
 
                     with get_session() as session:
                         job = session.query(Job).filter(Job.id == job_id).first()
@@ -418,7 +418,7 @@ class TestLoadPerformance:
             def concurrent_write_job(job_id: str, result_queue: Queue):
                 """Update job in separate thread."""
                 try:
-                    from plotty.db import get_session
+                    from vfab.db import get_session
 
                     with get_session() as session:
                         job = session.query(Job).filter(Job.id == job_id).first()
@@ -526,7 +526,7 @@ class TestLoadPerformance:
 
             # Verify data integrity after concurrent operations
             with benchmark.measure_performance("data_integrity_check"):
-                from plotty.db import get_session
+                from vfab.db import get_session
 
                 with get_session() as session:
                     jobs = session.query(Job).all()

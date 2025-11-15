@@ -1,8 +1,8 @@
-# ploTTY Logging Guide
+# vfab Logging Guide
 
 ## Overview
 
-ploTTY uses structured logging that writes to `~/.local/share/plotty/logs/plotty.log` by default. Instead of custom CLI commands, we recommend using standard Unix/Linux tools for log management.
+vfab uses structured logging that writes to `~/.local/share/vfab/logs/vfab.log` by default. Instead of custom CLI commands, we recommend using standard Unix/Linux tools for log management.
 
 ## Log Configuration
 
@@ -11,7 +11,7 @@ Logging is configured in `config.yaml`:
 ```yaml
 logging:
   level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
-  file: "$XDG_DATA_HOME/plotty/logs/plotty.log"
+  file: "$XDG_DATA_HOME/vfab/logs/vfab.log"
 ```
 
 ## External Log Management Tools
@@ -20,16 +20,16 @@ logging:
 
 ```bash
 # Follow logs in real-time
-tail -f ~/.local/share/plotty/logs/plotty.log
+tail -f ~/.local/share/vfab/logs/vfab.log
 
 # View last 100 lines
-tail -n 100 ~/.local/share/plotty/logs/plotty.log
+tail -n 100 ~/.local/share/vfab/logs/vfab.log
 
 # Search for errors
-grep "ERROR" ~/.local/share/plotty/logs/plotty.log
+grep "ERROR" ~/.local/share/vfab/logs/vfab.log
 
 # Search for specific job
-grep "job_abc123" ~/.local/share/plotty/logs/plotty.log
+grep "job_abc123" ~/.local/share/vfab/logs/vfab.log
 ```
 
 ### System Logging (Recommended)
@@ -37,17 +37,17 @@ grep "job_abc123" ~/.local/share/plotty/logs/plotty.log
 If running as a systemd service, logs are also available via journalctl:
 
 ```bash
-# View ploTTY logs
-journalctl -u plotty -f
+# View vfab logs
+journalctl -u vfab -f
 
 # Filter by error level
-journalctl -u plotty -p err
+journalctl -u vfab -p err
 
 # Since last boot
-journalctl -u plotty -b
+journalctl -u vfab -b
 
 # Last 100 lines
-journalctl -u plotty -n 100
+journalctl -u vfab -n 100
 ```
 
 ### Log Rotation
@@ -56,8 +56,8 @@ Use `logrotate` for automatic log management:
 
 ```bash
 # Create logrotate config
-sudo tee /etc/logrotate.d/plotty << EOF
-~/.local/share/plotty/logs/plotty.log {
+sudo tee /etc/logrotate.d/vfab << EOF
+~/.local/share/vfab/logs/vfab.log {
     daily
     rotate 7
     compress
@@ -69,7 +69,7 @@ sudo tee /etc/logrotate.d/plotty << EOF
 EOF
 
 # Test logrotate
-logrotate -d /etc/logrotate.d/plotty
+logrotate -d /etc/logrotate.d/vfab
 ```
 
 ### Advanced Log Analysis
@@ -77,21 +77,21 @@ logrotate -d /etc/logrotate.d/plotty
 #### Using `awk` for statistics:
 ```bash
 # Count log levels
-awk '{print $3}' ~/.local/share/plotty/logs/plotty.log | sort | uniq -c
+awk '{print $3}' ~/.local/share/vfab/logs/vfab.log | sort | uniq -c
 
 # Extract timestamps for analysis
-awk '{print $1, $2}' ~/.local/share/plotty/logs/plotty.log
+awk '{print $1, $2}' ~/.local/share/vfab/logs/vfab.log
 ```
 
 #### Using `sed` for cleanup:
 ```bash
 # Remove sensitive information
-sed -i 's/password=[^ ]*/password=***/g' ~/.local/share/plotty/logs/plotty.log
+sed -i 's/password=[^ ]*/password=***/g' ~/.local/share/vfab/logs/vfab.log
 ```
 
 ## Log Formats
 
-ploTTY supports multiple log formats configured in the core logging system:
+vfab supports multiple log formats configured in the core logging system:
 
 - **Simple**: Basic timestamp-level-message format
 - **Detailed**: Includes module and function information  
@@ -104,19 +104,19 @@ ploTTY supports multiple log formats configured in the core logging system:
 
 1. **No log file found**
    - Check config.yaml file path
-   - Ensure directory exists: `mkdir -p ~/.local/share/plotty/logs`
+   - Ensure directory exists: `mkdir -p ~/.local/share/vfab/logs`
    - Check permissions
 
 2. **Permission denied**
    ```bash
    # Fix log directory permissions
-   mkdir -p ~/.local/share/plotty/logs
-   chmod 755 ~/.local/share/plotty/logs
+   mkdir -p ~/.local/share/vfab/logs
+   chmod 755 ~/.local/share/vfab/logs
    ```
 
 3. **Logs not updating**
    - Check log level (DEBUG shows most, CRITICAL shows least)
-   - Verify ploTTY is actually running
+   - Verify vfab is actually running
    - Check for disk space
 
 ### Log Levels Explained
@@ -133,13 +133,13 @@ ploTTY supports multiple log formats configured in the core logging system:
 ```yaml
 # promtail-config.yml
 scrape_configs:
-  - job_name: plotty
+  - job_name: vfab
     static_configs:
       - targets:
           - localhost
         labels:
-          job: plotty
-          __path__: /home/user/.local/share/plotty/logs/plotty.log
+          job: vfab
+          __path__: /home/user/.local/share/vfab/logs/vfab.log
 ```
 
 ### Fluentd
@@ -147,9 +147,9 @@ scrape_configs:
 # fluentd.conf
 <source>
   @type tail
-  path /home/user/.local/share/plotty/logs/plotty.log
-  pos_file /var/log/fluentd/plotty.log.pos
-  tag plotty
+  path /home/user/.local/share/vfab/logs/vfab.log
+  pos_file /var/log/fluentd/vfab.log.pos
+  tag vfab
   format none
 </source>
 ```
@@ -160,8 +160,8 @@ Previous CLI commands and their equivalents:
 
 | Old Command | External Tool Equivalent |
 |-------------|----------------------|
-| `plotty system logs list` | `ls -la ~/.local/share/plotty/logs/` |
-| `plotty system logs show` | `tail -f ~/.local/share/plotty/logs/plotty.log` |
-| `plotty system logs cleanup` | `find ~/.local/share/plotty/logs -name "*.log.*" -mtime +30 -delete` |
+| `vfab system logs list` | `ls -la ~/.local/share/vfab/logs/` |
+| `vfab system logs show` | `tail -f ~/.local/share/vfab/logs/vfab.log` |
+| `vfab system logs cleanup` | `find ~/.local/share/vfab/logs -name "*.log.*" -mtime +30 -delete` |
 
 This approach provides more flexibility and better integration with existing system administration tools.

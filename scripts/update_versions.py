@@ -10,7 +10,7 @@ import subprocess
 
 def get_source_version():
     """Get version from central source."""
-    with open("src/plotty/__init__.py") as f:
+    with open("src/vfab/__init__.py") as f:
         content = f.read()
         match = re.search(r'__version__ = ["\']([^"\']+)["\']', content)
         return match.group(1) if match else None
@@ -35,7 +35,7 @@ def update_pyproject_toml(version):
 
 def update_cli_fallback(version):
     """Update CLI fallback version."""
-    with open("src/plotty/cli/__init__.py", "r") as f:
+    with open("src/vfab/cli/__init__.py", "r") as f:
         content = f.read()
 
     # Check if fallback version needs updating
@@ -54,7 +54,7 @@ def update_cli_fallback(version):
         flags=re.MULTILINE,
     )
 
-    with open("src/plotty/cli/__init__.py", "w") as f:
+    with open("src/vfab/cli/__init__.py", "w") as f:
         f.write(content)
 
 
@@ -96,7 +96,7 @@ def update_pkgbuild(version):
 def update_pkgbuild_manual(version):
     """Manual hash calculation as fallback."""
     try:
-        url = f"https://github.com/bkuri/plotty/archive/refs/tags/v{version}.tar.gz"
+        url = f"https://github.com/bkuri/vfab/archive/refs/tags/v{version}.tar.gz"
         response = urllib.request.urlopen(url)
         data = response.read()
         sha256_hash = hashlib.sha256(data).hexdigest()
@@ -123,7 +123,7 @@ def update_pkgbuild_manual(version):
 
 def update_websocket_version(version):
     """Update WebSocket server version."""
-    with open("src/plotty/websocket/server.py", "r") as f:
+    with open("src/vfab/websocket/server.py", "r") as f:
         content = f.read()
 
     # Check if version needs updating
@@ -134,13 +134,13 @@ def update_websocket_version(version):
 
     content = re.sub(r'version=["\'][^"\']+["\']', f'version="{version}"', content)
 
-    with open("src/plotty/websocket/server.py", "w") as f:
+    with open("src/vfab/websocket/server.py", "w") as f:
         f.write(content)
 
 
 def update_backup_version(version):
     """Update backup format version."""
-    with open("src/plotty/backup.py", "r") as f:
+    with open("src/vfab/backup.py", "r") as f:
         content = f.read()
 
     # Check if version needs updating
@@ -153,7 +153,7 @@ def update_backup_version(version):
         r'version: str = ["\'][^"\']+["\']', f'version: str = "{version}"', content
     )
 
-    with open("src/plotty/backup.py", "w") as f:
+    with open("src/vfab/backup.py", "w") as f:
         f.write(content)
 
 

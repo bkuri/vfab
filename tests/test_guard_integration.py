@@ -8,9 +8,9 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from plotty.guards import create_guard_system
-from plotty.config import load_config
-from plotty.checklist import create_checklist
+from vfab.guards import create_guard_system
+from vfab.config import load_config
+from vfab.checklist import create_checklist
 
 
 def test_guards_integration():
@@ -33,7 +33,7 @@ def test_guards_integration():
             config_file.write_text(
                 """
 workspace: ./workspace
-database: { url: "sqlite:///./plotty.db", echo: false }
+database: { url: "sqlite:///./vfab.db", echo: false }
 camera: { enabled: false }
 device: { preferred: "none" }
 vpype: { preset: fast, presets_file: "config/vpype-presets.yaml" }
@@ -44,7 +44,7 @@ hooks: {}
             # Set config env var
             import os
 
-            os.environ["PLOTTY_CONFIG"] = str(config_file)
+            os.environ["VFAB_CONFIG"] = str(config_file)
 
             config = load_config()
             guard_system = create_guard_system(config, workspace)

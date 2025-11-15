@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 from pathlib import Path
 from datetime import datetime, timezone
 
-from plotty.fsm import JobState, StateTransition, JobFSM, create_fsm
+from vfab.fsm import JobState, StateTransition, JobFSM, create_fsm
 
 
 class TestJobState:
@@ -92,11 +92,11 @@ class TestJobFSM:
     def job_fsm(self, mock_workspace):
         """Create JobFSM instance with mocked dependencies."""
         with (
-            patch("plotty.fsm.create_hook_executor") as mock_hooks,
-            patch("plotty.fsm.create_guard_system") as mock_guards,
-            patch("plotty.fsm.get_crash_recovery") as mock_recovery,
-            patch("plotty.fsm.create_checklist") as mock_checklist,
-            patch("plotty.fsm.get_statistics_service") as mock_stats,
+            patch("vfab.fsm.create_hook_executor") as mock_hooks,
+            patch("vfab.fsm.create_guard_system") as mock_guards,
+            patch("vfab.fsm.get_crash_recovery") as mock_recovery,
+            patch("vfab.fsm.create_checklist") as mock_checklist,
+            patch("vfab.fsm.get_statistics_service") as mock_stats,
         ):
 
             # Setup mocks
@@ -261,11 +261,11 @@ class TestFSMFactory:
     def test_create_fsm(self):
         """Test creating FSM through factory."""
         with (
-            patch("plotty.fsm.create_hook_executor") as mock_hooks,
-            patch("plotty.fsm.create_guard_system") as mock_guards,
-            patch("plotty.fsm.get_crash_recovery") as mock_recovery,
-            patch("plotty.fsm.create_checklist") as mock_checklist,
-            patch("plotty.fsm.get_statistics_service") as mock_stats,
+            patch("vfab.fsm.create_hook_executor") as mock_hooks,
+            patch("vfab.fsm.create_guard_system") as mock_guards,
+            patch("vfab.fsm.get_crash_recovery") as mock_recovery,
+            patch("vfab.fsm.create_checklist") as mock_checklist,
+            patch("vfab.fsm.get_statistics_service") as mock_stats,
         ):
 
             # Setup mocks
@@ -297,11 +297,11 @@ class TestFSMIntegration:
         workspace = Path(tempfile.gettempdir()) / f"test_fsm_{unique_id}"
 
         with (
-            patch("plotty.fsm.create_hook_executor"),
-            patch("plotty.fsm.create_guard_system"),
-            patch("plotty.fsm.get_crash_recovery"),
-            patch("plotty.fsm.create_checklist"),
-            patch("plotty.fsm.get_statistics_service"),
+            patch("vfab.fsm.create_hook_executor"),
+            patch("vfab.fsm.create_guard_system"),
+            patch("vfab.fsm.get_crash_recovery"),
+            patch("vfab.fsm.create_checklist"),
+            patch("vfab.fsm.get_statistics_service"),
         ):
 
             return JobFSM("integration_test", workspace)

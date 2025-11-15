@@ -8,7 +8,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from plotty.planner import plan_layers, plan_axidraw_layers
+from vfab.planner import plan_layers, plan_axidraw_layers
 
 
 class TestPlanLayers:
@@ -51,18 +51,18 @@ class TestPlanLayers:
 
         mock_layers = [mock_layer1, mock_layer2]
 
-        with patch("plotty.planner.detect_svg_layers", return_value=mock_layers):
+        with patch("vfab.planner.detect_svg_layers", return_value=mock_layers):
             with patch(
-                "plotty.planner.extract_layers_to_files", return_value=mock_layers
+                "vfab.planner.extract_layers_to_files", return_value=mock_layers
             ):
-                with patch("plotty.planner.load_preset") as mock_load_preset:
-                    with patch("plotty.planner.features") as mock_features:
+                with patch("vfab.planner.load_preset") as mock_load_preset:
+                    with patch("vfab.planner.features") as mock_features:
                         with patch(
-                            "plotty.planner.estimate_seconds", return_value=10.0
+                            "vfab.planner.estimate_seconds", return_value=10.0
                         ):
-                            with patch("plotty.planner.run_vpype"):
-                                with patch("plotty.planner.create_multipen_svg"):
-                                    with patch("plotty.planner.save_pen_mapping"):
+                            with patch("vfab.planner.run_vpype"):
+                                with patch("vfab.planner.create_multipen_svg"):
+                                    with patch("vfab.planner.save_pen_mapping"):
                                         # Mock preset
                                         mock_preset = Mock()
                                         mock_preset.format.return_value = (
@@ -119,16 +119,16 @@ class TestPlanLayers:
         mock_layer.order_index = 0
         mock_layer.elements = [Mock()]
 
-        with patch("plotty.planner.detect_svg_layers", return_value=[mock_layer]):
+        with patch("vfab.planner.detect_svg_layers", return_value=[mock_layer]):
             with patch(
-                "plotty.planner.extract_layers_to_files", return_value=[mock_layer]
+                "vfab.planner.extract_layers_to_files", return_value=[mock_layer]
             ):
-                with patch("plotty.planner.load_preset") as mock_load_preset:
-                    with patch("plotty.planner.features") as mock_features:
-                        with patch("plotty.planner.estimate_seconds", return_value=5.0):
-                            with patch("plotty.planner.run_vpype"):
-                                with patch("plotty.planner.create_multipen_svg"):
-                                    with patch("plotty.planner.save_pen_mapping"):
+                with patch("vfab.planner.load_preset") as mock_load_preset:
+                    with patch("vfab.planner.features") as mock_features:
+                        with patch("vfab.planner.estimate_seconds", return_value=5.0):
+                            with patch("vfab.planner.run_vpype"):
+                                with patch("vfab.planner.create_multipen_svg"):
+                                    with patch("vfab.planner.save_pen_mapping"):
                                         # Mock preset
                                         mock_preset = Mock()
                                         mock_preset.format.return_value = (
@@ -177,19 +177,19 @@ class TestPlanLayers:
         mock_layer.order_index = 0
         mock_layer.elements = [Mock()]
 
-        with patch("plotty.planner.detect_svg_layers", return_value=[mock_layer]):
+        with patch("vfab.planner.detect_svg_layers", return_value=[mock_layer]):
             with patch(
-                "plotty.planner.extract_layers_to_files", return_value=[mock_layer]
+                "vfab.planner.extract_layers_to_files", return_value=[mock_layer]
             ):
-                with patch("plotty.planner.load_preset") as mock_load_preset:
-                    with patch("plotty.planner.features") as mock_features:
-                        with patch("plotty.planner.estimate_seconds", return_value=8.0):
-                            with patch("plotty.planner.run_vpype"):
-                                with patch("plotty.planner.create_multipen_svg"):
+                with patch("vfab.planner.load_preset") as mock_load_preset:
+                    with patch("vfab.planner.features") as mock_features:
+                        with patch("vfab.planner.estimate_seconds", return_value=8.0):
+                            with patch("vfab.planner.run_vpype"):
+                                with patch("vfab.planner.create_multipen_svg"):
                                     with patch(
-                                        "plotty.planner.create_pen_mapping_prompt"
+                                        "vfab.planner.create_pen_mapping_prompt"
                                     ) as mock_prompt:
-                                        with patch("plotty.planner.save_pen_mapping"):
+                                        with patch("vfab.planner.save_pen_mapping"):
                                             # Mock preset
                                             mock_preset = Mock()
                                             mock_preset.format.return_value = (
@@ -241,18 +241,18 @@ class TestPlanLayers:
         mock_layer.order_index = 0
         mock_layer.elements = [Mock()]
 
-        with patch("plotty.planner.detect_svg_layers", return_value=[mock_layer]):
+        with patch("vfab.planner.detect_svg_layers", return_value=[mock_layer]):
             with patch(
-                "plotty.planner.extract_layers_to_files", return_value=[mock_layer]
+                "vfab.planner.extract_layers_to_files", return_value=[mock_layer]
             ):
-                with patch("plotty.planner.load_preset") as mock_load_preset:
-                    with patch("plotty.planner.features") as mock_features:
+                with patch("vfab.planner.load_preset") as mock_load_preset:
+                    with patch("vfab.planner.features") as mock_features:
                         with patch(
-                            "plotty.planner.estimate_seconds", return_value=12.0
+                            "vfab.planner.estimate_seconds", return_value=12.0
                         ):
-                            with patch("plotty.planner.run_vpype"):
-                                with patch("plotty.planner.create_multipen_svg"):
-                                    with patch("plotty.planner.save_pen_mapping"):
+                            with patch("vfab.planner.run_vpype"):
+                                with patch("vfab.planner.create_multipen_svg"):
+                                    with patch("vfab.planner.save_pen_mapping"):
                                         # Mock preset
                                         mock_preset = Mock()
                                         mock_preset.format.return_value = (
@@ -311,14 +311,14 @@ class TestPlanLayers:
         mock_layer.order_index = 0
         mock_layer.elements = [Mock()]
 
-        with patch("plotty.planner.detect_svg_layers", return_value=[mock_layer]):
+        with patch("vfab.planner.detect_svg_layers", return_value=[mock_layer]):
             with patch(
-                "plotty.planner.extract_layers_to_files", return_value=[mock_layer]
+                "vfab.planner.extract_layers_to_files", return_value=[mock_layer]
             ):
-                with patch("plotty.planner.load_preset") as mock_load_preset:
-                    with patch("plotty.planner.run_vpype"):
-                        with patch("plotty.planner.create_multipen_svg"):
-                            with patch("plotty.planner.save_pen_mapping"):
+                with patch("vfab.planner.load_preset") as mock_load_preset:
+                    with patch("vfab.planner.run_vpype"):
+                        with patch("vfab.planner.create_multipen_svg"):
+                            with patch("vfab.planner.save_pen_mapping"):
                                 # Mock preset
                                 mock_preset = Mock()
                                 mock_preset.format.return_value = "vpype_command"
@@ -351,18 +351,18 @@ class TestPlanLayers:
         mock_layer2.elements = [Mock()]
 
         with patch(
-            "plotty.planner.detect_svg_layers", return_value=[mock_layer1, mock_layer2]
+            "vfab.planner.detect_svg_layers", return_value=[mock_layer1, mock_layer2]
         ):
             with patch(
-                "plotty.planner.extract_layers_to_files",
+                "vfab.planner.extract_layers_to_files",
                 return_value=[mock_layer1, mock_layer2],
             ):
-                with patch("plotty.planner.load_preset") as mock_load_preset:
-                    with patch("plotty.planner.features") as mock_features:
-                        with patch("plotty.planner.estimate_seconds") as mock_estimate:
-                            with patch("plotty.planner.run_vpype"):
-                                with patch("plotty.planner.create_multipen_svg"):
-                                    with patch("plotty.planner.save_pen_mapping"):
+                with patch("vfab.planner.load_preset") as mock_load_preset:
+                    with patch("vfab.planner.features") as mock_features:
+                        with patch("vfab.planner.estimate_seconds") as mock_estimate:
+                            with patch("vfab.planner.run_vpype"):
+                                with patch("vfab.planner.create_multipen_svg"):
+                                    with patch("vfab.planner.save_pen_mapping"):
                                         # Mock preset
                                         mock_preset = Mock()
                                         mock_preset.format.return_value = (
@@ -433,18 +433,18 @@ class TestPlanLayers:
         mock_layer.order_index = 0
         mock_layer.elements = [Mock()]
 
-        with patch("plotty.planner.detect_svg_layers", return_value=[mock_layer]):
+        with patch("vfab.planner.detect_svg_layers", return_value=[mock_layer]):
             with patch(
-                "plotty.planner.extract_layers_to_files", return_value=[mock_layer]
+                "vfab.planner.extract_layers_to_files", return_value=[mock_layer]
             ):
-                with patch("plotty.planner.load_preset") as mock_load_preset:
-                    with patch("plotty.planner.features") as mock_features:
+                with patch("vfab.planner.load_preset") as mock_load_preset:
+                    with patch("vfab.planner.features") as mock_features:
                         with patch(
-                            "plotty.planner.estimate_seconds", return_value=10.0
+                            "vfab.planner.estimate_seconds", return_value=10.0
                         ):
-                            with patch("plotty.planner.run_vpype"):
-                                with patch("plotty.planner.create_multipen_svg"):
-                                    with patch("plotty.planner.save_pen_mapping"):
+                            with patch("vfab.planner.run_vpype"):
+                                with patch("vfab.planner.create_multipen_svg"):
+                                    with patch("vfab.planner.save_pen_mapping"):
                                         # Mock preset
                                         mock_preset = Mock()
                                         mock_preset.format.return_value = (
@@ -496,7 +496,7 @@ class TestPlanAxiDrawLayers:
 
     def test_plan_axidraw_layers_no_axidraw_available(self, workspace, sample_svg):
         """Test AxiDraw layer planning when AxiDraw is not available."""
-        with patch("plotty.planner.create_manager", None):
+        with patch("vfab.planner.create_manager", None):
             with pytest.raises(ImportError, match="AxiDraw support not available"):
                 plan_axidraw_layers(
                     src_svg=sample_svg,
@@ -515,8 +515,8 @@ class TestPlanAxiDrawLayers:
             "distance_pendown": 500.0,
         }
 
-        with patch("plotty.planner.create_manager", return_value=mock_manager):
-            with patch("plotty.planner.plan_layers") as mock_plan_layers:
+        with patch("vfab.planner.create_manager", return_value=mock_manager):
+            with patch("vfab.planner.plan_layers") as mock_plan_layers:
                 plan_result = {
                     "layers": [
                         {
@@ -579,8 +579,8 @@ class TestPlanAxiDrawLayers:
             "error": "Device not connected",
         }
 
-        with patch("plotty.planner.create_manager", return_value=mock_manager):
-            with patch("plotty.planner.plan_layers") as mock_plan_layers:
+        with patch("vfab.planner.create_manager", return_value=mock_manager):
+            with patch("vfab.planner.plan_layers") as mock_plan_layers:
                 plan_result = {
                     "layers": [
                         {
@@ -623,8 +623,8 @@ class TestPlanAxiDrawLayers:
             "distance_pendown": 250.0,
         }
 
-        with patch("plotty.planner.create_manager", return_value=mock_manager):
-            with patch("plotty.planner.plan_layers") as mock_plan_layers:
+        with patch("vfab.planner.create_manager", return_value=mock_manager):
+            with patch("vfab.planner.plan_layers") as mock_plan_layers:
                 plan_result = {
                     "layers": [
                         {
@@ -680,8 +680,8 @@ class TestPlanAxiDrawLayers:
             "distance_pendown": 300.0,
         }
 
-        with patch("plotty.planner.create_manager", return_value=mock_manager):
-            with patch("plotty.planner.plan_layers") as mock_plan_layers:
+        with patch("vfab.planner.create_manager", return_value=mock_manager):
+            with patch("vfab.planner.plan_layers") as mock_plan_layers:
                 plan_result = {
                     "layers": [
                         {

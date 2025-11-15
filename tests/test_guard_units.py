@@ -11,12 +11,12 @@ from unittest.mock import Mock
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from plotty.guards.job_guards import PaperSessionGuard, PenLayerGuard
-from plotty.guards.system_guards import CameraGuard
-from plotty.guards.base import GuardResult
-from plotty.config import Settings
-from plotty.db import init_database, get_session
-from plotty.models import Job, Paper, Pen, Layer
+from vfab.guards.job_guards import PaperSessionGuard, PenLayerGuard
+from vfab.guards.system_guards import CameraGuard
+from vfab.guards.base import GuardResult
+from vfab.config import Settings
+from vfab.db import init_database, get_session
+from vfab.models import Job, Paper, Pen, Layer
 
 
 def test_paper_session_guard():
@@ -32,7 +32,7 @@ def test_paper_session_guard():
         # Set config env var for database
         import os
 
-        os.environ["PLOTTY_CONFIG"] = str(Path(tmp_dir) / "config.yaml")
+        os.environ["VFAB_CONFIG"] = str(Path(tmp_dir) / "config.yaml")
 
         # Create test config
         config = Settings()
@@ -103,7 +103,7 @@ def test_pen_layer_guard():
         # Set config env var for database
         import os
 
-        os.environ["PLOTTY_CONFIG"] = str(Path(tmp_dir) / "config.yaml")
+        os.environ["VFAB_CONFIG"] = str(Path(tmp_dir) / "config.yaml")
 
         # Create test config
         config = Settings()
@@ -264,7 +264,7 @@ class TestPhysicalSetupGuard(unittest.TestCase):
 
     def test_physical_setup_guard_pass_single_pen(self):
         """Test PhysicalSetupGuard with single pen setup."""
-        from plotty.guards.system_guards import PhysicalSetupGuard
+        from vfab.guards.system_guards import PhysicalSetupGuard
 
         guard = PhysicalSetupGuard(self.mock_config)
         result = guard.check(self.test_job_id)
@@ -278,7 +278,7 @@ class TestPhysicalSetupGuard(unittest.TestCase):
 
     def test_physical_setup_guard_paper_size_mismatch(self):
         """Test PhysicalSetupGuard with paper size mismatch."""
-        from plotty.guards.system_guards import PhysicalSetupGuard
+        from vfab.guards.system_guards import PhysicalSetupGuard
 
         # Configure different paper size
         self.mock_config.paper.default_size = "A3"
@@ -294,7 +294,7 @@ class TestPhysicalSetupGuard(unittest.TestCase):
 
     def test_physical_setup_guard_multipen_not_enabled(self):
         """Test PhysicalSetupGuard when multipen required but not enabled."""
-        from plotty.guards.system_guards import PhysicalSetupGuard
+        from vfab.guards.system_guards import PhysicalSetupGuard
 
         # Use a different job ID for this test
         multipen_job_id = "multipen_test_job"

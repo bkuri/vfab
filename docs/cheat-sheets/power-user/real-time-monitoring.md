@@ -12,27 +12,27 @@
 
 ### **Basic Monitoring Setup**
 ```bash
-# 1. Start ploTTY daemon
-plotty daemon --log-level info
+# 1. Start vfab daemon
+vfab daemon --log-level info
 
 # 2. Monitor all activity (new terminal)
-plotty monitor --follow
+vfab monitor --follow
 
 # 3. Monitor specific job
-plotty monitor --job-id my_design_001 --follow
+vfab monitor --job-id my_design_001 --follow
 ```
 
 ### **Production Monitoring**
 ```bash
 # Start daemon with production settings
-sudo plotty daemon \
+sudo vfab daemon \
   --host 0.0.0.0 \
   --port 8766 \
   --log-level info \
   --daemonize
 
 # Remote monitoring
-plotty monitor \
+vfab monitor \
   --host monitor.example.com \
   --api-key your-secret-key \
   --follow
@@ -61,7 +61,7 @@ async def simple_dashboard():
             "channels": ["jobs", "system", "device"]
         }))
         
-        print("🔌 Connected to ploTTY WebSocket")
+        print("🔌 Connected to vfab WebSocket")
         print("=" * 60)
         
         async for message in websocket:
@@ -98,7 +98,7 @@ if __name__ == "__main__":
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ploTTY Real-Time Monitor</title>
+    <title>vfab Real-Time Monitor</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         .status { padding: 10px; margin: 5px 0; border-radius: 5px; }
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     </style>
 </head>
 <body>
-    <h1>🔌 ploTTY Real-Time Monitor</h1>
+    <h1>🔌 vfab Real-Time Monitor</h1>
     <div id="status">🔄 Connecting...</div>
     <div id="messages"></div>
 
@@ -121,7 +121,7 @@ if __name__ == "__main__":
         const messagesDiv = document.getElementById('messages');
         
         ws.onopen = () => {
-            statusDiv.innerHTML = '✅ Connected to ploTTY';
+            statusDiv.innerHTML = '✅ Connected to vfab';
             statusDiv.className = 'status success';
             
             // Subscribe to all channels
@@ -161,7 +161,7 @@ if __name__ == "__main__":
         };
         
         ws.onclose = () => {
-            statusDiv.innerHTML = '❌ Disconnected from ploTTY';
+            statusDiv.innerHTML = '❌ Disconnected from vfab';
             statusDiv.className = 'status error';
         };
         
@@ -182,31 +182,31 @@ if __name__ == "__main__":
 ### **Job Monitoring Only**
 ```bash
 # Monitor job state changes
-plotty monitor --channels jobs --follow
+vfab monitor --channels jobs --follow
 
 # Monitor specific job progress
-plotty monitor --channels jobs --job-id batch_job_001 --follow
+vfab monitor --channels jobs --job-id batch_job_001 --follow
 
 # JSON output for automation
-plotty monitor --channels jobs --format json --follow
+vfab monitor --channels jobs --format json --follow
 ```
 
 ### **System Status Monitoring**
 ```bash
 # System alerts and status
-plotty monitor --channels system --follow
+vfab monitor --channels system --follow
 
 # Filter for errors only
-plotty monitor --channels system --level error --follow
+vfab monitor --channels system --level error --follow
 ```
 
 ### **Device Monitoring**
 ```bash
 # Hardware status updates
-plotty monitor --channels device --follow
+vfab monitor --channels device --follow
 
 # Device status with JSON parsing
-plotty monitor --channels device --format json | jq '.status'
+vfab monitor --channels device --format json | jq '.status'
 ```
 
 ---
@@ -253,8 +253,8 @@ class AlertBot:
                 await self.send_webhook_alert(alert)
     
     async def send_email_alert(self, alert):
-        msg = MIMEText(f"ploTTY Alert: {alert['message']}")
-        msg['Subject'] = f"🚨 ploTTY {alert['level'].upper()}"
+        msg = MIMEText(f"vfab Alert: {alert['message']}")
+        msg['Subject'] = f"🚨 vfab {alert['level'].upper()}"
         msg['From'] = self.email_config['from']
         msg['To'] = self.email_config['to']
         
@@ -267,8 +267,8 @@ class AlertBot:
         
         async with aiohttp.ClientSession() as session:
             payload = {
-                "text": f"🚨 ploTTY {alert['level'].upper()}: {alert['message']}",
-                "username": "ploTTY Bot"
+                "text": f"🚨 vfab {alert['level'].upper()}: {alert['message']}",
+                "username": "vfab Bot"
             }
             
             async with session.post(self.webhook_url, json=payload) as response:
@@ -278,7 +278,7 @@ class AlertBot:
 # Usage
 alert_bot = AlertBot(
     email_config={
-        'from': 'plotty@studio.com',
+        'from': 'vfab@studio.com',
         'to': 'admin@studio.com'
     },
     webhook_url='https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
@@ -355,7 +355,7 @@ for instance in "${INSTANCES[@]}"; do
     port=$(echo $instance | cut -d: -f2)
     
     echo "🔌 Monitoring $instance..."
-    plotty monitor \
+    vfab monitor \
       --host $host \
       --port $port \
       --format json \
@@ -441,7 +441,7 @@ asyncio.run(monitor.monitor_health())
 ### **Connection Problems**
 ```bash
 # Check if daemon is running
-ps aux | grep plotty
+ps aux | grep vfab
 
 # Test WebSocket connection
 curl -i -N -H "Connection: Upgrade" \
@@ -457,22 +457,22 @@ netstat -tlnp | grep 8766
 ### **Authentication Issues**
 ```bash
 # Test with API key
-plotty monitor --api-key your-key --follow
+vfab monitor --api-key your-key --follow
 
 # Check configuration
-plotty info system | grep -i websocket
+vfab info system | grep -i websocket
 ```
 
 ### **Performance Issues**
 ```bash
 # Monitor message rate
-plotty monitor --format json --follow | pv -l > /dev/null
+vfab monitor --format json --follow | pv -l > /dev/null
 
 # Check connection count
 ss -tn state established '( dport = :8766 )' | wc -l
 
 # Monitor daemon resources
-top -p $(pgrep -f "plotty daemon")
+top -p $(pgrep -f "vfab daemon")
 ```
 
 ---
@@ -496,7 +496,7 @@ websocket:
 
 logging:
   level: "debug"
-  modules: ["plotty.websocket"]
+  modules: ["vfab.websocket"]
 ```
 
 ### **Production WebSocket Config**
@@ -548,4 +548,4 @@ logging:
   access_log: true
 ```
 
-This real-time monitoring system provides comprehensive visibility into ploTTY operations, enabling responsive dashboards, automated alerting, and professional studio management.
+This real-time monitoring system provides comprehensive visibility into vfab operations, enabling responsive dashboards, automated alerting, and professional studio management.

@@ -1,0 +1,13 @@
+[Unit]
+Description=vfab daemon (container)
+
+[Container]
+Image=ghcr.io/yourorg/vfab:latest
+Network=host
+Volume=%h/.local/share/vfab:/var/lib/vfab:Z
+Volume=%h/.config/vfab:/etc/vfab:Z
+Environment=VFAB_CONFIG=/etc/vfab/config.yaml
+Exec=vfab daemon --foreground
+
+[Install]
+WantedBy=default.target

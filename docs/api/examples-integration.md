@@ -1,6 +1,6 @@
 # Examples and Integration
 
-This section provides practical examples and integration patterns for working with ploTTY's APIs. These examples demonstrate common workflows, custom integrations, and advanced usage patterns.
+This section provides practical examples and integration patterns for working with vfab's APIs. These examples demonstrate common workflows, custom integrations, and advanced usage patterns.
 
 ## Quick Start Examples
 
@@ -8,9 +8,9 @@ This section provides practical examples and integration patterns for working wi
 
 ```python
 from pathlib import Path
-from plotty.fsm import create_fsm, JobState
-from plotty.plotting import MultiPenPlotter
-from plotty.config import get_config
+from vfab.fsm import create_fsm, JobState
+from vfab.plotting import MultiPenPlotter
+from vfab.config import get_config
 
 def simple_plot_job(job_id: str, svg_path: Path):
     """Simple job plotting workflow."""
@@ -46,8 +46,8 @@ def simple_plot_job(job_id: str, svg_path: Path):
 ```python
 import glob
 from pathlib import Path
-from plotty.fsm import create_fsm
-from plotty.config import get_config
+from vfab.fsm import create_fsm
+from vfab.config import get_config
 
 def batch_process_svgs(input_pattern: str, preset: str = "default"):
     """Process multiple SVG files in batch."""
@@ -98,11 +98,11 @@ def batch_process_svgs(input_pattern: str, preset: str = "default"):
 ```python
 import typer
 from pathlib import Path
-from plotty.fsm import create_fsm, JobState
-from plotty.config import get_config
+from vfab.fsm import create_fsm, JobState
+from vfab.config import get_config
 
 # Create custom CLI app
-custom_app = typer.Typer(help="Custom ploTTY commands")
+custom_app = typer.Typer(help="Custom vfab commands")
 
 @custom_app.command()
 def batch_plot(
@@ -140,25 +140,25 @@ if __name__ == "__main__":
     custom_app()
 ```
 
-### ploTTY as Python Module
+### vfab as Python Module
 
 ```python
 #!/usr/bin/env python3
-""" ploTTY integration script example """
+""" vfab integration script example """
 
 import sys
 import argparse
 from pathlib import Path
 
-# Add ploTTY to path if needed
-sys.path.insert(0, '/path/to/plotty/src')
+# Add vfab to path if needed
+sys.path.insert(0, '/path/to/vfab/src')
 
-from plotty.fsm import create_fsm, JobState
-from plotty.plotting import MultiPenPlotter
-from plotty.config import load_config
+from vfab.fsm import create_fsm, JobState
+from vfab.plotting import MultiPenPlotter
+from vfab.config import load_config
 
 def main():
-    parser = argparse.ArgumentParser(description='ploTTY integration example')
+    parser = argparse.ArgumentParser(description='vfab integration example')
     parser.add_argument('job_id', help='Job ID')
     parser.add_argument('svg_file', help='SVG file to plot')
     parser.add_argument('--preset', default='default', help='Optimization preset')
@@ -206,8 +206,8 @@ if __name__ == "__main__":
 ### Custom Database Queries
 
 ```python
-from plotty.db import get_session
-from plotty.models import Job, Pen, Paper, JobStatistics
+from vfab.db import get_session
+from vfab.models import Job, Pen, Paper, JobStatistics
 from sqlalchemy import func, and_
 from datetime import datetime, timedelta
 
@@ -294,8 +294,8 @@ def get_queue_status():
 ### Custom Model Operations
 
 ```python
-from plotty.db import get_session
-from plotty.models import Pen, Paper, Job
+from vfab.db import get_session
+from vfab.models import Pen, Paper, Job
 from sqlalchemy.exc import IntegrityError
 
 def create_custom_pen(name: str, width_mm: float, color: str, **kwargs):
@@ -354,10 +354,10 @@ def update_job_metadata(job_id: str, metadata: dict):
 ```python
 from flask import Flask, request, jsonify
 from pathlib import Path
-from plotty.fsm import create_fsm, JobState
-from plotty.config import get_config
-from plotty.db import get_session
-from plotty.models import Job
+from vfab.fsm import create_fsm, JobState
+from vfab.config import get_config
+from vfab.db import get_session
+from vfab.models import Job
 
 app = Flask(__name__)
 
@@ -445,12 +445,12 @@ from pydantic import BaseModel
 from typing import Optional, List
 from pathlib import Path
 
-from plotty.fsm import create_fsm, JobState
-from plotty.config import get_config
-from plotty.db import get_session
-from plotty.models import Job
+from vfab.fsm import create_fsm, JobState
+from vfab.config import get_config
+from vfab.db import get_session
+from vfab.models import Job
 
-app = FastAPI(title="ploTTY API", version="1.0.0")
+app = FastAPI(title="vfab API", version="1.0.0")
 
 class JobCreate(BaseModel):
     job_id: str
@@ -532,8 +532,8 @@ from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-from plotty.fsm import create_fsm
-from plotty.config import get_config
+from vfab.fsm import create_fsm
+from vfab.config import get_config
 
 class PlotFileHandler(FileSystemEventHandler):
     """Handle new SVG files for automatic plotting."""
@@ -598,9 +598,9 @@ if __name__ == "__main__":
 import schedule
 import time
 from pathlib import Path
-from plotty.fsm import create_fsm, JobState
-from plotty.plotting import MultiPenPlotter
-from plotty.config import get_config
+from vfab.fsm import create_fsm, JobState
+from vfab.plotting import MultiPenPlotter
+from vfab.config import get_config
 
 def process_queued_jobs():
     """Process all queued jobs."""
@@ -653,15 +653,15 @@ while True:
 
 ## Testing Examples
 
-### Unit Testing with ploTTY
+### Unit Testing with vfab
 
 ```python
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from plotty.fsm import create_fsm, JobState
-from plotty.testing import TestEnvironment, create_test_job
+from vfab.fsm import create_fsm, JobState
+from vfab.testing import TestEnvironment, create_test_job
 
 class TestPlottingWorkflow(unittest.TestCase):
     
@@ -751,9 +751,9 @@ if __name__ == '__main__':
 ```python
 import pytest
 from pathlib import Path
-from plotty.fsm import create_fsm, JobState
-from plotty.plotting import MultiPenPlotter
-from plotty.testing import TestEnvironment, create_test_job
+from vfab.fsm import create_fsm, JobState
+from vfab.plotting import MultiPenPlotter
+from vfab.testing import TestEnvironment, create_test_job
 
 @pytest.fixture
 def test_env():
@@ -822,4 +822,4 @@ def test_error_handling(test_env, sample_job):
     assert error is not None
 ```
 
-These examples demonstrate various ways to integrate with ploTTY's APIs, from simple scripts to complex web applications and automated workflows. The key is understanding the FSM-based job lifecycle and using the appropriate APIs for your use case.
+These examples demonstrate various ways to integrate with vfab's APIs, from simple scripts to complex web applications and automated workflows. The key is understanding the FSM-based job lifecycle and using the appropriate APIs for your use case.

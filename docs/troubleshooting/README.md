@@ -1,6 +1,6 @@
-# ploTTY Troubleshooting Guide
+# vfab Troubleshooting Guide
 
-This guide extracts common issues, error patterns, and troubleshooting scenarios from the ploTTY test suite and codebase analysis. It provides practical solutions for diagnosing and resolving problems users may encounter.
+This guide extracts common issues, error patterns, and troubleshooting scenarios from the vfab test suite and codebase analysis. It provides practical solutions for diagnosing and resolving problems users may encounter.
 
 ## Table of Contents
 
@@ -20,7 +20,7 @@ This guide extracts common issues, error patterns, and troubleshooting scenarios
 ### 1. Module Import and Mocking Issues
 
 **Symptoms:**
-- `AttributeError: module 'plotty.cli.add' does not have the attribute 'load_config'`
+- `AttributeError: module 'vfab.cli.add' does not have the attribute 'load_config'`
 - Test failures related to missing module attributes
 - Mock patching failures
 
@@ -32,11 +32,11 @@ This guide extracts common issues, error patterns, and troubleshooting scenarios
 **Solutions:**
 ```bash
 # Check actual module structure
-find src/plotty -name "*.py" | xargs grep -l "load_config"
+find src/vfab -name "*.py" | xargs grep -l "load_config"
 
 # Update test imports to match current structure
 # Use proper import paths like:
-from plotty.config import load_config
+from vfab.config import load_config
 ```
 
 ### 2. CLI Command Structure Issues
@@ -54,11 +54,11 @@ from plotty.config import load_config
 **Solutions:**
 ```bash
 # Check available commands
-plotty --help
-plotty list --help
+vfab --help
+vfab list --help
 
 # Verify subcommand implementation exists
-ls -la src/plotty/cli/list/
+ls -la src/vfab/cli/list/
 ```
 
 ### 3. Workspace and Directory Issues
@@ -76,13 +76,13 @@ ls -la src/plotty/cli/list/
 **Solutions:**
 ```bash
 # Initialize workspace
-plotty setup
+vfab setup
 
 # Check workspace configuration
-plotty info system
+vfab info system
 
 # Verify directory structure
-ls -la ~/.local/share/plotty/workspace/jobs/
+ls -la ~/.local/share/vfab/workspace/jobs/
 ```
 
 ---
@@ -91,7 +91,7 @@ ls -la ~/.local/share/plotty/workspace/jobs/
 
 ### 1. Custom Error Hierarchy
 
-ploTTY uses a structured error system with specific error types:
+vfab uses a structured error system with specific error types:
 
 ```python
 # Base error with user-friendly messages
@@ -109,7 +109,7 @@ ValidationError(message, expected_format=None) # Input validation
 #### File/Path Errors
 ```bash
 # Error: File not found
-plotty add job test /nonexistent/file.svg
+vfab add job test /nonexistent/file.svg
 
 # Solution: Check file exists and is readable
 ls -la /path/to/file.svg
@@ -120,24 +120,24 @@ file /path/to/file.svg
 ```bash
 # Error: Permission denied
 # Solution: Check permissions and ownership
-ls -la ~/.local/share/plotty/
-chmod -R u+rw ~/.local/share/plotty/
+ls -la ~/.local/share/vfab/
+chmod -R u+rw ~/.local/share/vfab/
 ```
 
 #### Configuration Errors
 ```bash
 # Error: Config invalid
 # Solution: Validate and recreate config
-plotty check self
-plotty setup
+vfab check self
+vfab setup
 ```
 
 #### Device Connection Errors
 ```bash
 # Error: Device not connected
 # Solution: Check AxiDraw connection
-plotty check servo
-plotty check camera
+vfab check servo
+vfab check camera
 ls -la /dev/ttyUSB* /dev/ttyACM*
 ```
 
@@ -162,7 +162,7 @@ lsusb | grep -i axidraw
 dmesg | grep -i tty
 
 # Test device connection
-plotty check servo
+vfab check servo
 ```
 
 **Solutions:**
@@ -175,7 +175,7 @@ sudo usermod -a -G dialout $USER
 # Logout and login again
 
 # Test with specific device
-plotty add job test file.svg --device /dev/ttyUSB0
+vfab add job test file.svg --device /dev/ttyUSB0
 ```
 
 ### 2. Camera Integration Issues
@@ -188,7 +188,7 @@ plotty add job test file.svg --device /dev/ttyUSB0
 **Diagnostic Steps:**
 ```bash
 # Check camera configuration
-plotty check camera
+vfab check camera
 
 # Test camera URL
 curl -I http://127.0.0.1:8881/stream.mjpeg
@@ -200,7 +200,7 @@ systemctl status motion
 **Solutions:**
 ```bash
 # Update camera configuration
-plotty setup
+vfab setup
 # Or edit config.yaml:
 camera:
   enabled: true
@@ -218,22 +218,22 @@ camera:
 **Diagnostic Steps:**
 ```bash
 # Check pen configuration
-plotty list pens
+vfab list pens
 
 # Validate pen mapping
-plotty info job <job_id>
+vfab info job <job_id>
 
 # Test pen swap system
-plotty check ready
+vfab check ready
 ```
 
 **Solutions:**
 ```bash
 # Configure pen mapping
-plotty add pen "0.3mm black" --width 0.3 --color "#000000"
+vfab add pen "0.3mm black" --width 0.3 --color "#000000"
 
 # Validate SVG layers
-plotty info job <job_id> --show-layers
+vfab info job <job_id> --show-layers
 ```
 
 ---
@@ -250,26 +250,26 @@ plotty info job <job_id> --show-layers
 **Diagnostic Steps:**
 ```bash
 # Check database location
-plotty info system | grep database
+vfab info system | grep database
 
 # Test database access
-sqlite3 ~/.local/share/plotty/plotty.db ".tables"
+sqlite3 ~/.local/share/vfab/vfab.db ".tables"
 
 # Check database permissions
-ls -la ~/.local/share/plotty/plotty.db
+ls -la ~/.local/share/vfab/vfab.db
 ```
 
 **Solutions:**
 ```bash
 # Reinitialize database
-rm ~/.local/share/plotty/plotty.db
-plotty setup
+rm ~/.local/share/vfab/vfab.db
+vfab setup
 
 # Run migrations
 uv run alembic upgrade head
 
 # Check database configuration
-cat ~/.config/plotty/config.yaml | grep database
+cat ~/.config/vfab/config.yaml | grep database
 ```
 
 ### 2. Configuration File Issues
@@ -282,26 +282,26 @@ cat ~/.config/plotty/config.yaml | grep database
 **Diagnostic Steps:**
 ```bash
 # Validate YAML syntax
-python -c "import yaml; yaml.safe_load(open('~/.config/plotty/config.yaml'))"
+python -c "import yaml; yaml.safe_load(open('~/.config/vfab/config.yaml'))"
 
 # Check configuration schema
-plotty info system
+vfab info system
 
 # Test configuration loading
-python -c "from plotty.config import load_config; print(load_config())"
+python -c "from vfab.config import load_config; print(load_config())"
 ```
 
 **Solutions:**
 ```bash
 # Recreate configuration
-plotty setup
+vfab setup
 
 # Backup and reset config
-mv ~/.config/plotty/config.yaml ~/.config/plotty/config.yaml.backup
-plotty setup
+mv ~/.config/vfab/config.yaml ~/.config/vfab/config.yaml.backup
+vfab setup
 
 # Manual configuration check
-cat ~/.config/plotty/config.yaml
+cat ~/.config/vfab/config.yaml
 ```
 
 ### 3. Workspace Issues
@@ -314,26 +314,26 @@ cat ~/.config/plotty/config.yaml
 **Diagnostic Steps:**
 ```bash
 # Check workspace structure
-tree ~/.local/share/plotty/workspace/
+tree ~/.local/share/vfab/workspace/
 
 # Verify permissions
-ls -la ~/.local/share/plotty/workspace/
+ls -la ~/.local/share/vfab/workspace/
 
 # Check disk space
-df -h ~/.local/share/plotty/
+df -h ~/.local/share/vfab/
 ```
 
 **Solutions:**
 ```bash
 # Reinitialize workspace
-rm -rf ~/.local/share/plotty/workspace/
-plotty setup
+rm -rf ~/.local/share/vfab/workspace/
+vfab setup
 
 # Fix permissions
-chmod -R u+rw ~/.local/share/plotty/workspace/
+chmod -R u+rw ~/.local/share/vfab/workspace/
 
 # Create missing directories
-mkdir -p ~/.local/share/plotty/workspace/jobs
+mkdir -p ~/.local/share/vfab/workspace/jobs
 ```
 
 ---
@@ -350,25 +350,25 @@ mkdir -p ~/.local/share/plotty/workspace/jobs
 **Diagnostic Steps:**
 ```bash
 # Check for interrupted jobs
-plotty info queue
+vfab info queue
 
 # Check job status
-plotty info job <job_id>
+vfab info job <job_id>
 
 # Examine journal files
-cat ~/.local/share/plotty/workspace/jobs/<job_id>/journal.jsonl
+cat ~/.local/share/vfab/workspace/jobs/<job_id>/journal.jsonl
 ```
 
 **Recovery Commands:**
 ```bash
 # Resume interrupted jobs
-plotty resume
+vfab resume
 
 # Check resumable jobs
-plotty list jobs --state interrupted
+vfab list jobs --state interrupted
 
 # Force job state change
-plotty restart <job_id>
+vfab restart <job_id>
 ```
 
 ### 2. Emergency Shutdown Recovery
@@ -381,13 +381,13 @@ plotty restart <job_id>
 **Recovery Process:**
 ```bash
 # Identify crashed jobs
-find ~/.local/share/plotty/workspace/jobs -name "journal.jsonl" -exec grep -l "emergency_shutdown" {} \;
+find ~/.local/share/vfab/workspace/jobs -name "journal.jsonl" -exec grep -l "emergency_shutdown" {} \;
 
 # Manual recovery
-plotty recovery <job_id>
+vfab recovery <job_id>
 
 # Clean up corrupted journals
-plotty cleanup --job <job_id>
+vfab cleanup --job <job_id>
 ```
 
 ### 3. State Machine Corruption
@@ -400,15 +400,15 @@ plotty cleanup --job <job_id>
 **Solutions:**
 ```bash
 # Reset job state
-plotty remove job <job_id> --force
-plotty add job <job_id> <file.svg>
+vfab remove job <job_id> --force
+vfab add job <job_id> <file.svg>
 
 # Validate state transitions
-plotty check job <job_id>
+vfab check job <job_id>
 
 # Reset entire system (last resort)
-rm -rf ~/.local/share/plotty/workspace/
-plotty setup
+rm -rf ~/.local/share/vfab/workspace/
+vfab setup
 ```
 
 ---
@@ -428,10 +428,10 @@ plotty setup
 ls -lh large_file.svg
 
 # Use appropriate optimization level
-plotty add job large_job large_file.svg --optimization fast
+vfab add job large_job large_file.svg --optimization fast
 
 # Monitor disk space
-df -h ~/.local/share/plotty/workspace/
+df -h ~/.local/share/vfab/workspace/
 
 # Split large jobs if needed
 # Use external tools to split SVG into smaller files
@@ -447,13 +447,13 @@ df -h ~/.local/share/plotty/workspace/
 **Solutions:**
 ```bash
 # Check for active processes
-ps aux | grep plotty
+ps aux | grep vfab
 
 # Wait for completion
-plotty info queue
+vfab info queue
 
 # Use job priorities
-plotty add job urgent_job urgent.svg --priority high
+vfab add job urgent_job urgent.svg --priority high
 ```
 
 ### 3. Network and Service Dependencies
@@ -474,7 +474,7 @@ ping -c 3 127.0.0.1
 curl -I http://127.0.0.1:8881/stream.mjpeg
 
 # Configure timeouts
-plotty setup
+vfab setup
 # Edit config.yaml:
 device:
   detection_timeout: 10
@@ -489,55 +489,55 @@ camera:
 ### System Health Check
 ```bash
 # Comprehensive system check
-plotty check self
+vfab check self
 
 # Component-specific checks
-plotty check camera
-plotty check servo  
-plotty check timing
-plotty check ready
+vfab check camera
+vfab check servo  
+vfab check timing
+vfab check ready
 ```
 
 ### Information Gathering
 ```bash
 # System information
-plotty info system --json
+vfab info system --json
 
 # Queue status
-plotty info queue --csv
+vfab info queue --csv
 
 # Job details
-plotty info job <job_id> --verbose
+vfab info job <job_id> --verbose
 
 # Available resources
-plotty list pens
-plotty list paper
-plotty list presets
+vfab list pens
+vfab list paper
+vfab list presets
 ```
 
 ### Log Analysis
 ```bash
 # Check application logs
-tail -f ~/.local/share/plotty/logs/plotty.log
+tail -f ~/.local/share/vfab/logs/vfab.log
 
 # Filter by error level
-grep "ERROR" ~/.local/share/plotty/logs/plotty.log
+grep "ERROR" ~/.local/share/vfab/logs/vfab.log
 
 # Analyze job journals
-find ~/.local/share/plotty/workspace/jobs -name "journal.jsonl" -exec cat {} \;
+find ~/.local/share/vfab/workspace/jobs -name "journal.jsonl" -exec cat {} \;
 ```
 
 ### Performance Monitoring
 ```bash
 # Monitor resource usage
-watch -n 1 'ps aux | grep plotty'
+watch -n 1 'ps aux | grep vfab'
 
 # Check disk usage
-du -sh ~/.local/share/plotty/
+du -sh ~/.local/share/vfab/
 
 # Database performance
-sqlite3 ~/.local/share/plotty/plotty.db ".schema"
-sqlite3 ~/.local/share/plotty/plotty.db "SELECT COUNT(*) FROM jobs;"
+sqlite3 ~/.local/share/vfab/vfab.db ".schema"
+sqlite3 ~/.local/share/vfab/vfab.db "SELECT COUNT(*) FROM jobs;"
 ```
 
 ---
@@ -549,25 +549,25 @@ sqlite3 ~/.local/share/plotty/plotty.db "SELECT COUNT(*) FROM jobs;"
 **Weekly Tasks:**
 ```bash
 # Clean up old journals
-find ~/.local/share/plotty/workspace/jobs -name "journal.jsonl" -mtime +7 -delete
+find ~/.local/share/vfab/workspace/jobs -name "journal.jsonl" -mtime +7 -delete
 
 # Compact database
-sqlite3 ~/.local/share/plotty/plotty.db "VACUUM;"
+sqlite3 ~/.local/share/vfab/vfab.db "VACUUM;"
 
 # Check disk space
-df -h ~/.local/share/plotty/
+df -h ~/.local/share/vfab/
 
 # Backup configuration
-cp ~/.config/plotty/config.yaml ~/.config/plotty/config.yaml.backup.$(date +%Y%m%d)
+cp ~/.config/vfab/config.yaml ~/.config/vfab/config.yaml.backup.$(date +%Y%m%d)
 ```
 
 **Monthly Tasks:**
 ```bash
 # Full system backup
-plotty system export --output backup_$(date +%Y%m%d).tar.gz
+vfab system export --output backup_$(date +%Y%m%d).tar.gz
 
 # Clean up completed jobs
-plotty remove job --state completed --older-than 30d
+vfab remove job --state completed --older-than 30d
 
 # Update dependencies
 uv pip install -e ".[dev,vpype,axidraw]"
@@ -578,9 +578,9 @@ uv pip install -e ".[dev,vpype,axidraw]"
 **File Organization:**
 ```yaml
 # Use absolute paths in configuration
-workspace: "/home/user/.local/share/plotty/workspace"
+workspace: "/home/user/.local/share/vfab/workspace"
 database:
-  url: "sqlite:///home/user/.local/share/plotty/plotty.db"
+  url: "sqlite:///home/user/.local/share/vfab/vfab.db"
 
 # Set appropriate timeouts
 device:
@@ -606,9 +606,9 @@ logging:
 **Log Monitoring:**
 ```bash
 # Set up log rotation
-sudo nano /etc/logrotate.d/plotty
+sudo nano /etc/logrotate.d/vfab
 # Content:
-~/.local/share/plotty/logs/*.log {
+~/.local/share/vfab/logs/*.log {
     weekly
     rotate 4
     compress
@@ -620,17 +620,17 @@ sudo nano /etc/logrotate.d/plotty
 **Health Checks:**
 ```bash
 # Create a health check script
-cat > ~/plotty_health.sh << 'EOF'
+cat > ~/vfab_health.sh << 'EOF'
 #!/bin/bash
-echo "=== ploTTY Health Check ==="
-plotty check self
+echo "=== vfab Health Check ==="
+vfab check self
 echo "=== Disk Usage ==="
-df -h ~/.local/share/plotty/
+df -h ~/.local/share/vfab/
 echo "=== Recent Errors ==="
-tail -10 ~/.local/share/plotty/logs/plotty.log | grep ERROR
+tail -10 ~/.local/share/vfab/logs/vfab.log | grep ERROR
 EOF
 
-chmod +x ~/plotty_health.sh
+chmod +x ~/vfab_health.sh
 ```
 
 ### 4. Backup Strategy
@@ -638,21 +638,21 @@ chmod +x ~/plotty_health.sh
 **Automated Backups:**
 ```bash
 # Create backup script
-cat > ~/backup_plotty.sh << 'EOF'
+cat > ~/backup_vfab.sh << 'EOF'
 #!/bin/bash
-BACKUP_DIR="/backup/plotty"
+BACKUP_DIR="/backup/vfab"
 DATE=$(date +%Y%m%d_%H%M%S)
 
 mkdir -p $BACKUP_DIR
 
 # Backup configuration
-cp ~/.config/plotty/config.yaml $BACKUP_DIR/config_$DATE.yaml
+cp ~/.config/vfab/config.yaml $BACKUP_DIR/config_$DATE.yaml
 
 # Backup database
-cp ~/.local/share/plotty/plotty.db $BACKUP_DIR/plotty_$DATE.db
+cp ~/.local/share/vfab/vfab.db $BACKUP_DIR/vfab_$DATE.db
 
 # Backup workspace (compressed)
-tar -czf $BACKUP_DIR/workspace_$DATE.tar.gz ~/.local/share/plotty/workspace/
+tar -czf $BACKUP_DIR/workspace_$DATE.tar.gz ~/.local/share/vfab/workspace/
 
 # Clean old backups (keep 7 days)
 find $BACKUP_DIR -name "*.yaml" -mtime +7 -delete
@@ -660,11 +660,11 @@ find $BACKUP_DIR -name "*.db" -mtime +7 -delete
 find $BACKUP_DIR -name "*.tar.gz" -mtime +7 -delete
 EOF
 
-chmod +x ~/backup_plotty.sh
+chmod +x ~/backup_vfab.sh
 
 # Add to crontab for daily execution
 crontab -e
-# Add: 0 2 * * * /home/user/backup_plotty.sh
+# Add: 0 2 * * * /home/user/backup_vfab.sh
 ```
 
 ---
@@ -680,40 +680,40 @@ crontab -e
 | `Device not connected` | AxiDraw not detected | Check USB connection and permissions |
 | `Config invalid` | YAML syntax error | Validate with `python -c "import yaml; yaml.safe_load(...)"` |
 | `Database locked` | Concurrent access | Wait for other processes to complete |
-| `Job stuck in PLOTTING` | Crash/interrupt | Use `plotty resume` or `plotty restart` |
+| `Job stuck in PLOTTING` | Crash/interrupt | Use `vfab resume` or `vfab restart` |
 | `Camera not accessible` | Network/service issue | Check URL and service status |
-| `Invalid state transition` | FSM state error | Check current state with `plotty info job` |
+| `Invalid state transition` | FSM state error | Check current state with `vfab info job` |
 
 ### Essential Commands
 
 ```bash
 # System setup
-plotty setup                    # Initialize configuration
-plotty check self               # System health check
+vfab setup                    # Initialize configuration
+vfab check self               # System health check
 
 # Job management  
-plotty add job <name> <file>    # Add new job
-plotty list jobs                 # List all jobs
-plotty info job <id>            # Job details
-plotty restart <id>             # Restart job
+vfab add job <name> <file>    # Add new job
+vfab list jobs                 # List all jobs
+vfab info job <id>            # Job details
+vfab restart <id>             # Restart job
 
 # Device checks
-plotty check servo              # Test AxiDraw
-plotty check camera             # Test camera
-plotty check ready              # Check all systems
+vfab check servo              # Test AxiDraw
+vfab check camera             # Test camera
+vfab check ready              # Check all systems
 
 # Recovery
-plotty resume                   # Resume interrupted jobs
-plotty info queue              # Check queue status
+vfab resume                   # Resume interrupted jobs
+vfab info queue              # Check queue status
 ```
 
 ### File Locations
 
 ```
-Configuration: ~/.config/plotty/config.yaml
-Database:     ~/.local/share/plotty/plotty.db  
-Workspace:    ~/.local/share/plotty/workspace/
-Logs:         ~/.local/share/plotty/logs/plotty.log
+Configuration: ~/.config/vfab/config.yaml
+Database:     ~/.local/share/vfab/vfab.db  
+Workspace:    ~/.local/share/vfab/workspace/
+Logs:         ~/.local/share/vfab/logs/vfab.log
 ```
 
-This troubleshooting guide is based on comprehensive analysis of the ploTTY test suite, covering real-world scenarios and solutions extracted from test failures, error handling patterns, and recovery mechanisms.
+This troubleshooting guide is based on comprehensive analysis of the vfab test suite, covering real-world scenarios and solutions extracted from test failures, error handling patterns, and recovery mechanisms.

@@ -1,6 +1,6 @@
-# ploTTY User Guide
+# vfab User Guide
 
-**Purpose:** Master pen plotting productivity with ploTTY - from your first plot to professional studio management.
+**Purpose:** Master pen plotting productivity with vfab - from your first plot to professional studio management.
 
 ---
 
@@ -33,23 +33,23 @@
 
 ## 🚀 Quick Start
 
-**New to ploTTY? Get plotting in 5 minutes!**
+**New to vfab? Get plotting in 5 minutes!**
 
 ```bash
-# 1. Install ploTTY
-git clone https://github.com/your-org/plotty.git
-cd plotty
+# 1. Install vfab
+git clone https://github.com/your-org/vfab.git
+cd vfab
 uv pip install -e ".[dev,vpype,axidraw]"
 uv run alembic upgrade head
 
 # 2. Quick setup
-plotty setup  # Accept defaults for now
+vfab setup  # Accept defaults for now
 
 # 3. Add your first design
-plotty add your_design.svg --paper a4
+vfab add your_design.svg --paper a4
 
 # 4. Plot it!
-plotty plot your_design
+vfab plot your_design
 ```
 
 That's it! 🎉 You're plotting. For detailed setup, see [Getting Started](#1-getting-started).
@@ -60,9 +60,9 @@ That's it! 🎉 You're plotting. For detailed setup, see [Getting Started](#1-ge
 
 ## 1. Getting Started
 
-### 1.1 What is ploTTY?
+### 1.1 What is vfab?
 
-ploTTY is your **pen plotting productivity assistant** that helps you:
+vfab is your **pen plotting productivity assistant** that helps you:
 - 📋 **Queue jobs** - Line up multiple designs
 - ⚡ **Optimize automatically** - Faster plotting, better results  
 - 🖊️ **Manage pens** - Switch between colors/sizes seamlessly
@@ -90,9 +90,9 @@ ploTTY is your **pen plotting productivity assistant** that helps you:
 # Step 1: Install uv (modern Python package manager)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Step 2: Clone ploTTY
-git clone https://github.com/your-org/plotty.git
-cd plotty
+# Step 2: Clone vfab
+git clone https://github.com/your-org/vfab.git
+cd vfab
 
 # Step 3: Install with hardware support
 uv pip install -e ".[dev,vpype,axidraw]"
@@ -101,18 +101,18 @@ uv pip install -e ".[dev,vpype,axidraw]"
 uv run alembic upgrade head
 ```
 
-> **💡 Tip:** Run `plotty --version` to verify installation.
+> **💡 Tip:** Run `vfab --version` to verify installation.
 
 ### 1.4 First-Time Setup
 
 ```bash
 # Run the interactive setup wizard
-plotty setup
+vfab setup
 ```
 
 **Setup walkthrough:**
 ```
-🔧 ploTTY Setup Wizard
+🔧 vfab Setup Wizard
 ======================
 
 Device Configuration:
@@ -166,10 +166,10 @@ Let's walk through your complete first plotting experience.
 
 ```bash
 # Add the test design
-plotty add test.svg --paper a4
+vfab add test.svg --paper a4
 
 # Add with a friendly name
-plotty add test.svg --name "My First Plot" --paper a4
+vfab add test.svg --name "My First Plot" --paper a4
 ```
 
 **What you'll see:**
@@ -190,7 +190,7 @@ Planning optimizes your design for faster plotting.
 
 ```bash
 # Interactive planning (perfect for beginners)
-plotty plan test --interactive
+vfab plan test --interactive
 ```
 
 **Interactive walkthrough:**
@@ -222,7 +222,7 @@ Make sure your AxiDraw is connected and has paper loaded, then:
 
 ```bash
 # Start plotting
-plotty plot test
+vfab plot test
 ```
 
 **Real-time progress display:**
@@ -247,7 +247,7 @@ Controls:
 
 ```bash
 # See job details
-plotty info job test
+vfab info job test
 
 # View the generated report
 # Open: workspace/jobs/test/report.html in your browser
@@ -270,22 +270,22 @@ Master the everyday operations you'll use frequently.
 **View what's queued:**
 ```bash
 # List all jobs
-plotty list jobs
+vfab list jobs
 
 # See current queue
-plotty list queue
+vfab list queue
 
 # Check job status
-plotty info job test
+vfab info job test
 ```
 
 **Remove jobs:**
 ```bash
 # Remove specific job
-plotty remove job test
+vfab remove job test
 
 # Clear completed jobs
-plotty queue cleanup --state completed
+vfab queue cleanup --state completed
 ```
 
 ### 3.2 Quick Plotting Workflow
@@ -293,28 +293,28 @@ plotty queue cleanup --state completed
 **Your daily plotting routine:**
 ```bash
 # 1. Add new design
-plotty add new_design.svg --name "Today's Art" --paper a4
+vfab add new_design.svg --name "Today's Art" --paper a4
 
 # 2. Plan it (interactive is best)
-plotty plan new_design --interactive
+vfab plan new_design --interactive
 
 # 3. Plot it
-plotty plot new_design
+vfab plot new_design
 
 # 4. Check results
-plotty info job new_design
+vfab info job new_design
 ```
 
 ### 3.3 Paper and Pen Basics
 
 **Check available paper:**
 ```bash
-plotty list paper
+vfab list paper
 ```
 
 **Add custom paper size:**
 ```bash
-plotty add paper \
+vfab add paper \
   --name "Square" \
   --width 150 \
   --height 150 \
@@ -324,10 +324,10 @@ plotty add paper \
 **Basic pen management:**
 ```bash
 # List pens
-plotty list pens
+vfab list pens
 
 # Add a new pen
-plotty add pen \
+vfab add pen \
   --name "Fine Black" \
   --width 0.3 \
   --color "#000000"
@@ -338,13 +338,13 @@ plotty add pen \
 **Quick system check:**
 ```bash
 # Is everything ready?
-plotty check ready
+vfab check ready
 
 # Detailed status
-plotty status
+vfab status
 
 # Test device movement
-plotty check device --test-move
+vfab check device --test-move
 ```
 
 **Common status outputs:**
@@ -360,14 +360,14 @@ plotty check device --test-move
 **Know how long jobs will take:**
 ```bash
 # Quick estimate
-plotty estimate job_name
+vfab estimate job_name
 
 # Detailed breakdown
-plotty estimate job_name --detailed
+vfab estimate job_name --detailed
 
 # Compare before/after optimization
-plotty estimate job_name --stage pre
-plotty estimate job_name --stage post
+vfab estimate job_name --stage pre
+vfab estimate job_name --stage post
 ```
 
 **Sample output:**
@@ -392,7 +392,7 @@ Create colorful, multi-layered designs with automatic pen management.
 
 ### 4.1 Understanding Multi-Pen Detection
 
-ploTTY automatically detects when your design needs multiple pens from:
+vfab automatically detects when your design needs multiple pens from:
 
 **SVG Layers** (Inkscape, Illustrator, etc.):
 ```xml
@@ -422,38 +422,38 @@ ploTTY automatically detects when your design needs multiple pens from:
 
 **View current pens:**
 ```bash
-plotty list pens
+vfab list pens
 ```
 
 **Add pens interactively:**
 ```bash
-plotty setup pen
+vfab setup pen
 ```
 
 **Add specific pens:**
 ```bash
 # Fine detail pen
-plotty add pen \
+vfab add pen \
   --name "Fine Black" \
   --width 0.3 \
   --color "#000000" \
   --speed-cap 50
 
 # Medium workhorse pen
-plotty add pen \
+vfab add pen \
   --name "Medium Black" \
   --width 0.7 \
   --color "#000000" \
   --speed-cap 80
 
 # Color pens
-plotty add pen \
+vfab add pen \
   --name "Fine Red" \
   --width 0.3 \
   --color "#FF0000" \
   --speed-cap 50
 
-plotty add pen \
+vfab add pen \
   --name "Medium Blue" \
   --width 0.5 \
   --color "#0000FF" \
@@ -474,12 +474,12 @@ plotty add pen \
 
 **Add your colorful design:**
 ```bash
-plotty add colorful_art.svg --paper a4 --name "Rainbow Design"
+vfab add colorful_art.svg --paper a4 --name "Rainbow Design"
 ```
 
 **Interactive pen mapping:**
 ```bash
-plotty plan colorful_art --interactive
+vfab plan colorful_art --interactive
 ```
 
 **Pen mapping walkthrough:**
@@ -514,7 +514,7 @@ Time saved: ~4 minutes
 
 **Start your colorful plot:**
 ```bash
-plotty plot colorful_art
+vfab plot colorful_art
 ```
 
 **During plotting - pen change prompts:**
@@ -561,26 +561,26 @@ Please change pen now...
 **Advanced pen mapping:**
 ```bash
 # Plan with custom pen order
-plotty plan artwork --pen-order 2,1,4,3
+vfab plan artwork --pen-order 2,1,4,3
 
 # Optimize for minimum pen changes
-plotty plan artwork --optimize-pens
+vfab plan artwork --optimize-pens
 
 # Preview pen changes without plotting
-plotty plan artwork --dry-run --show-pen-changes
+vfab plan artwork --dry-run --show-pen-changes
 ```
 
 ### 3.2 Setting Up Multiple Pens
 
 ```bash
 # View current pens
-plotty list pens
+vfab list pens
 
 # Add pens interactively
-plotty setup pen
+vfab setup pen
 
 # Add specific pen
-plotty add pen \
+vfab add pen \
   --name "Fine Black" \
   --width 0.3 \
   --color "#000000" \
@@ -601,10 +601,10 @@ plotty add pen \
 
 ```bash
 # Add multi-pen design
-plotty add colorful_design.svg --paper a4
+vfab add colorful_design.svg --paper a4
 
 # Plan with interactive pen mapping
-plotty plan colorful_design --interactive
+vfab plan colorful_design --interactive
 ```
 
 **Interactive pen mapping:**
@@ -637,7 +637,7 @@ Time saved: ~4 minutes
 
 ```bash
 # Plot with pen change prompts
-plotty plot colorful_design
+vfab plot colorful_design
 ```
 
 **During plotting:**
@@ -657,14 +657,14 @@ Please change pen now...
 
 ## 5. Creative Tool Integration
 
-Connect ploTTY with your favorite creative tools for seamless workflows.
+Connect vfab with your favorite creative tools for seamless workflows.
 
-### 5.1 vsketch + vpype-plotty (Recommended)
+### 5.1 vsketch + vpype-vfab (Recommended)
 
 **Setup vsketch integration:**
 ```bash
-# Install vpype-plotty plugin for vsketch
-pipx inject vsketch vpype-plotty
+# Install vpype-vfab plugin for vsketch
+pipx inject vsketch vpype-vfab
 ```
 
 **Basic vsketch workflow:**
@@ -684,8 +684,8 @@ class MyDesign(vsketch.SketchClass):
         # Optimize in vsketch
         vsk.vpype("linemerge linesimplify reloop linesort")
         
-        # Send to ploTTY queue
-        vsk.vpype("plotty-add --name my_design --preset hq --queue")
+        # Send to vfab queue
+        vsk.vpype("vfab-add --name my_design --preset hq --queue")
 
 if __name__ == "__main__":
     MyDesign().display()
@@ -724,7 +724,7 @@ class GenerativeArt(vsketch.SketchClass):
         
         # Dynamic naming based on parameters
         job_name = f"{self.style}_c{self.complexity}_d{self.density}"
-        vsk.vpype(f"plotty-add --name '{job_name}' --preset hq --queue")
+        vsk.vpype(f"vfab-add --name '{job_name}' --preset hq --queue")
 
 if __name__ == "__main__":
     GenerativeArt().display()
@@ -734,15 +734,15 @@ if __name__ == "__main__":
 
 **For existing SVG files:**
 ```bash
-# Add existing design to ploTTY
-vpype read my_art.svg plotty-add --name "My Art" --preset fast
+# Add existing design to vfab
+vpype read my_art.svg vfab-add --name "My Art" --preset fast
 
 # Create generative art and queue directly
-vpype rand --seed 123 plotty-add --name "Random Art 123" --paper A3 --queue
+vpype rand --seed 123 vfab-add --name "Random Art 123" --paper A3 --queue
 
 # Process and optimize in one step
 vpype read design.svg linemerge linesimplify \
-    plotty-add --name "Optimized Design" --preset none
+    vfab-add --name "Optimized Design" --preset none
 ```
 
 **Batch generation with vpype:**
@@ -750,13 +750,13 @@ vpype read design.svg linemerge linesimplify \
 # Create a series of variations
 for seed in {1..10}; do
     vpype rand --seed $seed \
-        plotty-add --name "Variation $seed" --preset fast --queue
+        vfab-add --name "Variation $seed" --preset fast --queue
 done
 
 # Geometric patterns
 for i in {1..5}; do
     vpype rect --grid 4x$i --spacing 20mm \
-        plotty-add --name "Grid $i" --queue
+        vfab-add --name "Grid $i" --queue
 done
 ```
 
@@ -789,7 +789,7 @@ class MultiLayerArt(vsketch.SketchClass):
     
     def finalize(self, vsk: vsketch.Vsketch) -> None:
         vsk.vpype("linemerge linesimplify reloop linesort")
-        vsk.vpype("plotty-add --name multi_pen_art --preset hq --queue")
+        vsk.vpype("vfab-add --name multi_pen_art --preset hq --queue")
 ```
 
 ### 5.4 Integration with Design Software
@@ -801,8 +801,8 @@ class MultiLayerArt(vsketch.SketchClass):
 # 2. File > Save As... > SVG
 # 3. Use meaningful layer names
 
-# Add to ploTTY queue
-vpype read inkscape_design.svg plotty-add --name "Inkscape Art" --preset hq
+# Add to vfab queue
+vpype read inkscape_design.svg vfab-add --name "Inkscape Art" --preset hq
 ```
 
 **Adobe Illustrator workflow:**
@@ -812,8 +812,8 @@ vpype read inkscape_design.svg plotty-add --name "Inkscape Art" --preset hq
 # 2. Choose SVG format
 # 3. Use "Save Artboards" if you have multiple designs
 
-# Process with ploTTY
-vpype read illustrator_art.svg plotty-add --name "Illustrator Design" --queue
+# Process with vfab
+vpype read illustrator_art.svg vfab-add --name "Illustrator Design" --queue
 ```
 
 **Processing/p5.js workflow:**
@@ -841,7 +841,7 @@ void draw() {
 
 ```bash
 # Queue Processing art
-vpype read processing_art.svg plotty-add --name "Processing Sketch" --preset default
+vpype read processing_art.svg vfab-add --name "Processing Sketch" --preset default
 ```
 
 ### 5.5 Creative Project Organization
@@ -855,7 +855,7 @@ my_creative_project/
 ├── output/               # Generated SVGs
 │   ├── art_001.svg
 │   └── art_002.svg
-├── ploppy_workspace/     # ploTTY job data
+├── ploppy_workspace/     # vfab job data
 ├── scripts/             # Automation scripts
 │   └── batch_generate.py
 └── assets/              # Reference materials
@@ -874,7 +874,7 @@ class ClientProject(vsketch.SketchClass):
         
         # Professional job naming
         job_name = f"{self.client_name}_{self.project_type}_{self.version}"
-        vsk.vpype(f"plotty-add --name '{job_name}' --preset hq --queue")
+        vsk.vpype(f"vfab-add --name '{job_name}' --preset hq --queue")
 ```
 
 ### 5.6 ⚠️ Critical: Optimization Control
@@ -882,8 +882,8 @@ class ClientProject(vsketch.SketchClass):
 **Understanding optimization prevents double-processing and ensures best results.**
 
 #### **The Optimization Rule**
-- **vsketch optimizes** → ploTTY should skip (`--preset none`)
-- **ploTTY optimizes** → vsketch should skip optimization
+- **vsketch optimizes** → vfab should skip (`--preset none`)
+- **vfab optimizes** → vsketch should skip optimization
 - **Never both** → Avoids double-processing and quality loss
 
 #### **Correct Workflows**
@@ -894,34 +894,34 @@ def finalize(self, vsk: vsketch.Vsketch) -> None:
     # vsketch does the optimization
     vsk.vpype("linemerge linesimplify reloop linesort")
     
-    # ploTTY skips optimization (already done)
-    vsk.vpype("plotty-add --name my_design --preset none --queue")
+    # vfab skips optimization (already done)
+    vsk.vpype("vfab-add --name my_design --preset none --queue")
 ```
 
-**Workflow 2: ploTTY optimizes**
+**Workflow 2: vfab optimizes**
 ```python
 def finalize(self, vsk: vsketch.Vsketch) -> None:
     # vsketch skips optimization
     # vsk.vpype("linemerge linesimplify reloop linesort")  # Commented out
     
-    # ploTTY handles optimization
-    vsk.vpype("plotty-add --name my_design --preset hq --queue")
+    # vfab handles optimization
+    vsk.vpype("vfab-add --name my_design --preset hq --queue")
 ```
 
-**Workflow 3: vpype optimizes, ploTTY skips**
+**Workflow 3: vpype optimizes, vfab skips**
 ```bash
-# vpype optimizes, ploTTY skips
+# vpype optimizes, vfab skips
 vpype read design.svg linemerge linesimplify \
-    plotty-add --name optimized --preset none
+    vfab-add --name optimized --preset none
 ```
 
 #### **Quick Reference**
 
-| Tool Doing Optimization | ploTTY Command | When to Use |
+| Tool Doing Optimization | vfab Command | When to Use |
 |------------------------|----------------|-------------|
 | vsketch | `--preset none` | Most vsketch workflows |
 | vpype | `--preset none` | When vpype processes first |
-| ploTTY | `--preset hq/fast/default` | Raw SVG files |
+| vfab | `--preset hq/fast/default` | Raw SVG files |
 | None | `--preset none` | Pre-optimized files |
 
 > **🚨 Golden Rule:** Only one tool should optimize. Choose your favorite and stick with it consistently.
@@ -955,7 +955,7 @@ class QuickSketch(vsketch.SketchClass):
     def finalize(self, vsk: vsketch.Vsketch) -> None:
         # Quick optimization for testing
         vsk.vpype("linemerge linesort")
-        vsk.vpype("plotty-add --name 'quick_test' --preset fast --queue")
+        vsk.vpype("vfab-add --name 'quick_test' --preset fast --queue")
 ```
 
 **Step 2: Refine and scale**
@@ -980,7 +980,7 @@ class RefinedArt(vsketch.SketchClass):
     def finalize(self, vsk: vsketch.Vsketch) -> None:
         # Production optimization
         vsk.vpype("linemerge linesimplify reloop linesort")
-        vsk.vpype("plotty-add --name 'refined_piece' --preset hq --queue")
+        vsk.vpype("vfab-add --name 'refined_piece' --preset hq --queue")
 ```
 
 ### 6.2 Multi-Revision Workflow
@@ -993,11 +993,11 @@ for version in {1..5}; do
         --save-only --output "art_v${version}.svg"
     
     vpype read "art_v${version}.svg" \
-        plotty-add --name "Art Series v${version}" --queue
+        vfab-add --name "Art Series v${version}" --queue
 done
 
 # Plot all versions
-plotty plot-all
+vfab plot-all
 ```
 
 **Compare versions:**
@@ -1005,7 +1005,7 @@ plotty plot-all
 # Estimate time for each version
 for job in art_series_*; do
     echo "=== $job ==="
-    plotty estimate "$job" --detailed
+    vfab estimate "$job" --detailed
 done
 ```
 
@@ -1039,7 +1039,7 @@ class ClientPresentation(vsketch.SketchClass):
         
         # Professional naming
         job_name = f"{self.client_name}_{self.project_code}_final"
-        vsk.vpype(f"plotty-add --name '{job_name}' --preset hq --queue")
+        vsk.vpype(f"vfab-add --name '{job_name}' --preset hq --queue")
 ```
 
 ### 6.4 Limited Edition Workflow
@@ -1059,11 +1059,11 @@ for edition in $(seq 1 $edition_size); do
     # Queue with edition naming
     job_name="${artwork_name} - Edition ${edition}/${edition_size}"
     vpype read output.svg \
-        plotty-add --name "$job_name" --preset hq --queue
+        vfab-add --name "$job_name" --preset hq --queue
 done
 
 # Plot with documentation
-plotty plot-all --document-each
+vfab plot-all --document-each
 ```
 
 ### 6.5 Exhibition Preparation Workflow
@@ -1079,20 +1079,20 @@ for piece in "${exhibition_pieces[@]}"; do
     
     # Add to queue with exhibition naming
     vpype read "${piece}.svg" \
-        plotty-add --name "Exhibition: ${piece}" \
+        vfab-add --name "Exhibition: ${piece}" \
                    --paper a2 --preset hq --queue
     
     # Create test print first
     vpype read "${piece}.svg" \
-        plotty-add --name "Test: ${piece}" \
+        vfab-add --name "Test: ${piece}" \
                    --paper a4 --preset fast --queue
 done
 
 # Plot test versions first
-plotty plot "Test:*"
+vfab plot "Test:*"
 
 # After approval, plot full size
-plotty plot "Exhibition:*"
+vfab plot "Exhibition:*"
 ```
 
 > **🎯 Creative Goal:** Develop workflows that match your artistic process. Use these as templates and adapt them to your unique style.
@@ -1114,9 +1114,9 @@ mkdir -p client_acme/{designs,output,documentation}
 cd client_acme
 
 # Add all client designs
-plotty add designs/logo.svg --name "Acme Logo" --paper a4
-plotty add designs/business_card.svg --name "Acme Business Card" --paper a4
-plotty add designs/letterhead.svg --name "Acme Letterhead" --paper a4
+vfab add designs/logo.svg --name "Acme Logo" --paper a4
+vfab add designs/business_card.svg --name "Acme Business Card" --paper a4
+vfab add designs/letterhead.svg --name "Acme Letterhead" --paper a4
 ```
 
 **Batch import from directory:**
@@ -1124,7 +1124,7 @@ plotty add designs/letterhead.svg --name "Acme Letterhead" --paper a4
 # Import all SVGs from a directory
 for file in designs/*.svg; do
     basename=$(basename "$file" .svg)
-    plotty add "$file" --name "Acme: $basename" --paper a4
+    vfab add "$file" --name "Acme: $basename" --paper a4
 done
 ```
 
@@ -1133,37 +1133,37 @@ done
 **Plan all jobs with optimization:**
 ```bash
 # Fast batch planning (good for simple designs)
-plotty plan-all --preset fast
+vfab plan-all --preset fast
 
 # High-quality batch planning (complex designs)
-plotty plan-all --preset hq
+vfab plan-all --preset hq
 
 # Smart pen optimization across all jobs
-plotty plan-all --optimize-pens --global-pen-order
+vfab plan-all --optimize-pens --global-pen-order
 ```
 
 **Selective batch planning:**
 ```bash
 # Plan specific jobs with custom settings
-plotty plan "Acme Logo" "Acme Business Card" --preset hq
+vfab plan "Acme Logo" "Acme Business Card" --preset hq
 
 # Plan by pattern matching
-plotty plan "Acme:*" --preset fast
+vfab plan "Acme:*" --preset fast
 
 # Plan jobs added today
-plotty plan --added-today --preset default
+vfab plan --added-today --preset default
 ```
 
 **Advanced batch planning options:**
 ```bash
 # Plan with time constraints
-plotty plan-all --max-time-per-job 30m --preset fast
+vfab plan-all --max-time-per-job 30m --preset fast
 
 # Plan with pen change minimization
-plotty plan-all --minimize-pen-changes --pen-priority 2,1,3
+vfab plan-all --minimize-pen-changes --pen-priority 2,1,3
 
 # Dry run to see planning results
-plotty plan-all --dry-run --show-estimates
+vfab plan-all --dry-run --show-estimates
 ```
 
 ### 7.3 Automated Batch Plotting
@@ -1171,37 +1171,37 @@ plotty plan-all --dry-run --show-estimates
 **Standard batch execution:**
 ```bash
 # Plot all planned jobs
-plotty plot-all
+vfab plot-all
 
 # Plot with safety preset (slower but more reliable)
-plotty plot-all --preset safe
+vfab plot-all --preset safe
 
 # Plot with automatic camera recording
-plotty plot-all --record-all
+vfab plot-all --record-all
 ```
 
 **Advanced batch plotting:**
 ```bash
 # Plot with time limits
-plotty plot-all --max-total-time 4h
+vfab plot-all --max-total-time 4h
 
 # Plot with automatic pen change prompts
-plotty plot-all --auto-pen-change
+vfab plot-all --auto-pen-change
 
 # Plot with progress monitoring
-plotty plot-all --monitor --notify-on-complete
+vfab plot-all --monitor --notify-on-complete
 ```
 
 **Conditional batch plotting:**
 ```bash
 # Only plot jobs under 15 minutes
-plotty plot-all --max-job-time 15m
+vfab plot-all --max-job-time 15m
 
 # Plot high-priority jobs first
-plotty plot-all --priority-order
+vfab plot-all --priority-order
 
 # Plot with automatic retry on failure
-plotty plot-all --retry-failed --max-retries 2
+vfab plot-all --retry-failed --max-retries 2
 ```
 
 ### 7.4 Queue Management and Monitoring
@@ -1209,43 +1209,43 @@ plotty plot-all --retry-failed --max-retries 2
 **Real-time queue monitoring:**
 ```bash
 # Watch queue progress
-plotty list queue --watch
+vfab list queue --watch
 
 # Detailed queue status
-plotty list queue --detailed --show-estimates
+vfab list queue --detailed --show-estimates
 
 # Export queue status for reporting
-plotty list queue --json > queue_status_$(date +%Y%m%d).json
+vfab list queue --json > queue_status_$(date +%Y%m%d).json
 ```
 
 **Automated queue cleanup:**
 ```bash
 # Remove completed jobs
-plotty queue cleanup --state completed
+vfab queue cleanup --state completed
 
 # Remove old jobs (older than 7 days)
-plotty queue cleanup --older-than 7d
+vfab queue cleanup --older-than 7d
 
 # Remove failed jobs
-plotty queue cleanup --state failed
+vfab queue cleanup --state failed
 
 # Comprehensive cleanup
-plotty queue cleanup --completed --failed --older-than 3d
+vfab queue cleanup --completed --failed --older-than 3d
 ```
 
 **Queue organization:**
 ```bash
 # Group jobs by project
-plotty queue group --by-project "Acme"
+vfab queue group --by-project "Acme"
 
 # Reorder queue by priority
-plotty queue reorder --by-time-estimate
+vfab queue reorder --by-time-estimate
 
 # Pause specific jobs
-plotty queue pause "Acme:*"
+vfab queue pause "Acme:*"
 
 # Resume paused jobs
-plotty queue resume "Acme:*"
+vfab queue resume "Acme:*"
 ```
 
 ### 7.5 Production Reporting
@@ -1253,13 +1253,13 @@ plotty queue resume "Acme:*"
 **Generate production reports:**
 ```bash
 # Daily production summary
-plotty stats production --date today --export > daily_report.json
+vfab stats production --date today --export > daily_report.json
 
 # Client-specific reports
-plotty stats jobs --client "Acme" --last 30 --export > acme_report.json
+vfab stats jobs --client "Acme" --last 30 --export > acme_report.json
 
 # Performance analytics
-plotty stats performance --pen-usage --time-analysis --export > performance.json
+vfab stats performance --pen-usage --time-analysis --export > performance.json
 ```
 
 **Automated reporting script:**
@@ -1276,20 +1276,20 @@ mkdir -p "$REPORT_DIR"
     echo "# Production Report - $DATE"
     echo ""
     echo "## Queue Status"
-    plotty list queue --detailed
+    vfab list queue --detailed
     echo ""
     echo "## Today's Performance"
-    plotty stats summary --today
+    vfab stats summary --today
     echo ""
     echo "## Pen Usage"
-    plotty stats pens --last 7
+    vfab stats pens --last 7
     echo ""
     echo "## Failed Jobs"
-    plotty list jobs --state failed --today
+    vfab list jobs --state failed --today
 } > "$REPORT_DIR/production_report.md"
 
 # Export machine-readable data
-plotty stats production --date today --json > "$REPORT_DIR/production_data.json"
+vfab stats production --date today --json > "$REPORT_DIR/production_data.json"
 
 echo "Report generated: $REPORT_DIR/production_report.md"
 ```
@@ -1308,13 +1308,13 @@ def smart_batch_process(project_name, max_total_time_hours=4):
     
     # Add all project files
     subprocess.run([
-        "uv", "run", "plotty", "add", f"{project_name}/*.svg",
+        "uv", "run", "vfab", "add", f"{project_name}/*.svg",
         "--name", f"{project_name}_batch", "--paper", "a4"
     ])
     
     # Plan with time constraints
     result = subprocess.run([
-        "uv", "run", "plotty", "plan-all", 
+        "uv", "run", "vfab", "plan-all", 
         "--preset", "fast",
         "--max-time-per-job", "30m"
     ], capture_output=True, text=True)
@@ -1329,7 +1329,7 @@ def smart_batch_process(project_name, max_total_time_hours=4):
         else:
             # Start batch plotting
             subprocess.run([
-                "uv", "run", "plotty", "plot-all",
+                "uv", "run", "vfab", "plot-all",
                 "--monitor", "--notify-on-complete"
             ])
 
@@ -1350,7 +1350,7 @@ Fine-tune every aspect of plotting performance and quality.
 
 ### 8.1 Understanding Optimization Presets
 
-ploTTY includes three optimization levels:
+vfab includes three optimization levels:
 
 **Fast Preset** (Quick processing):
 ```yaml
@@ -1381,27 +1381,27 @@ hq: "read {src} pagesize {pagesize} crop 0 0 {width_mm}mm {height_mm}mm linemerg
 **Create your own optimization:**
 ```bash
 # Custom pipeline for specific needs
-plotty plan job --custom "read {src} linemerge linesort write {dst}"
+vfab plan job --custom "read {src} linemerge linesort write {dst}"
 
 # Advanced custom pipeline
-plotty plan job --custom "read {src} linemerge linesimplify reloop linesort write {dst}"
+vfab plan job --custom "read {src} linemerge linesimplify reloop linesort write {dst}"
 
 # Minimal optimization (for already optimized files)
-plotty plan job --custom "read {src} write {dst}"
+vfab plan job --custom "read {src} write {dst}"
 ```
 
 **Custom optimization examples:**
 ```bash
 # For geometric designs (focus on line merging)
-plotty plan geometric_design \
+vfab plan geometric_design \
   --custom "read {src} linemerge --tolerance 0.1mm linesort write {dst}"
 
 # For organic designs (focus on line simplification)
-plotty plan organic_art \
+vfab plan organic_art \
   --custom "read {src} linesimplify --tolerance 0.05mm linesort write {dst}"
 
 # For text-heavy designs (preserve detail)
-plotty plan typography \
+vfab plan typography \
   --custom "read {src} linemerge --tolerance 0.01mm linesort write {dst}"
 ```
 
@@ -1410,23 +1410,23 @@ plotty plan typography \
 **Compare different presets:**
 ```bash
 # Test all presets on the same job
-plotty plan test_job --preset fast --dry-run --save-as fast_test
-plotty plan test_job --preset default --dry-run --save-as default_test
-plotty plan test_job --preset hq --dry-run --save-as hq_test
+vfab plan test_job --preset fast --dry-run --save-as fast_test
+vfab plan test_job --preset default --dry-run --save-as default_test
+vfab plan test_job --preset hq --dry-run --save-as hq_test
 
 # Compare results
-plotty compare fast_test default_test hq_test --show-time-estimates
+vfab compare fast_test default_test hq_test --show-time-estimates
 ```
 
 **Detailed time analysis:**
 ```bash
 # Comprehensive time breakdown
-plotty estimate job --detailed --show-optimization-steps
+vfab estimate job --detailed --show-optimization-steps
 
 # Compare pre/post optimization
-plotty estimate job --stage pre --save pre_estimate
-plotty estimate job --stage post --save post_estimate
-plotty compare pre_estimate post_estimate --show-improvement
+vfab estimate job --stage pre --save pre_estimate
+vfab estimate job --stage post --save post_estimate
+vfab compare pre_estimate post_estimate --show-improvement
 ```
 
 **Sample detailed output:**
@@ -1461,28 +1461,28 @@ Optimization Summary:
 **Global pen optimization across jobs:**
 ```bash
 # Optimize pen changes across entire queue
-plotty optimize-pens --global --queue-wide
+vfab optimize-pens --global --queue-wide
 
 # Custom pen change priority
-plotty optimize-pens --pen-order 2,1,3,4 --minimize-distance
+vfab optimize-pens --pen-order 2,1,3,4 --minimize-distance
 
 # Pen optimization with time constraints
-plotty optimize-pens --max-pen-change-time 30s --prefer-fewer-changes
+vfab optimize-pens --max-pen-change-time 30s --prefer-fewer-changes
 ```
 
 **Pen optimization strategies:**
 ```bash
 # Strategy 1: Minimize total pen changes
-plotty plan-all --optimize-pens --strategy min-changes
+vfab plan-all --optimize-pens --strategy min-changes
 
 # Strategy 2: Minimize pen change time
-plotty plan-all --optimize-pens --strategy min-time
+vfab plan-all --optimize-pens --strategy min-time
 
 # Strategy 3: Optimize for pen wear
-plotty plan-all --optimize-pens --strategy balance-wear
+vfab plan-all --optimize-pens --strategy balance-wear
 
 # Strategy 4: Prioritize speed over pen changes
-plotty plan-all --optimize-pens --strategy speed-first
+vfab plan-all --optimize-pens --strategy speed-first
 ```
 
 ### 8.5 Performance Tuning
@@ -1490,64 +1490,64 @@ plotty plan-all --optimize-pens --strategy speed-first
 **Device-specific optimization:**
 ```bash
 # AxiDraw v3 optimization
-plotty config device --model v3 --optimize-for v3
+vfab config device --model v3 --optimize-for v3
 
 # Custom speed profiles
-plotty add speed-profile \
+vfab add speed-profile \
   --name "precision" \
   --speed 15 \
   --acceleration 50 \
   --pen-up-delay 50
 
 # Use custom speed profile
-plotty plan job --speed-profile precision
+vfab plan job --speed-profile precision
 ```
 
 **Paper-specific optimization:**
 ```bash
 # Optimization for different paper types
-plotty add paper-profile \
+vfab add paper-profile \
   --name "watercolor_paper" \
   --type "rough" \
   --pen-pressure "light" \
   --speed-reduction 20
 
-plotty plan job --paper-profile watercolor_paper
+vfab plan job --paper-profile watercolor_paper
 ```
 
 **Environmental optimization:**
 ```bash
 # Humidity-aware optimization
-plotty plan job --humidity high --adjust-speed
+vfab plan job --humidity high --adjust-speed
 
 # Temperature compensation
-plotty plan job --temperature cold --compensate
+vfab plan job --temperature cold --compensate
 ```
 
 ### 8.6 Quality vs Speed Trade-offs
 
 **Automated quality selection:**
 ```bash
-# Let ploTTY choose optimal preset
-plotty plan job --auto-preset --target-time 10m
+# Let vfab choose optimal preset
+vfab plan job --auto-preset --target-time 10m
 
 # Quality-based selection
-plotty plan job --quality-threshold 95 --auto-preset
+vfab plan job --quality-threshold 95 --auto-preset
 
 # Speed-based selection
-plotty plan job --speed-priority --max-time 5m
+vfab plan job --speed-priority --max-time 5m
 ```
 
 **Manual quality tuning:**
 ```bash
 # Custom quality settings
-plotty plan job \
+vfab plan job \
   --line-merge-tolerance 0.05mm \
   --line-simplify-tolerance 0.02mm \
   --min-path-length 1mm
 
 # Progressive refinement
-plotty plan job --progressive-refinement --iterations 3
+vfab plan job --progressive-refinement --iterations 3
 ```
 
 ### 8.7 Optimization Profiling
@@ -1555,13 +1555,13 @@ plotty plan job --progressive-refinement --iterations 3
 **Profile optimization performance:**
 ```bash
 # Profile optimization process
-plotty profile job --show-steps --timing
+vfab profile job --show-steps --timing
 
 # Compare optimization algorithms
-plotty profile job --compare-algorithms fast,hq,custom
+vfab profile job --compare-algorithms fast,hq,custom
 
 # Optimization bottleneck analysis
-plotty profile job --find-bottlenecks
+vfab profile job --find-bottlenecks
 ```
 
 **Sample profiling output:**
@@ -1593,7 +1593,7 @@ def auto_optimize(job_name, target_time=None, quality_priority=False):
     
     # Get job analysis
     result = subprocess.run([
-        "uv", "run", "plotty", "info", "job", job_name, "--json"
+        "uv", "run", "vfab", "info", "job", job_name, "--json"
     ], capture_output=True, text=True)
     
     job_data = json.loads(result.stdout)
@@ -1617,7 +1617,7 @@ def auto_optimize(job_name, target_time=None, quality_priority=False):
     
     # Apply optimization
     subprocess.run([
-        "uv", "run", "plotty", "plan", job_name, "--preset", preset
+        "uv", "run", "vfab", "plan", job_name, "--preset", preset
     ])
     
     return preset
@@ -1647,28 +1647,28 @@ Professional studio operations and resource management.
 **Device health monitoring:**
 ```bash
 # Comprehensive device check
-plotty check ready --detailed
+vfab check ready --detailed
 
 # Test device movement patterns
-plotty check device --test-move --pattern full-range
+vfab check device --test-move --pattern full-range
 
 # Device calibration
-plotty calibrate device --auto-calibrate
+vfab calibrate device --auto-calibrate
 
 # Device performance test
-plotty benchmark device --duration 5m
+vfab benchmark device --duration 5m
 ```
 
 **Multi-device management:**
 ```bash
 # List all connected devices
-plotty list devices
+vfab list devices
 
 # Switch between devices
-plotty config device --active axidraw_v3_1
+vfab config device --active axidraw_v3_1
 
 # Device-specific settings
-plotty config device --name axidraw_v3_1 \
+vfab config device --name axidraw_v3_1 \
   --speed-profile precision \
   --pen-up-delay 60 \
   --pen-down-delay 40
@@ -1677,13 +1677,13 @@ plotty config device --name axidraw_v3_1 \
 **Device maintenance tracking:**
 ```bash
 # Log maintenance
-plotty maintenance log --type cleaning --device axidraw_v3_1
+vfab maintenance log --type cleaning --device axidraw_v3_1
 
 # Schedule maintenance reminders
-plotty maintenance schedule --interval 100h --type cleaning
+vfab maintenance schedule --interval 100h --type cleaning
 
 # View maintenance history
-plotty maintenance history --device axidraw_v3_1 --last 90d
+vfab maintenance history --device axidraw_v3_1 --last 90d
 ```
 
 ### 9.2 Pen and Paper Inventory
@@ -1691,10 +1691,10 @@ plotty maintenance history --device axidraw_v3_1 --last 90d
 **Comprehensive pen management:**
 ```bash
 # List all pens with detailed info
-plotty list pens --detailed --show-usage
+vfab list pens --detailed --show-usage
 
 # Add new pen with full specifications
-plotty add pen \
+vfab add pen \
   --name "Ultra Fine Black" \
   --width 0.2 \
   --color "#000000" \
@@ -1706,19 +1706,19 @@ plotty add pen \
   --cost 3.50
 
 # Update pen usage tracking
-plotty update pen 1 --log-usage --hours-used 2.5
+vfab update pen 1 --log-usage --hours-used 2.5
 
 # Pen inventory management
-plotty inventory pens --check-stock --reorder-threshold 3
+vfab inventory pens --check-stock --reorder-threshold 3
 ```
 
 **Advanced paper management:**
 ```bash
 # List paper with inventory tracking
-plotty list paper --show-stock --show-cost
+vfab list paper --show-stock --show-cost
 
 # Add custom paper with full details
-plotty add paper \
+vfab add paper \
   --name "Arches Watercolor" \
   --width 210 \
   --height 297 \
@@ -1730,22 +1730,22 @@ plotty add paper \
   --stock-count 25
 
 # Paper usage tracking
-plotty update paper "Arches Watercolor" --consume 1
+vfab update paper "Arches Watercolor" --consume 1
 
 # Cost analysis by paper type
-plotty analyze paper --cost-per-job --last 30
+vfab analyze paper --cost-per-job --last 30
 ```
 
 **Resource optimization:**
 ```bash
 # Optimize pen usage across jobs
-plotty optimize pens --minimize-wear --balance-usage
+vfab optimize pens --minimize-wear --balance-usage
 
 # Suggest paper sizes for jobs
-plotty suggest paper --job complex_art --optimize-waste
+vfab suggest paper --job complex_art --optimize-waste
 
 # Resource cost analysis
-plotty analyze costs --by-project --include-materials
+vfab analyze costs --by-project --include-materials
 ```
 
 ### 9.3 Performance Monitoring and Analytics
@@ -1753,28 +1753,28 @@ plotty analyze costs --by-project --include-materials
 **Real-time performance monitoring:**
 ```bash
 # Live performance dashboard
-plotty monitor --live --refresh 5s
+vfab monitor --live --refresh 5s
 
 # Performance alerts setup
-plotty alerts set --metric success-rate --threshold 95 --below
+vfab alerts set --metric success-rate --threshold 95 --below
 
 # Automated performance reports
-plotty report performance --daily --email studio@example.com
+vfab report performance --daily --email studio@example.com
 ```
 
 **Comprehensive analytics:**
 ```bash
 # Studio-wide statistics
-plotty stats summary --last 30 --detailed
+vfab stats summary --last 30 --detailed
 
 # Job performance analytics
-plotty stats jobs --by-complexity --by-paper-type --by-pen
+vfab stats jobs --by-complexity --by-paper-type --by-pen
 
 # Device performance tracking
-plotty stats device --uptime --error-rate --maintenance-schedule
+vfab stats device --uptime --error-rate --maintenance-schedule
 
 # Resource utilization analysis
-plotty stats resources --pen-usage --paper-consumption --cost-analysis
+vfab stats resources --pen-usage --paper-consumption --cost-analysis
 ```
 
 **Sample comprehensive analytics output:**
@@ -1811,21 +1811,21 @@ Financial Summary:
 **Automated studio workflows:**
 ```bash
 # Morning startup routine
-plotty workflow morning-startup \
+vfab workflow morning-startup \
   --device-check \
   --inventory-check \
   --queue-review \
   --schedule-optimization
 
 # End-of-day shutdown
-plotty workflow end-of-day \
+vfab workflow end-of-day \
   --backup-data \
   --generate-reports \
   --schedule-maintenance \
   --cleanup-temp
 
 # Weekly maintenance
-plotty workflow weekly-maintenance \
+vfab workflow weekly-maintenance \
   --device-calibration \
   --inventory-audit \
   --performance-review \
@@ -1866,7 +1866,7 @@ class StudioManager:
     def check_device_health(self):
         """Comprehensive device health check."""
         result = subprocess.run([
-            "uv", "run", "plotty", "check", "ready", "--json"
+            "uv", "run", "vfab", "check", "ready", "--json"
         ], capture_output=True, text=True)
         
         return json.loads(result.stdout)
@@ -1875,14 +1875,14 @@ class StudioManager:
         """Optimize queue for today's production."""
         # Get today's jobs
         result = subprocess.run([
-            "uv", "run", "plotty", "list", "queue", "--today", "--json"
+            "uv", "run", "vfab", "list", "queue", "--today", "--json"
         ], capture_output=True, text=True)
         
         jobs = json.loads(result.stdout)
         
         # Optimize for minimal pen changes and time
         subprocess.run([
-            "uv", "run", "plotty", "optimize-pens", 
+            "uv", "run", "vfab", "optimize-pens", 
             "--global", "--strategy", "min-time"
         ])
         
@@ -1915,25 +1915,25 @@ if __name__ == "__main__":
 **Automated quality checks:**
 ```bash
 # Pre-plot quality validation
-plotty validate job --check-paths --check-complexity --check-time
+vfab validate job --check-paths --check-complexity --check-time
 
 # Post-plot quality assessment
-plotty assess job --compare-with-expected --quality-score
+vfab assess job --compare-with-expected --quality-score
 
 # Batch quality validation
-plotty validate-all --strict-mode --fail-on-warnings
+vfab validate-all --strict-mode --fail-on-warnings
 ```
 
 **Quality tracking:**
 ```bash
 # Quality metrics over time
-plotty quality trends --last 90 --by-complexity
+vfab quality trends --last 90 --by-complexity
 
 # Quality by pen/paper combinations
-plotty quality matrix --pens-vs-paper
+vfab quality matrix --pens-vs-paper
 
 # Customer quality feedback tracking
-plotty quality feedback --by-client --by-project
+vfab quality feedback --by-client --by-project
 ```
 
 > **🎯 Studio Management Goal:** Create a self-monitoring, self-optimizing studio that requires minimal manual intervention while maintaining maximum quality and efficiency.
@@ -1942,18 +1942,18 @@ plotty quality feedback --by-client --by-project
 
 ```bash
 # List all resources
-plotty list pens
-plotty list paper
+vfab list pens
+vfab list paper
 
 # Add new paper size
-plotty add paper \
+vfab add paper \
   --name "Custom Large" \
   --width 300 \
   --height 200 \
   --margin 15
 
 # Update pen information
-plotty update pen 1 \
+vfab update pen 1 \
   --speed-cap 60 \
   --pressure "light"
 ```
@@ -1962,13 +1962,13 @@ plotty update pen 1 \
 
 ```bash
 # Quick statistics overview
-plotty stats summary
+vfab stats summary
 
 # Detailed job analytics
-plotty stats jobs --last 30
+vfab stats jobs --last 30
 
 # Performance metrics
-plotty stats performance --pen-usage
+vfab stats performance --pen-usage
 ```
 
 **Statistics output:**
@@ -1993,34 +1993,34 @@ Medium Blue: 3 jobs (6%)
 
 ## 10. Real-Time Monitoring
 
-Monitor your ploTTY studio in real-time with WebSocket connections for live dashboards, alerts, and automation.
+Monitor your vfab studio in real-time with WebSocket connections for live dashboards, alerts, and automation.
 
 ### 10.1 WebSocket Monitoring Basics
 
-ploTTY includes a built-in WebSocket server that provides real-time updates about jobs, system status, and device activity.
+vfab includes a built-in WebSocket server that provides real-time updates about jobs, system status, and device activity.
 
 **Start the monitoring daemon:**
 ```bash
 # Start in background
-plotty daemon --start
+vfab daemon --start
 
 # Start with custom settings
-plotty daemon --start --port 8765 --host 0.0.0.0
+vfab daemon --start --port 8765 --host 0.0.0.0
 
 # Check daemon status
-plotty daemon --status
+vfab daemon --status
 ```
 
 **Basic monitoring with CLI:**
 ```bash
 # Simple terminal monitoring
-plotty monitor
+vfab monitor
 
 # Monitor specific channels
-plotty monitor --channels jobs,system
+vfab monitor --channels jobs,system
 
 # Monitor with filtering
-plotty monitor --filter "job.status:plotting"
+vfab monitor --filter "job.status:plotting"
 ```
 
 ### 10.2 Web Dashboard Setup
@@ -2032,7 +2032,7 @@ Create a real-time web dashboard for visual monitoring.
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ploTTY Monitor</title>
+    <title>vfab Monitor</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         .status { padding: 10px; margin: 5px 0; border-radius: 5px; }
@@ -2043,7 +2043,7 @@ Create a real-time web dashboard for visual monitoring.
     </style>
 </head>
 <body>
-    <h1>🖊️ ploTTY Studio Monitor</h1>
+    <h1>🖊️ vfab Studio Monitor</h1>
     <div id="status">Connecting...</div>
     <div id="jobs"></div>
     <div id="metrics" class="metrics"></div>
@@ -2052,7 +2052,7 @@ Create a real-time web dashboard for visual monitoring.
         const ws = new WebSocket('ws://localhost:8765');
         
         ws.onopen = () => {
-            document.getElementById('status').innerHTML = '🟢 Connected to ploTTY';
+            document.getElementById('status').innerHTML = '🟢 Connected to vfab';
         };
         
         ws.onmessage = (event) => {
@@ -2106,9 +2106,9 @@ class PlottyMonitor:
         }
     
     async def connect(self):
-        """Connect to ploTTY WebSocket server."""
+        """Connect to vfab WebSocket server."""
         self.websocket = await websockets.connect(self.uri)
-        print(f"🔗 Connected to ploTTY at {self.uri}")
+        print(f"🔗 Connected to vfab at {self.uri}")
         
         # Start listening
         await self.listen()
@@ -2120,7 +2120,7 @@ class PlottyMonitor:
                 data = json.loads(message)
                 await self.handle_message(data)
         except websockets.exceptions.ConnectionClosed:
-            print("❌ Connection to ploTTY lost")
+            print("❌ Connection to vfab lost")
         except Exception as e:
             print(f"❌ Error: {e}")
     
@@ -2207,16 +2207,16 @@ class AlertSystem(PlottyMonitor):
     async def alert_job_failed(self, job, timestamp):
         """Send alert when job fails."""
         message = f"""
-        ploTTY Job Failed Alert
+        vfab Job Failed Alert
         
         Job: {job.get('name')}
         Status: {job.get('status')}
         Error: {job.get('error_message', 'Unknown error')}
         Time: {timestamp}
         
-        Check ploTTY for details.
+        Check vfab for details.
         """
-        await self.send_email("ploTTY Job Failed", message)
+        await self.send_email("vfab Job Failed", message)
     
     async def alert_job_completed(self, job, timestamp):
         """Send notification when job completes."""
@@ -2224,7 +2224,7 @@ class AlertSystem(PlottyMonitor):
             time_diff = job['actual_time'] - job['estimated_time']
             if abs(time_diff) > 300:  # 5 minute difference
                 message = f"""
-                ploTTY Job Time Anomaly
+                vfab Job Time Anomaly
                 
                 Job: {job.get('name')}
                 Estimated: {job.get('estimated_time')}s
@@ -2233,7 +2233,7 @@ class AlertSystem(PlottyMonitor):
                 
                 Review optimization settings.
                 """
-                await self.send_email("ploTTY Time Anomaly", message)
+                await self.send_email("vfab Time Anomaly", message)
     
     async def send_email(self, subject, message):
         """Send email alert."""
@@ -2243,7 +2243,7 @@ class AlertSystem(PlottyMonitor):
         
         try:
             msg = MIMEText(message)
-            msg['Subject'] = f"[ploTTY] {subject}"
+            msg['Subject'] = f"[vfab] {subject}"
             msg['From'] = self.email_config['from']
             msg['To'] = self.email_config['to']
             
@@ -2344,7 +2344,7 @@ class ProductionMonitor(PlottyMonitor):
         avg_job_time = self.metrics['total_plotting_time'] / max(self.metrics['jobs_completed'], 1)
         
         report = f"""
-        ploTTY Shift Report
+        vfab Shift Report
         ===================
         Shift Duration: {shift_duration}
         Jobs Completed: {self.metrics['jobs_completed']}
@@ -2364,7 +2364,7 @@ class ProductionMonitor(PlottyMonitor):
                 report += f"\nAverage Estimation Accuracy: {avg_accuracy:.2f}"
         
         print(report)
-        await self.send_email("ploTTY Shift Report", report)
+        await self.send_email("vfab Shift Report", report)
 
 # Schedule monitoring
 async def run_production_monitoring():
@@ -2385,7 +2385,7 @@ if __name__ == "__main__":
 
 ### 10.6 Integration with External Systems
 
-Connect ploTTY monitoring to your existing infrastructure.
+Connect vfab monitoring to your existing infrastructure.
 
 **Slack integration:**
 ```python
@@ -2428,7 +2428,7 @@ class SlackMonitor(PlottyMonitor):
         
         if job.get('status') in status_colors:
             emoji = {"completed": "✅", "failed": "❌", "plotting": "🖊️"}.get(job.get('status'), "📋")
-            message = f"{emoji} ploTTY Job `{job.get('name')}`: {job.get('status')}"
+            message = f"{emoji} vfab Job `{job.get('name')}`: {job.get('status')}"
             
             if job.get('status') == 'plotting' and job.get('progress'):
                 message += f" ({job.get('progress')}% complete)"
@@ -2507,7 +2507,7 @@ if __name__ == "__main__":
 
 ## 11. Real-World Examples
 
-Learn from professionals using ploTTY in production environments.
+Learn from professionals using vfab in production environments.
 
 ### 10.1 Graphic Design Studio Workflow
 
@@ -2519,15 +2519,15 @@ Learn from professionals using ploTTY in production environments.
 
 # Morning setup
 echo "🌅 Morning studio setup..."
-plotty check ready --detailed
-plotty status
-plotty inventory check --alert-low
+vfab check ready --detailed
+vfab status
+vfab inventory check --alert-low
 
 # Process today's client batch
 echo "📋 Processing client designs..."
 for file in client_*.svg; do
     client_name=$(basename "$file" .svg | sed 's/client_//')
-    plotty add "$file" \
+    vfab add "$file" \
         --name "Client: $client_name" \
         --paper a4 \
         --priority normal
@@ -2535,16 +2535,16 @@ done
 
 # Optimize for production efficiency
 echo "⚡ Optimizing production queue..."
-plotty plan-all --preset hq --optimize-pens --global-pen-order
+vfab plan-all --preset hq --optimize-pens --global-pen-order
 
 # Production run with quality monitoring
 echo "🖊️ Starting production run..."
-plotty plot-all --preset safe --record-all --monitor
+vfab plot-all --preset safe --record-all --monitor
 
 # End of day reporting
 echo "📊 Generating daily report..."
-plotty stats summary --today --export > "reports/daily_$(date +%Y%m%d).json"
-plotty inventory usage --log-consumption
+vfab stats summary --today --export > "reports/daily_$(date +%Y%m%d).json"
+vfab inventory usage --log-consumption
 
 echo "✅ Studio workflow complete!"
 ```
@@ -2552,7 +2552,7 @@ echo "✅ Studio workflow complete!"
 **Client delivery automation:**
 ```bash
 # Prepare client delivery package
-plotty package client_acme \
+vfab package client_acme \
   --include-reports \
   --include-photos \
   --generate-invoice \
@@ -2578,11 +2578,11 @@ vsk run "$artwork_name.py" --set edition=master --save-only
 
 # Step 2: Create test print
 echo "🖨️ Creating test print..."
-plotty add "${artwork_name}_master.svg" \
+vfab add "${artwork_name}_master.svg" \
     --name "Test: $artwork_name" \
     --paper a4 --preset fast
 
-plotty plot "Test:*" --preview --record
+vfab plot "Test:*" --preview --record
 
 # Step 3: Review and approve test
 echo "📋 Review test print before continuing..."
@@ -2599,7 +2599,7 @@ for edition in $(seq 1 $edition_size); do
     
     # Queue with edition naming
     job_name="${artwork_name} - Edition ${edition}/${edition_size}"
-    plotty add "${artwork_name}_edition${edition}.svg" \
+    vfab add "${artwork_name}_edition${edition}.svg" \
         --name "$job_name" \
         --paper a3 --preset hq \
         --priority high
@@ -2607,11 +2607,11 @@ done
 
 # Step 5: Plot edition with documentation
 echo "🖊️ Plotting limited edition..."
-plotty plot-all --record-all --document-each --numbered
+vfab plot-all --record-all --document-each --numbered
 
 # Step 6: Generate certificate of authenticity
 echo "📜 Generating certificates..."
-plotty generate certificates \
+vfab generate certificates \
   --artwork "$artwork_name" \
   --edition-size $edition_size \
   --artist "Your Name" \
@@ -2635,14 +2635,14 @@ echo "🎓 Setting up $workshop_name workshop..."
 
 # Step 1: Setup demo files
 echo "📋 Preparing demo files..."
-plotty add demo_pattern.svg --name "Demo: Basic Pattern" --paper a4
-plotty add demo_complex.svg --name "Demo: Advanced Technique" --paper a4
+vfab add demo_pattern.svg --name "Demo: Basic Pattern" --paper a4
+vfab add demo_complex.svg --name "Demo: Advanced Technique" --paper a4
 
 # Step 2: Add participant designs
 echo "👥 Adding participant designs..."
 for participant in "${participants[@]}"; do
     if [[ -f "${participant}_design.svg" ]]; then
-        plotty add "${participant}_design.svg" \
+        vfab add "${participant}_design.svg" \
             --name "Workshop: $participant" \
             --paper a4 --priority normal
     fi
@@ -2650,26 +2650,26 @@ done
 
 # Step 3: Quick batch planning for demo
 echo "⚡ Planning demo files..."
-plotty plan "Demo:*" --preset fast
+vfab plan "Demo:*" --preset fast
 
 # Step 4: Demonstrate plotting
 echo "🖊️ Live demonstration..."
 echo "Plotting basic pattern..."
-plotty plot "Demo: Basic Pattern" --preview --explain-steps
+vfab plot "Demo: Basic Pattern" --preview --explain-steps
 
 echo "Plotting advanced technique..."
-plotty plot "Demo: Advanced Technique" --preview --explain-steps
+vfab plot "Demo: Advanced Technique" --preview --explain-steps
 
 # Step 5: Participant plotting session
 echo "👥 Participant plotting session..."
 for participant in "${participants[@]}"; do
     echo "Plotting $participant's design..."
-    plotty plot "Workshop: $participant" --record
+    vfab plot "Workshop: $participant" --record
 done
 
 # Step 6: Generate workshop report
 echo "📊 Generating workshop report..."
-plotty report workshop \
+vfab report workshop \
   --name "$workshop_name" \
   --participants "${#participants[@]}" \
   --include-photos \
@@ -2797,7 +2797,7 @@ if __name__ == "__main__":
 - 📹 **Document important jobs** - Use camera recording for client work
 
 **Business tips:**
-- 💰 **Track material costs** - Use ploTTY's cost tracking features
+- 💰 **Track material costs** - Use vfab's cost tracking features
 - ⏱️ **Monitor time efficiency** - Use stats to improve pricing estimates
 - 📋 **Maintain client records** - Use consistent naming and documentation
 - 📊 **Generate regular reports** - Use analytics for business insights
@@ -2807,9 +2807,9 @@ if __name__ == "__main__":
 ## Getting Help
 
 **Quick help:**
-- **Command help**: `plotty --help` or `plotty <command> --help`
-- **System info**: `plotty info system` (include with bug reports)
-- **Version check**: `plotty --version`
+- **Command help**: `vfab --help` or `vfab <command> --help`
+- **System info**: `vfab info system` (include with bug reports)
+- **Version check**: `vfab --version`
 
 **Documentation:**
 - **API documentation**: `docs/api/` directory
@@ -2828,4 +2828,4 @@ if __name__ == "__main__":
 
 ---
 
-**🎯 Your ploTTY Journey:** Start with the [Beginner Path](#-beginner-path) to master the basics, progress through the [Creative Path](#-creative-path) to develop your artistic style, and advance to the [Power User Path](#-power-user-path) for professional studio management. Each path builds on the previous one, creating a complete mastery of pen plotting productivity.
+**🎯 Your vfab Journey:** Start with the [Beginner Path](#-beginner-path) to master the basics, progress through the [Creative Path](#-creative-path) to develop your artistic style, and advance to the [Power User Path](#-power-user-path) for professional studio management. Each path builds on the previous one, creating a complete mastery of pen plotting productivity.

@@ -13,18 +13,18 @@
 ### **Daily Status Check**
 ```bash
 # Complete studio status
-echo "=== ploTTY Studio Status ==="
+echo "=== vfab Studio Status ==="
 echo "System Health:"
-plotty system status
+vfab system status
 echo ""
 echo "Current Queue:"
-plotty list
+vfab list
 echo ""
 echo "Recent Statistics:"
-plotty stats --days 7
+vfab stats --days 7
 echo ""
 echo "Hardware Status:"
-plotty check --hardware
+vfab check --hardware
 ```
 
 ### **Workspace Organization**
@@ -33,8 +33,8 @@ plotty check --hardware
 mkdir -p studio/{active_jobs,completed,templates,materials,logs,backups}
 cd studio
 
-# Initialize ploTTY workspace
-plotty init --workspace-type studio
+# Initialize vfab workspace
+vfab init --workspace-type studio
 
 # Set up project templates
 mkdir templates/{business_cards,art_prints,logos,posters}
@@ -157,16 +157,16 @@ add_priority_job() {
     # Copy to priority queue
     cp "$file" "studio/active_jobs/${priority_file}"
     
-    # Add to ploTTY with priority
+    # Add to vfab with priority
     case $priority in
         "high")
-            plotty add --priority high "$file"
+            vfab add --priority high "$file"
             ;;
         "normal")
-            plotty add "$file"
+            vfab add "$file"
             ;;
         "low")
-            plotty add --priority low "$file"
+            vfab add --priority low "$file"
             ;;
     esac
     
@@ -178,7 +178,7 @@ reorganize_queue() {
     echo "Reorganizing queue by priority..."
     
     # Get current queue
-    plotty list > current_queue.txt
+    vfab list > current_queue.txt
     
     # Extract high priority jobs
     grep "HIGH" current_queue.txt > high_priority.txt
@@ -186,22 +186,22 @@ reorganize_queue() {
     grep "LOW" current_queue.txt > low_priority.txt
     
     # Clear and rebuild queue
-    plotty remove --all
+    vfab remove --all
     
     # Add back in priority order
     while IFS= read -r line; do
         job_file=$(echo "$line" | awk '{print $NF}')
-        plotty add --priority high "$job_file"
+        vfab add --priority high "$job_file"
     done < high_priority.txt
     
     while IFS= read -r line; do
         job_file=$(echo "$line" | awk '{print $NF}')
-        plotty add "$job_file"
+        vfab add "$job_file"
     done < normal_priority.txt
     
     while IFS= read -r line; do
         job_file=$(echo "$line" | awk '{print $NF}')
-        plotty add --priority low "$job_file"
+        vfab add --priority low "$job_file"
     done < low_priority.txt
     
     echo "Queue reorganized by priority"
@@ -481,10 +481,10 @@ daily_maintenance() {
     find "$STUDIO_DIR/logs" -name "*.log" -mtime +30 -delete
     
     # Check system health
-    plotty system status >> "$STUDIO_DIR/logs/daily_health_$(date +%Y%m%d).txt"
+    vfab system status >> "$STUDIO_DIR/logs/daily_health_$(date +%Y%m%d).txt"
     
     # Generate daily report
-    plotty stats --days 1 >> "$STUDIO_DIR/logs/daily_stats_$(date +%Y%m%d).txt"
+    vfab stats --days 1 >> "$STUDIO_DIR/logs/daily_stats_$(date +%Y%m%d).txt"
     
     log_message "Daily maintenance completed"
 }
@@ -582,9 +582,9 @@ class StudioDashboard:
             'low_stock_items': 0
         }
         
-        # Get ploTTY queue length
+        # Get vfab queue length
         try:
-            result = subprocess.run(['plotty', 'list'], capture_output=True, text=True)
+            result = subprocess.run(['vfab', 'list'], capture_output=True, text=True)
             status['queue_length'] = len(result.stdout.strip().split('\n')) - 1
         except:
             status['queue_length'] = 0
@@ -603,7 +603,7 @@ class StudioDashboard:
         """Display formatted dashboard"""
         status = self.get_current_status()
         
-        print("=== ploTTY Studio Dashboard ===")
+        print("=== vfab Studio Dashboard ===")
         print(f"Updated: {status['timestamp']}")
         print("")
         print("📊 Job Status:")
@@ -615,7 +615,7 @@ class StudioDashboard:
         # System health
         print("🔧 System Health:")
         try:
-            result = subprocess.run(['plotty', 'system', 'status'], capture_output=True, text=True)
+            result = subprocess.run(['vfab', 'system', 'status'], capture_output=True, text=True)
             print(f"  {result.stdout.strip()}")
         except:
             print("  Unable to get system status")
@@ -630,7 +630,7 @@ class StudioDashboard:
             print(f"  {job.get('client', 'Unknown')}: {job.get('description', 'No description')}")
         
         print("")
-        print("Use 'plotty list' for full queue details")
+        print("Use 'vfab list' for full queue details")
 
 # Usage
 if __name__ == "__main__":

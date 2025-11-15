@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Load testing script for ploTTY with 100+ jobs."""
+"""Load testing script for vfab with 100+ jobs."""
 
 import time
 import tempfile
@@ -11,19 +11,19 @@ from typing import Dict
 import psutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# Add ploTTY to path
+# Add vfab to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from plotty.db import init_database, get_session
-from plotty.models import Job, Paper
+from vfab.db import init_database, get_session
+from vfab.models import Job, Paper
 
 
 class LoadTestScenario:
-    """Load testing scenario for ploTTY."""
+    """Load testing scenario for vfab."""
 
     def __init__(self, num_jobs: int = 100):
         self.num_jobs = num_jobs
-        self.temp_dir = Path(tempfile.mkdtemp(prefix="plotty_load_test_"))
+        self.temp_dir = Path(tempfile.mkdtemp(prefix="vfab_load_test_"))
         self.db_path = self.temp_dir / "test.db"
         self.results = {}
 
@@ -117,11 +117,11 @@ class LoadTestScenario:
 
             try:
                 result = subprocess.run(
-                    [sys.executable, "-m", "plotty.cli"] + cmd,
+                    [sys.executable, "-m", "vfab.cli"] + cmd,
                     capture_output=True,
                     text=True,
                     timeout=30,
-                    env={**os.environ, "PLOTTY_DB_PATH": str(self.db_path)},
+                    env={**os.environ, "VFAB_DB_PATH": str(self.db_path)},
                 )
 
                 execution_time = time.time() - start_time
@@ -188,7 +188,7 @@ class LoadTestScenario:
         print(f"   Per job: {self.results['memory']['memory_per_job_kb']:.1f}KB")
 
     def test_concurrent_access(self):
-        """Test concurrent access to ploTTY systems."""
+        """Test concurrent access to vfab systems."""
         print("🔄 Testing concurrent access...")
 
         def worker_task(worker_id: int) -> Dict:
@@ -389,7 +389,7 @@ class LoadTestScenario:
 
     def run_load_test(self) -> bool:
         """Run complete load test scenario."""
-        print(f"🚀 Starting ploTTY load test with {self.num_jobs} jobs...")
+        print(f"🚀 Starting vfab load test with {self.num_jobs} jobs...")
 
         try:
             self.setup_test_environment()
@@ -417,7 +417,7 @@ def main():
     """Main load test entry point."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="ploTTY Load Testing")
+    parser = argparse.ArgumentParser(description="vfab Load Testing")
     parser.add_argument(
         "--jobs", type=int, default=100, help="Number of jobs to test with"
     )

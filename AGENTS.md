@@ -1,4 +1,4 @@
-# ploTTY Agent Guidelines
+# vfab Agent Guidelines
 
 ## Build/Test Commands
 - **Install**: `uv pip install -e ".[dev,vpype]"` (add `,axidraw` for hardware)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Release engineering script for ploTTY.
+Release engineering script for vfab.
 
 This script automates the release process including:
 - Version bumping
@@ -41,7 +41,7 @@ def update_version(new_version: str) -> None:
     print(f"📝 Updating version to {new_version}")
 
     # Update central source (pre-commit hook will sync the rest)
-    with open("src/plotty/__init__.py", "w") as f:
+    with open("src/vfab/__init__.py", "w") as f:
         f.write(f'__all__ = ["__version__"]\n__version__ = "{new_version}"\n')
 
     # Run version sync to update all locations
@@ -216,7 +216,7 @@ def create_release_tag(version: str) -> None:
 
 def generate_release_notes(version: str, changelog: str) -> str:
     """Generate release notes."""
-    notes = f"""# ploTTY v{version} Release Notes
+    notes = f"""# vfab v{version} Release Notes
 
 {changelog}
 
@@ -224,16 +224,16 @@ def generate_release_notes(version: str, changelog: str) -> str:
 
 ```bash
 # Install from PyPI
-pip install plotty
+pip install vfab
 
 # Install with vpype support
-pip install plotty[vpype]
+pip install vfab[vpype]
 
 # Install with AxiDraw support
-pip install plotty[axidraw]
+pip install vfab[axidraw]
 
 # Install development version
-pip install git+https://github.com/your-repo/plotty.git
+pip install git+https://github.com/your-repo/vfab.git
 ```
 
 ## Verification
@@ -241,7 +241,7 @@ pip install git+https://github.com/your-repo/plotty.git
 After installation, verify with:
 
 ```bash
-plotty check self --level=all
+vfab check self --level=all
 ```
 
 ## Performance
@@ -253,9 +253,9 @@ This release includes comprehensive performance testing:
 
 ## Support
 
-- 📖 [Documentation](https://plotty.ai/docs)
-- 🐛 [Issue Tracker](https://github.com/your-repo/plotty/issues)
-- 💬 [Discussions](https://github.com/your-repo/plotty/discussions)
+- 📖 [Documentation](https://vfab.ai/docs)
+- 🐛 [Issue Tracker](https://github.com/your-repo/vfab/issues)
+- 💬 [Discussions](https://github.com/your-repo/vfab/discussions)
 """
 
     return notes
@@ -263,7 +263,7 @@ This release includes comprehensive performance testing:
 
 def main():
     """Main release process."""
-    print("🚀 ploTTY Release Engineering")
+    print("🚀 vfab Release Engineering")
     print("=" * 50)
 
     # Check if we're on main branch

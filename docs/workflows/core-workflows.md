@@ -1,6 +1,6 @@
-# ploTTY Core Workflows
+# vfab Core Workflows
 
-**Purpose:** Step-by-step guides for the essential ploTTY operations that users perform daily.
+**Purpose:** Step-by-step guides for the essential vfab operations that users perform daily.
 
 ---
 
@@ -10,16 +10,16 @@
 
 ```bash
 # 1. Initial setup (one-time)
-plotty setup
+vfab setup
 
 # 2. Add your first job
-plotty add my_drawing.svg --paper a4
+vfab add my_drawing.svg --paper a4
 
 # 3. Plan the job (optimization + pen mapping)
-plotty plan my_drawing --interactive
+vfab plan my_drawing --interactive
 
 # 4. Plot the job
-plotty plot my_drawing
+vfab plot my_drawing
 ```
 
 **What happens:**
@@ -32,18 +32,18 @@ plotty plot my_drawing
 
 ```bash
 # Check current status
-plotty status
+vfab status
 
 # Add new jobs
-plotty add batch1.svg --paper a3
-plotty add batch2.svg --paper a4
+vfab add batch1.svg --paper a3
+vfab add batch2.svg --paper a4
 
 # Plan all jobs
-plotty plan-all --preset fast
+vfab plan-all --preset fast
 
 # Plot sequentially
-plotty plot batch1
-plotty plot batch2
+vfab plot batch1
+vfab plot batch2
 ```
 
 ---
@@ -52,14 +52,14 @@ plotty plot batch2
 
 ### 2.1 Automatic Multi-Pen Detection
 
-ploTTY automatically detects multi-pen requirements:
+vfab automatically detects multi-pen requirements:
 
 ```bash
 # Add a multi-layer SVG
-plotty add complex_art.svg --paper a4
+vfab add complex_art.svg --paper a4
 
 # Plan with interactive pen mapping
-plotty plan complex_art --interactive
+vfab plan complex_art --interactive
 ```
 
 **Interactive pen mapping prompt:**
@@ -83,10 +83,10 @@ Map layers to pens (comma-separated, e.g. "1,2,3,4"):
 
 ```bash
 # Plan with pen optimization (reduces pen swaps)
-plotty plan complex_art --optimize-pens
+vfab plan complex_art --optimize-pens
 
 # View optimization results
-plotty info job complex_art
+vfab info job complex_art
 ```
 
 **Optimization report:**
@@ -105,42 +105,42 @@ plotty info job complex_art
 
 ```bash
 # Plan all queued jobs with fast preset
-plotty plan-all --preset fast
+vfab plan-all --preset fast
 
 # Plan with custom optimization
-plotty plan-all --preset hq --optimize-pens
+vfab plan-all --preset hq --optimize-pens
 
 # Plan specific jobs
-plotty plan job1 job2 job3 --interactive
+vfab plan job1 job2 job3 --interactive
 ```
 
 ### 3.2 Batch Plotting
 
 ```bash
 # Plot all planned jobs
-plotty plot-all
+vfab plot-all
 
 # Plot with preset (overrides job-specific settings)
-plotty plot-all --preset safe
+vfab plot-all --preset safe
 
 # Plot specific jobs
-plotty plot job1 job2 job3
+vfab plot job1 job2 job3
 ```
 
 ### 3.3 Queue Management
 
 ```bash
 # View queue
-plotty list queue
+vfab list queue
 
 # Remove completed jobs
-plotty queue cleanup --state completed
+vfab queue cleanup --state completed
 
 # Remove old jobs (older than 7 days)
-plotty queue cleanup --older-than 7d
+vfab queue cleanup --older-than 7d
 
 # Remove specific jobs
-plotty remove job1 job2
+vfab remove job1 job2
 ```
 
 ---
@@ -151,13 +151,13 @@ plotty remove job1 job2
 
 ```bash
 # Check for interrupted jobs
-plotty recovery list
+vfab recovery list
 
 # Resume interrupted job
-plotty resume interrupted_job
+vfab resume interrupted_job
 
 # Safe abort (pen up, park)
-plotty abort interrupted_job --safe
+vfab abort interrupted_job --safe
 ```
 
 ### 4.2 Error Scenarios
@@ -165,28 +165,28 @@ plotty abort interrupted_job --safe
 **Device disconnected:**
 ```bash
 # Check device status
-plotty check ready
+vfab check ready
 
 # Reconnect device
-plotty check device --reconnect
+vfab check device --reconnect
 ```
 
 **Pen out of ink:**
 ```bash
 # Test pen operation
-plotty check servo
+vfab check servo
 
 # Replace pen and update database
-plotty setup pen --replace
+vfab setup pen --replace
 ```
 
 **Camera issues:**
 ```bash
 # Check camera status
-plotty check camera
+vfab check camera
 
 # Continue without camera
-plotty plot job_name --no-camera
+vfab plot job_name --no-camera
 ```
 
 ---
@@ -197,33 +197,33 @@ plotty plot job_name --no-camera
 
 ```bash
 # Use custom vpype pipeline
-plotty plan job --custom "read {src} linemerge linesort write {dst}"
+vfab plan job --custom "read {src} linemerge linesort write {dst}"
 
 # Compare optimization presets
-plotty plan job --preset fast --dry-run
-plotty plan job --preset hq --dry-run
-plotty compare job fast hq
+vfab plan job --preset fast --dry-run
+vfab plan job --preset hq --dry-run
+vfab compare job fast hq
 ```
 
 ### 5.2 Time Estimation
 
 ```bash
 # Get detailed time estimate
-plotty estimate job --detailed
+vfab estimate job --detailed
 
 # Compare pre/post optimization
-plotty estimate job --stage pre
-plotty estimate job --stage post
+vfab estimate job --stage pre
+vfab estimate job --stage post
 ```
 
 ### 5.3 Test Recording
 
 ```bash
 # Record test plot (5 seconds)
-plotty record-test job --seconds 5
+vfab record-test job --seconds 5
 
 # Compare with actual plot
-plotty compare-test job
+vfab compare-test job
 ```
 
 ---
@@ -234,26 +234,26 @@ plotty compare-test job
 
 ```bash
 # Watch job progress
-plotty watch job
+vfab watch job
 
 # System status overview
-plotty status --detailed
+vfab status --detailed
 
 # Queue status
-plotty list queue --watch
+vfab list queue --watch
 ```
 
 ### 6.2 Performance Analytics
 
 ```bash
 # Quick overview
-plotty stats summary
+vfab stats summary
 
 # Detailed job analytics
-plotty stats jobs --last 30
+vfab stats jobs --last 30
 
 # Performance metrics
-plotty stats performance --pen-usage
+vfab stats performance --pen-usage
 ```
 
 ---
@@ -264,26 +264,26 @@ plotty stats performance --pen-usage
 
 ```bash
 # View current config
-plotty info system
+vfab info system
 
 # Update device settings
-plotty config device --port /dev/ttyUSB0 --model 1
+vfab config device --port /dev/ttyUSB0 --model 1
 
 # Test device
-plotty check device --test-move
+vfab check device --test-move
 ```
 
 ### 7.2 Pen and Paper Management
 
 ```bash
 # List available pens
-plotty list pens
+vfab list pens
 
 # Add new pen
-plotty add pen --name "Fine Black" --width 0.3 --color "#000000"
+vfab add pen --name "Fine Black" --width 0.3 --color "#000000"
 
 # Add paper size
-plotty add paper --name "Custom" --width 200 --height 150 --margin 10
+vfab add paper --name "Custom" --width 200 --height 150 --margin 10
 ```
 
 ---
@@ -294,46 +294,46 @@ plotty add paper --name "Custom" --width 200 --height 150 --margin 10
 
 ```bash
 # Morning setup
-plotty check ready
-plotty status
+vfab check ready
+vfab status
 
 # Process daily batch
 for svg in *.svg; do
-    plotty add "$svg" --paper a4
+    vfab add "$svg" --paper a4
 done
-plotty plan-all --preset hq --optimize-pens
-plotty plot-all
+vfab plan-all --preset hq --optimize-pens
+vfab plot-all
 
 # End of day cleanup
-plotty queue cleanup --state completed
-plotty stats summary
+vfab queue cleanup --state completed
+vfab stats summary
 ```
 
 ### 8.2 Development Workflow
 
 ```bash
 # Test new design
-plotty add prototype.svg --paper a4
-plotty plan prototype --interactive
-plotty record-test prototype --seconds 10
+vfab add prototype.svg --paper a4
+vfab plan prototype --interactive
+vfab record-test prototype --seconds 10
 
 # Review and iterate
-plotty info job prototype
-plotty compare-test prototype
+vfab info job prototype
+vfab compare-test prototype
 
 # Production run
-plotty plot prototype --preset safe
+vfab plot prototype --preset safe
 ```
 
 ### 8.3 Multi-Device Workflow (Future v2)
 
 ```bash
 # Check all devices
-plotty list devices
+vfab list devices
 
 # Distribute jobs across devices
-plotty plan-all --distribute
-plotty plot-all --concurrent
+vfab plan-all --distribute
+vfab plot-all --concurrent
 ```
 
 ---
@@ -356,26 +356,26 @@ projects/
 
 ```bash
 # Good naming
-plotty add "client_logotype_v2.svg" --paper a4
-plotty add "test_pattern_2025-11-07.svg" --paper a4
+vfab add "client_logotype_v2.svg" --paper a4
+vfab add "test_pattern_2025-11-07.svg" --paper a4
 
 # Avoid
-plotty add "drawing.svg" --paper a4
-plotty add "final_final.svg" --paper a4
+vfab add "drawing.svg" --paper a4
+vfab add "final_final.svg" --paper a4
 ```
 
 ### 9.3 Quality Assurance
 
 ```bash
 # Always test new designs
-plotty record-test new_design --seconds 30
+vfab record-test new_design --seconds 30
 
 # Verify optimization
-plotty estimate new_design --stage pre
-plotty estimate new_design --stage post
+vfab estimate new_design --stage pre
+vfab estimate new_design --stage post
 
 # Check pen mapping
-plotty info job new_design --show-layers
+vfab info job new_design --show-layers
 ```
 
 ---
@@ -384,13 +384,13 @@ plotty info job new_design --show-layers
 
 | Problem | Command | Solution |
 |---------|---------|----------|
-| Device not found | `plotty check device` | Check USB connection |
-| Pen not moving | `plotty check servo` | Test servo operation |
-| Poor optimization | `plotty plan job --preset hq` | Use high-quality preset |
-| Camera not working | `plotty check camera` | Check IP feed URL |
-| Job stuck | `plotty recovery list` | Resume or safe abort |
-| Slow plotting | `plotty stats performance` | Check speed settings |
+| Device not found | `vfab check device` | Check USB connection |
+| Pen not moving | `vfab check servo` | Test servo operation |
+| Poor optimization | `vfab plan job --preset hq` | Use high-quality preset |
+| Camera not working | `vfab check camera` | Check IP feed URL |
+| Job stuck | `vfab recovery list` | Resume or safe abort |
+| Slow plotting | `vfab stats performance` | Check speed settings |
 
 ---
 
-**These workflows cover the essential ploTTY operations. For specific command details, use `plotty --help` or `plotty <command> --help`.**
+**These workflows cover the essential vfab operations. For specific command details, use `vfab --help` or `vfab <command> --help`.**

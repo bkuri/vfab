@@ -1,7 +1,7 @@
 # vsketch Integration Cheat Sheet
 
 ## 🧭 Quick Navigation
-- **New to ploTTY?** [First Plot Checklist](../beginner/first-plot-checklist.md)
+- **New to vfab?** [First Plot Checklist](../beginner/first-plot-checklist.md)
 - **Multi-pen designs?** [Multi-Pen Workflow](multi-pen-workflow.md)
 - **Optimize your designs?** [Design Optimization](design-optimization.md)
 - **Generate many designs?** [Batch Art Generation](batch-art-generation.md)
@@ -10,18 +10,18 @@
 
 ## **Quick Setup**
 ```bash
-# Install vsketch with ploTTY support
+# Install vsketch with vfab support
 pip install vsketch
 
 # Initialize vsketch project
 vsk new my_plotting_project
 cd my_plotting_project
 
-# Configure ploTTY as plotter backend
-vsk set plotter plotty
+# Configure vfab as plotter backend
+vsk set plotter vfab
 ```
 
-## **Basic vsketch → ploTTY Workflow**
+## **Basic vsketch → vfab Workflow**
 
 ### **1. Create Your Sketch**
 ```python
@@ -43,14 +43,14 @@ if __name__ == "__main__":
     MySketch().display()
 ```
 
-### **2. Send to ploTTY**
+### **2. Send to vfab**
 ```bash
-# Preview and send to ploTTY
+# Preview and send to vfab
 vsk run --save final.svg
-plotty add final.svg
+vfab add final.svg
 
 # Or direct pipeline
-vsk run --save - | plotty add -
+vsk run --save - | vfab add -
 ```
 
 ## **Advanced Integration**
@@ -79,19 +79,19 @@ def generate_variation(seed):
 for seed in range(5):
     sketch = generate_variation(seed)
     sketch.save(f"variation_{seed}.svg")
-    plotty add f"variation_{seed}.svg"
+    vfab add f"variation_{seed}.svg"
 ```
 
-### **ploTTY Presets in vsketch**
+### **vfab Presets in vsketch**
 ```python
-# Use ploTTY presets in your sketch
+# Use vfab presets in your sketch
 import vsketch
 
 class PresetSketch(vsketch.SketchClass):
     def draw(self, vsk: vsketch.Vsketch):
-        # Configure for ploTTY preset
+        # Configure for vfab preset
         vsk.size("a4")
-        vsk.penWidth("0.3mm")  # Matches ploTTY pen settings
+        vsk.penWidth("0.3mm")  # Matches vfab pen settings
         
         # Draw with preset-aware parameters
         vsk.stroke(1)  # Layer 1 for first pen
@@ -134,11 +134,11 @@ vsk run --param count=20 --param radius=60 --save sweep_1.svg
 vsk run --param count=30 --param radius=80 --save sweep_2.svg
 vsk run --param count=40 --param radius=100 --save sweep_3.svg
 
-# Add all to ploTTY
-plotty add sweep_*.svg
+# Add all to vfab
+vfab add sweep_*.svg
 
 # Check status
-plotty list
+vfab list
 ```
 
 ## **Real-world Workflows**
@@ -149,11 +149,11 @@ plotty list
 python generate_designs.py  # Creates 20 variations
 
 # 2. Review and select
-plotty list  # See all queued designs
-plotty info design_05.svg  # Check specific design
+vfab list  # See all queued designs
+vfab info design_05.svg  # Check specific design
 
 # 3. Plot selected ones
-plotty resume  # Start plotting
+vfab resume  # Start plotting
 ```
 
 ### **Iterative Design Process**
@@ -170,26 +170,26 @@ while true; do
     read -p "Add to queue? (y/n) " answer
     if [[ $answer == "y" ]]; then
         vsk run --save iteration_$(date +%H%M).svg
-        plotty add iteration_$(date +%H%M).svg
+        vfab add iteration_$(date +%H%M).svg
     fi
 done
 ```
 
-## **Troubleshooting vsketch + ploTTY**
+## **Troubleshooting vsketch + vfab**
 
 ### **Common Issues**
 ```bash
-# Check ploTTY status
-plotty info
+# Check vfab status
+vfab info
 
 # Verify SVG compatibility
-plotty check my_design.svg
+vfab check my_design.svg
 
 # Clear queue if needed
-plotty remove --all
+vfab remove --all
 
-# Restart ploTTY service
-sudo systemctl restart plottyd
+# Restart vfab service
+sudo systemctl restart vfabd
 ```
 
 ### **File Format Issues**
@@ -197,14 +197,14 @@ sudo systemctl restart plottyd
 # Ensure proper SVG output
 vsk.size("a4", landscape=False)  # Explicit orientation
 vsk.detail("0.1mm")  # Set appropriate detail level
-vsk.penWidth("0.3mm")  # Match ploTTY pen widths
+vsk.penWidth("0.3mm")  # Match vfab pen widths
 ```
 
 ## **Pro Tips**
 
 ### **Layer Management**
 ```python
-# Use ploTTY layer system
+# Use vfab layer system
 vsk.stroke(1)  # First pen/color
 # Draw elements for pen 1
 
@@ -226,8 +226,8 @@ for i in {1..10}; do
     vsk run --param seed=$i --save "design_${i}.svg"
 done
 
-# Add to ploTTY in bulk
-plotty add design_*.svg
+# Add to vfab in bulk
+vfab add design_*.svg
 ```
 
 ## **Related Cheat Sheets**

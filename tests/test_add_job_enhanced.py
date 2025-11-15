@@ -19,7 +19,7 @@ def run_test(test_name, command, expected_success=True):
         text=True,
         timeout=30,
         env=os.environ,
-        cwd="/home/bk/source/plotty",
+        cwd="/home/bk/source/vfab",
     )
 
     success = result.returncode == 0
@@ -36,7 +36,7 @@ def run_test(test_name, command, expected_success=True):
 def main():
     """Run comprehensive tests of enhanced add job functionality."""
 
-    print("🚀 Testing Enhanced ploTTY Add Job Functionality")
+    print("🚀 Testing Enhanced vfab Add Job Functionality")
     print("=" * 60)
 
     # Test 1: SVG with default settings
@@ -51,19 +51,19 @@ def main():
 
     run_test(
         "SVG with default settings",
-        f"uv run python -m plotty.cli add job DefaultTest {svg_path}",
+        f"uv run python -m vfab.cli add job DefaultTest {svg_path}",
     )
 
     # Test 2: SVG with fast preset
     run_test(
         "SVG with fast preset",
-        f"uv run python -m plotty.cli add job FastTest {svg_path} --preset fast",
+        f"uv run python -m vfab.cli add job FastTest {svg_path} --preset fast",
     )
 
     # Test 3: SVG with HQ preset and digest 2
     run_test(
         "SVG with HQ preset and digest 2",
-        f"uv run python -m plotty.cli add job HQTest {svg_path} --preset hq --digest 2",
+        f"uv run python -m vfab.cli add job HQTest {svg_path} --preset hq --digest 2",
     )
 
     # Test 4: Plob file (should skip optimization)
@@ -74,19 +74,19 @@ def main():
 
     run_test(
         "Plob file (pristine mode)",
-        f"uv run python -m plotty.cli add job PlobTest {plob_path}",
+        f"uv run python -m vfab.cli add job PlobTest {plob_path}",
     )
 
     # Test 5: Plob file with overrides (should ignore them)
     run_test(
         "Plob file with overrides (should ignore)",
-        f"uv run python -m plotty.cli add job PlobOverrideTest {plob_path} --preset hq --digest 2",
+        f"uv run python -m vfab.cli add job PlobOverrideTest {plob_path} --preset hq --digest 2",
     )
 
     # Test 6: Invalid file (should fail)
     run_test(
         "Invalid file (should fail)",
-        "uv run python -m plotty.cli add job FailTest /nonexistent/file.svg",
+        "uv run python -m vfab.cli add job FailTest /nonexistent/file.svg",
         expected_success=False,
     )
 

@@ -28,9 +28,9 @@
 - [ ] **Pen works** (test on scrap paper first)
 
 ### 💻 Software Check
-- [ ] **ploTTY running** (`plotty --version` works)
-- [ ] **Device detected** (`plotty check device`)
-- [ ] **Database ready** (`plotty check database`)
+- [ ] **vfab running** (`vfab --version` works)
+- [ ] **Device detected** (`vfab check device`)
+- [ ] **Database ready** (`vfab check database`)
 
 ---
 
@@ -45,7 +45,7 @@
 ### 📏 Size Verification
 ```bash
 # Quick check your design
-plotty add your_design.svg --dry-run
+vfab add your_design.svg --dry-run
 ```
 
 **Look for:**
@@ -60,7 +60,7 @@ plotty add your_design.svg --dry-run
 ### 1️⃣ Add Your Design
 ```bash
 # Add with descriptive name
-plotty add your_design.svg --name "My First Plot"
+vfab add your_design.svg --name "My First Plot"
 ```
 
 **Expected output:**
@@ -76,7 +76,7 @@ plotty add your_design.svg --name "My First Plot"
 ### 2️⃣ Plan the Job
 ```bash
 # Interactive planning (recommended for beginners)
-plotty plan my_first_plot --interactive
+vfab plan my_first_plot --interactive
 ```
 
 **Interactive prompts:**
@@ -94,7 +94,7 @@ Choose optimization [1]: 1  # Press Enter for Fast
 ### 4️⃣ Start Plotting
 ```bash
 # Begin plotting
-plotty plot my_first_plot
+vfab plot my_first_plot
 ```
 
 **During plotting:**
@@ -116,7 +116,7 @@ plotty plot my_first_plot
 ### 📊 Results Review
 ```bash
 # Check job details
-plotty info job my_first_plot
+vfab info job my_first_plot
 
 # View detailed report
 # Open: workspace/jobs/my_first_plot/report.html
@@ -134,11 +134,11 @@ plotty info job my_first_plot
 
 | Issue | Immediate Action | Follow-up |
 |-------|------------------|-----------|
-| **Device not found** | Check USB connection, try different port | `plotty check device` |
-| **Pen not drawing** | Check pen tip, try new pen | `plotty check servo` |
-| **Lines too light** | Lower pen position slightly | `plotty config device --pen-down 35` |
-| **Plot runs off paper** | Check design size, paper position | `plotty add design.svg --dry-run` |
-| **Job stuck** | Press Space to pause, then A to abort | `plotty recovery list` |
+| **Device not found** | Check USB connection, try different port | `vfab check device` |
+| **Pen not drawing** | Check pen tip, try new pen | `vfab check servo` |
+| **Lines too light** | Lower pen position slightly | `vfab config device --pen-down 35` |
+| **Plot runs off paper** | Check design size, paper position | `vfab add design.svg --dry-run` |
+| **Job stuck** | Press Space to pause, then A to abort | `vfab recovery list` |
 
 ---
 
@@ -165,10 +165,10 @@ plotty info job my_first_plot
 
 ```bash
 # If anything goes wrong
-plotty check ready          # Full system check
-plotty status               # Current status
-plotty info system          # System info for support
-plotty recovery list        # Recovery options
+vfab check ready          # Full system check
+vfab status               # Current status
+vfab info system          # System info for support
+vfab recovery list        # Recovery options
 ```
 
 ---

@@ -1,11 +1,11 @@
 # CLI API Reference
 
-The ploTTY CLI provides a comprehensive command-line interface built with Typer. The CLI is organized into logical command groups for different operations.
+The vfab CLI provides a comprehensive command-line interface built with Typer. The CLI is organized into logical command groups for different operations.
 
 ## Main CLI Structure
 
 ```bash
-plotty [GLOBAL_OPTIONS] COMMAND [SUBCOMMAND] [OPTIONS] [ARGUMENTS]
+vfab [GLOBAL_OPTIONS] COMMAND [SUBCOMMAND] [OPTIONS] [ARGUMENTS]
 ```
 
 ### Global Options
@@ -15,15 +15,15 @@ plotty [GLOBAL_OPTIONS] COMMAND [SUBCOMMAND] [OPTIONS] [ARGUMENTS]
 
 ## Command Groups
 
-### 1. Add Commands (`plotty add`)
+### 1. Add Commands (`vfab add`)
 
 Add new resources to the system.
 
-#### `plotty add job`
+#### `vfab add job`
 Add a single job from an SVG or PLOB file.
 
 ```bash
-plotty add job JOB_NAME FILE_PATH [OPTIONS]
+vfab add job JOB_NAME FILE_PATH [OPTIONS]
 ```
 
 **Arguments:**
@@ -40,20 +40,20 @@ plotty add job JOB_NAME FILE_PATH [OPTIONS]
 **Examples:**
 ```bash
 # Add job with default settings
-plotty add job my_design design.svg --apply
+vfab add job my_design design.svg --apply
 
 # Add job with high-quality optimization
-plotty add job my_design design.svg --preset hq --digest 2 --apply
+vfab add job my_design design.svg --preset hq --digest 2 --apply
 
 # Preview job addition
-plotty add job my_design design.svg --dry-run
+vfab add job my_design design.svg --dry-run
 ```
 
-#### `plotty add jobs`
+#### `vfab add jobs`
 Add multiple jobs using a file pattern.
 
 ```bash
-plotty add jobs PATTERN [OPTIONS]
+vfab add jobs PATTERN [OPTIONS]
 ```
 
 **Arguments:**
@@ -67,17 +67,17 @@ plotty add jobs PATTERN [OPTIONS]
 **Examples:**
 ```bash
 # Add all SVG files
-plotty add jobs "*.svg" --apply
+vfab add jobs "*.svg" --apply
 
 # Add PLOB files in pristine mode
-plotty add jobs "designs/*.plob" --pristine --apply
+vfab add jobs "designs/*.plob" --pristine --apply
 ```
 
-#### `plotty add pen`
+#### `vfab add pen`
 Add a new pen configuration.
 
 ```bash
-plotty add pen NAME WIDTH_MM SPEED_CAP PRESSURE PASSES [OPTIONS]
+vfab add pen NAME WIDTH_MM SPEED_CAP PRESSURE PASSES [OPTIONS]
 ```
 
 **Arguments:**
@@ -92,14 +92,14 @@ plotty add pen NAME WIDTH_MM SPEED_CAP PRESSURE PASSES [OPTIONS]
 
 **Example:**
 ```bash
-plotty add pen "0.3mm black" 0.3 25.0 80 1 --color "#000000"
+vfab add pen "0.3mm black" 0.3 25.0 80 1 --color "#000000"
 ```
 
-#### `plotty add paper`
+#### `vfab add paper`
 Add a new paper configuration.
 
 ```bash
-plotty add paper NAME WIDTH_MM HEIGHT_MM [OPTIONS]
+vfab add paper NAME WIDTH_MM HEIGHT_MM [OPTIONS]
 ```
 
 **Arguments:**
@@ -113,86 +113,86 @@ plotty add paper NAME WIDTH_MM HEIGHT_MM [OPTIONS]
 
 **Example:**
 ```bash
-plotty add paper "A4" 210.0 297.0 --margin 15 --orientation portrait
+vfab add paper "A4" 210.0 297.0 --margin 15 --orientation portrait
 ```
 
-### 2. List Commands (`plotty list`)
+### 2. List Commands (`vfab list`)
 
 List and manage resources.
 
-#### `plotty list jobs`
+#### `vfab list jobs`
 List all jobs with their status.
 
 ```bash
-plotty list jobs [OPTIONS]
+vfab list jobs [OPTIONS]
 ```
 
 **Options:**
 - `--state, -s`: Filter by job state
 - `--format, -f`: Output format (table, json, csv)
 
-#### `plotty list pens`
+#### `vfab list pens`
 List all pen configurations.
 
 ```bash
-plotty list pens [OPTIONS]
+vfab list pens [OPTIONS]
 ```
 
-#### `plotty list papers`
+#### `vfab list papers`
 List all paper configurations.
 
 ```bash
-plotty list papers [OPTIONS]
+vfab list papers [OPTIONS]
 ```
 
-#### `plotty list presets`
+#### `vfab list presets`
 List available plotting presets.
 
 ```bash
-plotty list presets [OPTIONS]
+vfab list presets [OPTIONS]
 ```
 
-#### `plotty list guards`
+#### `vfab list guards`
 List configured guards.
 
 ```bash
-plotty list guards [OPTIONS]
+vfab list guards [OPTIONS]
 ```
 
-### 3. Info Commands (`plotty info`)
+### 3. Info Commands (`vfab info`)
 
 Status and monitoring commands.
 
-#### `plotty info` (default)
+#### `vfab info` (default)
 Show complete status overview.
 
 ```bash
-plotty info [OPTIONS]
+vfab info [OPTIONS]
 ```
 
 **Options:**
 - `--json`: Export status as JSON
 - `--csv`: Export status as CSV
 
-#### `plotty info system`
+#### `vfab info system`
 Show overall system status.
 
 ```bash
-plotty info system [OPTIONS]
+vfab info system [OPTIONS]
 ```
 
-#### `plotty info tldr`
+#### `vfab info tldr`
 Show quick overview (too long; didn't read).
 
 ```bash
-plotty info tldr [OPTIONS]
+vfab info tldr [OPTIONS]
 ```
 
-#### `plotty info job`
+#### `vfab info job`
 Show detailed information about a specific job.
 
 ```bash
-plotty info job JOB_ID [OPTIONS]
+vfab info job JOB_ID [OPTIONS]
 ```
 
 **Arguments:**
@@ -202,11 +202,11 @@ plotty info job JOB_ID [OPTIONS]
 - `--json`: Export status as JSON
 - `--csv`: Export status as CSV
 
-#### `plotty info queue`
+#### `vfab info queue`
 Show job queue status.
 
 ```bash
-plotty info queue [OPTIONS]
+vfab info queue [OPTIONS]
 ```
 
 **Options:**
@@ -215,18 +215,18 @@ plotty info queue [OPTIONS]
 - `--json`: Export as JSON
 - `--csv`: Export as CSV
 
-#### `plotty info session`
+#### `vfab info session`
 Show current session information.
 
 ```bash
-plotty info session
+vfab info session
 ```
 
-#### `plotty info reset`
+#### `vfab info reset`
 Reset the current session.
 
 ```bash
-plotty info reset [OPTIONS]
+vfab info reset [OPTIONS]
 ```
 
 **Options:**
@@ -234,11 +234,11 @@ plotty info reset [OPTIONS]
 
 ### 4. Core Job Commands
 
-#### `plotty plot` / `plotty start`
+#### `vfab plot` / `vfab start`
 Start plotting a job.
 
 ```bash
-plotty plot JOB_ID [OPTIONS]
+vfab plot JOB_ID [OPTIONS]
 ```
 
 **Arguments:**
@@ -261,20 +261,20 @@ plotty plot JOB_ID [OPTIONS]
 **Examples:**
 ```bash
 # Preview plotting
-plotty plot my_design --dry-run
+vfab plot my_design --dry-run
 
 # Plot with safe preset
-plotty plot my_design --preset safe --apply
+vfab plot my_design --preset safe --apply
 
 # Plot with specific device
-plotty plot my_design --port /dev/ttyUSB0 --model 2 --apply
+vfab plot my_design --port /dev/ttyUSB0 --model 2 --apply
 ```
 
-#### `plotty plan`
+#### `vfab plan`
 Plan a job for plotting with layer analysis.
 
 ```bash
-plotty plan JOB_ID [OPTIONS]
+vfab plan JOB_ID [OPTIONS]
 ```
 
 **Arguments:**
@@ -284,11 +284,11 @@ plotty plan JOB_ID [OPTIONS]
 - `--pen, -p`: Default pen specification (default: "0.3mm black")
 - `--interactive, -i`: Interactive layer planning
 
-#### `plotty optimize`
+#### `vfab optimize`
 Optimize jobs with preview by default.
 
 ```bash
-plotty optimize [JOB_IDS] [OPTIONS]
+vfab optimize [JOB_IDS] [OPTIONS]
 ```
 
 **Arguments:**
@@ -299,11 +299,11 @@ plotty optimize [JOB_IDS] [OPTIONS]
 - `--digest, -d`: Digest level for AxiDraw acceleration (0-2)
 - `--apply`: Actually perform optimization (preview by default)
 
-#### `plotty queue`
+#### `vfab queue`
 Manually queue a job for plotting.
 
 ```bash
-plotty queue JOB_ID
+vfab queue JOB_ID
 ```
 
 **Arguments:**
@@ -311,11 +311,11 @@ plotty queue JOB_ID
 
 ### 5. Recovery Commands
 
-#### `plotty resume`
+#### `vfab resume`
 Resume interrupted plotting jobs.
 
 ```bash
-plotty resume [JOB_ID] [OPTIONS]
+vfab resume [JOB_ID] [OPTIONS]
 ```
 
 **Arguments:**
@@ -325,11 +325,11 @@ plotty resume [JOB_ID] [OPTIONS]
 - `--force`: Force resume without confirmation
 - `--from-layer`: Resume from specific layer
 
-#### `plotty restart`
+#### `vfab restart`
 Restart job from beginning.
 
 ```bash
-plotty restart JOB_ID [OPTIONS]
+vfab restart JOB_ID [OPTIONS]
 ```
 
 **Arguments:**
@@ -338,145 +338,145 @@ plotty restart JOB_ID [OPTIONS]
 **Options:**
 - `--force`: Force restart without confirmation
 
-### 6. Check Commands (`plotty check`)
+### 6. Check Commands (`vfab check`)
 
 System and device checking.
 
-#### `plotty check self`
-Check ploTTY installation and dependencies.
+#### `vfab check self`
+Check vfab installation and dependencies.
 
 ```bash
-plotty check self
+vfab check self
 ```
 
-#### `plotty check camera`
+#### `vfab check camera`
 Check camera configuration and access.
 
 ```bash
-plotty check camera [OPTIONS]
+vfab check camera [OPTIONS]
 ```
 
-#### `plotty check servo`
+#### `vfab check servo`
 Check servo/pen lift system.
 
 ```bash
-plotty check servo [OPTIONS]
+vfab check servo [OPTIONS]
 ```
 
-#### `plotty check timing`
+#### `vfab check timing`
 Check timing and synchronization.
 
 ```bash
-plotty check timing [OPTIONS]
+vfab check timing [OPTIONS]
 ```
 
-#### `plotty check ready`
+#### `vfab check ready`
 Check if system is ready for plotting.
 
 ```bash
-plotty check ready [OPTIONS]
+vfab check ready [OPTIONS]
 ```
 
-#### `plotty check job`
+#### `vfab check job`
 Check job configuration and files.
 
 ```bash
-plotty check job JOB_ID [OPTIONS]
+vfab check job JOB_ID [OPTIONS]
 ```
 
-### 7. Stats Commands (`plotty stats`)
+### 7. Stats Commands (`vfab stats`)
 
 Statistics and analytics.
 
-#### `plotty stats summary`
+#### `vfab stats summary`
 Show system statistics summary.
 
 ```bash
-plotty stats summary [OPTIONS]
+vfab stats summary [OPTIONS]
 ```
 
-#### `plotty stats jobs`
+#### `vfab stats jobs`
 Show job statistics.
 
 ```bash
-plotty stats jobs [OPTIONS]
+vfab stats jobs [OPTIONS]
 ```
 
-#### `plotty stats performance`
+#### `vfab stats performance`
 Show performance metrics.
 
 ```bash
-plotty stats performance [OPTIONS]
+vfab stats performance [OPTIONS]
 ```
 
-### 8. System Commands (`plotty system`)
+### 8. System Commands (`vfab system`)
 
 System management commands.
 
-#### `plotty system export`
+#### `vfab system export`
 Export system configuration and data.
 
 ```bash
-plotty system export [OPTIONS]
+vfab system export [OPTIONS]
 ```
 
-#### `plotty system import`
+#### `vfab system import`
 Import system configuration and data.
 
 ```bash
-plotty system import FILE_PATH [OPTIONS]
+vfab system import FILE_PATH [OPTIONS]
 ```
 
-### 9. Remove Commands (`plotty remove`)
+### 9. Remove Commands (`vfab remove`)
 
 Remove resources from the system.
 
-#### `plotty remove job`
+#### `vfab remove job`
 Remove a job.
 
 ```bash
-plotty remove job JOB_ID [OPTIONS]
+vfab remove job JOB_ID [OPTIONS]
 ```
 
-#### `plotty remove pen`
+#### `vfab remove pen`
 Remove a pen configuration.
 
 ```bash
-plotty remove pen PEN_NAME [OPTIONS]
+vfab remove pen PEN_NAME [OPTIONS]
 ```
 
-#### `plotty remove paper`
+#### `vfab remove paper`
 Remove a paper configuration.
 
 ```bash
-plotty remove paper PAPER_NAME [OPTIONS]
+vfab remove paper PAPER_NAME [OPTIONS]
 ```
 
 ### 10. Interactive Commands
 
-#### `plotty interactive`
+#### `vfab interactive`
 Start an interactive plotting session.
 
 ```bash
-plotty interactive [OPTIONS]
+vfab interactive [OPTIONS]
 ```
 
-#### `plotty setup`
+#### `vfab setup`
 Run setup wizard.
 
 ```bash
-plotty setup
+vfab setup
 ```
 
-### 11. Monitoring Commands (`plotty daemon`, `plotty monitor`)
+### 11. Monitoring Commands (`vfab daemon`, `vfab monitor`)
 
 Real-time monitoring and daemon management commands.
 
-#### `plotty daemon`
-Start the ploTTY daemon process with WebSocket server.
+#### `vfab daemon`
+Start the vfab daemon process with WebSocket server.
 
 ```bash
-plotty daemon [OPTIONS]
+vfab daemon [OPTIONS]
 ```
 
 **Options:**
@@ -493,20 +493,20 @@ plotty daemon [OPTIONS]
 **Examples:**
 ```bash
 # Development daemon
-plotty daemon --log-level debug
+vfab daemon --log-level debug
 
 # Production daemon
-sudo plotty daemon --host 0.0.0.0 --port 8766 --daemonize --user plotty
+sudo vfab daemon --host 0.0.0.0 --port 8766 --daemonize --user vfab
 
 # Custom workspace
-plotty daemon --workspace /mnt/storage/plotty-workspace
+vfab daemon --workspace /mnt/storage/vfab-workspace
 ```
 
-#### `plotty monitor`
+#### `vfab monitor`
 Connect to WebSocket server for real-time monitoring.
 
 ```bash
-plotty monitor [OPTIONS]
+vfab monitor [OPTIONS]
 ```
 
 **Options:**
@@ -523,16 +523,16 @@ plotty monitor [OPTIONS]
 **Examples:**
 ```bash
 # Monitor all channels
-plotty monitor --follow
+vfab monitor --follow
 
 # Monitor specific job
-plotty monitor --job-id my_design_001 --follow
+vfab monitor --job-id my_design_001 --follow
 
 # Monitor with JSON output
-plotty monitor --format json --channels jobs,system --follow
+vfab monitor --format json --channels jobs,system --follow
 
 # Production monitoring with authentication
-plotty monitor --api-key your-secret-key --host monitor.example.com --follow
+vfab monitor --api-key your-secret-key --host monitor.example.com --follow
 ```
 
 **Channel Subscription:**
@@ -546,7 +546,7 @@ plotty monitor --api-key your-secret-key --host monitor.example.com --follow
 
 ## Common Options Pattern
 
-Many ploTTY commands follow these patterns:
+Many vfab commands follow these patterns:
 
 ### Dry-run / Apply Pattern
 Most modification commands use dry-run by default:
@@ -564,7 +564,7 @@ The CLI supports autocompletion for job IDs and other parameters where applicabl
 
 ## Exit Codes
 
-ploTTY uses standard exit codes:
+vfab uses standard exit codes:
 - `0`: Success
 - `1`: General error
 - `2`: Invalid usage
@@ -586,8 +586,8 @@ The CLI can be configured via:
 # Add and plot multiple designs
 for file in designs/*.svg; do
     job_name=$(basename "$file" .svg)
-    plotty add job "$job_name" "$file" --preset hq --apply
-    plotty plot "$job_name" --preset safe --apply
+    vfab add job "$job_name" "$file" --preset hq --apply
+    vfab plot "$job_name" --preset safe --apply
 done
 ```
 
@@ -598,7 +598,7 @@ import json
 
 # Get job queue status
 result = subprocess.run(
-    ["plotty", "info", "queue", "--json"],
+    ["vfab", "info", "queue", "--json"],
     capture_output=True,
     text=True
 )

@@ -1,6 +1,6 @@
-# ploTTY Implementation Roadmap
+# vfab Implementation Roadmap
 
-**Purpose:** This document outlines the remaining implementation tasks for ploTTY, organized by priority and complexity. It serves as a living roadmap for completing core functionality and nice-to-have management features.
+**Purpose:** This document outlines the remaining implementation tasks for vfab, organized by priority and complexity. It serves as a living roadmap for completing core functionality and nice-to-have management features.
 
 **Status:** ✅ **v1 COMPLETE** - All v1 features implemented. v2 planning in progress.
 
@@ -87,9 +87,9 @@
 
 **Priority: MEDIUM | Complexity: LOW**
 
-- ✅ **`plotty stats summary`** - Quick overview with JSON support
-- ✅ **`plotty stats jobs`** - Detailed job analytics
-- ✅ **`plotty stats performance`** - Time usage analytics
+- ✅ **`vfab stats summary`** - Quick overview with JSON support
+- ✅ **`vfab stats jobs`** - Detailed job analytics
+- ✅ **`vfab stats performance`** - Time usage analytics
 - ✅ **Rich console output** - Enhanced display with fallback support
 
 ---
@@ -207,17 +207,17 @@
 ### 7.1 Existing Systems Integration ✅ **VALIDATED**
 
 **FSM Integration:**
-- ✅ All plotting features integrate with `src/plotty/fsm.py`
+- ✅ All plotting features integrate with `src/vfab/fsm.py`
 - ✅ State consistency maintained across operations
 - ✅ Crash recovery and state restoration working
 
 **Database Integration:**
-- ✅ Existing models in `src/plotty/models.py` used
-- ✅ Database patterns in `src/plotty/db.py` followed
+- ✅ Existing models in `src/vfab/models.py` used
+- ✅ Database patterns in `src/vfab/db.py` followed
 - ✅ Data integrity and consistency maintained
 
 **Configuration Integration:**
-- ✅ Configuration system in `src/plotty/config.py` used
+- ✅ Configuration system in `src/vfab/config.py` used
 - ✅ YAML-based configuration supported
 - ✅ Configuration validation working
 
@@ -266,7 +266,7 @@
 ### 8.2 v2 Success Criteria 📋 **PLANNED**
 
 **TUI Requirements:**
-- 📋 TUI launches with `plotty --tui`
+- 📋 TUI launches with `vfab --tui`
 - 📋 Real-time updates for active operations
 - 📋 Multi-device status visualization
 - 📋 Responsive keyboard controls

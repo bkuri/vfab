@@ -90,7 +90,7 @@ class JobProcessor(FileSystemEventHandler):
                 print(f"Quality check failed for {file_path.name}")
                 return False
         
-        # Step 4: Add to ploTTY queue
+        # Step 4: Add to vfab queue
         self.add_to_queue(processed_file)
         
         # Step 5: Log processing
@@ -124,8 +124,8 @@ class JobProcessor(FileSystemEventHandler):
     def quality_check(self, file_path):
         """Perform quality check on processed file"""
         try:
-            # Use ploTTY to check file
-            result = subprocess.run(['plotty', 'check', str(file_path)], 
+            # Use vfab to check file
+            result = subprocess.run(['vfab', 'check', str(file_path)], 
                                   capture_output=True, text=True)
             
             if result.returncode == 0:
@@ -140,9 +140,9 @@ class JobProcessor(FileSystemEventHandler):
             return False
     
     def add_to_queue(self, file_path):
-        """Add file to ploTTY queue with space management"""
+        """Add file to vfab queue with space management"""
         # Check queue size
-        result = subprocess.run(['plotty', 'list'], capture_output=True, text=True)
+        result = subprocess.run(['vfab', 'list'], capture_output=True, text=True)
         queue_size = len(result.stdout.strip().split('\n')) - 1
         
         if queue_size >= self.config['max_queue_size']:
@@ -150,7 +150,7 @@ class JobProcessor(FileSystemEventHandler):
             return False
         
         # Add to queue
-        result = subprocess.run(['plotty', 'add', str(file_path)], 
+        result = subprocess.run(['vfab', 'add', str(file_path)], 
                               capture_output=True, text=True)
         
         if result.returncode == 0:
@@ -268,15 +268,15 @@ class ScheduledAutomation:
     
     def hourly_maintenance(self):
         """Hourly maintenance tasks"""
-        # Check ploTTY service status
+        # Check vfab service status
         try:
-            result = subprocess.run(['systemctl', 'is-active', 'plottyd'], 
+            result = subprocess.run(['systemctl', 'is-active', 'vfabd'], 
                                   capture_output=True, text=True)
             if result.stdout.strip() != 'active':
-                print(f"ploTTY service is not active: {result.stdout.strip()}")
-                subprocess.run(['systemctl', 'restart', 'plottyd'])
+                print(f"vfab service is not active: {result.stdout.strip()}")
+                subprocess.run(['systemctl', 'restart', 'vfabd'])
         except Exception as e:
-            print(f"Error checking ploTTY service: {e}")
+            print(f"Error checking vfab service: {e}")
         
         # Monitor memory usage
         self.check_memory_usage()
@@ -300,9 +300,9 @@ class ScheduledAutomation:
         print("Weekly maintenance complete")
     
     def check_queue_status(self):
-        """Check ploTTY queue status"""
+        """Check vfab queue status"""
         try:
-            result = subprocess.run(['plotty', 'list'], capture_output=True, text=True)
+            result = subprocess.run(['vfab', 'list'], capture_output=True, text=True)
             lines = result.stdout.strip().split('\n')
             queue_size = len(lines) - 1 if lines else 0
             
@@ -337,18 +337,18 @@ class ScheduledAutomation:
         """Comprehensive system health check"""
         print("Running system health check...")
         
-        # ploTTY system status
+        # vfab system status
         try:
-            result = subprocess.run(['plotty', 'system', 'status'], 
+            result = subprocess.run(['vfab', 'system', 'status'], 
                                   capture_output=True, text=True)
-            print("ploTTY System Status:")
+            print("vfab System Status:")
             print(result.stdout)
         except Exception as e:
-            print(f"Error getting ploTTY status: {e}")
+            print(f"Error getting vfab status: {e}")
         
         # Hardware check
         try:
-            result = subprocess.run(['plotty', 'check', '--hardware'], 
+            result = subprocess.run(['vfab', 'check', '--hardware'], 
                                   capture_output=True, text=True)
             print("Hardware Status:")
             print(result.stdout)
@@ -360,9 +360,9 @@ class ScheduledAutomation:
         import glob
         
         temp_patterns = [
-            '/tmp/plotty_*',
-            '/var/tmp/plotty_*',
-            '~/.cache/plotty/tmp/*'
+            '/tmp/vfab_*',
+            '/var/tmp/vfab_*',
+            '~/.cache/vfab/tmp/*'
         ]
         
         for pattern in temp_patterns:
@@ -384,12 +384,12 @@ class ScheduledAutomation:
         report_file = f"reports/daily_report_{datetime.now().strftime('%Y%m%d')}.txt"
         
         with open(report_file, 'w') as f:
-            f.write(f"Daily ploTTY Report - {datetime.now().strftime('%Y-%m-%d')}\n")
+            f.write(f"Daily vfab Report - {datetime.now().strftime('%Y-%m-%d')}\n")
             f.write("=" * 50 + "\n\n")
             
             # Queue status
             try:
-                result = subprocess.run(['plotty', 'list'], capture_output=True, text=True)
+                result = subprocess.run(['vfab', 'list'], capture_output=True, text=True)
                 f.write("Queue Status:\n")
                 f.write(result.stdout)
                 f.write("\n")
@@ -398,7 +398,7 @@ class ScheduledAutomation:
             
             # System statistics
             try:
-                result = subprocess.run(['plotty', 'stats', '--days', '1'], 
+                result = subprocess.run(['vfab', 'stats', '--days', '1'], 
                                       capture_output=True, text=True)
                 f.write("Today's Statistics:\n")
                 f.write(result.stdout)
@@ -414,9 +414,9 @@ class ScheduledAutomation:
         
         backup_dir = f"backups/daily_backup_{datetime.now().strftime('%Y%m%d')}"
         
-        # Backup ploTTY data
-        if os.path.exists('/var/lib/plotty'):
-            shutil.copytree('/var/lib/plotty', f"{backup_dir}/plotty_data", 
+        # Backup vfab data
+        if os.path.exists('/var/lib/vfab'):
+            shutil.copytree('/var/lib/vfab', f"{backup_dir}/vfab_data", 
                           dirs_exist_ok=True)
         
         # Backup custom configurations
@@ -428,7 +428,7 @@ class ScheduledAutomation:
     def process_remaining_jobs(self):
         """Process any remaining jobs in queue"""
         try:
-            result = subprocess.run(['plotty', 'list'], capture_output=True, text=True)
+            result = subprocess.run(['vfab', 'list'], capture_output=True, text=True)
             lines = result.stdout.strip().split('\n')
             queue_size = len(lines) - 1 if lines else 0
             
@@ -462,9 +462,9 @@ class ScheduledAutomation:
                     print(f"Error removing {log_file}: {e}")
     
     def optimize_database(self):
-        """Optimize ploTTY database"""
+        """Optimize vfab database"""
         try:
-            result = subprocess.run(['plotty', 'db', 'optimize'], 
+            result = subprocess.run(['vfab', 'db', 'optimize'], 
                                   capture_output=True, text=True)
             print("Database optimization:")
             print(result.stdout)
@@ -472,22 +472,22 @@ class ScheduledAutomation:
             print(f"Database optimization error: {e}")
     
     def update_software(self):
-        """Update ploTTY and dependencies"""
+        """Update vfab and dependencies"""
         print("Checking for software updates...")
         # Implementation depends on your package manager
-        # For example: uv pip install --upgrade plotty
+        # For example: uv pip install --upgrade vfab
     
     def generate_weekly_report(self):
         """Generate comprehensive weekly report"""
         report_file = f"reports/weekly_report_{datetime.now().strftime('%Y%m%d')}.txt"
         
         with open(report_file, 'w') as f:
-            f.write(f"Weekly ploTTY Report - Week of {datetime.now().strftime('%Y-%m-%d')}\n")
+            f.write(f"Weekly vfab Report - Week of {datetime.now().strftime('%Y-%m-%d')}\n")
             f.write("=" * 60 + "\n\n")
             
             # Weekly statistics
             try:
-                result = subprocess.run(['plotty', 'stats', '--days', '7'], 
+                result = subprocess.run(['vfab', 'stats', '--days', '7'], 
                                       capture_output=True, text=True)
                 f.write("Weekly Statistics:\n")
                 f.write(result.stdout)
@@ -502,10 +502,10 @@ class ScheduledAutomation:
         import psutil
         
         for proc in psutil.process_iter(['pid', 'name', 'memory_info']):
-            if proc.info['name'] == 'plottyd':
+            if proc.info['name'] == 'vfabd':
                 memory_mb = proc.info['memory_info'].rss / 1024 / 1024
                 if memory_mb > 1000:  # More than 1GB
-                    print(f"Warning: ploTTY using {memory_mb:.1f}MB memory")
+                    print(f"Warning: vfab using {memory_mb:.1f}MB memory")
     
     def run(self):
         """Run the scheduled task manager"""
@@ -538,7 +538,7 @@ app = Flask(__name__)
 
 class WebhookAutomation:
     def __init__(self):
-        self.temp_dir = Path(tempfile.mkdtemp(prefix="plotty_webhook_"))
+        self.temp_dir = Path(tempfile.mkdtemp(prefix="vfab_webhook_"))
         self.setup_routes()
     
     def setup_routes(self):
@@ -569,7 +569,7 @@ class WebhookAutomation:
         
         @app.route('/api/status', methods=['GET'])
         def status_api():
-            """Get ploTTY status"""
+            """Get vfab status"""
             return self.get_status()
     
     def handle_github_push(self, data):
@@ -623,7 +623,7 @@ class WebhookAutomation:
             temp_file = self.temp_dir / f"api_job_{int(time.time())}.svg"
             temp_file.write_bytes(response.content)
             
-            # Add to ploTTY queue
+            # Add to vfab queue
             if self.add_file_to_queue(temp_file, priority=data.get('priority', 'normal')):
                 return jsonify({
                     'status': 'success',
@@ -637,15 +637,15 @@ class WebhookAutomation:
             return jsonify({'error': str(e)}), 500
     
     def get_status(self):
-        """Get current ploTTY status"""
+        """Get current vfab status"""
         try:
             # Get queue status
-            result = subprocess.run(['plotty', 'list'], capture_output=True, text=True)
+            result = subprocess.run(['vfab', 'list'], capture_output=True, text=True)
             lines = result.stdout.strip().split('\n')
             queue_size = len(lines) - 1 if lines else 0
             
             # Get system status
-            system_result = subprocess.run(['plotty', 'system', 'status'], 
+            system_result = subprocess.run(['vfab', 'system', 'status'], 
                                          capture_output=True, text=True)
             
             return jsonify({
@@ -658,14 +658,14 @@ class WebhookAutomation:
             return jsonify({'error': str(e)}), 500
     
     def add_file_to_queue(self, file_path, priority='normal'):
-        """Add file to ploTTY queue"""
+        """Add file to vfab queue"""
         try:
             if priority == 'high':
-                cmd = ['plotty', 'add', '--priority', 'high', str(file_path)]
+                cmd = ['vfab', 'add', '--priority', 'high', str(file_path)]
             elif priority == 'low':
-                cmd = ['plotty', 'add', '--priority', 'low', str(file_path)]
+                cmd = ['vfab', 'add', '--priority', 'low', str(file_path)]
             else:
-                cmd = ['plotty', 'add', str(file_path)]
+                cmd = ['vfab', 'add', str(file_path)]
             
             result = subprocess.run(cmd, capture_output=True, text=True)
             return result.returncode == 0
@@ -676,7 +676,7 @@ class WebhookAutomation:
     def get_queue_position(self):
         """Get current queue position"""
         try:
-            result = subprocess.run(['plotty', 'list'], capture_output=True, text=True)
+            result = subprocess.run(['vfab', 'list'], capture_output=True, text=True)
             lines = result.stdout.strip().split('\n')
             return len(lines) - 1 if lines else 0
         except:
@@ -762,14 +762,14 @@ class EmailNotifier:
         if not self.config['notifications']['job_completed']:
             return
         
-        subject = f"ploTTY Job Completed: {job_name}"
+        subject = f"vfab Job Completed: {job_name}"
         body = f"""
 Job completed successfully!
 
 Job Name: {job_name}
 Completion Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
-Check ploTTY for more details.
+Check vfab for more details.
         """
         
         self.send_email(subject, body)
@@ -779,9 +779,9 @@ Check ploTTY for more details.
         if not self.config['notifications']['queue_empty']:
             return
         
-        subject = "ploTTY Queue Empty"
+        subject = "vfab Queue Empty"
         body = f"""
-All jobs in the ploTTY queue have been completed.
+All jobs in the vfab queue have been completed.
 
 Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
@@ -795,9 +795,9 @@ Ready for new jobs!
         if not self.config['notifications']['error_occurred']:
             return
         
-        subject = "ploTTY Error Occurred"
+        subject = "vfab Error Occurred"
         body = f"""
-An error has occurred in ploTTY:
+An error has occurred in vfab:
 
 Error: {error_message}
 Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
@@ -814,18 +814,18 @@ Please check the system.
         
         try:
             # Get today's statistics
-            result = subprocess.run(['plotty', 'stats', '--days', '1'], 
+            result = subprocess.run(['vfab', 'stats', '--days', '1'], 
                                   capture_output=True, text=True)
             
             # Get current queue status
-            queue_result = subprocess.run(['plotty', 'list'], 
+            queue_result = subprocess.run(['vfab', 'list'], 
                                         capture_output=True, text=True)
             lines = queue_result.stdout.strip().split('\n')
             queue_size = len(lines) - 1 if lines else 0
             
-            subject = f"ploTTY Daily Summary - {datetime.now().strftime('%Y-%m-%d')}"
+            subject = f"vfab Daily Summary - {datetime.now().strftime('%Y-%m-%d')}"
             body = f"""
-Daily ploTTY Summary for {datetime.now().strftime('%Y-%m-%d')}
+Daily vfab Summary for {datetime.now().strftime('%Y-%m-%d')}
 
 Today's Statistics:
 {result.stdout}

@@ -1,8 +1,8 @@
-# vpype-plotty Integration Guide
+# vpype-vfab Integration Guide
 
 ## Overview
 
-**vpype-plotty** is a vpype plugin that seamlessly bridges creative tools (vsketch, vpype) with ploTTY's production plotter management system. It enables a complete workflow from generative art creation to professional plotter job management.
+**vpype-vfab** is a vpype plugin that seamlessly bridges creative tools (vsketch, vpype) with vfab's production plotter management system. It enables a complete workflow from generative art creation to professional plotter job management.
 
 ## Installation
 
@@ -10,28 +10,28 @@
 
 ```bash
 # Install plugin into vsketch environment
-pipx inject vsketch vpype-plotty
+pipx inject vsketch vpype-vfab
 
 # Verify installation
-vsk --help | grep plotty
+vsk --help | grep vfab
 ```
 
 ### For vpype Users
 
 ```bash
 # Install plugin into vpype environment  
-pipx inject vpype vpype-plotty
+pipx inject vpype vpype-vfab
 
 # Verify installation
-vpype --help | grep plotty
+vpype --help | grep vfab
 ```
 
 ### Development Installation
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/vpype-plotty.git
-cd vpype-plotty
+git clone https://github.com/your-org/vpype-vfab.git
+cd vpype-vfab
 
 # Install in development mode
 pip install -e ".[dev]"
@@ -44,7 +44,7 @@ pipx inject vpype -e .
 
 ### vsketch Integration
 
-The most common use case is integrating vpype-plotty directly into your vsketch workflow:
+The most common use case is integrating vpype-vfab directly into your vsketch workflow:
 
 ```python
 import vsketch
@@ -72,8 +72,8 @@ class MySketch(vsketch.SketchClass):
         # Standard vpype optimization
         vsk.vpype("linemerge linesimplify reloop linesort")
         
-        # Add to ploTTY with high-quality preset and auto-queue
-        vsk.vpype("plotty-add --name schotter --preset hq --queue")
+        # Add to vfab with high-quality preset and auto-queue
+        vsk.vpype("vfab-add --name schotter --preset hq --queue")
 
 if __name__ == "__main__":
     MySketch().display()
@@ -81,33 +81,33 @@ if __name__ == "__main__":
 
 ### Standalone vpype Usage
 
-You can also use vpype-plotty directly with vpype commands:
+You can also use vpype-vfab directly with vpype commands:
 
 ```bash
-# Create generative art and add to ploTTY
-vpype rand --seed 123 plotty-add --name random_art --preset fast
+# Create generative art and add to vfab
+vpype rand --seed 123 vfab-add --name random_art --preset fast
 
-# Add existing SVG to ploTTY
-vpype read input.svg plotty-add --name existing_design --paper A3
+# Add existing SVG to vfab
+vpype read input.svg vfab-add --name existing_design --paper A3
 
 # Queue existing job
-vpype plotty-queue --name my_design --priority 2
+vpype vfab-queue --name my_design --priority 2
 
 # Check job status
-vpype plotty-status --name my_design
+vpype vfab-status --name my_design
 
 # List all queued jobs
-vpype plotty-list --state queued --format table
+vpype vfab-list --state queued --format table
 ```
 
 ## Command Reference
 
-### `plotty-add`
+### `vfab-add`
 
-Add current vpype document to ploTTY job queue.
+Add current vpype document to vfab job queue.
 
 ```bash
-vpype plotty-add [OPTIONS]
+vpype vfab-add [OPTIONS]
 ```
 
 **Options:**
@@ -115,26 +115,26 @@ vpype plotty-add [OPTIONS]
 - `--preset, -p`: Optimization preset (`fast`, `default`, `hq`) [default: `fast`]
 - `--paper`: Paper size [default: `A4`]
 - `--queue/--no-queue`: Automatically queue job after adding [default: `no-queue`]
-- `--workspace`: ploTTY workspace path (auto-detected if omitted)
+- `--workspace`: vfab workspace path (auto-detected if omitted)
 
 **Examples:**
 ```bash
 # Basic usage
-vpype plotty-add --name my_design
+vpype vfab-add --name my_design
 
 # High-quality optimization with auto-queue
-vpype plotty-add --name detailed_art --preset hq --queue
+vpype vfab-add --name detailed_art --preset hq --queue
 
 # Custom paper size
-vpype plotty-add --name poster --paper A3 --preset default
+vpype vfab-add --name poster --paper A3 --preset default
 ```
 
-### `plotty-queue`
+### `vfab-queue`
 
-Queue existing ploTTY job for plotting.
+Queue existing vfab job for plotting.
 
 ```bash
-vpype plotty-queue [OPTIONS]
+vpype vfab-queue [OPTIONS]
 ```
 
 **Options:**
@@ -145,21 +145,21 @@ vpype plotty-queue [OPTIONS]
 **Examples:**
 ```bash
 # Queue job with default settings
-vpype plotty-queue --name my_design
+vpype vfab-queue --name my_design
 
 # High priority job with interactive pen mapping
-vpype plotty-queue --name urgent_job --priority 5 --interactive
+vpype vfab-queue --name urgent_job --priority 5 --interactive
 
 # Non-interactive queue (use existing pen mapping)
-vpype plotty-queue --name batch_job --no-interactive
+vpype vfab-queue --name batch_job --no-interactive
 ```
 
-### `plotty-status`
+### `vfab-status`
 
-Check ploTTY job status.
+Check vfab job status.
 
 ```bash
-vpype plotty-status [OPTIONS]
+vpype vfab-status [OPTIONS]
 ```
 
 **Options:**
@@ -169,21 +169,21 @@ vpype plotty-status [OPTIONS]
 **Examples:**
 ```bash
 # Show status for specific job
-vpype plotty-status --name my_design
+vpype vfab-status --name my_design
 
 # Show all jobs in JSON format
-vpype plotty-status --format json
+vpype vfab-status --format json
 
 # Simple text output
-vpype plotty-status --format simple
+vpype vfab-status --format simple
 ```
 
-### `plotty-list`
+### `vfab-list`
 
-List ploTTY jobs with filtering options.
+List vfab jobs with filtering options.
 
 ```bash
-vpype plotty-list [OPTIONS]
+vpype vfab-list [OPTIONS]
 ```
 
 **Options:**
@@ -194,13 +194,13 @@ vpype plotty-list [OPTIONS]
 **Examples:**
 ```bash
 # List all queued jobs
-vpype plotty-list --state queued
+vpype vfab-list --state queued
 
 # Export completed jobs to CSV
-vpype plotty-list --state completed --format csv
+vpype vfab-list --state completed --format csv
 
 # Show first 5 jobs in JSON format
-vpype plotty-list --limit 5 --format json
+vpype vfab-list --limit 5 --format json
 ```
 
 ## Workflow Examples
@@ -240,9 +240,9 @@ class GenerativeDesign(vsketch.SketchClass):
         # Optimize for plotting
         vsk.vpype("linemerge linesimplify reloop linesort")
         
-        # Add to ploTTY with parameter-based naming
+        # Add to vfab with parameter-based naming
         job_name = f"gen_design_c{self.complexity}_d{self.density}_v{self.variation:.1f}"
-        vsk.vpype(f"plotty-add --name '{job_name}' --preset hq --queue")
+        vsk.vpype(f"vfab-add --name '{job_name}' --preset hq --queue")
 
 if __name__ == "__main__":
     GenerativeDesign().display()
@@ -263,10 +263,10 @@ for complexity in 30 50 70; do
 done
 
 # Check queue status
-vpype plotty-list --state queued
+vpype vfab-list --state queued
 
 # Monitor first job
-vpype plotty-status --name gen_design_c50_d10_v1.0
+vpype vfab-status --name gen_design_c50_d10_v1.0
 ```
 
 ### Batch Processing Workflow
@@ -309,10 +309,10 @@ def generate_batch(base_name, seed_range, preset="fast"):
         svg_file = svg_files[0]
         job_name = f"{base_name}_seed_{seed}"
         
-        # Add to ploTTY
+        # Add to vfab
         cmd = [
             "vpype", "read", str(svg_file),
-            "plotty-add", 
+            "vfab-add", 
             "--name", job_name,
             "--preset", preset,
             "--queue"
@@ -377,7 +377,7 @@ class MultiPenDesign(vsketch.SketchClass):
     
     def finalize(self, vsk: vsketch.Vsketch) -> None:
         vsk.vpype("linemerge linesimplify reloop linesort")
-        vsk.vpype("plotty-add --name multipen_art --preset hq --queue")
+        vsk.vpype("vfab-add --name multipen_art --preset hq --queue")
 
 if __name__ == "__main__":
     MultiPenDesign().display()
@@ -388,28 +388,28 @@ if __name__ == "__main__":
 vsk run multipen_design.py
 
 # Or queue non-interactively with predefined pen mapping
-vpype plotty-queue --name multipen_art --no-interactive
+vpype vfab-queue --name multipen_art --no-interactive
 ```
 
 ## Configuration
 
-### ploTTY Workspace Detection
+### vfab Workspace Detection
 
-vpype-plotty automatically detects ploTTY workspace using this priority order:
+vpype-vfab automatically detects vfab workspace using this priority order:
 
 1. **Explicit workspace path** (`--workspace` option)
-2. **Current directory**: `./plotty-workspace/`
-3. **Home directory**: `~/plotty-workspace/`
-4. **XDG data directory**: `~/.local/share/plotty/`
-5. **Create default**: `~/plotty-workspace/` (if none found)
+2. **Current directory**: `./vfab-workspace/`
+3. **Home directory**: `~/vfab-workspace/`
+4. **XDG data directory**: `~/.local/share/vfab/`
+5. **Create default**: `~/vfab-workspace/` (if none found)
 
-### ploTTY Configuration
+### vfab Configuration
 
-The plugin reads ploTTY configuration from:
+The plugin reads vfab configuration from:
 - `{workspace}/config.yaml`
 - `{workspace}/vpype-presets.yaml`
 
-If ploTTY is not installed, vpype-plotty uses sensible defaults:
+If vfab is not installed, vpype-vfab uses sensible defaults:
 ```yaml
 vpype:
   preset: fast
@@ -421,7 +421,7 @@ paper:
 
 ### Optimization Presets
 
-Available presets match ploTTY's optimization levels:
+Available presets match vfab's optimization levels:
 
 | Preset | Description | Use Case |
 |---------|-------------|----------|
@@ -431,7 +431,7 @@ Available presets match ploTTY's optimization levels:
 
 ### ⚠️ Optimization Handling
 
-**Important**: vpype-plotty provides flexible control over optimization to prevent double-processing:
+**Important**: vpype-vfab provides flexible control over optimization to prevent double-processing:
 
 #### **Optimization Scenarios**
 
@@ -441,131 +441,131 @@ def finalize(self, vsk: vsketch.Vsketch) -> None:
     # vsketch handles optimization
     vsk.vpype("linemerge linesimplify reloop linesort")
     
-    # Skip ploTTY optimization (already optimized)
-    vsk.vpype("plotty-add --name my_design --preset none --queue")
+    # Skip vfab optimization (already optimized)
+    vsk.vpype("vfab-add --name my_design --preset none --queue")
 ```
 
 **2. Raw SVG Processing**
 ```bash
-# Let vpype optimize, ploTTY skips
-vpype read raw.svg linemerge linesimplify plotty-add --name optimized --preset none
+# Let vpype optimize, vfab skips
+vpype read raw.svg linemerge linesimplify vfab-add --name optimized --preset none
 
-# Let ploTTY optimize
-vpype read raw.svg plotty-add --name raw --preset hq
+# Let vfab optimize
+vpype read raw.svg vfab-add --name raw --preset hq
 ```
 
 **3. Pre-optimized Files**
 ```bash
 # Already optimized SVG - skip all optimization
-vpype read optimized.svg plotty-add --name production --preset none
+vpype read optimized.svg vfab-add --name production --preset none
 ```
 
 #### **Optimization Control Options**
 
 | Command | Optimization Applied | Use Case |
 |---------|-------------------|------------|
-| `--preset none` | Skip ploTTY optimization | Already optimized by vsketch/vpype |
-| `--preset fast` | Use ploTTY fast preset | Quick ploTTY optimization |
-| `--preset hq` | Use ploTTY high-quality preset | Production quality |
-| `--preset default` | Use ploTTY balanced preset | General use |
+| `--preset none` | Skip vfab optimization | Already optimized by vsketch/vpype |
+| `--preset fast` | Use vfab fast preset | Quick vfab optimization |
+| `--preset hq` | Use vfab high-quality preset | Production quality |
+| `--preset default` | Use vfab balanced preset | General use |
 
-#### **How ploTTY Detects Optimization**
+#### **How vfab Detects Optimization**
 
-vpype-plotty communicates optimization state to ploTTY through metadata:
+vpype-vfab communicates optimization state to vfab through metadata:
 
 ```python
-# vpype-plotty adds optimization metadata
+# vpype-vfab adds optimization metadata
 job_metadata = {
     'name': job_name,
     'preset': preset,
-    'optimized_by_vpype': True,  # Tells ploTTY to skip optimization
+    'optimized_by_vpype': True,  # Tells vfab to skip optimization
     'vpype_commands': ['linemerge', 'linesimplify', 'reloop', 'linesort']
 }
 ```
 
-**Result**: ploTTY sees `optimized_by_vpype: True` and skips its optimization step, preventing double-processing.
+**Result**: vfab sees `optimized_by_vpype: True` and skips its optimization step, preventing double-processing.
 
 #### **Best Practices**
 
 **For vsketch users:**
 - Use `--preset none` to leverage vsketch's optimization
-- vsketch provides creative control, ploTTY handles production
+- vsketch provides creative control, vfab handles production
 
 **For vpype users:**
-- Optimize in vpype, use `--preset none` in ploTTY
-- Or use ploTTY presets for consistent production quality
+- Optimize in vpype, use `--preset none` in vfab
+- Or use vfab presets for consistent production quality
 
 **For mixed workflows:**
-- Match optimization levels: vpype `fast` → ploTTY `fast`
+- Match optimization levels: vpype `fast` → vfab `fast`
 - Use `--preset hq` for final production regardless of source
 
 ## Troubleshooting
 
 ### Common Issues
 
-**ploTTY workspace not found**
+**vfab workspace not found**
 ```bash
-# Check if ploTTY is installed
-plotty --version
+# Check if vfab is installed
+vfab --version
 
 # Create workspace manually
-mkdir -p ~/plotty-workspace
-plotty init ~/plotty-workspace
+mkdir -p ~/vfab-workspace
+vfab init ~/vfab-workspace
 
 # Or specify workspace explicitly
-vpype plotty-add --workspace /path/to/workspace --name my_design
+vpype vfab-add --workspace /path/to/workspace --name my_design
 ```
 
 **Plugin not found in vpype/vsketch**
 ```bash
 # Verify installation
-pipx list | grep vpype-plotty
+pipx list | grep vpype-vfab
 
 # Reinstall if needed
-pipx inject vpype vpype-plotty --force
+pipx inject vpype vpype-vfab --force
 
 # Check vpype plugin registration
-vpype --help | grep plotty
+vpype --help | grep vfab
 ```
 
 **Job creation fails**
 ```bash
 # Enable verbose output
-vpype -v plotty-add --name test_design
+vpype -v vfab-add --name test_design
 
-# Check ploTTY configuration
-cat ~/plotty-workspace/config.yaml
+# Check vfab configuration
+cat ~/vfab-workspace/config.yaml
 
-# Test ploTTY directly
-plotty add job test_design --src test.svg --apply
+# Test vfab directly
+vfab add job test_design --src test.svg --apply
 ```
 
 **Pen mapping issues**
 ```bash
-# Check ploTTY pen database
-plotty list pens
+# Check vfab pen database
+vfab list pens
 
 # Use interactive mode for first setup
-vpype plotty-queue --name my_design --interactive
+vpype vfab-queue --name my_design --interactive
 
 # Or configure pens first
-plotty setup
+vfab setup
 ```
 
 ### Getting Help
 
 ```bash
-# vpype-plotty specific help
-vpype plotty-add --help
-vpype plotty-queue --help
-vpype plotty-status --help
-vpype plotty-list --help
+# vpype-vfab specific help
+vpype vfab-add --help
+vpype vfab-queue --help
+vpype vfab-status --help
+vpype vfab-list --help
 
 # General vpype help
 vpype --help
 
-# ploTTY help (if installed)
-plotty --help
+# vfab help (if installed)
+vfab --help
 ```
 
 ## Advanced Usage
@@ -610,7 +610,7 @@ def create_job_from_template(svg_path, template_name, **kwargs):
     # Build command
     cmd = [
         "vpype", "read", svg_path,
-        "plotty-add",
+        "vfab-add",
         "--name", kwargs.get("name", f"template_{template_name}"),
         "--preset", template["preset"],
         "--paper", template["paper"]
@@ -636,18 +636,18 @@ create_job_from_template("poster.svg", "poster", name="large_print")
 
 ### Integration with Other Tools
 
-vpype-plotty works with any tool that outputs SVG:
+vpype-vfab works with any tool that outputs SVG:
 
 ```bash
 # From Inkscape
 inkscape --export-type=svg design.svg
-vpype read design.svg plotty-add --name inkscape_design
+vpype read design.svg vfab-add --name inkscape_design
 
 # From other generative tools
 my_generative_tool --output design.svg
-vpype read design.svg plotty-add --name generated_art
+vpype read design.svg vfab-add --name generated_art
 
 # From vector editing software
 illustrator --export design.svg
-vpype read design.svg plotty-add --name illustrator_art
+vpype read design.svg vfab-add --name illustrator_art
 ```

@@ -1,8 +1,8 @@
-# 🔧 ploTTY AxiDraw Import Fix - COMPLETED
+# 🔧 vfab AxiDraw Import Fix - COMPLETED
 
 ## **Problem Solved**
 
-The ploTTY project had **conflicting pyaxidraw dependencies** and **poor import error handling** that caused:
+The vfab project had **conflicting pyaxidraw dependencies** and **poor import error handling** that caused:
 
 1. **Installation failures** due to duplicate dependency declarations
 2. **Import errors** when pyaxidraw was not available
@@ -28,7 +28,7 @@ axidraw = ["axicli @ https://cdn.evilmadscientist.com/dl/ad/public/AxiDraw_API.z
 # ✅ Uses correct package metadata name
 ```
 
-### **2. Enhanced Import Handling** (`src/plotty/axidraw_integration.py`)
+### **2. Enhanced Import Handling** (`src/vfab/axidraw_integration.py`)
 
 ```python
 try:
@@ -50,7 +50,7 @@ def get_axidraw_install_instructions() -> str:
 
 ### **3. Graceful Degradation** (All modules)
 
-**CLI Commands** (`src/plotty/cli.py`):
+**CLI Commands** (`src/vfab/cli.py`):
 ```python
 @app.command()
 def plot(job_id: str, ...):
@@ -60,7 +60,7 @@ def plot(job_id: str, ...):
         )
 ```
 
-**Plotting Module** (`src/plotty/plotting.py`):
+**Plotting Module** (`src/vfab/plotting.py`):
 ```python
 class MultiPenPlotter:
     def __init__(self, ...):
@@ -70,7 +70,7 @@ class MultiPenPlotter:
             )
 ```
 
-**Planner Module** (`src/plotty/planner.py`):
+**Planner Module** (`src/vfab/planner.py`):
 ```python
 def plan_axidraw_layers(...):
     if create_manager is None:
@@ -83,7 +83,7 @@ def plan_axidraw_layers(...):
 
 ```python
 try:
-    from plotty.axidraw_integration import create_manager, is_axidraw_available
+    from vfab.axidraw_integration import create_manager, is_axidraw_available
 except ImportError:
     create_manager = None
     is_axidraw_available = lambda: False
@@ -98,7 +98,7 @@ class TestAxiDrawManager:
 
 ### **For Users with AxiDraw Hardware:**
 ```bash
-# Install ploTTY with AxiDraw support
+# Install vfab with AxiDraw support
 uv pip install -e ".[axidraw]"
 
 # Or install AxiDraw support separately
@@ -107,7 +107,7 @@ uv pip install -e ".[axidraw]"
 
 ### **For Users without AxiDraw Hardware:**
 ```bash
-# Install ploTTY without AxiDraw (works for planning, simulation, etc.)
+# Install vfab without AxiDraw (works for planning, simulation, etc.)
 uv pip install -e ".[vpype]"
 ```
 
@@ -121,29 +121,29 @@ uv pip install -e ".[axidraw]"
 
 ### **✅ Import Test:**
 ```bash
-uv run python -c "from plotty.axidraw_integration import is_axidraw_available; print(f'Available: {is_axidraw_available()}')"
+uv run python -c "from vfab.axidraw_integration import is_axidraw_available; print(f'Available: {is_axidraw_available()}')"
 # ✅ SUCCESS: Import works with or without pyaxidraw
 ```
 
 ### **✅ CLI Test:**
 ```bash
-uv run python -m plotty.cli --help
+uv run python -m vfab.cli --help
 # ✅ SUCCESS: All commands available, clear error messages
 ```
 
 ### **✅ Code Quality:**
 ```bash
-uvx ruff check src/plotty/axidraw_integration.py src/plotty/cli.py src/plotty/planner.py src/plotty/plotting.py
+uvx ruff check src/vfab/axidraw_integration.py src/vfab/cli.py src/vfab/planner.py src/vfab/plotting.py
 # ✅ SUCCESS: All linting checks pass
 
-uvx black --check src/plotty/axidraw_integration.py src/plotty/cli.py src/plotty/planner.py src/plotty/plotting.py  
+uvx black --check src/vfab/axidraw_integration.py src/vfab/cli.py src/vfab/planner.py src/vfab/plotting.py  
 # ✅ SUCCESS: All formatting checks pass
 ```
 
 ## **Benefits Achieved**
 
 1. **🔧 Fixed Installation**: No more package metadata conflicts
-2. **🛡️ Graceful Degradation**: ploTTY works without AxiDraw hardware
+2. **🛡️ Graceful Degradation**: vfab works without AxiDraw hardware
 3. **📝 Clear Error Messages**: Users get helpful installation instructions
 4. **🧪 Test Compatibility**: Tests run in all environments
 5. **📦 Proper Dependencies**: Optional dependency management works correctly
@@ -152,19 +152,19 @@ uvx black --check src/plotty/axidraw_integration.py src/plotty/cli.py src/plotty
 ## **Files Modified**
 
 - `pyproject.toml` - Fixed dependency declarations
-- `src/plotty/axidraw_integration.py` - Enhanced import handling
-- `src/plotty/cli.py` - Added availability checks to commands
-- `src/plotty/plotting.py` - Added availability checks to plotting classes
-- `src/plotty/planner.py` - Added availability checks to planning functions
+- `src/vfab/axidraw_integration.py` - Enhanced import handling
+- `src/vfab/cli.py` - Added availability checks to commands
+- `src/vfab/plotting.py` - Added availability checks to plotting classes
+- `src/vfab/planner.py` - Added availability checks to planning functions
 - `tests/test_axidraw.py` - Added skip decorators for optional tests
 
 ## **Status: ✅ COMPLETE**
 
-The pyaxidraw import issue is **permanently resolved**. ploTTY now:
+The pyaxidraw import issue is **permanently resolved**. vfab now:
 
 - **Installs correctly** with or without AxiDraw support
 - **Provides clear guidance** when AxiDraw features are needed
 - **Maintains full functionality** for non-AxiDraw workflows
 - **Passes all quality checks** (linting, formatting, tests)
 
-Users can now install ploTTY confidently and get helpful error messages when they need AxiDraw support.
+Users can now install vfab confidently and get helpful error messages when they need AxiDraw support.

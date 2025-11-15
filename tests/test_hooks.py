@@ -9,7 +9,7 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from plotty.fsm import JobState, create_fsm
+from vfab.fsm import JobState, create_fsm
 
 
 def test_hooks_integration():
@@ -22,7 +22,7 @@ def test_hooks_integration():
         config_file.write_text(
             """
 workspace: ./workspace
-database: { url: "sqlite:///./plotty.db", echo: false }
+database: { url: "sqlite:///./vfab.db", echo: false }
 camera: { mode: ip, url: "http://127.0.0.1:8881/stream.mjpeg", enabled: true, timelapse_fps: 1 }
 device: { preferred: "axidraw:auto", pause_ink_swatch: true }
 vpype: { preset: fast, presets_file: "config/vpype-presets.yaml" }
@@ -40,7 +40,7 @@ hooks:
         # Set config env var
         import os
 
-        os.environ["PLOTTY_CONFIG"] = str(config_file)
+        os.environ["VFAB_CONFIG"] = str(config_file)
 
         fsm = create_fsm("test_hooks", workspace)
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Lightweight memory profiling for ploTTY.
+Lightweight memory profiling for vfab.
 
 This script performs basic memory analysis without external dependencies.
 """
@@ -45,7 +45,7 @@ def create_test_svg() -> str:
 
 def run_memory_test():
     """Run basic memory test."""
-    print("🧠 ploTTY Memory Profiler")
+    print("🧠 vfab Memory Profiler")
     print("=" * 50)
 
     # Start memory tracing
@@ -56,15 +56,15 @@ def run_memory_test():
     baseline = get_memory_usage()
     print(f"Baseline memory: {format_bytes(baseline)}")
 
-    # Test ploTTY command memory usage
-    print("\n📊 Testing ploTTY command memory usage...")
+    # Test vfab command memory usage
+    print("\n📊 Testing vfab command memory usage...")
 
     commands = [
-        "plotty check config",
-        "plotty list pens",
-        "plotty list papers",
-        "plotty info system",
-        "plotty stats summary",
+        "vfab check config",
+        "vfab list pens",
+        "vfab list papers",
+        "vfab info system",
+        "vfab stats summary",
     ]
 
     peak_memory = baseline
@@ -102,7 +102,7 @@ def run_memory_test():
         # Test job creation
         pre_memory = get_memory_usage()
         _ = os.system(
-            f'plotty add job memory-test "{test_svg}" --apply > /dev/null 2>&1'
+            f'vfab add job memory-test "{test_svg}" --apply > /dev/null 2>&1'
         )
         post_memory = get_memory_usage()
         memory_samples.append(post_memory)
@@ -111,14 +111,14 @@ def run_memory_test():
 
         # Test job listing
         pre_memory = get_memory_usage()
-        _ = os.system("plotty list jobs > /dev/null 2>&1")
+        _ = os.system("vfab list jobs > /dev/null 2>&1")
         post_memory = get_memory_usage()
         memory_samples.append(post_memory)
 
         print(f"  Job listing memory: {format_bytes(post_memory - pre_memory)}")
 
         # Clean up test job
-        os.system("plotty remove job memory-test > /dev/null 2>&1")
+        os.system("vfab remove job memory-test > /dev/null 2>&1")
 
     finally:
         # Clean up test SVG
