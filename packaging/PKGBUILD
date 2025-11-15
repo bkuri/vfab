@@ -44,8 +44,9 @@ checkdepends=(
 )
 provides=('plotty')
 conflicts=('plotty')
-source=("$pkgname-$pkgver.tar.gz::https://github.com/bkuri/plotty/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('19052c3b549fa349fbab56c4f4a9ad8a2c75b8b7e476f5f334749ca49e139a6e')
+source=("$url/releases/download/v$pkgver/$pkgname-$pkgver.tar.gz")
+# Note: Update sha256sum when new GitHub release is created
+sha256sums=('6ab9df659c104625ac924bd9e1c32a0feb7e4c577185a651196db6abe326e5e2')
 
 build() {
   cd "$pkgname-$pkgver"
@@ -94,7 +95,17 @@ except Exception as e:
 
 package() {
   cd "$pkgname-$pkgver"
-  python -m installer --destdir="$pkgdir" --prefix=/usr dist/*.whl
+  
+  # Find the built wheel file (handles dynamic versioning)
+  local wheel_file
+  wheel_file=$(find dist -name "*.whl" -type f | head -n1)
+  if [ -z "$wheel_file" ]; then
+    echo "Error: No wheel file found in dist/"
+    return 1
+  fi
+  
+  echo "Installing wheel: $wheel_file"
+  python -m installer --destdir="$pkgdir" --prefix=/usr "$wheel_file"
   
   # Create proper entry point script
   cat > "$pkgdir/usr/bin/plotty" << 'EOF'
@@ -114,7 +125,7 @@ EOF
   
   # Install systemd service files
   install -Dm644 packaging/systemd/plotty.service "$pkgdir/usr/lib/systemd/user/plotty.service"
-  install -Dm644 packaging/quadlet/plottyd.container "$pkgdir/usr/share/containers/systemd/plotty.container"
+  install -Dm644 packaging/quadlet/plotty.container "$pkgdir/usr/share/containers/systemd/plotty.container"
   
   # Install shell completions
   install -Dm644 completions/bash/plotty "$pkgdir/usr/share/bash-completion/completions/plotty"
