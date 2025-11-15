@@ -1,7 +1,7 @@
 # Maintainer: Bernardo Kuri <github@bkuri.com>
 pkgname=plotty
 pkgver=1.2.2
-pkgrel=1
+pkgrel=2
 pkgdesc="ploTTY: FSM plotter manager (headless-first) with vpype + per-session recording"
 arch=('any')
 url="https://github.com/bkuri/plotty"
@@ -75,7 +75,7 @@ except Exception as e:
 
 package() {
   cd "$pkgname-$pkgver"
-  python -m installer --destdir="$pkgdir" dist/*.whl
+  python -m installer --destdir="$pkgdir" --prefix=/usr dist/*.whl
   
   # Install documentation
   install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
@@ -86,7 +86,7 @@ package() {
   
   # Install systemd service files
   install -Dm644 packaging/systemd/plotty.service "$pkgdir/usr/lib/systemd/user/plotty.service"
-  install -Dm644 packaging/quadlet/plotty.container "$pkgdir/usr/share/containers/systemd/plotty.container"
+  install -Dm644 packaging/quadlet/plottyd.container "$pkgdir/usr/share/containers/systemd/plotty.container"
   
   # Install shell completions
   install -Dm644 completions/bash/plotty "$pkgdir/usr/share/bash-completion/completions/plotty"
