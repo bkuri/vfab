@@ -1,7 +1,7 @@
 # Maintainer: Bernardo Kuri <github@bkuri.com>
 pkgname=plotty
 pkgver=1.2.2
-pkgrel=2
+pkgrel=4
 pkgdesc="ploTTY: FSM plotter manager (headless-first) with vpype + per-session recording"
 arch=('any')
 url="https://github.com/bkuri/plotty"
@@ -50,12 +50,22 @@ sha256sums=('19052c3b549fa349fbab56c4f4a9ad8a2c75b8b7e476f5f334749ca49e139a6e')
 build() {
   cd "$pkgname-$pkgver"
   python -m build --wheel --no-isolation
+  
+  # Create entry point script for testing
+  mkdir -p "$srcdir/entry_test"
+  cat > "$srcdir/entry_test/plotty" << 'EOF'
+#!/usr/bin/python3
+import sys
+from plotty.cli import main
+sys.exit(main())
+EOF
+  chmod +x "$srcdir/entry_test/plotty"
 }
 
 check() {
   cd "$pkgname-$pkgver"
   
-  # Basic import test to verify package installation
+  # Test basic imports from the built wheel
   python -c "
 import sys
 sys.path.insert(0, 'src')
@@ -71,11 +81,29 @@ except Exception as e:
     print(f'✗ Import failed: {e}')
     sys.exit(1)
 "
+  
+  # Test entry point script structure
+  if [ -f "$srcdir/entry_test/plotty" ]; then
+    echo "✓ Entry point script created successfully"
+    grep -q "from plotty.cli import main" "$srcdir/entry_test/plotty" && echo "✓ Entry point has correct import" || echo "✗ Entry point import incorrect"
+  else
+    echo "✗ Entry point script not created"
+    return 1
+  fi
 }
 
 package() {
   cd "$pkgname-$pkgver"
   python -m installer --destdir="$pkgdir" --prefix=/usr dist/*.whl
+  
+  # Create proper entry point script
+  cat > "$pkgdir/usr/bin/plotty" << 'EOF'
+#!/usr/bin/python3
+import sys
+from plotty.cli import main
+sys.exit(main())
+EOF
+  chmod +x "$pkgdir/usr/bin/plotty"
   
   # Install documentation
   install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
