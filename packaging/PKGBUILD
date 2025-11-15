@@ -45,7 +45,7 @@ checkdepends=(
 provides=('plotty')
 conflicts=('plotty')
 source=("$pkgname-$pkgver.tar.gz::https://github.com/bkuri/plotty/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('a3fb45e7bd46d4261992ed893ff24a69a80cd39c8b0c0505a27bf145decf06a5')
+sha256sums=('1203554efcec248bdd42cbe6dc23ef364c073e77d764e489fb1db4bae651ef91')
 
 build() {
   cd "$pkgname-$pkgver"
