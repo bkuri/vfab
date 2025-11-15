@@ -45,7 +45,7 @@ class CompressionType(str, Enum):
 class BackupManifest(BaseModel):
     """Manifest file for backup contents and metadata."""
 
-    version: str = "1.2.1"
+    version: str = "1.2.2"
     created_at: datetime = Field(default_factory=datetime.now)
     created_by: str = "ploTTY"
     backup_type: BackupType

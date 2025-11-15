@@ -85,8 +85,8 @@ package() {
   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
   
   # Install systemd service files
-  install -Dm644 packaging/systemd/plottyd.service "$pkgdir/usr/lib/systemd/user/plottyd.service"
-  install -Dm644 packaging/quadlet/plottyd.container "$pkgdir/usr/share/containers/systemd/plottyd.container"
+  install -Dm644 packaging/systemd/plotty.service "$pkgdir/usr/lib/systemd/user/plotty.service"
+  install -Dm644 packaging/quadlet/plotty.container "$pkgdir/usr/share/containers/systemd/plotty.container"
   
   # Install shell completions
   install -Dm644 completions/bash/plotty "$pkgdir/usr/share/bash-completion/completions/plotty"
@@ -101,14 +101,14 @@ post_install() {
   echo "Configuration: ~/.config/plotty/config.yaml"
   echo ""
   echo "Quick start:"
-  echo "  plotty setup                    # Run setup wizard"
-  echo "  plotty job add drawing.svg      # Add a job"
+  echo "  plotty setup                   # Run setup wizard"
+  echo "  plotty job add drawing.svg     # Add a job"
   echo "  plotty job plan drawing        # Plan the job"
   echo "  plotty plot drawing            # Plot the job"
   echo ""
   echo "Optional dependencies:"
-  echo "  plotty install-axidraw          # Install pyaxidraw for AxiDraw support"
-  echo "  pipx install \"vpype[all]\"       # Install vpype for SVG processing"
+  echo "  plotty install-axidraw         # Install pyaxidraw for AxiDraw support"
+  echo "  pipx install \"vpype[all]\     # Install vpype for SVG processing"
   echo ""
   echo "For statistics:"
   echo "  plotty stats summary           # View statistics"
@@ -123,6 +123,6 @@ post_upgrade() {
 }
 
 pre_remove() {
-  echo "Removing ploTTY..."
+  echo "Removing ploTTY…"
   echo "Your user data directory (~/.local/share/plotty/) will not be removed."
 }
