@@ -4,8 +4,6 @@ Install driver support command.
 
 from __future__ import annotations
 
-import subprocess
-import sys
 from pathlib import Path
 import typer
 

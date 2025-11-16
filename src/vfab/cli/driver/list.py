@@ -17,10 +17,8 @@ def list_command() -> None:
 
         try:
             from ...drivers.registry import get_registry, initialize_registry
-            from ...drivers.base import DriverType
         except ImportError:
             from vfab.drivers.registry import get_registry, initialize_registry
-            from vfab.drivers.base import DriverType
 
         # Initialize registry to discover drivers
         initialize_registry()

@@ -13,11 +13,11 @@ from typing import Any, Dict, List, Optional, Union
 import logging
 
 try:
-    from .base import BaseDriver, DriverType
+    from .base import DriverType
     from .registry import DriverRegistry, get_registry, initialize_registry
 except ImportError:
     # Fallback for when running as a script
-    from vfab.drivers.base import BaseDriver, DriverType
+    from vfab.drivers.base import DriverType
     from vfab.drivers.registry import DriverRegistry, get_registry, initialize_registry
 
 logger = logging.getLogger(__name__)

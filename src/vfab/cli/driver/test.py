@@ -4,9 +4,6 @@ Test driver functionality command.
 
 from __future__ import annotations
 
-import signal
-import time
-from typing import Optional
 import typer
 
 

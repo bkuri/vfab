@@ -7,10 +7,9 @@ configuration generation functionality.
 
 from __future__ import annotations
 
-import pytest
 import tempfile
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 
 # Test the base driver interface

@@ -11,15 +11,15 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Union
 import logging
 
 try:
-    from .base import BaseDriver, DriverInfo
+    from .base import BaseDriver
     from .registry import DriverRegistry, DriverSource
 except ImportError:
     # Fallback for when running as a script
-    from vfab.drivers.base import BaseDriver, DriverInfo
+    from vfab.drivers.base import BaseDriver
     from vfab.drivers.registry import DriverRegistry, DriverSource
 
 logger = logging.getLogger(__name__)
