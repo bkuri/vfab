@@ -1,6 +1,6 @@
 # Maintainer: Bernardo Kuri <github+vfab@bkuri.com>
 pkgname=vfab
-pkgver=0.9.0
+pkgver=0.11.0
 pkgrel=1
 pkgdesc="FSM plotter manager (headless-first) with vpype + per-session recording"
 arch=('any')

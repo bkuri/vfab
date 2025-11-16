@@ -267,7 +267,7 @@ def create_websocket_app(manager: WebSocketManager) -> FastAPI:
     app = FastAPI(
         title="vfab WebSocket API",
         description="Real-time monitoring API for vfab plotting system",
-        version="0.9.0",
+        version="0.11.0",
     )
 
     @app.get("/", response_class=HTMLResponse)
