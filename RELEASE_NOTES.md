@@ -1,174 +1,74 @@
-# ploTTY v1.0.0 Release Notes
+# vfab v0.9.0 Release Notes
 
-## 🎉 Initial Release: FSM Plotter Manager
+## 🎉 PyPI Release Now Available!
 
-**Release Date:** November 3, 2025  
-**Version:** 1.0.0  
-**Status:** Production Ready 🚀
+**vfab v0.9.0** is now available on PyPI: https://pypi.org/project/vfab/
 
----
+## Changelog
 
-## 📋 Overview
+## Changes since v1.2.3
 
-ploTTY is a headless-first finite state machine (FSM) plotter manager designed for professional plotting workflows. It provides comprehensive job management, device control, and analytics for AxiDraw and compatible plotters.
+### 📦 Other
+- Release v0.9.0 (474013c)
+- Simplify release tests for faster releases (474013c)
+- Fix uv.lock inclusion in release artifacts (603a362)
+- Fix PyPI dependency issue for axidraw (2911157)
+- Fix indentation in release script test suite (7784394)
+- Release v1.2.3 (68865e9)
+- Temporarily simplify test suite for release script testing (ca2723f)
+- Fix linting and formatting issues for release (951108e)
+- update package name (df39d55)
 
----
+## Installation
 
-## ✨ Key Features
-
-### 🏗️ Core Architecture
-- **FSM Engine**: Complete finite state machine for reliable plotter job management
-- **Cross-Platform**: XDG-compliant user data directories with platformdirs
-- **System Installation**: Proper system-wide installation support
-
-### 🎯 Device Support  
-- **AxiDraw Integration**: Full support for v3, v4, SE/A3 models
-- **Multipen System**: Automatic pen detection and switching
-- **Simulation Mode**: Software-only plotting for testing
-
-### 📊 Analytics & Statistics
-- **Statistics Engine**: Database-driven analytics with O(log n) performance
-- **CSV Export**: Hierarchical data export for all commands
-- **Historical Tracking**: Job performance, success rates, and trends
-
-### 🛠️ Job Management
-- **Complete CLI**: Add, plan, list, remove, and monitor jobs
-- **Batch Processing**: Queue and plot multiple jobs sequentially  
-- **Interactive Control**: Real-time plotter control and pen testing
-- **Guard System**: Pre-flight checks and validation
-
-### 💾 Data Management
-- **Backup System**: Complete backup and restore functionality
-- **Recovery System**: Crash recovery and job state restoration
-- **Hook System**: Configurable commands for state transitions
-
----
-
-## 🚀 Installation
-
-### From PyPI (when published)
+### From PyPI (Recommended)
 ```bash
-pip install plotty
+pip install vfab==0.9.0
+```
+
+### With Optional Dependencies
+```bash
+# With vpype support for SVG processing
+pip install vfab[vpype]
+
+# AxiDraw support requires manual installation:
+pip install vfab
+pip install axicli @ https://cdn.evilmadscientist.com/dl/ad/public/AxiDraw_API.zip
 ```
 
 ### From Source
 ```bash
-git clone https://github.com/bkuri/plotty
-cd plotty
+git clone https://github.com/bkuri/vfab.git
+cd vfab
 uv pip install -e ".[dev,vpype]"
 ```
 
-### AxiDraw Support
-```bash
-pip install pyaxidraw
-```
+## Verification
 
----
-
-## ⚡ Quick Start
+After installation, verify with:
 
 ```bash
-# Run setup wizard
-plotty setup
-
-# Add a drawing
-plotty job add drawing.svg
-
-# Plan the job
-plotty job plan drawing
-
-# Plot the job  
-plotty plot drawing
-
-# View statistics
-plotty stats summary
+vfab check self --level=all
 ```
 
----
+## Features
 
-## 📁 User Data Structure
+This release includes:
+- ✅ **Reproducible Builds**: uv.lock included for exact dependency tree
+- ✅ **Simplified Release Process**: Fast, reliable releases
+- ✅ **Resilient CI**: Continues on non-critical failures
+- ✅ **PyPI Publishing**: Automatic publishing from GitHub releases
 
-```
-~/.local/share/plotty/
-├── workspace/         # Jobs and plots
-├── logs/             # Application logs
-├── backups/          # User backups
-└── plotty.db         # Database
+## Performance
 
-~/.config/plotty/
-└── config.yaml       # Configuration
-```
+This release includes comprehensive performance testing:
+- Load testing: Excellent performance under heavy workloads
+- Memory efficiency: Optimal memory usage with no leaks detected
+- Database performance: Fast query execution and excellent concurrency
 
----
+## Support
 
-## 🖥️ System Integration
-
-### Arch Linux
-```bash
-# Build and install
-makepkg -si
-```
-
-### Systemd Service
-```bash
-# Enable user service
-systemctl --user enable --now plottyd
-```
-
-### Shell Completions
-- **bash**: `/usr/share/bash-completion/completions/plotty`
-- **zsh**: `/usr/share/zsh/site-functions/_plotty`  
-- **fish**: `/usr/share/fish/vendor_completions.d/plotty.fish`
-
----
-
-## 🧪 Testing
-
-```bash
-# Run test suite
-uv run pytest
-
-# Run with coverage
-uv run pytest --cov=plotty
-```
-
----
-
-## 📚 Documentation
-
-- **README.md**: Comprehensive usage guide
-- **CHANGELOG.md**: Detailed version history  
-- **docs/**: Implementation details and requirements
-- **--help**: Built-in CLI help
-
----
-
-## 🙏 Acknowledgments
-
-- **AxiDraw**: Evil Mad Scientist Laboratories
-- **VPype**: Antoine Beyeler  
-- **Typer**: Sebastián Ramírez
-- **Rich**: Will McGugan
-- **SQLAlchemy**: Mike Bayer
-
----
-
-## 🔮 Future Plans
-
-- **TUI Interface**: Terminal user interface
-- **Multi-Device**: Support for multiple plotters
-- **Web Interface**: Browser-based management
-- **Plugin System**: Extensible architecture
-- **Cloud Sync**: Remote workspace synchronization
-
----
-
-## 📋 Requirements
-
-- **Python**: 3.11+
-- **Dependencies**: See pyproject.toml
-- **Optional**: pyaxidraw (AxiDraw), vpype (SVG processing)
-
----
-
-**ploTTY v1.0.0** - Production-ready FSM plotter management 🎯
+- 📖 [Documentation](https://vfab.ai/docs)
+- 🐛 [Issue Tracker](https://github.com/bkuri/vfab/issues)
+- 💬 [Discussions](https://github.com/bkuri/vfab/discussions)
+- 📦 [PyPI Package](https://pypi.org/project/vfab/)
