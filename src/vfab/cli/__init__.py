@@ -37,7 +37,7 @@ except ImportError:
 try:
     __version__ = metadata.version("vfab")
 except metadata.PackageNotFoundError:
-    __version__ = "0.10.0"
+    __version__ = "0.9.0"
 
 # Create main app
 app = typer.Typer(no_args_is_help=True)

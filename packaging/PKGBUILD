@@ -51,7 +51,7 @@ provides=('vfab')
 conflicts=('vfab')
 source=("$url/releases/download/v$pkgver/$pkgname-$pkgver.tar.gz")
 # Note: Update sha256sum when new GitHub release is created
-sha256sums=('6ab9df659c104625ac924bd9e1c32a0feb7e4c577185a651196db6abe326e5e2')
+sha256sums=('507663bac0d8620072c0c0ccee26fa1b1d25795b518cd94a5f274f4dee4c643e')
 
 build() {
   cd "$pkgname-$pkgver"
