@@ -101,9 +101,7 @@ def run_memory_test():
     try:
         # Test job creation
         pre_memory = get_memory_usage()
-        _ = os.system(
-            f'vfab add job memory-test "{test_svg}" --apply > /dev/null 2>&1'
-        )
+        _ = os.system(f'vfab add job memory-test "{test_svg}" --apply > /dev/null 2>&1')
         post_memory = get_memory_usage()
         memory_samples.append(post_memory)
 

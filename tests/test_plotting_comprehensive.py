@@ -416,9 +416,7 @@ class TestMultiPenPlotter:
 
                 # Mock detect_svg_layers
                 mock_layers = [Mock(name="test_layer")]
-                with patch(
-                    "vfab.plotting.detect_svg_layers", return_value=mock_layers
-                ):
+                with patch("vfab.plotting.detect_svg_layers", return_value=mock_layers):
                     with patch(
                         "vfab.plotting.parse_axidraw_layer_control"
                     ) as mock_parse:

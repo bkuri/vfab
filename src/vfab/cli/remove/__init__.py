@@ -56,9 +56,7 @@ def remove_pen(
                 typer.echo("💡 Suggestions:")
                 typer.echo("   • Reassign layers to a different pen first")
                 typer.echo("   • List layers using this pen: vfab info job <job_id>")
-                typer.echo(
-                    "   • Remove jobs using this pen: vfab remove job <job_id>"
-                )
+                typer.echo("   • Remove jobs using this pen: vfab remove job <job_id>")
                 raise typer.Exit(ExitCode.BUSY)
 
             # Create items list for dry-run

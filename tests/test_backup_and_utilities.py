@@ -37,17 +37,13 @@ class TestBackupManager:
 
     def test_backup_manager_init(self, temp_db):
         """Test BackupManager initialization."""
-        with patch(
-            "vfab.backup.get_database_url", return_value=f"sqlite:///{temp_db}"
-        ):
+        with patch("vfab.backup.get_database_url", return_value=f"sqlite:///{temp_db}"):
             manager = BackupManager()
             assert manager is not None
 
     def test_create_backup_full(self, temp_db):
         """Test creating a full backup."""
-        with patch(
-            "vfab.backup.get_database_url", return_value=f"sqlite:///{temp_db}"
-        ):
+        with patch("vfab.backup.get_database_url", return_value=f"sqlite:///{temp_db}"):
             manager = BackupManager()
 
             result_path = None
@@ -60,9 +56,7 @@ class TestBackupManager:
 
     def test_create_backup_config(self, temp_db):
         """Test creating a config backup."""
-        with patch(
-            "vfab.backup.get_database_url", return_value=f"sqlite:///{temp_db}"
-        ):
+        with patch("vfab.backup.get_database_url", return_value=f"sqlite:///{temp_db}"):
             manager = BackupManager()
 
             result_path = None
@@ -75,9 +69,7 @@ class TestBackupManager:
 
     def test_restore_backup(self, temp_db):
         """Test restoring a backup."""
-        with patch(
-            "vfab.backup.get_database_url", return_value=f"sqlite:///{temp_db}"
-        ):
+        with patch("vfab.backup.get_database_url", return_value=f"sqlite:///{temp_db}"):
             manager = BackupManager()
 
             result_path = None

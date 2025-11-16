@@ -37,13 +37,14 @@ def run_websocket_basic_tests_sync(test_env: dict, progress_tracker=None) -> lis
         progress_tracker.advance(test_name)
 
     try:
-        from vfab.websocket import WebSocketManager
+        import importlib.util
 
-        results.append(
-            create_test_result(
-                test_name, True, "✓ WebSocket modules imported successfully"
+        if importlib.util.find_spec("vfab.websocket"):
+            results.append(
+                create_test_result(test_name, True, "✓ WebSocket modules available")
             )
-        )
+        else:
+            raise ImportError("WebSocket module not found")
     except ImportError as e:
         results.append(
             create_test_result(
@@ -88,14 +89,18 @@ def run_websocket_fsm_tests_sync(test_env: dict, progress_tracker=None) -> list:
         progress_tracker.advance(test_name)
 
     try:
-        from vfab.fsm import JobFSM
-        from vfab.hooks import HookExecutor
+        import importlib.util
 
-        results.append(
-            create_test_result(
-                test_name, True, "✓ FSM and HookExecutor modules available"
+        if importlib.util.find_spec("vfab.fsm") and importlib.util.find_spec(
+            "vfab.hooks"
+        ):
+            results.append(
+                create_test_result(
+                    test_name, True, "✓ FSM and HookExecutor modules available"
+                )
             )
-        )
+        else:
+            raise ImportError("FSM or HookExecutor module not found")
     except ImportError as e:
         results.append(
             create_test_result(

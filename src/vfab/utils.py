@@ -220,9 +220,7 @@ class ErrorHandler:
             # Try to extract filename from the document
             first_line = error.doc.split("\n")[0] if error.doc else ""
             if "config" in first_line.lower():
-                suggestion = (
-                    "Validate your configuration file with 'vfab config-check'"
-                )
+                suggestion = "Validate your configuration file with 'vfab config-check'"
 
         vfab_error = PlottyError(
             message=message,

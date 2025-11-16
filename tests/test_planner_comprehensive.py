@@ -57,9 +57,7 @@ class TestPlanLayers:
             ):
                 with patch("vfab.planner.load_preset") as mock_load_preset:
                     with patch("vfab.planner.features") as mock_features:
-                        with patch(
-                            "vfab.planner.estimate_seconds", return_value=10.0
-                        ):
+                        with patch("vfab.planner.estimate_seconds", return_value=10.0):
                             with patch("vfab.planner.run_vpype"):
                                 with patch("vfab.planner.create_multipen_svg"):
                                     with patch("vfab.planner.save_pen_mapping"):
@@ -247,9 +245,7 @@ class TestPlanLayers:
             ):
                 with patch("vfab.planner.load_preset") as mock_load_preset:
                     with patch("vfab.planner.features") as mock_features:
-                        with patch(
-                            "vfab.planner.estimate_seconds", return_value=12.0
-                        ):
+                        with patch("vfab.planner.estimate_seconds", return_value=12.0):
                             with patch("vfab.planner.run_vpype"):
                                 with patch("vfab.planner.create_multipen_svg"):
                                     with patch("vfab.planner.save_pen_mapping"):
@@ -439,9 +435,7 @@ class TestPlanLayers:
             ):
                 with patch("vfab.planner.load_preset") as mock_load_preset:
                     with patch("vfab.planner.features") as mock_features:
-                        with patch(
-                            "vfab.planner.estimate_seconds", return_value=10.0
-                        ):
+                        with patch("vfab.planner.estimate_seconds", return_value=10.0):
                             with patch("vfab.planner.run_vpype"):
                                 with patch("vfab.planner.create_multipen_svg"):
                                     with patch("vfab.planner.save_pen_mapping"):
