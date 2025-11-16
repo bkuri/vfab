@@ -1,11 +1,12 @@
-# Maintainer: Bernardo Kuri <github@bkuri.com>
-pkgname=plotty
+# Maintainer: Bernardo Kuri <github+vfab@bkuri.com>
+pkgname=vfab
 pkgver=1.2.2
-pkgrel=4
-pkgdesc="ploTTY: FSM plotter manager (headless-first) with vpype + per-session recording"
+pkgrel=1
+pkgdesc="FSM plotter manager (headless-first) with vpype + per-session recording"
 arch=('any')
-url="https://github.com/bkuri/plotty"
+url="https://github.com/bkuri/$pkgname"
 license=('MIT')
+
 depends=(
   'python>=3.13'
   'python-typer'
@@ -25,12 +26,14 @@ depends=(
   'python-pandas'
   'python-pipx'
 )
+
 makedepends=(
   'python-build'
   'python-installer'
   'python-wheel'
   'python-setuptools'
 )
+
 optdepends=(
   'python-pyaxidraw: AxiDraw plotter support (install from PyPI)'
   'ffmpeg: Camera recording and timelapse generation'
@@ -38,12 +41,14 @@ optdepends=(
   'python-matplotlib: Plot generation for statistics'
   'python-pandas: Data analysis for statistics'
 )
+
 checkdepends=(
   'python-pytest'
   'python-pytest-cov'
 )
-provides=('plotty')
-conflicts=('plotty')
+
+provides=('vfab')
+conflicts=('vfab')
 source=("$url/releases/download/v$pkgver/$pkgname-$pkgver.tar.gz")
 # Note: Update sha256sum when new GitHub release is created
 sha256sums=('6ab9df659c104625ac924bd9e1c32a0feb7e4c577185a651196db6abe326e5e2')
@@ -54,13 +59,13 @@ build() {
   
   # Create entry point script for testing
   mkdir -p "$srcdir/entry_test"
-  cat > "$srcdir/entry_test/plotty" << 'EOF'
+  cat > "$srcdir/entry_test/$pkgname" << 'EOF'
 #!/usr/bin/python3
 import sys
-from plotty.cli import main
+from vfab.cli import main
 sys.exit(main())
 EOF
-  chmod +x "$srcdir/entry_test/plotty"
+  chmod +x "$srcdir/entry_test/$pkgname"
 }
 
 check() {
@@ -71,11 +76,11 @@ check() {
 import sys
 sys.path.insert(0, 'src')
 try:
-    import plotty
-    print('✓ ploTTY imports successfully')
-    from plotty.config import load_config
+    import vfab
+    print('✓ vfab imports successfully')
+    from vfab.config import load_config
     print('✓ Config module loads')
-    from plotty.fsm import JobFSM
+    from vfab.fsm import JobFSM
     print('✓ FSM module loads')
     print('✓ All basic imports working')
 except Exception as e:
@@ -84,9 +89,9 @@ except Exception as e:
 "
   
   # Test entry point script structure
-  if [ -f "$srcdir/entry_test/plotty" ]; then
+  if [ -f "$srcdir/entry_test/$pkgname" ]; then
     echo "✓ Entry point script created successfully"
-    grep -q "from plotty.cli import main" "$srcdir/entry_test/plotty" && echo "✓ Entry point has correct import" || echo "✗ Entry point import incorrect"
+    grep -q "from $pkgname.cli import main" "$srcdir/entry_test/$pkgname" && echo "✓ Entry point has correct import" || echo "✗ Entry point import incorrect"
   else
     echo "✗ Entry point script not created"
     return 1
@@ -99,6 +104,7 @@ package() {
   # Find the built wheel file (handles dynamic versioning)
   local wheel_file
   wheel_file=$(find dist -name "*.whl" -type f | head -n1)
+
   if [ -z "$wheel_file" ]; then
     echo "Error: No wheel file found in dist/"
     return 1
@@ -108,13 +114,14 @@ package() {
   python -m installer --destdir="$pkgdir" --prefix=/usr "$wheel_file"
   
   # Create proper entry point script
-  cat > "$pkgdir/usr/bin/plotty" << 'EOF'
+  cat > "$pkgdir/usr/bin/$pkgname" << 'EOF'
 #!/usr/bin/python3
 import sys
-from plotty.cli import main
+from vfab.cli import main
 sys.exit(main())
 EOF
-  chmod +x "$pkgdir/usr/bin/plotty"
+
+  chmod +x "$pkgdir/usr/bin/$pkgname"
   
   # Install documentation
   install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
@@ -124,44 +131,44 @@ EOF
   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
   
   # Install systemd service files
-  install -Dm644 packaging/systemd/plotty.service "$pkgdir/usr/lib/systemd/user/plotty.service"
-  install -Dm644 packaging/quadlet/plotty.container "$pkgdir/usr/share/containers/systemd/plotty.container"
+  install -Dm644 "packaging/systemd/$pkgname.service" "$pkgdir/usr/lib/systemd/user/$pkgname.service"
+  install -Dm644 "packaging/quadlet/$pkgname.container" "$pkgdir/usr/share/containers/systemd/$pkgname.container"
   
   # Install shell completions
-  install -Dm644 completions/bash/plotty "$pkgdir/usr/share/bash-completion/completions/plotty"
-  install -Dm644 completions/zsh/_plotty "$pkgdir/usr/share/zsh/site-functions/_plotty"
-  install -Dm644 completions/fish/plotty.fish "$pkgdir/usr/share/fish/vendor_completions.d/plotty.fish"
+  install -Dm644 "completions/bash/$pkgname" "$pkgdir/usr/share/bash-completion/completions/$pkgname"
+  install -Dm644 "completions/zsh/_$pkgname" "$pkgdir/usr/share/zsh/site-functions/_$pkgname"
+  install -Dm644 "completions/fish/$pkgname.fish" "$pkgdir/usr/share/fish/vendor_completions.d/$pkgname.fish"
 }
 
 post_install() {
-  echo "ploTTY v$pkgver has been installed successfully!"
+  echo "vfab v$pkgver has been installed successfully!"
   echo ""
-  echo "User data will be stored in: ~/.local/share/plotty/"
-  echo "Configuration: ~/.config/plotty/config.yaml"
+  echo "User data will be stored in: ~/.local/share/$pkgname/"
+  echo "Configuration: ~/.config/$pkgname/config.yaml"
   echo ""
   echo "Quick start:"
-  echo "  plotty setup                   # Run setup wizard"
-  echo "  plotty job add drawing.svg     # Add a job"
-  echo "  plotty job plan drawing        # Plan the job"
-  echo "  plotty plot drawing            # Plot the job"
+  echo "  $pkgname setup                   # Run setup wizard"
+  echo "  $pkgname job add drawing.svg     # Add a job"
+  echo "  $pkgname job plan drawing        # Plan the job"
+  echo "  $pkgname plot drawing            # Plot the job"
   echo ""
   echo "Optional dependencies:"
-  echo "  plotty install-axidraw         # Install pyaxidraw for AxiDraw support"
-  echo "  pipx install \"vpype[all]\     # Install vpype for SVG processing"
+  echo "  $pkgname install-axidraw         # Install pyaxidraw for AxiDraw support"
+  echo "  pipx install vpype[all]          # Install vpype for SVG processing"
   echo ""
   echo "For statistics:"
-  echo "  plotty stats summary           # View statistics"
+  echo "  $pkgname stats summary           # View statistics"
   echo "  (Database automatically initialized on first run)"
   echo ""
   echo "Documentation: /usr/share/doc/$pkgname/"
 }
 
 post_upgrade() {
-  echo "ploTTY has been upgraded to v$pkgver"
+  echo "$pkgname has been upgraded to v$pkgver"
   echo "Run 'uv run alembic upgrade head' to update the database schema"
 }
 
 pre_remove() {
-  echo "Removing ploTTY…"
-  echo "Your user data directory (~/.local/share/plotty/) will not be removed."
+  echo "Removing $pkgname…"
+  echo "Your user data directory (~/.local/share/$pkgname/) will not be removed."
 }
