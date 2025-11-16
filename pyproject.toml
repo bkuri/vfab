@@ -10,7 +10,7 @@ vfab = ["config/*.yaml"]
 
 [project]
 name = "vfab"
-version = "1.2.2"
+version = "1.2.3"
 description = "vfab: FSM plotter manager (headless-first) with vpype + per-session recording"
 readme = "README.md"
 license = "MIT"
