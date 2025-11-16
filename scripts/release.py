@@ -13,6 +13,9 @@ This script automates the release process including:
 import subprocess
 import sys
 
+# Primary branch name for this repository
+PRIMARY_BRANCH = "master"
+
 
 def run_command(cmd: str, check: bool = True) -> subprocess.CompletedProcess:
     """Run a command and return the result."""
@@ -203,7 +206,7 @@ def create_release_tag(version: str) -> None:
             # Commit the hash update
             run_command("git add packaging/PKGBUILD")
             run_command(f"git commit -m 'Update PKGBUILD hash for v{version}'")
-            run_command("git push origin main")
+            run_command(f"git push origin {PRIMARY_BRANCH}")
             print("✅ PKGBUILD hash update committed and pushed")
         else:
             print("⚠️  PKGBUILD hash update failed, but release continues")
@@ -266,10 +269,10 @@ def main():
     print("🚀 vfab Release Engineering")
     print("=" * 50)
 
-    # Check if we're on main branch
+    # Check if we're on primary branch
     result = run_command("git branch --show-current", check=False)
-    if result.stdout.strip() != "main":
-        print("⚠️  Warning: Not on main branch")
+    if result.stdout.strip() != PRIMARY_BRANCH:
+        print(f"⚠️  Warning: Not on {PRIMARY_BRANCH} branch")
 
     # Check if working directory is clean
     result = run_command("git status --porcelain", check=False)
@@ -329,7 +332,7 @@ def main():
     run_command(f"git commit -m 'Release v{new_version}'")
 
     # Push changes
-    run_command("git push origin main")
+    run_command(f"git push origin {PRIMARY_BRANCH}")
 
     # Create tag and update PKGBUILD hash
     create_release_tag(new_version)
