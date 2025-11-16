@@ -34,9 +34,10 @@ dependencies = [
 
 [project.optional-dependencies]
 vpype = ["vpype>=1.14.0"]
-# NOTE: EMS API is distributed as a zip; import name is `pyaxidraw`
-# Package metadata name is `axicli` but provides `pyaxidraw` module
-axidraw = ["axicli @ https://cdn.evilmadscientist.com/dl/ad/public/AxiDraw_API.zip"]
+# NOTE: AxiDraw support requires manual installation from:
+# https://cdn.evilmadscientist.com/dl/ad/public/AxiDraw_API.zip
+# Install with: pip install axicli @ https://cdn.evilmadscientist.com/dl/ad/public/AxiDraw_API.zip
+axidraw = []  # Placeholder - requires manual installation
 dev = ["pytest>=8.3.2", "pre-commit>=3.8.0", "ruff>=0.6.8", "black>=24.10.0"]
 
 [project.scripts]
