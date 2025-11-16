@@ -59,7 +59,7 @@ jobs:
         run: uvx black --check .
           
       - name: Run tests
-        run: uv run pytest -q --cov=plotty --cov-report=xml || uv run pytest -q
+        run: uv run pytest -q --cov=vfab --cov-report=xml || uv run pytest -q
           
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.12' && matrix.os == 'ubuntu-latest'
