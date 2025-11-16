@@ -6,6 +6,7 @@ Welcome to the comprehensive API documentation for vfab, a powerful plotter mana
 
 - [Overview](#overview)
 - [CLI API Reference](#cli-api-reference)
+- [Driver Development](#driver-development)
 - [Database Models](#database-models)
 - [Configuration Schema](#configuration-schema)
 - [Core Classes and Methods](#core-classes-and-methods)
@@ -24,6 +25,30 @@ vfab is a Python-based plotter management system that provides:
 - **Extensible Architecture**: Plugin system for guards, hooks, and custom functionality
 
 The system is designed around a clear separation of concerns with well-defined APIs for each component.
+
+## Driver Development
+
+For developers looking to add new hardware drivers to vfab, see:
+
+- **[Driver Development Guide](../driver/development.md)** - Step-by-step instructions for adding new drivers
+- **[Driver Architecture](../driver/architecture.md)** - System architecture and design patterns
+- **[Driver Requirements](../requirements/drivers.md)** - Strategic roadmap and implementation milestones
+
+### Quick Driver Examples
+
+```bash
+# List available drivers
+vfab driver list
+
+# Install AxiDraw support
+vfab driver install axidraw
+
+# Check driver status
+vfab driver info axidraw --verbose
+
+# Test driver functionality
+vfab driver test axidraw --cycles 3
+```
 
 ## Quick Start
 

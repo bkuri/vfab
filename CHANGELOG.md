@@ -1,9 +1,52 @@
 # Changelog
 
-All notable changes to ploTTY will be documented in this file.
+All notable changes to vfab will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.11.0] - 2025-11-15
+
+### 🚀 **MAJOR MILESTONE** - Dynamic Driver System & CLI Cleanup
+
+### 🛠️ Complete Dynamic Driver System
+- **BaseDriver Interface**: New extensible driver architecture in `src/vfab/drivers/base.py`
+- **DriverRegistry**: Centralized driver discovery and management system
+- **PluginLoader**: Automatic driver loading from plugins directory
+- **DynamicConfigSchema**: Runtime configuration validation for dynamic drivers
+- **AxiDraw Integration**: Updated to use new dynamic interface while maintaining backward compatibility
+
+### 🔄 CLI Command Restructuring
+- **Removed Redundant Commands**: `vfab check servo` and `vfab check timing` deprecated
+- **Unified Driver Commands**: All hardware tests now use `vfab driver test axidraw`
+- **Updated Command References**: Servo tests → `vfab driver test axidraw`, Timing tests → `vfab driver test axidraw --timing`
+- **Cleaner CLI Structure**: Consolidated hardware testing under unified driver system
+
+### 📚 Comprehensive Documentation Updates
+- **CLI Reference Updated**: All command examples reflect new driver structure
+- **Installation Guide Updated**: Hardware test commands updated throughout
+- **Workflow Documentation**: Core workflows updated with new command patterns
+- **Cheat Sheets Updated**: Beginner guides updated with new driver commands
+- **Troubleshooting Updated**: All diagnostic commands updated to use new structure
+- **README Updated**: Command examples updated for consistency
+
+### 🧪 Enhanced Testing Framework
+- **Dynamic Driver Tests**: Comprehensive test suite for new driver system
+- **Backward Compatibility Tests**: Ensure existing functionality preserved
+- **Integration Tests**: Full workflow testing with new driver commands
+- **Performance Tests**: Verify no regression in driver performance
+
+### 🎯 Key Benefits Achieved
+- **Extensibility**: Easy addition of new hardware drivers through plugin system
+- **Maintainability**: Cleaner code structure with unified driver management
+- **User Experience**: Simplified commands with consistent interface
+- **Future-Proof**: Architecture ready for multi-device support (v2.0)
+
+### 📝 Migration Guide
+- **For Users**: Replace `vfab check servo` with `vfab driver test axidraw`
+- **For Users**: Replace `vfab check timing` with `vfab driver test axidraw --timing`
+- **For Developers**: New driver development through BaseDriver interface
+- **Full Compatibility**: All existing functionality preserved with new commands
 
 ## [1.1.1] - 2025-11-12
 

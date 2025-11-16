@@ -294,7 +294,10 @@ cd vfab
 # Install vfab
 uv pip install -e ".[dev,vpype]"
 
-# For AxiDraw support (requires USB passthrough)
+# For AxiDraw support (recommended method)
+vfab driver install axidraw
+
+# Alternative: Install manually
 uv pip install -e ".[dev,vpype,axidraw]"
 
 # Initialize database
@@ -490,7 +493,7 @@ ls -la /dev/ttyUSB*
 groups $USER | grep -o uucp
 
 # Test connection
-vfab check device
+vfab driver test axidraw
 ```
 
 **macOS:**
@@ -508,7 +511,7 @@ ls /dev/cu.usbserial*
 # Look under "Ports (COM & LPT)" for "USB Serial Port"
 
 # Test with vfab
-vfab check device
+vfab driver test axidraw
 ```
 
 ### 7.2 Camera Setup
@@ -653,7 +656,8 @@ vfab --version
 vfab --help
 
 # Test all checks
-vfab check all
+vfab check self
+vfab driver test axidraw
 
 # Test without hardware
 vfab add --help
@@ -664,14 +668,13 @@ vfab plan --help
 
 ```bash
 # Test AxiDraw connection
-vfab check device
-vfab check servo
+vfab driver test axidraw
 
 # Test camera
 vfab check camera
 
 # Test plotting (with test file)
-vfab add test.svg --paper a4
+vfab add job test test.svg --apply
 vfab plan test --dry-run
 ```
 

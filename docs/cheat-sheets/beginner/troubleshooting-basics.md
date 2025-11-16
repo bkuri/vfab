@@ -37,13 +37,13 @@ vfab recovery list
 **Diagnostic commands:**
 ```bash
 # Check device detection
-vfab check device
+vfab driver test axidraw
 
 # List available ports
 vfab list ports
 
 # Test specific port
-vfab check device --port /dev/ttyUSB1
+vfab driver test axidraw
 ```
 
 **If still not found:**
@@ -74,7 +74,7 @@ vfab config device --port /dev/cu.usbmodem1411  # Mac
 vfab config device --pen-down 35
 
 # Test pen movement
-vfab check servo
+vfab driver test axidraw
 
 # Test with simple pattern
 vfab test pattern --basic

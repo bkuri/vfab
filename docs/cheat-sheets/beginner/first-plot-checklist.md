@@ -29,7 +29,7 @@
 
 ### 💻 Software Check
 - [ ] **vfab running** (`vfab --version` works)
-- [ ] **Device detected** (`vfab check device`)
+- [ ] **Device detected** (`vfab driver test axidraw`)
 - [ ] **Database ready** (`vfab check database`)
 
 ---
@@ -134,8 +134,8 @@ vfab info job my_first_plot
 
 | Issue | Immediate Action | Follow-up |
 |-------|------------------|-----------|
-| **Device not found** | Check USB connection, try different port | `vfab check device` |
-| **Pen not drawing** | Check pen tip, try new pen | `vfab check servo` |
+| **Device not found** | Check USB connection, try different port | `vfab driver test axidraw` |
+| **Pen not drawing** | Check pen tip, try new pen | `vfab driver test axidraw` |
 | **Lines too light** | Lower pen position slightly | `vfab config device --pen-down 35` |
 | **Plot runs off paper** | Check design size, paper position | `vfab add design.svg --dry-run` |
 | **Job stuck** | Press Space to pause, then A to abort | `vfab recovery list` |

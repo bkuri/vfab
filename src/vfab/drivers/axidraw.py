@@ -7,7 +7,9 @@ following the official pyaxidraw API documentation.
 
 from __future__ import annotations
 from pathlib import Path
-from typing import Optional, Tuple, Dict, Any
+from typing import Optional, Tuple, Dict, Any, List
+import subprocess
+import sys
 
 try:
     from pyaxidraw import axidraw
@@ -19,25 +21,315 @@ except ImportError:
     _AXIDRAW_AVAILABLE = False
     _IMPORT_ERROR = "pyaxidraw not found. Install with: uv pip install -e '.[axidraw]'"
 
+try:
+    from .base import (
+        PlotterDriver,
+        DriverInfo,
+        DriverStatus,
+        DriverTestResult,
+        DriverCapability,
+    )
+except ImportError:
+    from vfab.drivers.base import (
+        PlotterDriver,
+        DriverInfo,
+        DriverStatus,
+        DriverTestResult,
+        DriverCapability,
+    )
+
+
+class AxiDrawDriver(PlotterDriver):
+    """AxiDraw driver implementation using the BaseDriver interface."""
+
+    DRIVER_INFO = DriverInfo(
+        name="axidraw",
+        display_name="AxiDraw Plotter",
+        version="1.0.0",
+        description="AxiDraw USB pen plotter driver supporting all AxiDraw models",
+        author="vfab",
+        driver_type="plotter",
+        capabilities=[
+            DriverCapability(
+                name="usb_control",
+                description="USB device communication and control",
+                required=True,
+            ),
+            DriverCapability(
+                name="pen_control",
+                description="Pen up/down control with configurable height",
+                required=True,
+            ),
+            DriverCapability(
+                name="movement",
+                description="XY movement control with speed adjustment",
+                required=True,
+            ),
+            DriverCapability(
+                name="svg_plotting",
+                description="Direct SVG file plotting capability",
+                required=False,
+            ),
+        ],
+        dependencies=["pyaxidraw"],
+        config_schema={
+            "type": "object",
+            "properties": {
+                "port": {
+                    "type": "string",
+                    "description": "USB port or nickname for AxiDraw (auto-detect if empty)",
+                },
+                "model": {
+                    "type": "integer",
+                    "enum": [1, 2, 3, 4, 5, 6],
+                    "description": "AxiDraw model number",
+                    "default": 1,
+                },
+                "penlift": {
+                    "type": "integer",
+                    "enum": [1, 2, 3],
+                    "description": "Pen lift servo configuration",
+                    "default": 1,
+                },
+                "speed": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 100,
+                    "description": "Plotting speed percentage",
+                    "default": 50,
+                },
+            },
+        },
+        website="https://axidraw.com/",
+    )
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
+        """Initialize the AxiDraw driver.
+
+        Args:
+            config: Driver configuration dictionary
+        """
+        super().__init__(config)
+
+        if not _AXIDRAW_AVAILABLE:
+            raise ImportError(_IMPORT_ERROR)
+
+        self.port = self.config.get("port")
+        self.model = self.config.get("model", 1)
+        self.penlift = self.config.get("penlift", 1)
+        self.speed = self.config.get("speed", 50)
+
+        # Create the AxiDraw instance
+        self.ad = axidraw.AxiDraw() if axidraw else None
+        if self.ad:
+            self.ad.options.port = self.port or ""
+            self.ad.options.model = self.model
+            self.ad.options.penlift = self.penlift
+            self.ad.options.speed = self.speed
+
+        self._connected = False
+
+    @classmethod
+    def is_available(cls) -> bool:
+        """Check if AxiDraw driver is available."""
+        return _AXIDRAW_AVAILABLE
+
+    @classmethod
+    def get_installation_status(cls) -> DriverStatus:
+        """Get AxiDraw installation status."""
+        if _AXIDRAW_AVAILABLE:
+            return DriverStatus.AVAILABLE
+        else:
+            return DriverStatus.NOT_INSTALLED
+
+    @classmethod
+    def install(cls, force: bool = False) -> bool:
+        """Install AxiDraw support."""
+        if cls.is_available() and not force:
+            return True
+
+        try:
+            # Install using uv pip with axidraw extra
+            cmd = [sys.executable, "-m", "uv", "pip", "install", "-e", ".[axidraw]"]
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            return result.returncode == 0
+        except subprocess.CalledProcessError:
+            return False
+
+    def test(self) -> DriverTestResult:
+        """Test AxiDraw driver functionality."""
+        import time
+
+        try:
+            start_time = time.time()
+
+            # Test basic initialization
+            if not self.is_available():
+                return DriverTestResult(
+                    success=False, message="AxiDraw driver not available"
+                )
+
+            # Test connection
+            connected = self.connect()
+            if not connected:
+                return DriverTestResult(
+                    success=False, message="Failed to connect to AxiDraw device"
+                )
+
+            # Test basic operations
+            test_results = {}
+
+            # Test pen up
+            try:
+                self.pen_up()
+                test_results["pen_up"] = "success"
+            except Exception as e:
+                test_results["pen_up"] = f"failed: {e}"
+
+            # Test pen down
+            try:
+                self.pen_down()
+                test_results["pen_down"] = "success"
+            except Exception as e:
+                test_results["pen_down"] = f"failed: {e}"
+
+            # Test movement
+        try:
+            if self.ad:
+                self.ad.move(x, y)
+            return True
+        except Exception:
+            return False
+
+            if device_id and device_id != "auto":
+                self.ad.options.port = device_id
+
+            self.ad.interactive()
+            self._connected = True
+            return True
+        except Exception:
+            self._connected = False
+            return False
+
+    def disconnect(self) -> bool:
+        """Disconnect from AxiDraw."""
+        try:
+            if self._connected and self.ad:
+                self.ad.disconnect()
+                self._connected = False
+            return True
+        except Exception:
+            return False
+
+    def get_position(self) -> Dict[str, float]:
+        """Get current pen position."""
+        # AxiDraw doesn't provide direct position reading
+        # Return last known position or default
+        return {"x": 0.0, "y": 0.0, "pen_down": False}
+
+    def move_to(self, x: float, y: float, pen_down: bool = False) -> bool:
+        """Move pen to specified coordinates."""
+        try:
+            if not self.ad:
+                return False
+
+            if pen_down:
+                self.ad.goto(x, y)
+            else:
+                self.ad.pendown()
+                self.ad.goto(x, y)
+                self.ad.penup()
+            return True
+        except Exception:
+            return False
+
+    def pen_up(self) -> bool:
+        """Lift the pen."""
+        try:
+            if self.ad:
+                self.ad.disconnect()
+            self.connected = False
+            return True
+        except Exception:
+            return False
+
+    def pen_down(self) -> bool:
+        """Lower the pen."""
+        try:
+            if self.ad:
+                self.ad.pendown()
+            return True
+        except Exception:
+            return False
+
+    def disconnect(self) -> bool:
+        """Disconnect from AxiDraw."""
+        try:
+            if self._connected:
+                self.ad.disconnect()
+                self._connected = False
+            return True
+        except Exception:
+            return False
+
+    def get_position(self) -> Dict[str, float]:
+        """Get current pen position."""
+        # AxiDraw doesn't provide direct position reading
+        # Return last known position or default
+        return {"x": 0.0, "y": 0.0, "pen_down": False}
+
+    def move_to(self, x: float, y: float, pen_down: bool = False) -> bool:
+        """Move pen to specified coordinates."""
+        try:
+            if pen_down:
+                self.ad.goto(x, y)
+            else:
+                self.ad.pendown()
+                self.ad.goto(x, y)
+                self.ad.penup()
+            return True
+        except Exception:
+            return False
+
+    def pen_up(self) -> bool:
+        """Lift the pen."""
+        try:
+            if self.ad:
+                self.ad.moveto(x, y)
+            return True
+        except Exception:
+            return False
+
+    def pen_down(self) -> bool:
+        """Lower the pen."""
+        try:
+            if self.ad:
+                self.ad.lineto(x, y)
+            return True
+        except Exception:
+            return False
+
 
 class AxiDrawManager:
     """Manages AxiDraw plotter operations in both Plot and Interactive contexts."""
 
-    def __init__(self, port: Optional[str] = None, model: int = 1):
+    def __init__(self, port: Optional[str] = None, model: int = 1, penlift: int = 1):
         """Initialize AxiDraw manager.
 
         Args:
             port: USB port or nickname for AxiDraw (auto-detect if None)
             model: AxiDraw model number (1=V2/V3/SE/A4, 2=V3/A3/SE/A3, etc.)
+            penlift: Pen lift servo configuration
         """
         if not _AXIDRAW_AVAILABLE:
             raise ImportError(_IMPORT_ERROR)
 
-        self.ad = axidraw.AxiDraw()
+        self.ad = axidraw.AxiDraw() if axidraw else None
         self.port = port
         self.model = model
+        self.penlift = penlift
         self.connected = False
-        self.default_penlift = 1  # Default penlift setting
+        self.default_penlift = penlift  # Default penlift setting
 
     def setup_plot_context(self, svg_file: Path, **options) -> None:
         """Setup Plot context for SVG file.
@@ -46,7 +338,8 @@ class AxiDrawManager:
             svg_file: Path to SVG file to plot
             **options: Additional AxiDraw options (speed, pen height, etc.)
         """
-        self.ad.plot_setup(str(svg_file))
+        if self.ad:
+            self.ad.plot_setup(str(svg_file))
 
         # Apply model setting
         self.ad.options.model = self.model
@@ -79,10 +372,11 @@ class AxiDrawManager:
             self.ad.options.preview = True
 
         # Enable time reporting for estimates
-        self.ad.options.report_time = True
+        if self.ad:
+            self.ad.options.report_time = True
 
         try:
-            output_svg = self.ad.plot_run(True)
+            output_svg = self.ad.plot_run(True) if self.ad else None
             return {
                 "success": True,
                 "output_svg": output_svg,
@@ -106,19 +400,20 @@ class AxiDrawManager:
         Args:
             **options: Additional AxiDraw options
         """
-        self.ad.interactive()
+        if self.ad:
+            self.ad.interactive()
 
-        # Apply model setting
-        self.ad.options.model = self.model
+            # Apply model setting
+            self.ad.options.model = self.model
 
-        # Apply port if specified
-        if self.port:
-            self.ad.options.port = self.port
+            # Apply port if specified
+            if self.port:
+                self.ad.options.port = self.port
 
-        # Apply additional options
-        for key, value in options.items():
-            if hasattr(self.ad.options, key):
-                setattr(self.ad.options, key, value)
+            # Apply additional options
+            for key, value in options.items():
+                if hasattr(self.ad.options, key):
+                    setattr(self.ad.options, key, value)
 
     def connect(self) -> bool:
         """Connect to AxiDraw in Interactive context.

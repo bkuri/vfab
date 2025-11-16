@@ -136,7 +136,7 @@ vfab setup
 ```bash
 # Error: Device not connected
 # Solution: Check AxiDraw connection
-vfab check servo
+vfab driver test axidraw
 vfab check camera
 ls -la /dev/ttyUSB* /dev/ttyACM*
 ```
@@ -162,7 +162,7 @@ lsusb | grep -i axidraw
 dmesg | grep -i tty
 
 # Test device connection
-vfab check servo
+vfab driver test axidraw
 ```
 
 **Solutions:**
@@ -493,8 +493,7 @@ vfab check self
 
 # Component-specific checks
 vfab check camera
-vfab check servo  
-vfab check timing
+vfab driver test axidraw
 vfab check ready
 ```
 
@@ -698,7 +697,7 @@ vfab info job <id>            # Job details
 vfab restart <id>             # Restart job
 
 # Device checks
-vfab check servo              # Test AxiDraw
+vfab driver test axidraw      # Test AxiDraw
 vfab check camera             # Test camera
 vfab check ready              # Check all systems
 

@@ -95,7 +95,7 @@ vfab status
 vfab check ready
 
 # Device status
-vfab check device
+vfab driver test axidraw
 
 # Database status
 vfab check database
@@ -191,7 +191,7 @@ vfab config device --port /dev/ttyUSB0
 vfab config device --pen-up 60 --pen-down 40
 
 # Test device
-vfab check device --test-move
+vfab driver test axidraw
 ```
 
 ### General Configuration
@@ -323,7 +323,7 @@ vfab info system
 vfab abort
 
 # Emergency device reset
-vfab check device --reset
+vfab driver test axidraw
 
 # Full system restart
 vfab restart

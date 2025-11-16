@@ -11,8 +11,7 @@ vfab check self
 
 # Component-specific checks
 vfab check camera
-vfab check servo
-vfab check timing
+vfab driver test axidraw
 vfab check ready
 
 # Verbose health check with details
@@ -93,16 +92,16 @@ cat ~/.local/share/vfab/workspace/jobs/<job_id>/journal.jsonl
 ### AxiDraw/Plotter Diagnostics
 ```bash
 # Test plotter connection
-vfab check servo
+vfab driver test axidraw
 
 # Test plotter movement
-vfab check servo --test-movement
+vfab driver test axidraw
 
 # Check device detection
-vfab check servo --detect-devices
+vfab driver test axidraw
 
 # Test with specific device
-vfab check servo --device /dev/ttyUSB0
+vfab driver test axidraw
 
 # Show device information
 vfab info system | grep -A 10 device
@@ -437,7 +436,7 @@ echo
 
 # Device status
 echo "3. Device Status:"
-vfab check servo
+vfab driver test axidraw
 vfab check camera
 echo
 
@@ -512,7 +511,7 @@ vfab info queue              # Queue status
 vfab info job <id>           # Job details
 
 # Device checks
-vfab check servo             # Test plotter
+vfab driver test axidraw     # Test plotter
 vfab check camera            # Test camera
 
 # Log analysis

@@ -168,13 +168,13 @@ vfab abort interrupted_job --safe
 vfab check ready
 
 # Reconnect device
-vfab check device --reconnect
+vfab driver test axidraw
 ```
 
 **Pen out of ink:**
 ```bash
 # Test pen operation
-vfab check servo
+vfab driver test axidraw
 
 # Replace pen and update database
 vfab setup pen --replace
@@ -270,7 +270,7 @@ vfab info system
 vfab config device --port /dev/ttyUSB0 --model 1
 
 # Test device
-vfab check device --test-move
+vfab driver test axidraw
 ```
 
 ### 7.2 Pen and Paper Management
@@ -384,8 +384,8 @@ vfab info job new_design --show-layers
 
 | Problem | Command | Solution |
 |---------|---------|----------|
-| Device not found | `vfab check device` | Check USB connection |
-| Pen not moving | `vfab check servo` | Test servo operation |
+| Device not found | `vfab driver test axidraw` | Check USB connection |
+| Pen not moving | `vfab driver test axidraw` | Test servo operation |
 | Poor optimization | `vfab plan job --preset hq` | Use high-quality preset |
 | Camera not working | `vfab check camera` | Check IP feed URL |
 | Job stuck | `vfab recovery list` | Resume or safe abort |

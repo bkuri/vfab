@@ -103,7 +103,7 @@ vfab check ready
 | Problem | Quick Fix |
 |---------|-----------|
 | Device not found | Check USB cable, try different port |
-| Poor line quality | `vfab check servo` |
+| Poor line quality | `vfab driver test axidraw` |
 | Job stuck | `vfab recovery list` |
 | Camera not working | Skip camera for now (optional) |
 

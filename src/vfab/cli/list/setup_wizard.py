@@ -100,7 +100,7 @@ def setup() -> None:
                 show_status("⚠ AxiDraw installed but no devices connected", "warning")
             else:
                 show_status(
-                    "⚠ AxiDraw not installed (install with: pip install pyaxidraw)",
+                    "⚠ AxiDraw not installed (install with: vfab driver install axidraw)",
                     "warning",
                 )
 
@@ -289,7 +289,7 @@ def check_config() -> None:
                     warnings.append("AxiDraw installed but no devices connected")
                 else:
                     warnings.append(
-                        "AxiDraw not available (install: pip install pyaxidraw)"
+                        "AxiDraw not available (install: vfab driver install axidraw)"
                     )
 
             # Check Camera
@@ -355,7 +355,8 @@ def check_config() -> None:
                             )
                         elif "AxiDraw not available" in warning:
                             console.print(
-                                "    💡 Run: uv pip install pyaxidraw", style="dim cyan"
+                                "    💡 Run: vfab driver install axidraw",
+                                style="dim cyan",
                             )
                         elif "No camera devices found" in warning:
                             console.print(
@@ -403,7 +404,7 @@ def check_config() -> None:
                         elif "AxiDraw installed but no devices connected" in warning:
                             print("    💡 Connect your AxiDraw device and check USB")
                         elif "AxiDraw not available" in warning:
-                            print("    💡 Run: uv pip install pyaxidraw")
+                            print("    💡 Run: vfab driver install axidraw")
                         elif "No camera devices found" in warning:
                             print(
                                 "    💡 Connect a camera or check /dev/video* devices"

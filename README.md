@@ -11,6 +11,8 @@ and per-session recording (IP feed v1; native v4l2 later).
 - **[User Guide](docs/user-guide.md)** - Complete usage documentation  
 - **[vpype-vfab Integration Guide](docs/vpype-plotty.md)** - Bridge creative tools with vfab production
 - **[API Reference](docs/api/)** - Developer documentation and integration
+- **[Driver Development](docs/driver/)** - 🛠️ Add new hardware drivers to vfab
+- **[Driver Requirements](docs/requirements/)** - 📋 Strategic roadmap and implementation milestones
 - **[Troubleshooting](docs/troubleshooting/)** - Common issues and solutions
 - **[Changelog](CHANGELOG.md)** - Version history and release notes
 
@@ -96,7 +98,7 @@ uv run vfab plot <job_id> --preview
 uv run vfab interactive
 
 # Test pen up/down movement
-uv run vfab check servo
+uv run vfab driver test axidraw
 
 # List available pens from database
 uv run vfab list pens
@@ -191,7 +193,7 @@ uv run vfab plot <job_id> --dry-run
 uv run vfab interactive
 
 # Check device timing
-uv run vfab check timing
+uv run vfab driver test axidraw --timing
 ```
 
 ### AxiDraw Configuration
@@ -226,8 +228,8 @@ uv run plotty plan "$(cat /tmp/J)" --interactive
 uv run plotty record_test "$(cat /tmp/J)" --seconds 5
 
 # test AxiDraw integration (if hardware available)
-uv run plotty check servo --cycles 1
-uv run plotty interactive --help
+uv run vfab driver test axidraw --cycles 1
+uv run vfab interactive --help
 ```
 
 ## Feature Highlights

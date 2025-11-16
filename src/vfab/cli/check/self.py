@@ -536,13 +536,13 @@ def run_integrated_system_validation_tests(
     if progress_tracker:
         progress_tracker.advance(test_name)
 
-    result = run_integrated_command("vfab check servo")
+    result = run_integrated_command("vfab driver test axidraw")
     if result["success"]:
         results.append(
             create_test_result(
                 test_name,
                 True,
-                "✓ Passed - Servo motor operational",
+                "✓ Passed - AxiDraw driver operational",
             )
         )
     elif "AxiDraw support not available" in result["stdout"]:
@@ -568,13 +568,13 @@ def run_integrated_system_validation_tests(
     if progress_tracker:
         progress_tracker.advance(test_name)
 
-    result = run_integrated_command("vfab check timing")
+    result = run_integrated_command("vfab driver test axidraw")
     if result["success"]:
         results.append(
             create_test_result(
                 test_name,
                 True,
-                "✓ Passed - Device timing operational",
+                "✓ Passed - AxiDraw timing operational",
             )
         )
     elif "AxiDraw support not available" in result["stdout"]:

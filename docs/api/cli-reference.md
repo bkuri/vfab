@@ -116,7 +116,94 @@ vfab add paper NAME WIDTH_MM HEIGHT_MM [OPTIONS]
 vfab add paper "A4" 210.0 297.0 --margin 15 --orientation portrait
 ```
 
-### 2. List Commands (`vfab list`)
+### 2. Driver Commands (`vfab driver`)
+
+Hardware driver management and installation.
+
+#### `vfab driver install <DRIVER>`
+Install driver support for hardware devices.
+
+```bash
+vfab driver install DRIVER [OPTIONS]
+```
+
+**Arguments:**
+- `DRIVER`: Driver name (currently supports: axidraw)
+
+**Options:**
+- `--force, -f`: Force reinstall even if already available
+
+**Examples:**
+```bash
+# Install AxiDraw support
+vfab driver install axidraw
+
+# Force reinstall AxiDraw support
+vfab driver install axidraw --force
+```
+
+#### `vfab driver list`
+List available and installed hardware drivers.
+
+```bash
+vfab driver list
+```
+
+**Output:**
+- Shows driver availability status
+- Displays connected hardware devices
+- Provides installation commands for missing drivers
+
+#### `vfab driver info <DRIVER>`
+Show detailed status and information for a specific driver.
+
+```bash
+vfab driver info DRIVER [OPTIONS]
+```
+
+**Arguments:**
+- `DRIVER`: Driver name (axidraw)
+
+**Options:**
+- `--verbose, -v`: Show detailed information including connection tests
+
+**Examples:**
+```bash
+# Show basic AxiDraw status
+vfab driver info axidraw
+
+# Show detailed information with connection test
+vfab driver info axidraw --verbose
+```
+
+#### `vfab driver test <DRIVER>`
+Test driver functionality with hardware validation.
+
+```bash
+vfab driver test DRIVER [OPTIONS]
+```
+
+**Arguments:**
+- `DRIVER`: Driver name (axidraw)
+
+**Options:**
+- `--penlift, -p`: Pen lift servo configuration (1=Default, 2=Standard, 3=Brushless)
+- `--cycles, -c`: Number of test cycles to run (default: 1)
+- `--timing, -t`: Run timing tests instead of servo tests
+
+**Examples:**
+```bash
+# Basic servo test
+vfab driver test axidraw
+
+# Test with specific penlift configuration
+vfab driver test axidraw --penlift 2 --cycles 3
+
+# Run timing tests
+vfab driver test axidraw --timing
+```
+
+### 4. List Commands (`vfab list`)
 
 List and manage resources.
 
@@ -159,7 +246,7 @@ List configured guards.
 vfab list guards [OPTIONS]
 ```
 
-### 3. Info Commands (`vfab info`)
+### 5. Info Commands (`vfab info`)
 
 Status and monitoring commands.
 
@@ -232,7 +319,7 @@ vfab info reset [OPTIONS]
 **Options:**
 - `--apply`: Apply session reset (dry-run by default)
 
-### 4. Core Job Commands
+### 6. Core Job Commands
 
 #### `vfab plot` / `vfab start`
 Start plotting a job.
@@ -356,18 +443,26 @@ Check camera configuration and access.
 vfab check camera [OPTIONS]
 ```
 
-#### `vfab check servo`
-Check servo/pen lift system.
+#### `vfab check servo` (DEPRECATED)
+Check servo/pen lift system. **Use `vfab driver test axidraw` instead.**
 
 ```bash
+# OLD COMMAND (deprecated)
 vfab check servo [OPTIONS]
+
+# NEW COMMAND (recommended)
+vfab driver test axidraw [OPTIONS]
 ```
 
-#### `vfab check timing`
-Check timing and synchronization.
+#### `vfab check timing` (DEPRECATED)
+Check timing and synchronization. **Use `vfab driver test axidraw --timing` instead.**
 
 ```bash
+# OLD COMMAND (deprecated)
 vfab check timing [OPTIONS]
+
+# NEW COMMAND (recommended)
+vfab driver test axidraw --timing [OPTIONS]
 ```
 
 #### `vfab check ready`

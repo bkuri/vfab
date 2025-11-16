@@ -425,7 +425,7 @@ class PhysicalSetupGuard(Guard):
                     return GuardCheck(
                         "physical_setup",
                         GuardResult.SOFT_FAIL,
-                        "💡 No device configuration found. Connect AxiDraw and run: vfab check servo",
+                        "💡 No device configuration found. Connect AxiDraw and run: vfab driver test axidraw",
                         {
                             "required_pen_count": 1,
                             "device_configured": False,

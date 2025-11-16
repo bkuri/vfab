@@ -1,6 +1,9 @@
 #!/bin/bash
 # ploTTY AxiDraw Support Installation Script
 # Installs pyaxidraw (axicli) for AxiDraw hardware integration
+#
+# DEPRECATED: This script is deprecated. Use 'vfab driver install axidraw' instead.
+# This script will be removed in a future version.
 
 set -euo pipefail
 
@@ -108,8 +111,13 @@ show_usage() {
 
 # Main installation flow
 main() {
-    echo "🔧 ploTTY AxiDraw Support Installation"
-    echo "======================================"
+    echo "⚠️  DEPRECATION WARNING"
+    echo "======================="
+    echo "This script is deprecated. Use 'vfab driver install axidraw' instead."
+    echo "This script will be removed in a future version."
+    echo
+    echo "🔧 ploTTY AxiDraw Support Installation (Legacy)"
+    echo "=============================================="
     echo
     
     check_uv

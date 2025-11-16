@@ -12,6 +12,7 @@ import typer
 
 from .add import add_app
 from .check import check_app
+from .driver import driver_app
 from .info import info_app
 from .interactive import interactive_command
 from .commands import optimize_command, plan_command, queue_command, start_command
@@ -36,7 +37,7 @@ except ImportError:
 try:
     __version__ = metadata.version("vfab")
 except metadata.PackageNotFoundError:
-    __version__ = "0.9.0"
+    __version__ = "0.10.0"
 
 # Create main app
 app = typer.Typer(no_args_is_help=True)
@@ -44,6 +45,7 @@ app = typer.Typer(no_args_is_help=True)
 # Add sub-apps and commands (alphabetical order)
 app.add_typer(add_app, name="add", help="Add new files")
 app.add_typer(check_app, name="check", help="System and device checking")
+app.add_typer(driver_app, name="driver", help="Hardware driver management")
 if daemon_command:
     app.command("daemon", help="Run vfab as a persistent daemon")(daemon_command)
 app.add_typer(info_app, name="info", help="Information and monitoring commands")
